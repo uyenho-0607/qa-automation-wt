@@ -1,0 +1,49 @@
+{
+    "CPUAT":                    "https://cpuat.lirunex.com/Home/",
+
+    "MT4": {
+        "Lirunex": {
+            "Desktop": {
+                "SIT":          "https://lirunex-mb.webtrader-sit.s20ip12.com/web/login",
+                "Release_SIT":  "https://lirunex-mb.webtrader-release-sit.s20ip12.com/web/login",
+                "UAT":          "https://lirunex-mb.webtrader-uat.s20ip12.com/web/login"
+            },
+            "Mobile": {
+                "SIT":          "https://lirunex-mb.webtrader-sit.s20ip12.com/mobile/login",
+                "Release_SIT":  "https://lirunex-mb.webtrader-release-sit.s20ip12.com/mobile/login",
+                "UAT":          "https://lirunex-mb.webtrader-uat.s20ip12.com/mobile/login"
+            },
+            "Backoffice": {
+                "SIT":          "https://lirunex-backoffice.webtrader-sit.s20ip12.com/backoffice/login",
+                "Release_SIT":  "https://lirunex-backoffice.webtrader-release-sit.s20ip12.com/backoffice/login",
+                "UAT":          "https://lirunex-backoffice.webtrader-uat.s20ip12.com/backoffice/login"
+            }
+        }
+    },
+
+    "MT5": {
+        "Transactcloudmt5": {
+            "Desktop": {
+                "SIT":          "https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/web/login",
+                "Release_SIT":  "https://transactcloudmt5-mb.webtrader-release-sit.s20ip12.com/web/login",
+                "UAT":          "https://transactcloudmt5-mb.webtrader-uat.s20ip12.com/web/login"
+            },
+            "Mobile": {
+                "SIT":          "https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/mobile/login",
+                "Release_SIT":  "https://transactcloudmt5-mb.webtrader-release-sit.s20ip12.com/mobile/login",
+                "UAT":          "https://transactcloudmt5-mb.webtrader-uat.s20ip12.com/mobile/login"
+            },
+            "Backoffice": {
+                "SIT":          "https://transactcloudmt5-backoffice.webtrader-sit.s20ip12.com/backoffice/login",
+                "Release_SIT":  "https://transactcloudmt5-backoffice.webtrader-release-sit.s20ip12.com/backoffice/login",
+                "UAT":           "https://transactcloudmt5-backoffice.webtrader-uat.s20ip12.com/backoffice/login"
+            }
+        }
+    },
+
+    "RootAdmin": {
+        "SIT":              "https://root.webtrader-sit.s20ip12.com/root/login",
+        "Release_SIT":      "https://root.webtrader-release-sit.s20ip12.com/root/login",
+        "UAT":              "https://root.webtrader-uat.s20ip12.com/root/login"
+    }
+}

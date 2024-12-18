@@ -1,0 +1,47 @@
+{
+  "MT4": {
+    "Lirunex": {
+      "Symbols": [
+        "AUDCAD.std",
+        "AUDCHF.std",
+        "AUDJPY.std",
+        "DJCUSD.std",
+        "ETHUSD.std",
+        "EURAUD.std",
+        "EURJPY.std",
+        "EURUSD.std",
+        "GBPJPY.std",
+        "GBPUSD.std",
+        "LTCUSD.std",
+        "USDCAD.std",
+        "USDJPY.std",
+        "USOIL.std",
+        "UKOIL.std",
+        "XRPUSD.std"
+      ],
+      "Symbols_Price": [
+        "DASHUSD.std",
+        "LTCUSD.std"
+      ]
+    }
+  },
+
+  "MT5": {
+    "Transactcloudmt5": {
+      "Symbols": [
+        "ADA.USD",
+        "BAKE.USD",
+        "ETH.USD",
+        "TRX.USD",
+        "VET.USD",
+        "XAUUSD"
+      ],
+      "Symbols_Price": [
+        "ADA.USD",
+        "BAKE.USD",
+        "ETH.USD",
+        "TRX.USD"
+      ]
+    }
+  }
+}  

@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qa-automation-wt"
+version = "0.0.0"
+description = "QA Automation - WT"
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12"
+]
+dependencies = [
+    # Put the project's production dependencies here:
+
+]
+
+[project.optional-dependencies]
+dev = [
+    # Put the project's dev dependencies here:
+    "allure-pytest",
+    "flake8",
+    "flake8-builtins",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+
+# All test classes must start with "TC" as prefix e.g. class TC_aA01:
+python_classes = "TC"
+
+# All test functions must start with "test" as prefix e.g. def test_TC01:
+python_functions = "test*"
+
+python_files = "test_MT4_Desktop/TS_MT4_aX_Signal/test_MT4_aX01.py"

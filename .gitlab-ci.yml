@@ -1,0 +1,63 @@
+stages:
+  # - install
+  - test
+  - report
+  - upload
+
+# install_dependencies:
+#   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
+#   stage: install
+#   script:
+#     - echo "install de"
+#   artifacts:
+#     paths:
+#       - node_modules/
+
+run_tests:
+  image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
+  stage: test
+  allow_failure: true
+  # dependencies:
+  #   - install_dependencies
+  script:
+    # - pnpm test -- --ci  # Run Jest tests with the --ci flag for CI environment
+    - ./run.sh
+  artifacts:
+    paths:
+      - allure-results/
+    when: always
+
+generate_allure_report:
+  image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
+  stage: report
+  dependencies:
+    - run_tests
+  script:
+    - |
+      if [ ! -d allure-results ]; then
+        echo "Error: allure-results directory does not exist!"
+        exit 1
+      fi
+    - allure generate allure-results --clean
+    - ls -lh allure-report
+  artifacts:
+    paths:
+      - allure-report/  # Store the allure report for download
+
+# Upload Allure Report to S3 bucket
+upload_to_s3:
+  image: 
+    name: amazon/aws-cli:latest
+    entrypoint: [""]
+  stage: upload
+  dependencies:
+    - generate_allure_report  # Ensure the report is generated before uploading
+    # completed the pipeline in dev, clear with cs then proceed to work on the pipeline with qa
+  script:
+    - ls -lh /root/.aws
+    - cat /root/.aws/config
+    - export FOLDER_NAME=$(TZ="Asia/Singapore" date +"%Y%m%d_%H%M%S")SGT
+    - aws s3 cp allure-report/ s3://allure-static-dev/reports/$FOLDER_NAME --recursive
+    - echo "Link to report - http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME"
+
+
