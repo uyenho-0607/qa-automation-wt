@@ -25,6 +25,7 @@ class TC_MT4_aB01():
     def test_TC01(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
+        session_id = main_driver.session_id
 
 
         # Get the class name dynamically

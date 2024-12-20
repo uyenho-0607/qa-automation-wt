@@ -5,23 +5,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
-# from typing import Generator
 
-
-"""
-@pytest.fixture(scope="class")
-def chromeDriver() -> WebDriver:
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("detach", True)
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    return driver
-
-"""
 
 @pytest.fixture(scope="class")
 def chromeDriver() -> WebDriver:
-    
-    chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
+    # chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
     
     options = Options()
     options.add_argument("--incognito") # Opens the browser in incognito mode
@@ -42,20 +30,8 @@ def chromeDriver() -> WebDriver:
     # options.add_experimental_option("detach", True) # allows the Chrome browser to stay open after the script finishes.
     
     service = Service()
-    driver = webdriver.Chrome(service=service, options=options)
+    # driver = webdriver.Chrome(service=service, options=options)
 
-    # driver = webdriver.Remote('http://localhost:4444/wd/hub', options=options)
+    driver = webdriver.Remote('http://13.215.191.118:4444/wd/hub', options=options)
+    
     return driver
-
-
-
-
-
-# @pytest.fixture(scope="class")
-# def safariDriver() -> Generator[WebDriver, None, None]:
-#     # Initialize Safari WebDriver directly
-#     driver = webdriver.Safari()
-
-#     yield driver  # This allows the test to use the driver
-
-#     driver.quit() # Cleanup after tests

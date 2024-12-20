@@ -2,7 +2,7 @@ import allure
 
 from datetime import datetime
 from constants.helper.driver import delay, shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_video_to_allure
+from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 from common.mobileweb.module_login.utils import login_wt
 from common.mobileweb.module_symbol.utils import input_symbol
@@ -30,7 +30,6 @@ class TC_MT4_aP07():
         # Get the class name dynamically
         class_name = self.__class__.__name__
         # start_recording_mobile(driver=main_driver)
-        # ffmpeg_process, screen_recording_file = start_screen_recording(class_name)
         
         try:
             
@@ -65,9 +64,3 @@ class TC_MT4_aP07():
             shutdown(main_driver)
 
             # attach_video_to_allure_mobile(video_data, class_name)
-            
-            # stop_screen_recording(ffmpeg_process)
-            
-            # shutdown(main_driver)
-
-            # attach_video_to_allure(screen_recording_file, class_name)
