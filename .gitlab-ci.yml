@@ -1,8 +1,8 @@
 variables:
   TEST_SCOPE: ""
 
-rules:
-  - when: manual
+only:
+  - merge_requests
 stages:
   # - install
   - test
