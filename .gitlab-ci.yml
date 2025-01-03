@@ -1,6 +1,11 @@
 variables:
   TEST_SCOPE: ""
 
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_JOB_MANUAL
+    
 stages:
   # - install
   - test
@@ -29,7 +34,6 @@ run_tests:
     paths:
       - allure-results/
     when: always
-  when: manual
 
 generate_allure_report:
   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
@@ -47,7 +51,6 @@ generate_allure_report:
   artifacts:
     paths:
       - allure-report/  # Store the allure report for download
-  when: manual
 
 # Upload Allure Report to S3 bucket
 upload_to_s3:
@@ -63,4 +66,5 @@ upload_to_s3:
     - export FOLDER_NAME=$(TZ="Asia/Singapore" date +"%Y%m%d_%H%M%S")SGT
     - aws s3 cp allure-report/ s3://allure-static-dev/reports/$FOLDER_NAME --recursive
     - echo "Link to report - http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME"
-  when: manual
+
+
