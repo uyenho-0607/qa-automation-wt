@@ -1,3 +1,6 @@
+variables:
+  TEST_SCOPE: ""
+
 stages:
   # - install
   - test
@@ -21,7 +24,7 @@ run_tests:
   #   - install_dependencies
   script:
     # - pnpm test -- --ci  # Run Jest tests with the --ci flag for CI environment
-    - ./run.sh
+    - ./run.sh $TEST_SCOPE
   artifacts:
     paths:
       - allure-results/
