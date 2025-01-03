@@ -1,6 +1,10 @@
 variables:
   TEST_SCOPE: ""
 
+workflow:
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+    
 stages:
   # - install
   - test
@@ -20,8 +24,6 @@ run_tests:
   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
   stage: test
   allow_failure: true
-  only:
-    - merge_requests
   # dependencies:
   #   - install_dependencies
   script:
@@ -37,8 +39,6 @@ generate_allure_report:
   stage: report
   dependencies:
     - run_tests
-  only:
-    - merge_requests
   script:
     - |
       if [ ! -d allure-results ]; then
@@ -59,8 +59,6 @@ upload_to_s3:
   stage: upload
   dependencies:
     - generate_allure_report  # Ensure the report is generated before uploading
-  only:
-    - merge_requests
   script:
     - ls -lh /root/.aws
     - cat /root/.aws/config
