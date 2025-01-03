@@ -3,8 +3,9 @@ variables:
 
 workflow:
   rules:
-    - if: $CI_MERGE_REQUEST_ID
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
     - if: $CI_JOB_MANUAL
+    - if: $CI_PIPELINE_SOURCE == 'web'
     
 stages:
   # - install
