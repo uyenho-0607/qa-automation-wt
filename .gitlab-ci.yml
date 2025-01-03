@@ -59,7 +59,8 @@ upload_to_s3:
   stage: upload
   dependencies:
     - generate_allure_report  # Ensure the report is generated before uploading
-    # completed the pipeline in dev, clear with cs then proceed to work on the pipeline with qa
+  only:
+    - merge_requests
   script:
     - ls -lh /root/.aws
     - cat /root/.aws/config
