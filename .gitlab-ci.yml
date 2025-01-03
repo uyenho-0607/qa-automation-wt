@@ -1,8 +1,6 @@
 variables:
   TEST_SCOPE: ""
 
-only:
-  - merge_requests
 stages:
   # - install
   - test
@@ -22,6 +20,8 @@ run_tests:
   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
   stage: test
   allow_failure: true
+  only:
+    - merge_requests
   # dependencies:
   #   - install_dependencies
   script:
@@ -37,6 +37,8 @@ generate_allure_report:
   stage: report
   dependencies:
     - run_tests
+  only:
+    - merge_requests
   script:
     - |
       if [ ! -d allure-results ]; then
