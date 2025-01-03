@@ -4,7 +4,7 @@ variables:
 workflow:
   rules:
     - if: $CI_MERGE_REQUEST_ID
-    
+    - when: manual
 stages:
   # - install
   - test
