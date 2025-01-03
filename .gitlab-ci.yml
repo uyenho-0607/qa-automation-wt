@@ -1,6 +1,8 @@
 variables:
   TEST_SCOPE: ""
 
+rules:
+  - when: manual
 stages:
   # - install
   - test
