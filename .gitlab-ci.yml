@@ -28,7 +28,8 @@ run_tests:
   artifacts:
     paths:
       - allure-results/
-    when: manual
+    when: always
+  when: manual
 
 generate_allure_report:
   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
