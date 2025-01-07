@@ -87,7 +87,7 @@ send_slack_notification:
     # - source exports.env  # Load the variables from the .env file
     - echo "Sending slack notification $REPORT_LINK"
     - >
-      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST https://your-webhook-url.com \
+      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST $SLACK_WEBHOOK_URL \
         -H "Content-Type: application/json" \
         -d "{\"text\": \"Deployment has finished successfully on branch $REPORT_LINK!\"}")
       if [ "$RESPONSE" -ne 200 ]; then
