@@ -1,7 +1,14 @@
-import traceback
 import inspect
+import logging
+import traceback
 
 from constants.helper.screenshot import take_screenshot
+
+
+# Configure logging
+# Log everything at DEBUG level and above
+logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 
 def handle_exception(driver, e):
@@ -20,4 +27,5 @@ def handle_exception(driver, e):
     take_screenshot(driver, f"Exception_Screenshot - {function_name}")
     
     # Log the full exception message and stack trace
+    logger.error(f"Error occurred in {function_name}: {e}", exc_info=True)
     assert False, f"{str(e)}\n{traceback.format_exc()}"

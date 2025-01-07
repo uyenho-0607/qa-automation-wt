@@ -1,6 +1,6 @@
 import allure
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
@@ -39,16 +39,13 @@ class TC_MT5_aP01():
         main_driver = self.driver
         session_id = main_driver.session_id
 
-        # Get the class name dynamically
-        start_screen_recording()
-        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, platform="MT5", client_name="Transactcloudmt5", account_type="live")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="live")
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, platform="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
 
             with allure.step("Enable OCT"):
                 toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
@@ -98,9 +95,9 @@ class TC_MT5_aP01():
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)
 
-        finally:
-            stop_screen_recording()
+
                         
+        finally:
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)

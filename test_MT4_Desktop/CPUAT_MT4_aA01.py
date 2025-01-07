@@ -1,6 +1,6 @@
 import allure
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_cpuat
 
 
@@ -21,25 +21,16 @@ class TC_MT4_aA01():
     
     def test_TC01(self, chromeDriver):
         self.driver = chromeDriver
-        session_id = self.driver.session_id
 
-        # Get the class name dynamically
-        start_screen_recording()
+
 
         try:
             
             with allure.step("Launch CPUAT and redirect to WebTrader website"):
                 login_cpuat(self, platform="CPUAT", testcaseID="TC01")
 
-        finally:
-            # stop_screen_recording(ffmpeg_process)
-                        
-            # shutdown(self.driver)
 
-            # attach_video_to_allure(screen_recording_file, class_name)
- 
-            stop_screen_recording()
                         
             shutdown(self.driver)
-            
-            attach_session_video_to_allure(session_id)
+
+            attach_video_to_allure(screen_recording_file, class_name)

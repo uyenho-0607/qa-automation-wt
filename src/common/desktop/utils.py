@@ -11,7 +11,6 @@ from common.desktop.module_symbol.utils import input_symbol, symbol_watchlist
 # from common.desktop.module_trade.utils import
 
 
-
 # Notification
 from common.desktop.module_notification.utils import process_order_notifications
 
@@ -34,9 +33,6 @@ __all__ = [
     # Symbol
     'input_symbol',
     'symbol_watchlist',
-    
-    
-    
     
     
     # Notification Related

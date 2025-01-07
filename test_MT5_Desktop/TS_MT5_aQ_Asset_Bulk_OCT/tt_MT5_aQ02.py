@@ -2,7 +2,7 @@ import allure
 import pandas as pd
 
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_trade.utils import toggle_radioButton_OCT, type_orderPanel, button_bulk_operation, get_bulk_snackbar_banner, check_orderIDs_in_table
@@ -28,13 +28,12 @@ class TC_MT5_aQ02():
         main_driver = self.driver
         session_id = main_driver.session_id
         
-        # Get the class name dynamically
-        start_screen_recording()
+
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, platform="MT5", client_name="Transactcloudmt5", account_type="live")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="live")
 
             with allure.step("Enable OCT"):
                 toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
@@ -87,9 +86,9 @@ class TC_MT5_aQ02():
                 process_and_print_data(open_position_df, order_history_df, noti_msg_df, noti_order_df, group_by_order_no=True)
             
 
-        finally:
-            stop_screen_recording()
+
                         
+        finally:
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)

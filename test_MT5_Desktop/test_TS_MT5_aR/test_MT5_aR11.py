@@ -1,9 +1,9 @@
 import allure
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_market_order, neg_modify_market_order, get_trade_snackbar_banner, get_neg_snackbar_banner, extract_order_info, trade_ordersConfirmationDetails
+from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_market_order, modify_market_order, get_trade_snackbar_banner, get_neg_snackbar_banner, extract_order_info, trade_ordersConfirmationDetails
 
 
 
@@ -28,16 +28,13 @@ class TC_MT5_aR11():
         main_driver = self.driver
         session_id = main_driver.session_id
 
-        # Get the class name dynamically
-        start_screen_recording()
-        
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, platform="MT5", client_name="Transactcloudmt5", account_type="live")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="live")
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, platform="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
                 
             with allure.step("Disable OCT"):
                 toggle_radioButton_OCT(driver=main_driver)
@@ -55,7 +52,7 @@ class TC_MT5_aR11():
                 extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
 
             with allure.step("Modify order"):
-                neg_modify_market_order(driver=main_driver, trade_type="edit", row_number=[1], set_stopLoss=False)
+                modify_market_order(driver=main_driver, trade_type="edit", row_number=[1], set_stopLoss=False, takeProfit_flag=False, tp_type="price")
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
                 trade_ordersConfirmationDetails(driver=main_driver, trade_type="edit")
@@ -63,9 +60,9 @@ class TC_MT5_aR11():
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)
                 
-        finally:
-            stop_screen_recording()
+
                         
+        finally:
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)

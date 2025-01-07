@@ -1,11 +1,9 @@
-from common.desktop.module_announcement.announcement import modal_announcement, modal_announcement_arrow, modal_announcement_gotIt, modal_announcement_tryItNow
+from common.desktop.module_announcement.announcement import modal_announcement, handle_modal_announcement
 
 
 __all__ = [
     
     'modal_announcement',
-    'modal_announcement_arrow',
-    'modal_announcement_gotIt',
-    'modal_announcement_tryItNow'
+    'handle_modal_announcement',
     
 ]

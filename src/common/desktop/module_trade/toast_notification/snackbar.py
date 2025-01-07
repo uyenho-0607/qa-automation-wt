@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, click_element_with_wait, get_label_of_element, visibility_of_element_by_testid, find_element_by_testid
+from constants.helper.element import get_label_of_element, visibility_of_element_by_testid, find_element_by_testid
 
 
 """
@@ -15,6 +15,15 @@ from constants.helper.element import click_element, click_element_with_wait, get
 """
 
 def get_trade_snackbar_banner(driver):
+    """
+    Extracts the snackbar trade notification message, processes its content, and returns a structured DataFrame with order details.
+
+    Returns: 
+    - pd.DataFrame: A DataFrame containing the extracted trade details from the snackbar banner.
+    
+    Raises:
+    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    """
     try:
             
         valid_message_headers = [
@@ -104,16 +113,14 @@ def get_trade_snackbar_banner(driver):
         
         # Create a DataFrame with the snackbar message details
         order_notification_message = pd.DataFrame([snackbar_msg], columns=success_message_headers)
-
         order_notification_message['Section'] = "Snackbar Banner Message"
-
-        master_df_transposed = order_notification_message.set_index('Section').T.fillna('-')
-        overall = tabulate(master_df_transposed, headers='keys', tablefmt='grid', stralign='center')
+        overall = tabulate(order_notification_message.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
         attach_text(overall, name="Snackbar Banner Message")
 
         return order_notification_message  # Return DataFrame
 
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
@@ -129,7 +136,15 @@ def get_trade_snackbar_banner(driver):
 """
 
 def get_neg_snackbar_banner(driver):
+    """
+    Extracts the snackbar trade notification message, processes its content, and returns a structured DataFrame with order details.
 
+    Returns: 
+    - pd.DataFrame: A DataFrame containing the extracted trade details from the snackbar banner.
+    
+    Raises:
+    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    """
     try:
         
         neg_message_headers = [
@@ -164,6 +179,7 @@ def get_neg_snackbar_banner(driver):
         driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", closeBtn)
         
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
@@ -179,7 +195,15 @@ def get_neg_snackbar_banner(driver):
 """
 
 def get_bulk_snackbar_banner(driver):
+    """
+    Extracts the snackbar trade notification message, processes its content, and returns a structured DataFrame with order details.
 
+    Returns: 
+    - pd.DataFrame: A DataFrame containing the extracted trade details from the snackbar banner.
+    
+    Raises:
+    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    """
     try:
         valid_message_headers = [
             "Bulk closure of open positions",
@@ -206,4 +230,5 @@ def get_bulk_snackbar_banner(driver):
         driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", closeBtn)
 
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

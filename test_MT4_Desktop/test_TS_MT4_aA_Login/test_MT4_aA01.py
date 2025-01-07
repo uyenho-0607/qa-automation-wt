@@ -1,6 +1,6 @@
 import allure
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_setting.utils import button_setting
 
@@ -23,19 +23,14 @@ class TC_MT4_aA01():
         main_driver = self.driver
         session_id = main_driver.session_id
 
-        # Get the class name dynamically
-        start_screen_recording()
-        
         try:
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, platform="MT4", client_name="Lirunex", account_type="crm", use_crm_cred=True)
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="crm", use_crm_cred=True)
             
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout")
 
         finally:
-            stop_screen_recording()
-                        
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)

@@ -7,6 +7,7 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 
 
+
 @pytest.fixture(scope="class")
 def chromeDriver() -> WebDriver:
     # chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
@@ -33,5 +34,16 @@ def chromeDriver() -> WebDriver:
     # driver = webdriver.Chrome(service=service, options=options)
 
     driver = webdriver.Remote('http://aqdev:aq123@13.215.191.118:4444/wd/hub', options=options)
-    
+
     return driver
+
+
+
+# @pytest.fixture(scope="class")
+# def safariDriver() -> Generator[WebDriver, None, None]:
+#     # Initialize Safari WebDriver directly
+#     driver = webdriver.Safari()
+
+#     yield driver  # This allows the test to use the driver
+
+#     driver.quit() # Cleanup after tests

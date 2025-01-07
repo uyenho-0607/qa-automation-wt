@@ -1,7 +1,4 @@
-import traceback
-
 from constants.helper.error_handler import handle_exception
-from constants.helper.screenshot import take_screenshot
 from constants.helper.element import populate_element_with_wait, spinner_element
 
 from common.desktop.module_trade.order_panel.orderPanel_info import button_orderPanel_action
@@ -114,6 +111,7 @@ def neg_trade_market_order(driver, trade_type, option, sl_type="price", tp_type=
         # return high_price, low_price
     
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
@@ -153,6 +151,7 @@ def neg_modify_market_order(driver, trade_type, row_number, sl_type="price", tp_
         button_trade_action(driver, trade_type)
 
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
   
 """

@@ -15,7 +15,7 @@ def compare_dataframes(df1, df2, name1, name2, required_columns):
     """
     Compare two dataframes and assert if the required columns match between them.
 
-    Args:
+    Arguments:
     - df1 (DataFrame): First dataframe
     - df2 (DataFrame): Second dataframe
     - name1 (str): Name of the first dataframe for reporting

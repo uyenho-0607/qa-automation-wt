@@ -1,7 +1,6 @@
 import json
 import os
 import csv
-import traceback
 
 from constants.helper.screenshot import attach_text
 

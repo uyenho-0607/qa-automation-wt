@@ -2,7 +2,7 @@ import allure
 import pandas as pd
 
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_chart.utils import chart_minMax
@@ -33,28 +33,25 @@ class TC_MT5_aL01():
         main_driver = self.driver
         session_id = main_driver.session_id
 
-        # Get the class name dynamically
-        start_screen_recording()
-        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, platform="MT5", client_name="Transactcloudmt5", account_type="live")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="live")
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, platform="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
 
             with allure.step("Enable OCT"):
                 toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
 
             with allure.step("Place Market Order"):
-                trade_oct_market_order(driver=main_driver, option="buy", set_Chart=True, chart_fullscreen="chart-toggle-fullscreen", set_OCT=False)
+                trade_oct_market_order(driver=main_driver, option="buy", set_Chart=True, chart_fullscreen="toggle", set_OCT=False)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Exit Fullscreen Chart"):
-                chart_minMax(driver=main_driver, chart_fullscreen="chart-exit-fullscreen")
+                chart_minMax(driver=main_driver, chart_fullscreen="exit")
 
             with allure.step("Retrieve the Open Position data"):
                 orderIDs_openPosition, open_position_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
@@ -89,9 +86,9 @@ class TC_MT5_aL01():
                 process_and_print_data(open_position_df, snackbar_banner_df, noti_msg_df, noti_order_df)
                             
 
-        finally:
-            stop_screen_recording()
+
                         
+        finally:
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)

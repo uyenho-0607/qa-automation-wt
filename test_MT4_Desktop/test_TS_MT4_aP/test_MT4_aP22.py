@@ -1,9 +1,9 @@
 import allure
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import start_screen_recording, stop_screen_recording, attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton_OCT, neg_trade_stop_order, get_neg_snackbar_banner
+from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_stop_order, get_neg_snackbar_banner
 
 
 
@@ -28,29 +28,26 @@ class TC_MT4_aP22():
         main_driver = self.driver
         session_id = main_driver.session_id
 
-        # Get the class name dynamically
-        start_screen_recording()
-        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, platform="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, platform="MT4", client_name="Lirunex")
+                input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
                 
             with allure.step("Enable OCT"):
                 toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
                 
             with allure.step("Place Stop Order"):
-                neg_trade_stop_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, set_takeProfit=False)
-                
+                trade_stop_order(driver=main_driver, trade_type="trade", option="sell", entryPrice_flag=False, set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")
+
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)
                 
-        finally:
-            stop_screen_recording()
+
                         
+        finally:
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)

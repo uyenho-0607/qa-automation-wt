@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import time
 import traceback
 
 from selenium.webdriver.common.by import By
@@ -9,8 +8,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+from constants.helper.error_handler import handle_exception
 
 from constants.main import DRIVER_WAIT_DURATION
 
@@ -301,7 +300,6 @@ def is_element_disabled_by_cursor(driver, element):
 """
 
 
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 FOR LOADING ICON
@@ -312,39 +310,13 @@ def is_element_disabled_by_cursor(driver, element):
 def spinner_element(driver):
     try:
         invisibility_of_element_by_testid(driver, data_testid="spin-loader")
-    except TimeoutError:
-        assert False, "Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct."
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                EXTRACT RGB COLOR FUNCTION
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-def extract_rgb_from_color(color_string):
-    # Extract RGB values from the color string
-    rgb_values = tuple(map(int, color_string.strip('rgba()').split(',')[:3]))
-    return rgb_values
-
-
-
-def get_button_color(driver, button_element):
-    try:
-        # JavaScript to get the color of the button
-        script = """
-        var button = arguments[0];
-        return window.getComputedStyle(button).color;
-        """
-        
-        button_color = driver.execute_script(script, button_element)
-        
-        print(f"Button color: {button_color}")
-        return button_color
-        
+    # except TimeoutError:
+    #     assert False, "Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct."
     except Exception as e:
-        print(f"Error retrieving button color: {str(e)}")
-        return None
-         
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct.")
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

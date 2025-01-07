@@ -1,9 +1,8 @@
-from common.desktop.module_trade.order_placing_window.opw_button_action import label_onePointEqual
-from constants.helper.element import click_element, clear_input_field, find_element_by_testid, javascript_click
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import click_element, clear_input_field, find_element_by_testid, javascript_click
 
-
+from common.desktop.module_trade.order_placing_window.opw_button_action import label_onePointEqual
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -13,15 +12,27 @@ from constants.helper.screenshot import attach_text
 
 # Retrieve the Take Profit (Price / Points) field
 def handle_takeProfit(driver, trade_type, tp_type):
+    """
+    Handles the interaction with the Take Profit input field in a trading platform.
+    This function locates the Take Profit input field, clears it if the trade is being edited,
+    and returns the input element for further interaction.
     
-    # Locate the Take Profit input field
+    Arguments:
+    - trade_type: The type of trade (e.g., 'trade', 'edit').
+    - tp_type: The type of Take Profit (e.g., 'price', 'points') that determines which specific input field to locate.
+    
+    Returns:
+    - takeProfit_element: The WebElement corresponding to the Take Profit input field.
+    """
+    
+    # Locate the Take Profit input field based on the trade type and take profit type (tp_type)
     takeProfit_element = find_element_by_testid(driver, data_testid=f"{trade_type}-input-takeprofit-{tp_type}")
     
-    # Clear the input field if in edit mode
+    # If the trade type is "edit", clear the existing value in the input field
     if trade_type == "edit":
-        clear_input_field(takeProfit_element)
+        clear_input_field(takeProfit_element) # Clear the field before updating the value
         
-    # Return the take-profit element for further actions if required
+    # Return the element representing the input field
     return takeProfit_element
 
 """
@@ -37,34 +48,44 @@ def handle_takeProfit(driver, trade_type, tp_type):
 """
 
 def btn_minMax_takeProfit(driver, trade_type, type, minMax, number_of_clicks):
+    """
+    Handles interaction with the Take Profit min/max button (increase/decrease) for either price or points.
+    This function clicks the min/max button a specified number of times, verifies the change in value,
+    and ensures the value increments or decrements correctly based on the expected value type (price or points).
+    
+    Arguments:
+    - trade_type: The type of trade (e.g., 'trade', 'edit').
+    - type: The type of value being modified ('price' or 'points').
+    - minMax: The action to perform, either 'increase' or 'decrease'.
+    - number_of_clicks: The number of times to click the min/max button.
+    
+    Raises:
+    - ValueError: If an invalid `type` or `minMax` is provided.
+    - AssertionError: If the value does not change as expected after each click.
+    """
     try:
-        # Locate and click the min/max button
+        # Locate the min/max button based on trade type, take profit type, and the action (increase/decrease)
         button_minMax = find_element_by_testid(driver, data_testid=f"{trade_type}-input-takeprofit-{type}-{minMax}")
         click_element(button_minMax)
 
-        # Locate the input field and determine the initial value and increment
+        # Locate the input field where the take profit value is displayed
         input_field = find_element_by_testid(driver, data_testid=f"{trade_type}-input-takeprofit-{type}")
 
-        # Determine the initial value based on value_type (either float or int)
+        # Determine the initial value and the increment based on the value type (price or points)
         initial_value_str = input_field.get_attribute("value")
         
         if type == "price":
             # Convert input value to float, default to 0.0 if empty
             initial_value = float(initial_value_str) if initial_value_str.strip() else 0.0
-            
-            # Retrieve the increment value for price
-            increment = label_onePointEqual(driver, trade_type)
-            
+            increment = label_onePointEqual(driver, trade_type) # Get the increment for price
         elif type == "points":
             # Convert input value to int, default to 0 if empty
             initial_value = int(initial_value_str) if initial_value_str.strip() else 0
-            
-            # Set increment for points to 1
-            increment = 1
-            
+            increment = 1  # For points, increment is always 1
         else:
             raise ValueError("Invalid value type. Must be 'price' or 'points'.")
 
+        # Loop to click the button a specified number of times
         for i in range(number_of_clicks):
             javascript_click(driver, element=button_minMax)
 
@@ -91,18 +112,24 @@ def btn_minMax_takeProfit(driver, trade_type, type, minMax, number_of_clicks):
             initial_value = updated_value
             
             # Attach text logs for the clicks and final value for reporting
-            attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
-            attach_text(f"{updated_value:.6f}" if type == "price" else str(updated_value), 
-                        name=f"Final value: {updated_value:.6f}" if type == "price" else f"Final value: {updated_value}")
+            # attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
+            # attach_text(f"{updated_value:.6f}" if type == "price" else str(updated_value), 
+            #             name=f"Final value: {updated_value:.6f}" if type == "price" else f"Final value: {updated_value}")
 
         # Final check: ensure total increment or decrement matches the expected value
         final_value = float(input_field.get_attribute("value")) if type == "price" else int(input_field.get_attribute("value"))
         expected_value = initial_value + (increment * number_of_clicks) if minMax == "increase" else initial_value - (increment * number_of_clicks)
         
-        # Final check: ensure total increment or decrement matches the expected value
+        # Assert if the final value doesn't match the expected value
         assert abs(final_value - expected_value), f"Final value does not match expected value. Expected: {expected_value}, Got: {final_value}"
 
+        # Log the results for the user
+        attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
+        attach_text(f"{updated_value:.6f}" if type == "price" else str(updated_value), 
+                    name=f"Final value: {updated_value:.6f}" if type == "price" else f"Final value: {updated_value}")
+        
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """

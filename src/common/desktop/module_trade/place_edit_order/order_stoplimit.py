@@ -1,9 +1,9 @@
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import populate_element_with_wait, spinner_element
+from constants.helper.element import spinner_element, populate_element
 
 from common.desktop.module_chart.chart import chart_minMax
 from common.desktop.module_trade.order_panel.orderPanel_info import button_orderPanel_action
-from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_random_point_distance, get_sl_point_distance, get_tp_point_distance, pointsDistance
+from common.desktop.module_trade.place_edit_order.price_related import store_entryPrice, get_current_price, get_edit_order_label, get_random_point_distance, get_sl_point_distance, get_tp_point_distance, pointsDistance
 from common.desktop.module_trade.order_placing_window.utils import button_tradeModule, label_onePointEqual, input_size_volume, handle_entryPrice, handle_stopLimitPrice, handle_stopLoss, handle_takeProfit, expiry, button_trade_action
 
 
@@ -11,44 +11,52 @@ from common.desktop.module_trade.order_placing_window.utils import button_tradeM
 entryPrice = None
 stopLimitPrice = None
 
+# To store the Stop Limit Price variable
+def store_stopLimitPrice():
+    global stopLimitPrice  # Declare the use of the global variable
+    print("Stored Stop Limit Price Value:", stopLimitPrice)
+    return stopLimitPrice
+
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 TRADE / EDIT - CALCULATE STOP LIMIT ENTRY PRICE VALUE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stopLimit_entryPrice(driver, trade_type, option, label_onePointsEqual, current_price):
+def calculate_stopLimit_entryPrice(driver, trade_type, option, label_onePointsEqual, current_price, entryPrice_flag: bool = True):
     global entryPrice  # Declare the use of the global variable
 
     entryPrice_input = handle_entryPrice(driver, trade_type)
 
     min_point_distance = get_random_point_distance(option, trade_type)
     
-    if option in ["buy", "BUY STOP LIMIT"]:
-        # EntryPrice = Buy price + (One point equals * Minimum Point Distance)
-        entryPrice = current_price + (label_onePointsEqual * min_point_distance)
+    if entryPrice_flag: # For Positive scenario
+        if option in ["buy", "BUY STOP LIMIT"]:
+            # EntryPrice = Buy price + (One point equals * Minimum Point Distance)
+            entryPrice = current_price + (label_onePointsEqual * min_point_distance)
+            
+        elif option in ["sell", "SELL STOP LIMIT"]:
+            # EntryPrice = Sell price - (One point equals * Minimum Point Distance)
+            entryPrice = current_price - (label_onePointsEqual * min_point_distance)
+    else: # For Negative scenario
+        if option in ["buy", "BUY STOP LIMIT"]:
+            entryPrice = current_price - (label_onePointsEqual * min_point_distance)
+            
+        elif option in ["sell", "SELL STOP LIMIT"]:
+            entryPrice = current_price + (label_onePointsEqual * min_point_distance)
         
-    elif option in ["sell", "SELL STOP LIMIT"]:
-        # EntryPrice = Sell price - (One point equals * Minimum Point Distance)
-        entryPrice = current_price - (label_onePointsEqual * min_point_distance)
-        
-    populate_element_with_wait(driver, element=entryPrice_input, text=entryPrice)
+    populate_element(element=entryPrice_input, text=entryPrice)
 
+    # To store the entryPrice
+    store_entryPrice(entryPrice)
+    
     return entryPrice
-
-# To store the Stop Limit Entry Price variable
-def store_stopLimit_entryPrice():
-    global entryPrice  # Declare the use of the global variable
-    print("Stored Limit Entry Price Value:", entryPrice)
-    return entryPrice
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-
 
 
 """
@@ -57,7 +65,7 @@ def store_stopLimit_entryPrice():
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual):
+def calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual, stopLimitPrice_flag: bool = True):
 
     global stopLimitPrice  # Declare the use of the global variable
 
@@ -65,25 +73,24 @@ def calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual):
 
     min_point_distance = get_random_point_distance(option, trade_type)
 
-    entryPrice_value = store_stopLimit_entryPrice()
+    entryPrice_value = store_entryPrice(entryPrice)
 
-    if option in ["buy", "BUY STOP LIMIT"]:
-        # stopLimitPrice = Price(SL) - (One point equals * Minimum Point Distance)
-        stopLimitPrice = entryPrice_value - (label_onePointsEqual * min_point_distance)
-        
-    elif option in ["sell", "SELL STOP LIMIT"]:
-        # stopLimitPrice = Price(SL) + (One point equals * Minimum Point Distance)
-        stopLimitPrice = entryPrice_value + (label_onePointsEqual * min_point_distance)
+    if stopLimitPrice_flag: # For Positive scenario
+        if option in ["buy", "BUY STOP LIMIT"]:
+            # stopLimitPrice = Price(SL) - (One point equals * Minimum Point Distance)
+            stopLimitPrice = entryPrice_value - (label_onePointsEqual * min_point_distance)
+        elif option in ["sell", "SELL STOP LIMIT"]:
+            # stopLimitPrice = Price(SL) + (One point equals * Minimum Point Distance)
+            stopLimitPrice = entryPrice_value + (label_onePointsEqual * min_point_distance)
+            
+    else: # For Negative scenario
+        if option in ["buy", "BUY STOP LIMIT"]:
+            stopLimitPrice = entryPrice_value + (label_onePointsEqual * min_point_distance)
+        elif option in ["sell", "SELL STOP LIMIT"]:
+            stopLimitPrice = entryPrice_value - (label_onePointsEqual * min_point_distance)
 
-    populate_element_with_wait(driver, element=stopLimitPrice_input, text=stopLimitPrice)
+    populate_element(element=stopLimitPrice_input, text=stopLimitPrice)
 
-    return stopLimitPrice
-
-
-# To store the Stop Limit Price variable
-def store_stopLimitPrice():
-    global stopLimitPrice  # Declare the use of the global variable
-    print("Stored Stop Limit Price Value:", stopLimitPrice)
     return stopLimitPrice
 
 """
@@ -98,7 +105,7 @@ def store_stopLimitPrice():
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_onePointsEqual):
+def calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_onePointsEqual, stopLoss_flag: bool = True):
 
     min_point_distance = pointsDistance(trade_type)
 
@@ -108,20 +115,27 @@ def calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_oneP
 
     stopLoss_input = handle_stopLoss(driver, trade_type, sl_type)
 
-    if sl_type == "price":
+    if stopLoss_flag: # For Positive scenario
+        if sl_type == "price":
+            if option in ["buy", "BUY STOP LIMIT"]:
+                # stopLoss_value = Stop Limit Price - (One point equals * Minimum Point Distance)
+                stopLoss_value = stopLimitPrice_value - (label_onePointsEqual * min_point_distance)
+                    
+            elif option in ["sell", "SELL STOP LIMIT"]:
+                # stopLoss_value = Stop Limit Price + (One point equals * Minimum Point Distance)
+                stopLoss_value = stopLimitPrice_value + (label_onePointsEqual * min_point_distance)
+                        
+        elif sl_type == "points":
+            if option in ["buy", "BUY STOP LIMIT", "sell", "SELL STOP LIMIT"]:
+                stopLoss_value = stopLoss_point
+    else: # For Negative scenario
         if option in ["buy", "BUY STOP LIMIT"]:
-            # stopLoss_value = Stop Limit Price - (One point equals * Minimum Point Distance)
-            stopLoss_value = stopLimitPrice_value - (label_onePointsEqual * min_point_distance)
+            stopLoss_value = stopLimitPrice_value + (label_onePointsEqual * min_point_distance)
                 
         elif option in ["sell", "SELL STOP LIMIT"]:
-            # stopLoss_value = Stop Limit Price + (One point equals * Minimum Point Distance)
-            stopLoss_value = stopLimitPrice_value + (label_onePointsEqual * min_point_distance)
-                    
-    elif sl_type == "points":
-        if option in ["buy", "BUY STOP LIMIT", "sell", "SELL STOP LIMIT"]:
-            stopLoss_value = stopLoss_point
+            stopLoss_value = stopLimitPrice_value - (label_onePointsEqual * min_point_distance)
 
-    populate_element_with_wait(driver, element=stopLoss_input, text=stopLoss_value)
+    populate_element(element=stopLoss_input, text=stopLoss_value)
 
     return stopLoss_value
         
@@ -137,7 +151,7 @@ def calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_oneP
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_onePointsEqual):
+def calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_onePointsEqual, takeProfit_flag: bool = True):
     
     min_point_distance = pointsDistance(trade_type)
 
@@ -147,20 +161,27 @@ def calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_on
 
     takeProfit_input = handle_takeProfit(driver, trade_type, tp_type)
 
-    if tp_type == "price":
+    if takeProfit_flag: # For Positive scenario
+        if tp_type == "price":
+            if option in ["buy", "BUY STOP LIMIT"]:
+                # takeProfit_value = Stop Limit Price + (One point equals * Minimum Point Distance)
+                takeProfit_value = stopLimitPrice_value + (label_onePointsEqual * min_point_distance)
+                    
+            elif option in ["sell", "SELL STOP LIMIT"]:
+                # takeProfit_value = Stop Limit Price - (One point equals * Minimum Point Distance)
+                takeProfit_value = stopLimitPrice_value - (label_onePointsEqual * min_point_distance)
+                        
+        elif tp_type == "points":
+            if option in ["buy", "BUY STOP LIMIT", "sell", "SELL STOP LIMIT"]:
+                takeProfit_value = takeProfit_point
+    else: # For Negative scenario
         if option in ["buy", "BUY STOP LIMIT"]:
-            # takeProfit_value = Stop Limit Price + (One point equals * Minimum Point Distance)
-            takeProfit_value = stopLimitPrice_value + (label_onePointsEqual * min_point_distance)
+            takeProfit_value = stopLimitPrice_value - (label_onePointsEqual * min_point_distance)
                 
         elif option in ["sell", "SELL STOP LIMIT"]:
-            # takeProfit_value = Stop Limit Price - (One point equals * Minimum Point Distance)
-            takeProfit_value = stopLimitPrice_value - (label_onePointsEqual * min_point_distance)
-                    
-    elif tp_type == "points":
-        if option in ["buy", "BUY STOP LIMIT", "sell", "SELL STOP LIMIT"]:
-            takeProfit_value = takeProfit_point
+            takeProfit_value = stopLimitPrice_value + (label_onePointsEqual * min_point_distance)
 
-    populate_element_with_wait(driver, element=takeProfit_input, text=takeProfit_value)
+    populate_element(element=takeProfit_input, text=takeProfit_value)
 
     return takeProfit_value
 
@@ -176,7 +197,7 @@ def calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_on
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def trade_stopLimit_order(driver, trade_type, option, expiryType, expiryDate=None, targetMonth=None, hour_option=None, min_option=None, sl_type=None, tp_type=None, chart_fullscreen=None, set_Chart: bool = False, set_entryPrice: bool = True, set_stopLimitPrice:bool = True, set_stopLoss: bool = True, set_takeProfit: bool = True, specifiedDate: bool = False):
+def trade_stopLimit_order(driver, trade_type, option, expiryType, expiryDate=None, targetMonth=None, hour_option=None, min_option=None, sl_type=None, tp_type=None, chart_fullscreen=None, set_Chart: bool = False, entryPrice_flag: bool = True, stopLimitPrice_flag: bool = True, set_stopLoss: bool = True, stopLoss_flag: bool = True, set_takeProfit: bool = True, takeProfit_flag: bool = True, specifiedDate: bool = False):
     try:
         
         spinner_element(driver)
@@ -195,23 +216,22 @@ def trade_stopLimit_order(driver, trade_type, option, expiryType, expiryDate=Non
         # Input the size/volume
         input_size_volume(driver)
         
-        if set_entryPrice: # if set_entryPrice is true
-            calculate_stopLimit_entryPrice(driver, trade_type, option, label_onePointsEqual, current_price)
+        calculate_stopLimit_entryPrice(driver, trade_type, option, label_onePointsEqual, current_price, entryPrice_flag)
             
-        if set_stopLimitPrice: # if set_entryPrice is true
-            calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual)
+        calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual, stopLimitPrice_flag)
 
         if set_stopLoss: # if set_stopLoss is true
-            calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_onePointsEqual)
+            calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_onePointsEqual, stopLoss_flag)
 
         if set_takeProfit: # if set_takeProfit is true
-            calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_onePointsEqual)
+            calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_onePointsEqual, takeProfit_flag)
 
         expiry(driver, trade_type, expiryType, expiryDate, targetMonth, hour_option, min_option, specifiedDate)
         
         button_trade_action(driver, trade_type)
 
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
@@ -226,7 +246,7 @@ def trade_stopLimit_order(driver, trade_type, option, expiryType, expiryDate=Non
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def modify_stopLimit_order(driver, trade_type, row_number, expiryType, expiryDate=None, targetMonth=None, hour_option=None, min_option=None, sl_type=None, tp_type=None, set_entryPrice:bool = True, set_stopLimitPrice: bool = True, set_stopLoss: bool = True, set_takeProfit: bool = True, specifiedDate: bool = False):
+def modify_stopLimit_order(driver, trade_type, row_number, expiryType, expiryDate=None, targetMonth=None, hour_option=None, min_option=None, sl_type=None, tp_type=None, entryPrice_flag: bool = True, stopLimitPrice_flag: bool = True, set_stopLoss: bool = True, stopLoss_flag: bool = True, set_takeProfit: bool = True, takeProfit_flag: bool = True, specifiedDate: bool = False):
     try:
         
         button_orderPanel_action(driver, trade_type, row_number)
@@ -238,23 +258,22 @@ def modify_stopLimit_order(driver, trade_type, row_number, expiryType, expiryDat
         # To retrieve the order type value
         option = get_edit_order_label(driver)
 
-        if set_entryPrice: # if set_entryPrice is true
-            calculate_stopLimit_entryPrice(driver, trade_type, option, label_onePointsEqual, current_price)
+        calculate_stopLimit_entryPrice(driver, trade_type, option, label_onePointsEqual, current_price, entryPrice_flag)
             
-        if set_stopLimitPrice: # if set_entryPrice is true
-            calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual)
+        calculate_stopLimit_Price(driver, trade_type, option, label_onePointsEqual, stopLimitPrice_flag)
 
         if set_stopLoss:
-            calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_onePointsEqual)
+            calculate_stopLimit_stopLoss(driver, trade_type, sl_type, option, label_onePointsEqual, stopLoss_flag)
 
         if set_takeProfit: # if set_takeProfit is True
-            calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_onePointsEqual)
+            calculate_stopLimit_takeProfit(driver, trade_type, tp_type, option, label_onePointsEqual, takeProfit_flag)
                 
         expiry(driver, trade_type, expiryType, expiryDate, targetMonth, hour_option, min_option, specifiedDate)
          
         button_trade_action(driver, trade_type)
 
     except Exception as e:
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
