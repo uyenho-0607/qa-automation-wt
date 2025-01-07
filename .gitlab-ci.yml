@@ -1,6 +1,5 @@
 variables:
   TEST_SCOPE: ""
-  SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
 
 workflow:
   rules:
