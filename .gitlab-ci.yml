@@ -83,7 +83,7 @@ send_slack_notification:
   # before_script:
   #   - export $(< variables.env)
   script:
-    - source exports.env  # Load the variables from the .env file
+    # - source exports.env  # Load the variables from the .env file
     - echo "Sending slack notification $REPORT_LINK"
     - >
       RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST $SLACK_WEBHOOK_URL \
