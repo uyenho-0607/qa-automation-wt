@@ -74,7 +74,6 @@ upload_to_s3:
       dotenv: variables.env  # Pass the dotenv file to the next job
 
 send_slack_notification:
-  image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
   stage: notify
   dependencies:
     - upload_to_s3
