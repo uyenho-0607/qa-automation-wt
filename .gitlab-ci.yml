@@ -1,5 +1,6 @@
 variables:
   TEST_SCOPE: ""
+  S3_REPORTS_URL: "http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports"
 
 workflow:
   rules:
@@ -66,8 +67,8 @@ upload_to_s3:
     - cat /root/.aws/config
     - export FOLDER_NAME=$(TZ="Asia/Singapore" date +"%Y%m%d_%H%M%S")SGT
     - aws s3 cp allure-report/ s3://allure-static-dev/reports/$FOLDER_NAME --recursive
-    - echo "Link to report - http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME"
-    - echo "REPORT_LINK=http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME" > variables.env
+    - echo "Link to report - $S3_REPORTS_URL/$FOLDER_NAME"
+    - echo "REPORT_LINK=$S3_REPORTS_URL/$FOLDER_NAME" > variables.env
   artifacts:
     reports:
       dotenv: variables.env  # Pass the dotenv file to the next job
