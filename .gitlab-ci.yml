@@ -71,15 +71,17 @@ upload_to_s3:
     - echo "REPORT_LINK=http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME" > exports.env
   artifacts:
     reports:
-      dotenv: exports.env  # Pass the dotenv file to the next job
+      dotenv: variables.env  # Pass the dotenv file to the next job
 
 send_slack_notification:
   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
   stage: notify
   dependencies:
     - upload_to_s3
+  before_script:
+    - export $(< variables.env)
   script:
-    - source exports.env  # Load the variables from the .env file
+    # - source exports.env  # Load the variables from the .env file
     - echo "Sending slack notification $REPORT_LINK"
     - >
       RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST $SLACK_WEBHOOK_URL \
