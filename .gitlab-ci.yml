@@ -1,3 +1,11 @@
+variables:
+  TEST_SCOPE: ""
+
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
+    - if: $CI_PIPELINE_SOURCE == 'web'
+    
 stages:
   # - install
   - test
@@ -21,7 +29,7 @@ run_tests:
   #   - install_dependencies
   script:
     # - pnpm test -- --ci  # Run Jest tests with the --ci flag for CI environment
-    - ./run.sh
+    - ./run.sh $TEST_SCOPE
   artifacts:
     paths:
       - allure-results/
@@ -52,7 +60,6 @@ upload_to_s3:
   stage: upload
   dependencies:
     - generate_allure_report  # Ensure the report is generated before uploading
-    # completed the pipeline in dev, clear with cs then proceed to work on the pipeline with qa
   script:
     - ls -lh /root/.aws
     - cat /root/.aws/config
