@@ -1,5 +1,6 @@
 variables:
   TEST_SCOPE: ""
+  SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
 
 workflow:
   rules:
@@ -11,6 +12,7 @@ stages:
   - test
   - report
   - upload
+  - notify
 
 # install_dependencies:
 #   image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
@@ -66,5 +68,24 @@ upload_to_s3:
     - export FOLDER_NAME=$(TZ="Asia/Singapore" date +"%Y%m%d_%H%M%S")SGT
     - aws s3 cp allure-report/ s3://allure-static-dev/reports/$FOLDER_NAME --recursive
     - echo "Link to report - http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME"
+    - echo "REPORT_LINK=http://allure-static-dev.s3-website-ap-southeast-1.amazonaws.com/reports/$FOLDER_NAME" > exports.env
+  artifacts:
+    reports:
+      dotenv: exports.env  # Pass the dotenv file to the next job
 
-
+send_slack_notification:
+  image: 149062447078.dkr.ecr.ap-southeast-1.amazonaws.com/cicd/qa-base:production
+  stage: notify
+  dependencies:
+    - upload_to_s3
+  script:
+    - source exports.env  # Load the variables from the .env file
+    - echo "Sending slack notification $REPORT_LINK"
+    - >
+      RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST $SLACK_WEBHOOK_URL \
+        -H "Content-Type: application/json" \
+        -d '{"text": "Deployment has finished successfully! \n $REPORT_LINK"}')
+      if [ "$RESPONSE" -ne 200 ]; then
+        echo "Webhook request failed with status $RESPONSE"
+        exit 1
+      fi
