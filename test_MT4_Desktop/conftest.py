@@ -40,7 +40,7 @@ def chromeDriver() -> WebDriver:
     # options.add_experimental_option("detach", True) # allows the Chrome browser to stay open after the script finishes.
     
     service = Service()
-    driver = webdriver.Chrome(service=service, options=options)
+    # driver = webdriver.Chrome(service=service, options=options)
 
     driver = webdriver.Remote('http://aqdev:aq123@13.215.191.118:4444/wd/hub', options=options)
     
