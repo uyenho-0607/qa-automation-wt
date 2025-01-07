@@ -78,6 +78,9 @@ send_slack_notification:
   stage: notify
   dependencies:
     - upload_to_s3
+  needs: 
+    job: upload_to_s3
+    artifacts: true
   before_script:
     - export $(< variables.env)
   script:
