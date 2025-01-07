@@ -1,5 +1,5 @@
 import pytest
-import chromedriver_autoinstaller
+# import chromedriver_autoinstaller
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -19,7 +19,7 @@ def chromeDriver() -> WebDriver:
 
 @pytest.fixture(scope="class")
 def chromeDriver() -> WebDriver:
-    chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
+    # chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
     
     options = Options()
     options.add_argument("--incognito") # Opens the browser in incognito mode
