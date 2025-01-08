@@ -88,7 +88,7 @@ send_slack_notification:
     - >
       RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST $SLACK_WEBHOOK_URL \
         -H "Content-Type: application/json" \
-        -d "{\"text\": \"Deployment has finished successfully! \nReport Link: $REPORT_LINK \"}")
+        -d "{\"text\": \"Automated test pipeline completed successfully! \nAllure Report Link: $REPORT_LINK \"}")
       if [ "$RESPONSE" -ne 200 ]; then
         echo "Webhook request failed with status $RESPONSE"
         exit 1
