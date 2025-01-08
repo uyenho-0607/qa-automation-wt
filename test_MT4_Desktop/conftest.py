@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 
 @pytest.fixture(scope="class")
 def chromeDriver() -> WebDriver:
-    chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
+    # chromedriver_autoinstaller.install() # This will install the correct version of ChromeDriver if not already installed
     
     options = Options()
     options.add_argument("--incognito") # Opens the browser in incognito mode
@@ -31,7 +31,7 @@ def chromeDriver() -> WebDriver:
     # options.add_experimental_option("detach", True) # allows the Chrome browser to stay open after the script finishes.
     
     service = Service()
-    driver = webdriver.Chrome(service=service, options=options)
+    # driver = webdriver.Chrome(service=service, options=options)
 
     driver = webdriver.Remote('http://aqdev:aq123@13.215.191.118:4444/wd/hub', options=options)
 
