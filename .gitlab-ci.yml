@@ -1,7 +1,7 @@
 variables:
   TEST_SCOPE: ""
   S3_BUCKET: "allure.aquariux.dev"
-  S3_REPORTS_URL: "http://allure.aquariux.dev.s3-website-ap-southeast-1.amazonaws.com/reports"
+  S3_REPORTS_URL: "http://allure.aquariux.dev/reports"
 
 workflow:
   rules:
