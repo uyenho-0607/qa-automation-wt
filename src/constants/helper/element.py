@@ -317,6 +317,18 @@ def spinner_element(driver):
         handle_exception(driver, e)
         raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct.")
 
+
+def bulk_spinner_element(driver, timeout=10):
+    try:
+        # invisibility_of_element_by_testid(driver, data_testid="spin-loader")
+        # Wait for the spinner to disappear
+        WebDriverWait(driver, timeout).until(EC.invisibility_of_element((By.CSS_SELECTOR, "[data-testid='spin-loader']")))
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct.")
+    
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
