@@ -3,9 +3,12 @@ import time
 
 from selenium.webdriver.common.by import By
 
+from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_trade.order_panel.orderPanel_info import type_orderPanel
+from common.desktop.module_trade.toast_notification.snackbar import get_bulk_snackbar_banner
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, spinner_element, is_element_disabled_by_cursor
+from constants.helper.element import spinner_element, bulk_spinner_element, click_element, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 from common.desktop.module_chart.chart import get_chart_symbol_name
 from data_config.utils import append_orderIDs_to_csv
@@ -121,13 +124,90 @@ def bulk_action_close_delete(driver, bulk_type, options_dropdown=None):
 """
 
 
+def bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type):
+    """
+    Bulk close orders on the Trade Page.
+    
+    Arguments
+    :param bulk_type: Action to perform ('close').
+    :param options_dropdown: Dropdown option ('all', 'profit', 'loss').
+    :param tab_order_type: Type of order tab to interact with.
+    """
+    try:
+        menu_button(driver, menu="assets")
+        print("Redirected to Asset page.")
+        type_orderPanel(driver, tab_order_type)
+        spinner_element(driver)
+        
+        find_element_by_testid(driver, data_testid=f"bulk-{bulk_type}")
+        
+        table_body = get_table_body(driver)
+
+        if bulk_type == "close":
+            if options_dropdown == "all":
+                spinner_element(driver)
+                # Loop through each row in the table body
+                for row in table_body.find_elements(By.TAG_NAME, "tr"):
+                    symbol_name = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
+                    label_symbolName = symbol_name.text
+                    symbol_name.click()
+                    spinner_element(driver)
+                    print(f"Clicked on symbol with {options_dropdown}: {label_symbolName}")
+                    break                
+            
+            elif options_dropdown in ['profit', 'loss']:
+                # Determine if we are looking for profit or loss orders
+                check_sign = '+' if options_dropdown == 'profit' else '-'
+                
+                while True:
+                    # rows = find_list_of_elements_by_xpath(driver, "//table/tbody/tr")
+                    found = False
+                    for row in table_body.find_elements(By.TAG_NAME, "tr"):
+                    # for row in rows:
+                        p_and_l = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-profit')]").text.strip()
+                        if p_and_l.startswith(check_sign):
+                            symbol_name = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
+                            label_symbolName = symbol_name.text
+                            symbol_name.click()
+                            spinner_element(driver)
+                            print(f"Clicked on symbol with {options_dropdown}: {label_symbolName}")
+                            found = True
+                            break
+
+                    if not found:
+                        # Check for pagination
+                        next_button = visibility_of_element_by_xpath(driver, "//div[@class='sc-erzke0-0 kStcxm']//div[2]")
+                        # if next_button and next_button[0].is_enabled():
+                        if next_button.is_enabled():
+                            next_button.click()
+                            spinner_element(driver)
+                        else:
+                            print(f"No more {options_dropdown} orders found.")
+                            raise Exception(f"No {options_dropdown} orders found.")
+                    else:
+                        break
+            else:
+                raise ValueError("Invalid action. Use 'profit' or 'loss'.")
+        else: # for bulk delete
+            for row in table_body.find_elements(By.TAG_NAME, "tr"):
+                symbol_name = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
+                label_symbolName = symbol_name.text
+                symbol_name.click()
+                spinner_element(driver)
+                print(f"Clicked on symbol with {options_dropdown}: {label_symbolName}")
+                break
+
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 BULK CLOSE / DELETE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_bulk_operation(driver, bulk_type, filename, section_name, options_dropdown=None, symbol_name_element: bool = False):
+def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_type, options_dropdown=None, symbol_name_element: bool = False, set_trade: bool = True):
     """
     Perform a bulk action (e.g., close/delete) on orders, process each row in the table based on the action,
     and interact with specific symbol name logic depending on whether it's an Asset or Trade page.
@@ -146,6 +226,42 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, options_dro
     - Any exceptions during execution are caught and handled by the `handle_exception` function.
     """
     try:
+        
+        if set_trade:
+            bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type)
+        else:
+            # Directly handle profit/loss logic for non-trade scenarios
+            if options_dropdown in ['profit', 'loss']:
+                # Determine if we are looking for profit or loss orders
+                check_sign = '+' if options_dropdown == 'profit' else '-'
+                
+                while True:
+                    spinner_element(driver)
+                    rows = find_list_of_elements_by_xpath(driver, "//table/tbody/tr")
+                    found = False
+                    for row in rows:
+                        p_and_l = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-profit')]").text.strip()
+                        if p_and_l.startswith(check_sign):
+                            found = True
+                            break
+                    if not found:
+                        # Check for pagination
+                        next_button = visibility_of_element_by_xpath(driver, "//div[@class='sc-erzke0-0 kStcxm']//div[2]")
+                        # if next_button and next_button[0].is_enabled():
+                        if next_button.is_enabled():
+                            next_button.click()
+                            spinner_element(driver)
+                        else:
+                            print(f"No more {options_dropdown} orders found.")
+                            raise Exception(f"No {options_dropdown} orders found.")
+                    else:
+                        break
+        
+        type_orderPanel(driver, tab_order_type)
+        
+        delay(0.5)
+        
+        spinner_element(driver)
 
         # Locate the table body and table headers
         table_body = get_table_body(driver)
@@ -188,18 +304,15 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, options_dro
                 # Locate the symbol name cell and check if it's disabled
                 symbol_name_row = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
                 symbol_disabled = is_element_disabled_by_cursor(driver, element=symbol_name_row)
-                print(f"symbol orderID: {order_id} is {symbol_disabled}")
 
                 # Check the state of symbol name and close button and handle accordingly
                 if not symbol_disabled and not close_disabled:
                     # Both buttons are enabled, process the row
                     process_profit_loss(row, order_id, options_dropdown, table_order_ids, table_row_contents, row_data)
-                    print(f"Symbol Name & Close button are enabled, system capturing orderID: {order_id}")
-                
+
                 elif not symbol_disabled and close_disabled:
                     # Symbol name is enabled but close button is disabled
-                    print(f"Symbol Name is enabled but Close button is disabled, prompting error for orderID: {order_id}")
-                    # assert False, ("Symbol Name is enabled but Close button is disabled, prompting error for orderID:", order_id)
+                    assert False, f"Symbol Name is enabled but Close button is disabled, prompting error for orderID: {order_id}"
                 
                 elif symbol_disabled and close_disabled:
                     # Both buttons are disabled
@@ -207,7 +320,7 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, options_dro
                 
                 elif symbol_disabled and not close_disabled:
                     # Symbol name is disabled but close button is enabled
-                    print(f"Symbol Name is disabled but Close button is enabled for orderID: {order_id}")
+                    assert False, f"Symbol Name is disabled but Close button is enabled for orderID: {order_id}"
             else:  # For Trade Page
                 # Process the row regardless of the symbol name element
                 process_profit_loss(row, order_id, options_dropdown, table_order_ids, table_row_contents, row_data)
@@ -223,10 +336,10 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, options_dro
         # Locate the submit button and click it to finalize the operation
         action_button = visibility_of_element_by_xpath(driver, ".//button[contains(@data-testid, 'button-submit')]")
         click_element(action_button)
-
+        
         # Return the processed order data
         return orderPanel_data
-
+    
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

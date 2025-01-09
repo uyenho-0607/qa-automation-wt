@@ -98,8 +98,6 @@ class TC_MT4_aN04():
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)
-
-
                         
         finally:
             shutdown(main_driver)
