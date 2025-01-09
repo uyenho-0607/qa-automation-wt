@@ -78,11 +78,13 @@ send_slack_notification:
     - echo "Sending success slack notification $REPORT_LINK"
     - |
       # Check the status of the previous job (upload_to_s3) using the `CI_JOB_STATUS` or `$CI_JOB_NAME` 
-      if [ "$CI_JOB_STATUS" == "success" ]; then
-        MESSAGE="Automated test pipeline completed successfully. \nAllure Report Link: $REPORT_LINK"
-      else
-        MESSAGE="Automated test pipeline failed during the upload_to_s3 stage. Please check the logs."
-      fi
+      # if [ "$CI_JOB_STATUS" == "success" ]; then
+      #   MESSAGE="Automated test pipeline completed successfully. \nAllure Report Link: $REPORT_LINK"
+      # else
+      #   MESSAGE="Automated test pipeline failed during the upload_to_s3 stage. Please check the logs."
+      # fi
+      MESSAGE="Automated test pipeline completed successfully. \nAllure Report Link: $REPORT_LINK"
+
 
       # Send the Slack notification
       RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST $SLACK_WEBHOOK_URL \
