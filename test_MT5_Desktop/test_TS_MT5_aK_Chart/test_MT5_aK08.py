@@ -54,7 +54,7 @@ class TC_MT5_aK08():
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
+                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
                                    df2=snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Volume", "Units", "Stop Loss", "Take Profit"])
         
@@ -68,7 +68,7 @@ class TC_MT5_aK08():
                 _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=pending_order_df, name1="Pending Order",
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order",
                                    df2=snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Units", "Stop Loss", "Take Profit"])
                 

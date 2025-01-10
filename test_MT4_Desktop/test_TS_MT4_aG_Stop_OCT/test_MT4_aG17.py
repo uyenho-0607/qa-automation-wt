@@ -66,7 +66,7 @@ class TC_MT4_aG17():
             with allure.step("Retrieve the Order History data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
 
-                compare_dataframes(df1=pending_order_df, name1="Pending Order",
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order",
                                    df2=order_history_df, name2="Order History",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Size", "Units", "Take Profit", "Stop Loss"])
 

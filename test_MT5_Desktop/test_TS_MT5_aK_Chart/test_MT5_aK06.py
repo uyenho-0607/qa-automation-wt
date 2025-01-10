@@ -47,7 +47,7 @@ class TC_MT5_aK06():
                 toggle_radioButton_OCT(driver=main_driver)
                 
             with allure.step("Place Stop Order"):
-                trade_stop_order(driver=main_driver, trade_type="trade", option="sell", sl_type="price", tp_type="points", expiryType="specified-date", expiryDate="19", targetMonth=datetime.strptime("Nov 2024", "%b %Y"), specifiedDate=True, set_Chart=True, chart_fullscreen="toggle")
+                trade_stop_order(driver=main_driver, trade_type="trade", option="sell", sl_type="price", tp_type="points", expiryType="specified-date", expiryDate="19", targetMonth=datetime.strptime("Feb 2025", "%b %Y"), specifiedDate=True, set_Chart=True, chart_fullscreen="toggle")
 
             with allure.step("Click on the Trade Confirmation button to update the order"):
                 trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
@@ -56,7 +56,7 @@ class TC_MT5_aK06():
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
+                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
                                    df2=snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Volume", "Stop Loss", "Take Profit"])
             
@@ -70,7 +70,7 @@ class TC_MT5_aK06():
                 _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=pending_order_df, name1="Pending Order",
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order",
                                    df2=snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Stop Loss", "Take Profit"])
                 

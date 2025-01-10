@@ -9,7 +9,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import javascript_click, click_element, populate_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath
 
-from common.desktop.module_login.utils import handle_login_error
+from common.desktop.module_login.utils import handle_alert_error
 from common.desktop.module_setting.utils import button_setting
 
 
@@ -142,7 +142,7 @@ def link_account(driver, account_id: str, accountPassword: str, expect_failure: 
         if match:
             handle_success(driver, account_id, expect_failure)
         else:
-            handle_login_error(driver, expect_failure)
+            handle_alert_error(driver, expect_failure)
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

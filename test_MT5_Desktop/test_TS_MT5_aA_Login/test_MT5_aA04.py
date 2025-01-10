@@ -29,10 +29,8 @@ class TC_MT5_aA04():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", account_type="demo", testcaseID="TC02",  expect_failure=True)
-                
-
-                        
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="demo", testcaseID="TC02", expect_failure=True)
+                      
         finally:
             shutdown(main_driver)
             

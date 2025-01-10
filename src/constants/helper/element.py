@@ -72,6 +72,18 @@ def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
+def is_element_present_by_testid(driver, data_testid: str) -> bool:
+    try:
+        # Try to find the element
+        data_test_id_string = data_test_id_pattern.format(data_testid)
+        find_element_by_testid(driver, data_test_id_string)
+        # Use WebDriver to find for element to according to specified xpath string
+        return True
+    except Exception:
+        # If element is not found, return False
+        return False
+    
+
 def is_element_present_by_xpath(driver, xpath: str) -> bool:
     try:
         # Try to find the element

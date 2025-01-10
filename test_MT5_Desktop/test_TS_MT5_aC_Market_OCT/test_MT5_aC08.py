@@ -60,7 +60,7 @@ class TC_MT5_aC08():
                 original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Trade Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
-                compare_dataframes(df1=trade_order_df, name1="Trade Open Position",
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position",
                                    df2=trade_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Volume", "Units", "Stop Loss", "Take Profit"])
 
@@ -73,7 +73,7 @@ class TC_MT5_aC08():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(df1=trade_order_df, name1="Trade Open Position",
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position",
                                    df2=noti_msg_df, name2="Notification Order Message",
                                    required_columns=["Symbol", "Order No.", "Volume", "Units"])
 
@@ -81,7 +81,7 @@ class TC_MT5_aC08():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(df1=trade_order_df, name1="Trade Open Position",
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position",
                                    df2=noti_order_df, name2="Notification Order Details",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Volume", "Units", "Take Profit", "Stop Loss", "Swap", "Commission"])
                 
@@ -101,7 +101,7 @@ class TC_MT5_aC08():
                 updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Updated Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
-                compare_dataframes(df1=updated_order_df, name1="Updated Open Position",
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Open Position",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Volume", "Units", "Stop Loss", "Take Profit"])
 

@@ -1304,7 +1304,7 @@ def trade_ordersConfirmationDetails(driver, trade_type):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def compare_dataframes(df1, df2, name1, name2, required_columns):
+def compare_dataframes(driver=main_driver, df1, df2, name1, name2, required_columns):
     """
     Compare two dataframes and assert if the required columns match between them.
 

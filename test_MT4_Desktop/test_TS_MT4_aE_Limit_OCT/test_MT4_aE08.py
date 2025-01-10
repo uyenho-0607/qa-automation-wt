@@ -61,7 +61,7 @@ class TC_MT4_aE08():
                 original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Trade Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=trade_order_df, name1="Trade Pending Order",
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Pending Order",
                                    df2=trade_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 
@@ -83,7 +83,7 @@ class TC_MT4_aE08():
                 append_orderIDs_to_csv(order_ids=updated_orderID, filename="MT4_Desktop_Limit_OCT.csv")
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=updated_order_df, name1="Updated Pending Order",
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 

@@ -90,7 +90,7 @@ class TC_MT5_aB19():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(df1=order_history_df, name1="Order History",
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
                                    df2=noti_msg_df, name2="Notification Order Message",
                                    required_columns=["Symbol", "Order No."])
 
@@ -101,7 +101,7 @@ class TC_MT5_aB19():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(df1=order_history_df, name1="Order History",
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
                                    df2=noti_order_df, name2="Notification Order Details",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Take Profit", "Stop Loss", "Swap", "Commission"])
 

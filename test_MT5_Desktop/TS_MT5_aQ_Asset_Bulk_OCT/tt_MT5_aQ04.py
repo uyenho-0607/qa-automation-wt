@@ -56,7 +56,7 @@ class TC_MT5_aQ04():
                 # Check order IDs in Order History table 
                 order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, order_panel="tab-asset-order-type-history", sub_tab="orders-and-deals", section_name="Order History", position=True)
         
-                compare_dataframes(df1=order_history_df, name1="Order History",
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
                                    df2=pending_order_df, name2="Pending Order",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Units", "Entry Price", "Take Profit", "Stop Loss"])
 

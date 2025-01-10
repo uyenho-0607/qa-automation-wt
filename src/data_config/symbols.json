@@ -30,18 +30,16 @@
   "MT5": {
     "Transactcloudmt5": {
       "Symbols": [
-        "ADA.USD",
-        "BAKE.USD",
-        "ETH.USD",
-        "TRX.USD",
-        "VET.USD",
+        "BCHUSD",
+        "DSHUSD",
+        "XMRUSD",
+        "ETHUSD",
+        "XRPUSD",
         "XAUUSD"
       ],
       "Symbols_Price": [
-        "ADA.USD",
-        "BAKE.USD",
-        "ETH.USD",
-        "TRX.USD"
+        "BCHUSD",
+        "LTCUSD"
       ]
     }
   }

@@ -4,6 +4,7 @@ import pandas as pd
 from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -11,7 +12,7 @@ from constants.helper.screenshot import attach_text
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def compare_dataframes(df1, df2, name1, name2, required_columns):
+def compare_dataframes(driver, df1, df2, name1, name2, required_columns):
     """
     Compare two dataframes and assert if the required columns match between them.
 
@@ -88,7 +89,8 @@ def compare_dataframes(df1, df2, name1, name2, required_columns):
     except Exception as e:
         # Log the full exception message and stacktrace
         # Raise an assertion error with the error message
-        assert False, f"{str(e)}\n{traceback.format_exc()}"
+        handle_exception(driver, e)
+        # assert False, f"{str(e)}\n{traceback.format_exc()}"
 
 
 """

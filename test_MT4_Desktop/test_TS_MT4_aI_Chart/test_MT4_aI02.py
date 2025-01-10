@@ -55,7 +55,7 @@ class TC_MT4_aI02():
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
+                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
                                    df2=snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
             
@@ -69,7 +69,7 @@ class TC_MT4_aI02():
                 orderIDs_openPosition, open_position_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
-                compare_dataframes(df1=open_position_df, name1="Open Position",
+                compare_dataframes(driver=main_driver, df1=open_position_df, name1="Open Position",
                                    df2=snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 
@@ -82,7 +82,7 @@ class TC_MT4_aI02():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(df1=open_position_df, name1="Open Position",
+                compare_dataframes(driver=main_driver, df1=open_position_df, name1="Open Position",
                                    df2=noti_msg_df, name2="Notification Order Message",
                                    required_columns=["Symbol", "Order No.", "Size"])
 
@@ -90,7 +90,7 @@ class TC_MT4_aI02():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(df1=open_position_df, name1="Open Position",
+                compare_dataframes(driver=main_driver, df1=open_position_df, name1="Open Position",
                                    df2=noti_order_df, name2="Notification Order Details",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Size", "Units", "Take Profit", "Stop Loss", "Swap", "Commission"])
 

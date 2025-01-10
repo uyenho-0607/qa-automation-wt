@@ -169,7 +169,7 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_login_error(driver, expect_failure: bool):
+def handle_alert_error(driver, expect_failure: bool):
     """
     This function handles the expected login error scenario by checking for the error notification 
     and extracting the error message. It then attaches the error message for logging or reporting purposes.
@@ -246,7 +246,7 @@ def handle_login_result(driver, expect_failure: bool = False):
     
     else:
         # If account balance was not found, the login failed. Handle the error scenario.
-        handle_login_error(driver, expect_failure)
+        handle_alert_error(driver, expect_failure)
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

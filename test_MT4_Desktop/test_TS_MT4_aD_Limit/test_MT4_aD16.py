@@ -61,7 +61,7 @@ class TC_MT4_aD16():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
+                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
                                    df2=trade_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
                 
@@ -69,7 +69,7 @@ class TC_MT4_aD16():
                 original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Trade Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=trade_order_df, name1="Trade Pending Order",
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Pending Order",
                                    df2=trade_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 
@@ -90,7 +90,7 @@ class TC_MT4_aD16():
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(df1=edit_tradeConfirmation_df, name1="Trade Confirmation Details",
+                compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1="Trade Confirmation Details",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 
@@ -99,7 +99,7 @@ class TC_MT4_aD16():
                 append_orderIDs_to_csv(order_ids=updated_orderID, filename="MT4_Desktop_Limit.csv")
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=updated_order_df, name1="Updated Pending Order",
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 

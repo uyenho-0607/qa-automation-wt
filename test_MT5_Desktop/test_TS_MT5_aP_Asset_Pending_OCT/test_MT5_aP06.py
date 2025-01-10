@@ -87,7 +87,7 @@ class TC_MT5_aP06():
                 _, updated_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Updated Pending Order", row_number=[1])
                 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=updated_order_df, name1="Updated Pending Order",
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Units", "Stop Loss", "Take Profit"])
 

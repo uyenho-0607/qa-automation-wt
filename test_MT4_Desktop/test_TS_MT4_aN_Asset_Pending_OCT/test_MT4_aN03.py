@@ -93,7 +93,7 @@ class TC_MT4_aN03():
                     assert False, f"Trade orderID - {updated_orderID} and Asset orderID - {asset_orderID} not matched"
                     
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(df1=updated_order_df, name1="Updated Pending Order",
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
 

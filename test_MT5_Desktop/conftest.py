@@ -38,7 +38,6 @@ def chromeDriver() -> WebDriver:
     return driver
 
 
-
 # @pytest.fixture(scope="class")
 # def safariDriver() -> Generator[WebDriver, None, None]:
 #     # Initialize Safari WebDriver directly

@@ -42,7 +42,7 @@ class TC_MT4_aX02():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Compare against the Copy Trade and Snackbar message"):
-                compare_dataframes(df1=copyTrade_df, name1="Copy Trade Details",
+                compare_dataframes(driver=main_driver, df1=copyTrade_df, name1="Copy Trade Details",
                                    df2=trade_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Stop Loss", "Take Profit"])
 
@@ -53,7 +53,7 @@ class TC_MT4_aX02():
                 _, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=orderPanel_type, section_name=orderPanel_name, row_number=[1])
             
             with allure.step("Compare against the Snackbar message and Order Panel details"):
-                compare_dataframes(df1=trade_snackbar_banner_df, name1="Snackbar Banner Message",
+                compare_dataframes(driver=main_driver, df1=trade_snackbar_banner_df, name1="Snackbar Banner Message",
                                    df2=trade_order_df, name2=orderPanel_name,
                                    required_columns=["Symbol", "Type", "Stop Loss", "Take Profit"])
             

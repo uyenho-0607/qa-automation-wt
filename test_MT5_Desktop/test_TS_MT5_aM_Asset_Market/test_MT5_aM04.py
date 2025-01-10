@@ -84,7 +84,7 @@ class TC_MT5_aM04():
             with allure.step("Retrieve the Order History data and compare against Open Position data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
 
-                compare_dataframes(df1=trade_order_df, name1="Asset Open Position",
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Asset Open Position",
                                    df2=order_history_df, name2="Order History",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Take Profit", "Stop Loss", "Swap"])
 
@@ -96,7 +96,7 @@ class TC_MT5_aM04():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(df1=order_history_df, name1="Order History",
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
                                    df2=noti_msg_df, name2="Notification Order Message",
                                    required_columns=["Symbol", "Order No.", "Volume", "Units"])
     
@@ -104,7 +104,7 @@ class TC_MT5_aM04():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(df1=order_history_df, name1="Order History",
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
                                    df2=noti_order_df, name2="Notification Order Details",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Volume", "Units", "Take Profit", "Stop Loss", "Swap", "Commission"])
 

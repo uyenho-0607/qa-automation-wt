@@ -33,8 +33,6 @@ class TC_MT5_aA01():
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout")
 
-
-                        
         finally:
             shutdown(main_driver)
             

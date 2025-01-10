@@ -50,7 +50,7 @@ class TC_MT5_aO12():
             """ Place Stop Limit Order """
 
             with allure.step("Place Stop Limit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, tp_type="price",  expiryType="specified-date", expiryDate="19", targetMonth=datetime.strptime("Nov 2024", "%b %Y"), specifiedDate=True)
+                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, tp_type="price",  expiryType="specified-date", expiryDate="19", targetMonth=datetime.strptime("Feb 2025", "%b %Y"), specifiedDate=True)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
                 trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
@@ -87,7 +87,7 @@ class TC_MT5_aO12():
             with allure.step("Retrieve the Order History data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1], position=True)
 
-                compare_dataframes(df1=pending_order_df, name1="Pending Order",
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order",
                                    df2=order_history_df, name2="Order History",
                                    required_columns=["Open Date", "Symbol", "Order No.", "Type", "Units", "Take Profit", "Stop Loss"])
             

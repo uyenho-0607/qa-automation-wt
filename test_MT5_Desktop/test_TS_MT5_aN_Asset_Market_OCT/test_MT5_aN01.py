@@ -83,7 +83,7 @@ class TC_MT5_aN01():
                     assert False, f"Trade orderID - {updated_orderID} and Asset orderID - {asset_orderID} not matched"
                     
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
-                compare_dataframes(df1=updated_order_df, name1="Updated Open Position",
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Open Position",
                                    df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
                                    required_columns=["Symbol", "Type", "Volume", "Units", "Stop Loss", "Take Profit"])
 
