@@ -33,7 +33,7 @@ def chromeDriver() -> WebDriver:
     service = Service()
     # driver = webdriver.Chrome(service=service, options=options)
 
-    driver = webdriver.Remote('http://aqdev:aq123@13.215.191.118:4444/wd/hub', options=options)
+    driver = webdriver.Remote('http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub', options=options)
 
     return driver
 
