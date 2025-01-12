@@ -65,7 +65,6 @@ def find_list_of_elements_by_testid(driver, data_testid):
 def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
     return driver.find_elements(By.CSS_SELECTOR, css_selector)
 
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 ELEMENTI IS VISIBLE / INVISIBILITY
@@ -339,7 +338,6 @@ def bulk_spinner_element(driver, timeout=10):
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
         raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct.")
-    
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

@@ -290,7 +290,7 @@ def select_account_type(driver, account_type: str):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, account_type, server: str, client_name: str, testcaseID: str = None,  device_type: str = "Desktop", env_type: str = "Release_SIT", expect_failure: bool = False, use_crm_cred: bool = False) -> None:
+def login_wt(driver, account_type, server: str, client_name: str, testcaseID: str = None,  device_type: str = "Desktop", env_type: str = "UAT", expect_failure: bool = False, use_crm_cred: bool = False) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 

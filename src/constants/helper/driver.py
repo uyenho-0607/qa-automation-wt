@@ -19,8 +19,6 @@ from constants.main import DRIVER_WAIT_DURATION
 def access_url(driver: WebDriver, url: str) -> None:
     # Route browser to the specified URL
     driver.get(url)
-    
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

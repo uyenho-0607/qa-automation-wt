@@ -1,5 +1,7 @@
 import random
 
+from selenium.webdriver.common.by import By
+
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -407,7 +409,7 @@ def news_section(driver):
 """
 
 
-def myTrade_order(driver, symbol_name):
+def myTrade_order222(driver, symbol_name, trade_direction):
     """
     Verify that the specified symbol appears in the 'My Trade' section at the top row.
     
@@ -428,13 +430,51 @@ def myTrade_order(driver, symbol_name):
         
         # Wait until the rows in 'My Trade' section are loaded
         symbol_element = visibility_of_element_by_xpath(driver, "(//div[@class='sc-1cdfgfd-2 dXKVYB'])[1]")
-        label_symbol = get_label_of_element(element=symbol_element)
+        displayed_symbol = get_label_of_element(element=symbol_element)
+        
+        if displayed_symbol != symbol_name:
+            raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")
+                
+        # Buy / Sell value
+        direction_element = visibility_of_element_by_xpath(driver, "(//div[@class='sc-1g7mcs0-2 bcaoRQ']/span)[1]")
+        label_direction = get_label_of_element(element=direction_element)
 
-        if label_symbol == symbol_name:
-            print(f"Symbol '{symbol_name}' is displayed at the top row.")
-            assert True
-        else:
-            assert False, f"Symbol '{symbol_name}' is not found in the top row."
+        if label_direction.upper() != trade_direction.upper():
+            raise AssertionError(f"Order type '{trade_direction}' does not match displayed type '{label_direction}'")
+        
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+        
+        
+        
+        
+        
+def myTrade_order(driver, symbol_name, order_type):
+    try:
+        # Redirect to the Markets page
+        menu_button(driver, menu="markets")
+        
+        # Wait till the spinner icon no longer displays
+        spinner_element(driver)
+        
+        # Wait until the rows in 'My Trade' section are loaded
+        top_row = visibility_of_element_by_xpath(driver, "//div[@class='sc-1g7mcs0-0 iiKKcu'][1]")
+        
+        # Validate symbol name in the top row
+        displayed_symbol = top_row.find_element(By.XPATH, "//div[@class='sc-1cdfgfd-2 dXKVYB']").text.strip()
+        
+        if displayed_symbol != symbol_name:
+            raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")
+        
+        # Validate order type (BUY/SELL)
+        displayed_order_type = top_row.find_element(By.XPATH, "//div[@class='sc-1g7mcs0-2 bcaoRQ']/span").text.strip()
+        
+        if displayed_order_type.upper() != order_type.upper():
+            raise AssertionError(f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'")
+        
+        print(f"Order for symbol '{symbol_name}' with order type '{order_type}' is correctly displayed in the top row.")
+        assert True
         
     except Exception as e:
         # Handle any exceptions that occur during the execution

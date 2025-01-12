@@ -87,12 +87,8 @@ def compare_dataframes(driver, df1, df2, name1, name2, required_columns):
                 assert False, f"Required columns not found in the index for {orderID}"
 
     except Exception as e:
-        # Log the full exception message and stacktrace
         # Raise an assertion error with the error message
         handle_exception(driver, e)
-        # assert False, f"{str(e)}\n{traceback.format_exc()}"
-
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
