@@ -5,7 +5,7 @@ import subprocess
 
 from selenium.webdriver.remote.webdriver import WebDriver
 
-seleniumGridS3BucketUrl = "https://selenium-grid-file-dev.s3.ap-southeast-1.amazonaws.com"
+seleniumGridS3BucketUrl = "https://selenium-grid-videos.aquariux.dev"
 
 """
 ------------------------------------------------------------------------------------------------------------------------------------
