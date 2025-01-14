@@ -79,7 +79,7 @@ send_slack_notification:
     - |
       # Check the status of the previous job (upload_to_s3) using the `CI_JOB_STATUS` or `$CI_JOB_NAME` 
       # if [ "$CI_JOB_STATUS" == "success" ]; then
-      #   MESSAGE="Automated test pipeline completed successfully. \nAllure Report Link: $REPORT_LINK"
+      #   MESSAGE="Automated test pipeline for $TEST_SCOPE completed successfully. \nAllure Report Link: $REPORT_LINK"
       # else
       #   MESSAGE="Automated test pipeline failed during the upload_to_s3 stage. Please check the logs."
       # fi
