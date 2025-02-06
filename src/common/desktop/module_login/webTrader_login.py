@@ -2,17 +2,15 @@ import random
 import logging
 
 
-from constants.helper.driver import access_url
+from constants.helper.driver import access_url, delay
 from constants.helper.screenshot import attach_text
-from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, spinner_element, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, spinner_element, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid
 from constants.helper.error_handler import handle_exception
 
 from data_config.encrypt_decrypt import decrypt_and_print
 from data_config.fileHandler import get_URLs, get_credentials
 
 from common.desktop.module_announcement.utils import modal_announcement
-
-
 
 
 # Configure logging
@@ -38,7 +36,7 @@ def launch_wt(driver, server: str, client_name: str, device_type: str, env_type:
     - server: The server type (e.g., 'MT4', 'MT5').
     - client_name: The name of the client to load the server for (e.g., 'Lirunex', 'Transactcloudmt5').
     - device_type: The type of device (e.g., 'Desktop', 'Mobile').
-    - env_type: The environment type (e.g., 'SIT', 'Release_SIT', 'UAT').
+    - env_type: The environment type (e.g., 'SIT', 'Release_SIT', 'Release_SIT').
     
     Returns:
     - None: The function does not return anything. It navigates to the appropriate URL.
@@ -56,7 +54,8 @@ def launch_wt(driver, server: str, client_name: str, device_type: str, env_type:
     
     # Access the URL with optimized loading techniques
     access_url(driver, params_wt_url)
-
+    
+    return params_wt_url
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -69,7 +68,27 @@ def launch_wt(driver, server: str, client_name: str, device_type: str, env_type:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None, expect_failure: bool = False, use_crm_cred: bool = False) -> None:
+import csv
+
+def get_username_from_csv(order_id, filename):
+    """Retrieve the username associated with a given order ID from the CSV file."""
+    try:
+        with open(filename, 'r', newline='') as csvfile:
+            csv_reader = csv.reader(csvfile)
+            next(csv_reader)  # Skip header
+            
+            for row in csv_reader:
+                if row and row[0] == str(order_id):  # Convert order_id to string for comparison
+                    return row[1]  # Return the associated username
+    except FileNotFoundError:
+        print(f"File '{filename}' not found.")
+    
+    return None  # Return None if no match is found
+
+
+
+
+def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None, selected_language: str = None, expect_failure: bool = False, use_crm_cred: bool = False) -> None:
     """
     This function automates the login process for a web trader platform (WT) using credentials from a JSON file.
     The function handles both valid and invalid login scenarios and supports choosing between CRM or regular credentials.
@@ -88,6 +107,7 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     Raises:
     - ValueError: If invalid inputs or missing values are encountered (e.g., server not found, missing testcaseID).
     """
+
     
     # Load credentials from the JSON file
     data = get_credentials()
@@ -118,6 +138,7 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
                 valid_testcases = [testcase for testcase in server_data.get(credential_type, [])
                                     if testcase["TestcaseID"] == testcaseID]
                 if not valid_testcases:
+                    # raise ValueError(f"❌ No {credential_type} data available  for server '{server}'")
                     raise ValueError(f"Testcase ID '{testcaseID}' not found in {credential_type} for server '{server}'")
                 testcase = valid_testcases[0]
             else:
@@ -148,11 +169,10 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
         click_element(submit_button)
 
         # Handle the result of the login (success or failure)
-        handle_login_result(driver, expect_failure)
+        handle_login_result(driver, expect_failure, selected_language)
 
         # Return the decrypted username used for login
-        return login_username
-        
+        return login_username, login_password
     else:
         # Raise an error if the server is not found in the credential data
         raise ValueError(f"Server '{server}' not found in credential data")
@@ -184,11 +204,10 @@ def handle_alert_error(driver, expect_failure: bool):
     # Attach the extracted error message to the logs for reporting purposes.
     attach_text(error_message, name="Error message found:")
     
-    
     # Handle the expected failure case
     if expect_failure:
         # If an expected failure message is found, log it and pass the test
-        if error_message in ["Invalid Login", "Invalid credentials, please try again"]:
+        if error_message in ["Invalid Login", "Invalid credentials, please try again", "Account already linked"]:
             attach_text("Expected failure condition met.", name="Expected Failure")
             assert True  # Pass the test as failure was expected and encountered
         else:
@@ -213,40 +232,52 @@ def handle_alert_error(driver, expect_failure: bool):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_login_result(driver, expect_failure: bool = False):
+def handle_login_result(driver, expect_failure: bool = False, selected_language: str = None):
     """
-    This function handles the result of the login attempt by checking whether the login succeeded or failed.
-    It waits for specific elements on the page to confirm the success or failure of the login, 
-    and then logs the results accordingly based on whether failure was expected.
-
-    Arguments:
-    - expect_failure: A boolean flag that indicates whether the login failure is expected.
-
-    Returns:
-    - None: The function handles the result by logging the outcome and asserts based on the result.
+    Handles the login result by verifying the presence of the expected text based on the selected language.
     """
-    
-    # Wait till the spinner icon no longer display
-    spinner_element(driver)
-
-    # Check if the "Account Balance" text is present on the page, indicating a successful login.
-    match = wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[normalize-space(text())='Account Balance']", text="Account Balance")
-    
-    # If the account balance is found, the login is successful
-    if match:
-        # If login succeeded but failure was expected, log the unexpected success and fail the test
-        if expect_failure:
-            attach_text("Expected failure, but login succeeded without any error. Test failed as expected failure condition was not met.", name="Unexpected Success")
-            assert False, "Expected failure, but login succeeded without error."
+    try:
         
-        # If login is successful and no failure was expected, process the modal announcement (if applicable)
-        modal_announcement(driver)
-        assert True  # Pass the test as login succeeded as expected
-        return  # Exit after processing the login request
-    
-    else:
-        # If account balance was not found, the login failed. Handle the error scenario.
-        handle_alert_error(driver, expect_failure)
+        # Language-specific verification map
+        language_specific_text = {
+            "English": "Trade",
+            "简体中文": "交易",
+            "繁体中文": "交易",
+            "ภาษาไทย": "เทรด",
+            "Tiếng Việt": "Giao dịch",
+            "Melayu": "Perdagangan",
+            "Bahasa Indonesia": "Berdagang",
+            "Japanese": "取引",
+            "Korean": "거래"
+        }
+
+        # Determine the text to wait for based on the selected language
+        verification_text = language_specific_text.get(selected_language, "Trade")
+        
+        # Wait till the spinner icon no longer display
+        spinner_element(driver)
+
+        # Wait until the text is present in the specified element
+        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="side-bar-option-trade", text=verification_text)
+
+        # If the account balance is found, the login is successful
+        if match:
+            # If login succeeded but failure was expected, log the unexpected success and fail the test
+            if expect_failure:
+                attach_text("Expected failure, but login succeeded without any error. Test failed as expected failure condition was not met.", name="Unexpected Success")
+                assert False, "Expected failure, but login succeeded without error."
+            
+            # If login is successful and no failure was expected, process the modal announcement (if applicable)
+            modal_announcement(driver)
+            assert True  # Pass the test as login succeeded as expected
+        else:
+            # If account balance was not found, the login failed. Handle the error scenario.
+            handle_alert_error(driver, expect_failure)
+
+    except Exception as e:
+        handle_exception(driver, e)
+
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -290,7 +321,7 @@ def select_account_type(driver, account_type: str):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, account_type, server: str, client_name: str, testcaseID: str = None,  device_type: str = "Desktop", env_type: str = "UAT", expect_failure: bool = False, use_crm_cred: bool = False) -> None:
+def login_wt(driver, account_type, server: str, client_name: str, testcaseID: str = None, device_type: str = "Desktop", env_type: str = "Release_SIT", expect_failure: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 
@@ -316,15 +347,22 @@ def login_wt(driver, account_type, server: str, client_name: str, testcaseID: st
     try:
             
         # Step 1: Launch and navigate to the WebTrader platform URL based on the provided parameters.
-        launch_wt(driver, server, client_name, device_type, env_type)
+        params_wt_url = launch_wt(driver, server, client_name, device_type, env_type)
 
         # Step 2: Select the desired account type (either Crm / Live or Demo) for login.
         select_account_type(driver, account_type)
         
+        # Select and verify language if required
+        selected_language = None
+        if set_language:
+            selected_language = select_and_verify_language(driver)
+            print("selected language", selected_language)
+            
         # Step 3: Perform the login action using the `wt_user_login` function. 
         # This handles credential retrieval, entry into the login form, and the actual login process.
-        username = wt_user_login(driver, server, client_name, testcaseID, expect_failure, use_crm_cred)
-        return username
+        if set_username:
+            username, password = wt_user_login(driver, server, client_name, testcaseID, selected_language, expect_failure, use_crm_cred)
+            return params_wt_url, username, password
     
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -337,87 +375,91 @@ def login_wt(driver, account_type, server: str, client_name: str, testcaseID: st
 """
 
 
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 LANGUAGE SELECTION
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# Login - Language dropdown selection
-def language_change(driver, language_str: str = 'Japanese'):
+def select_and_verify_language(driver):
     """
-    This function changes the language of the webpage by interacting with a language dropdown menu.
-    It selects the specified language from the available options.
+    Randomly selects three different languages from the dropdown,
+    verifies if the change is reflected on the login button, and repeats for each language.
 
-    Arguments:
-    - language_str: The language to select from the dropdown. Default is 'Japanese'.
-
-    Returns:
-    - None: The function performs the action of changing the language on the page.
+    Args:
+        driver (webdriver): Selenium WebDriver instance.
     """
     try:
-        # Locate the language dropdown element by its test ID.
-        language_dropdown = find_element_by_testid(driver, data_testid="language-dropdown")
         
-        # Step 2: Click on the dropdown to expand the language options.
+        # Language map for verification values
+        language_map = {
+            "English": "Sign in",
+            "简体中文": "登录",
+            "繁体中文": "登錄",
+            "ภาษาไทย": "เปิดบัญชีซื้อขายจริง",
+            "Tiếng Việt": "Đăng nhập",
+            "Melayu": "Log masuk",
+            "Bahasa Indonesia": "Masuk",
+            "Japanese": "ログイン",
+            "Korean": "로그인"
+        }
+
+        # Step 1: Locate the language dropdown
+        language_dropdown = visibility_of_element_by_testid(driver, data_testid="language-dropdown")
+
+        # Step 2: Get all available language options
         click_element_with_wait(driver, element=language_dropdown)
+        languages_options = find_list_of_elements_by_testid(driver, data_testid="language-option")
 
-        # Step 3: Find all the language options in the dropdown.
-        language_options = find_list_of_elements_by_testid(driver, data_testid="language-option")
-        
-        # Step 4: Loop through the available language options and select the matching one.
-        for option in language_options:
-            # Compare the inner HTML of the option with the provided language string
-            if option.get_attribute('innerHTML') == language_str:
-                # If a match is found, click on the option to select it.
-                click_element_with_wait(driver, element=option)
-                break # Exit the loop once the correct language is selected.
+        # Keep track of selected languages to avoid repetition
+        selected_languages = []
+
+        # Step 3: Select and verify languages
+        for i in range(3):  # Repeat for 3 different random languages
+            # Filter out languages already selected
+            remaining_languages = [lang for lang in languages_options if lang.text not in selected_languages]
+
+            if not remaining_languages:
+                print("No more languages left to select.")
+                break
+
+            random_language = random.choice(remaining_languages)
+            selected_language = random_language.text
+            print(f"Selected language: {selected_language}")
+
+            # Step 4: Click on the selected language
+            click_element(element=random_language)
             
+            delay(0.5)
+
+            # Step 5: Verify if the change is reflected
+            submit_button = find_element_by_testid(driver, data_testid="login-submit")
+            button_text = submit_button.text.strip()
+
+            # Get the expected value from the language map
+            expected_text = language_map.get(selected_language)
+
+            # Compare the button text with the expected text
+            if button_text == expected_text:
+                print(f"Language '{selected_language}' verified successfully.")
+            else:
+                assert False, f"Verification failed for language '{selected_language}', Expected: '{expected_text}', Found: '{button_text}''"
+
+            # Add the selected language to the list to avoid re-selection
+            selected_languages.append(selected_language)
+            
+            # Only click dropdown again if it's **not the last iteration**
+            if i < 2:  # Since range(3) means last index is 2
+                click_element_with_wait(driver, element=language_dropdown)
+                languages_options = find_list_of_elements_by_testid(driver, data_testid="language-option")
+
+        # Return the last successfully verified language
+        return selected_language
+    
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                LOGIN - OPEN A DEMO ACCOUNT
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-def login_open_demo_account(driver, server: str, client_name: str, device_type: str = "Desktop", env_type: str = "Release_SIT") -> None:
-    """
-    This function automates the login process for opening a demo account on a given server. 
-    It performs the following steps:
-        1. Launches the web trader server based on the provided parameters.
-        2. Selects the account type as "demo".
-        3. Clicks on the button to open the demo account.
-
-    Arguments:
-    - server: The server (MT4, MT5, etc.) on which the login will occur.
-    - client_name: The client's name  (e.g. Lirunex, Transactcloudmt5) for which the login is being done.
-    - device_type: The type of device (default is "Desktop").
-    - env_type: The environment type (default is "Release_SIT").
-
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
-    """
-    try:
         
-        launch_wt(driver, server, client_name, device_type, env_type)
-
-        select_account_type(driver, account_type="demo")
-        
-        demo_button = find_element_by_testid(driver, data_testid="login-account-signup")
-        click_element(element=demo_button)
-        
-    except Exception as e:
-       handle_exception(driver, e)
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

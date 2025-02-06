@@ -5,7 +5,7 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_oct_market_order, modify_market_order, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radioButton, trade_oct_market_order, modify_market_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 
@@ -34,6 +34,7 @@ class TC_MT4_aL01():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
@@ -43,10 +44,10 @@ class TC_MT4_aL01():
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Enable OCT"):
-                toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
+                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
             
             with allure.step("Place Market Order"):
-                trade_oct_market_order(driver=main_driver, option="buy")
+                trade_oct_market_order(driver=main_driver, indicator_type="buy")
                 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
@@ -86,15 +87,11 @@ class TC_MT4_aL01():
                     assert False, f"Trade orderID - {updated_orderID} and Asset orderID - {asset_orderID} not matched"
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Open Position",
-                                   df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
-                                   required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Open Position", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
                 
             with allure.step("Print Modify Order Table Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)
 
-
-                        
         finally:
             shutdown(main_driver)
             

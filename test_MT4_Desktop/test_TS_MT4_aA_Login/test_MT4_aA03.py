@@ -23,6 +23,7 @@ class TC_MT4_aA03():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
             
             with allure.step("Login to Web Trader Membersite"):

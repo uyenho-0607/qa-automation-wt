@@ -23,6 +23,7 @@ class TC_MT4_aA01():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="crm", use_crm_cred=True)

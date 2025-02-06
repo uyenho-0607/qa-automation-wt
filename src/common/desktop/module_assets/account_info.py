@@ -140,3 +140,54 @@ def account_balance_details(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
+
+
+def asset_account_currency(driver):
+    """
+    This function navigates to the 'Assets' page, retrieves the account name, Metatrader ID, 
+    leverage, and available balance, then prints the extracted details.
+        
+    Raises:
+    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    """
+    try:
+        
+        # Redirect to Asset page
+        menu_button(driver, menu="assets")
+        
+        # Wait for the page to load
+        delay(1)
+        
+        # Retrieve the Account Name
+        account_name = find_element_by_xpath(driver, "//div[@class='sc-1noy9f2-2 kohjey']")
+        label_accountName = get_label_of_element(account_name)
+
+        # Extract the text after "LIVE" or "DEMO"
+        # match = re.search(r"(?<=\b(LIVE|DEMO)\s)(.*)", label_accountName).group(2)
+
+        # Extract account type (LIVE or DEMO) and the name after it
+        match = re.search(r"(?<=\b(LIVE|DEMO)\s)(.*)", label_accountName)
+        if match:
+            account_type = match.group(1)  # LIVE or DEMO
+            account_name = match.group(2)  # Account name without the type
+            print(f"Account Type: {account_type}, Account Name: {account_name}")
+
+        # Retrieve the MetatraderID and Leverage
+        traderID = find_element_by_xpath(driver, "//div[@class='sc-1noy9f2-3 bZIhdg']")
+        label_username = get_label_of_element(traderID)
+
+        # Search for the pattern in the text
+        match = re.search(r"UID:\s*(\d+)\s*\((\d+:\d+)\)", label_username)
+        if match:
+            uid = match.group(1)
+            Leverage = match.group(2)
+            print(f"MetatraderID: {uid}, Leverage: {Leverage}")
+        
+        # Account Balance (Available Balance)
+        balance = find_element_by_xpath(driver, "(//div[@class='sc-2l74dl-0 iwdqqf'])[4]")
+        label_balance = get_label_of_element(balance)
+        print(f"Account Balance: {label_balance}")
+        
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)

@@ -1,9 +1,9 @@
+import random
 import re
 
 from constants.helper.driver import delay
-from constants.helper.element import click_element, javascript_click, click_element_with_wait, find_element_by_testid, visibility_of_element_by_testid, get_label_of_element
+from constants.helper.element import click_element, find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
 from constants.helper.error_handler import handle_exception
-
 
 
 """
@@ -85,10 +85,14 @@ def button_tradeModule(driver, module_Type: str):
         # Click the module tab with wait to ensure it's properly loaded before proceeding
         click_element_with_wait(driver, element=moduleOption)
                 
-        # if module_Type == "specification":
-        #     onePointsEqual = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-point-step']/div[2]")
-        #     label_onePointsEqual = float(get_label_of_element(onePointsEqual))
-        #     return label_onePointsEqual
+        if module_Type == "specification":
+            contractSize = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-contract-size']/div[2]")
+            label_contractSize = float(get_label_of_element(contractSize))
+            
+            minLotSize = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-min-lot-size']/div[2]")
+            label_minLotSize = float(get_label_of_element(minLotSize))
+            
+            return label_contractSize, label_minLotSize
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -107,13 +111,14 @@ def button_tradeModule(driver, module_Type: str):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_buy_sell_type(driver, indicator_type):
+def button_buy_sell_type(driver, indicator_type=None):
     """
     Clicks on the trade button (Buy/Sell) based on the given indicator type.
     The button is identified by its `data-testid` attribute, which is dynamically constructed using the `indicator_type`.
 
     Arguments:
     - indicator_type: A string representing the type of trade action, such as "buy" or "sell".
+                      If None, a random choice will be made between "buy" and "sell".
     
     Returns:
     - None: The function performs the action of clicking the button but does not return any value.
@@ -122,50 +127,19 @@ def button_buy_sell_type(driver, indicator_type):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
+        # Select a random indicator type if not provided
+        if indicator_type is None:
+            indicator_type = random.choice(["buy", "sell"])
+            print(f"Randomly selected indicator_type: {indicator_type}")
+
         # Locate the order execution button based on the provided indicator_type (buy/sell)
-        order_execution = visibility_of_element_by_testid(driver, data_testid=f"trade-button-order-{indicator_type}")
+        order_execution = visibility_of_element_by_xpath(driver, f"//div[contains(@data-testid, 'order-{indicator_type}')]")
 
         # Click the button with a wait to ensure the element is interactable before clicking
         click_element_with_wait(driver, element=order_execution)
         
-    except Exception as e:
-        # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
+        return indicator_type
         
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                TRADE OCT - BUY / SELL BUTTON INDICATOR
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-def button_OCT_buy_sell_type(driver, option):
-    """
-    Clicks on the OCT (Order Confirmation Tab) buy or sell button based on the given option.
-    The button is identified by its `data-testid` attribute, dynamically constructed using the `option`.
-
-    Arguments:
-    - option: A string representing the trade action, such as "buy" or "sell".
-    
-    Returns:
-    - None: The function performs the action of clicking the button but does not return any value.
-    
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
-    """
-    try:
-        # Locate the order execution button for the OCT buy/sell option
-        order_execution = find_element_by_testid(driver, data_testid=f"trade-button-oct-order-{option}")
-        
-        # Click the button using JavaScript to ensure the click is performed even if the element is hidden or overlayed
-        javascript_click(driver, element=order_execution)
-
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

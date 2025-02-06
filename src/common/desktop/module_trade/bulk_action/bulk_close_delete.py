@@ -1,14 +1,15 @@
-import traceback
 import time
+import random
+import traceback
 
 from selenium.webdriver.common.by import By
 
 from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_trade.order_panel.op_filter import perform_sorting
 from common.desktop.module_trade.order_panel.orderPanel_info import type_orderPanel
-from common.desktop.module_trade.toast_notification.snackbar import get_bulk_snackbar_banner
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import spinner_element, bulk_spinner_element, click_element, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
+from constants.helper.element import spinner_element, click_element, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 from common.desktop.module_chart.chart import get_chart_symbol_name
 from data_config.utils import append_orderIDs_to_csv
@@ -118,6 +119,7 @@ def bulk_action_close_delete(driver, bulk_type, options_dropdown=None):
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -188,6 +190,7 @@ def bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type):
                         break
             else:
                 raise ValueError("Invalid action. Use 'profit' or 'loss'.")
+            
         else: # for bulk delete
             for row in table_body.find_elements(By.TAG_NAME, "tr"):
                 symbol_name = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
@@ -207,7 +210,7 @@ def bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_type, options_dropdown=None, symbol_name_element: bool = False, set_trade: bool = True):
+def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_type, options_dropdown=None, sub_tab=None, set_sorting: bool = False, symbol_name_element: bool = False, set_trade: bool = True, position: bool = False):
     """
     Perform a bulk action (e.g., close/delete) on orders, process each row in the table based on the action,
     and interact with specific symbol name logic depending on whether it's an Asset or Trade page.
@@ -227,6 +230,12 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
     """
     try:
         
+        if bulk_type == "close":
+            # If options_dropdown is not provided, randomly select one from the available options
+            if options_dropdown is None:
+                options_dropdown = random.choice(["all", "loss"]) # currently excluding the "Profit"
+                print(f"Randomly selected options_dropdown: {options_dropdown}")
+            
         if set_trade:
             bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type)
         else:
@@ -257,7 +266,10 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
                     else:
                         break
         
-        type_orderPanel(driver, tab_order_type)
+        type_orderPanel(driver, tab_order_type, sub_tab, position)
+        
+        if set_sorting:
+            perform_sorting(driver, random_choice=True)
         
         delay(0.5)
         

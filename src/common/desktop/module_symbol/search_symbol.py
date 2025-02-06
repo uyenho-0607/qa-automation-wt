@@ -1,7 +1,7 @@
 import random
 
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element_with_wait, find_element_by_xpath, populate_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import click_element_with_wait, find_list_of_elements_by_xpath, populate_element, find_list_of_elements_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid
 from data_config.fileHandler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
 
@@ -75,34 +75,42 @@ def input_symbol(driver, server: str, client_name: str, symbol_type: str = "Symb
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                SYMBOL WATCHLIST
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-def symbol_watchlist(driver, tab_title: str):
-    """
-    The function is responsible for clicking on a tab in the symbol watchlist based on the title provided. 
-    It handles any exceptions that may occur during the process, such as failing to find the tab or encountering issues with the click action.
-   
-    Arguments:
-    - tab_title: The title of the tab to select in the symbol watchlist (e.g., 'All', 'Favourites', 'Top Picks', 'Top Gainer', 'Top Loser').
-
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
- """
+        
+        
+def clear_search_history(driver):
     try:
-        # Find the tab element using the provided tab title 
-        watchlist = find_element_by_xpath(driver, f"//div[normalize-space()='{tab_title}']")
-        # Click the tab and wait for the action to be completed
-        click_element_with_wait(driver, element=watchlist)
+        
+        # Find the search input field for symbols
+        search_input = visibility_of_element_by_testid(driver, data_testid="symbol-input-search")
+        click_element_with_wait(driver, element=search_input)
+        
+        # Locate the search history items and iterate through them
+        search_history_items = find_list_of_elements_by_xpath(driver, "//div[@data-testid='symbol-input-search-items']//div[@class='sc-1jx9xug-5 gVqGuT']")
+        
+        # Locate all clear buttons (bin or x)
+        clear_btns = find_list_of_elements_by_xpath(driver, "//div[@class='sc-1jx9xug-8 kXyyDI']")
+        
+        if clear_btns:
+            # If there's more than one button (Delete All / Delete One)
+            # Assuming the first button is always the "bin" (delete all) and subsequent ones are "x"
+            for idx, clear_btn in enumerate(clear_btns):
+                # If it's the first clear button, consider it as the bin (delete all)
+                # if idx == 0:
+                #     clear_btn.click()
+                #     print("Cleared all search history.")
+                #     break  # Exit after clicking the "bin" icon (delete all)
+                # else:
+                if idx >= 1:
+                    # Click the "x" icon (delete specific item)
+                    clear_btn.click()
+                    symbol_name = search_history_items[idx].text  # Get the name of the symbol being deleted
+                    print(f"Deleted search item: {symbol_name}")
+        
+        else:
+            print("No clear buttons found in search history.")
+        
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
-        
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
+
+

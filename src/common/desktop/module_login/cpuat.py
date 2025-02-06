@@ -152,6 +152,8 @@ def login_cpuat(self, platform: str, testcaseID: str, env_type: str = None, sub_
 
         btn_webTrader(self)
         
+        # login_cpuat(self, platform="CPUAT", testcaseID="TC01")
+        
     except Exception as e:
         # Attach a screenshot in case of an exception
         take_screenshot(self.driver, "login_cpuat - Exception Screenshot")

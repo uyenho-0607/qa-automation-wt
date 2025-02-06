@@ -1,6 +1,32 @@
 from constants.helper.color_element import get_body_color
+from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, visibility_of_element_by_xpath
+
+from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, find_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
+
+
+
+
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                SETTING ACCOUNT INFORMATION TAB
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+def accountInformation(driver):
+    # To open the account linkage profile
+    accountInfo = find_element_by_xpath(driver, "//div[@class='sc-ck4lnb-1 bxVapH']")
+    javascript_click(driver, element=accountInfo)
+    
+    # Wait for the modal display
+    visibility_of_element_by_xpath(driver, "//div[@class='sc-189z816-0 bElbxd']")
+    
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
 
 
 """
@@ -8,38 +34,47 @@ from constants.helper.element import click_element, find_element_by_testid, visi
                                                 SETTING DROPDOWN OPTION
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-def button_setting(driver, setting_option):
+        
+def button_setting(driver, setting_option: str):
     """
-    To navigate to a specific setting option and perform actions based on the setting selected.
+    Navigates to a specific setting option and performs actions based on the selected setting.
 
     Arguments:
-    - setting_option: The setting option to be selected, such as "change-password" or "open-demo-account".
+    - driver: Selenium WebDriver instance.
+    - setting_option: The setting option to be selected (e.g., "change-password", "open-demo-account", "notification-setting").
 
     Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    - AssertionError: If the expected modal is not displayed.
+    - ValueError: If the "Notification Settings" text is not found.
     """
     try:
-        # Find and click on the setting button to open the settings dropdown
-        setting = find_element_by_testid(driver, data_testid="setting-button")
-        click_element(setting)
+        # Click on the settings button to open the dropdown
+        click_element(find_element_by_testid(driver, data_testid="setting-button"))
         
-        # Find and click on the specific setting option based on the provided setting_option parameter
+        # Click on the specified setting option
         dropdown_option = find_element_by_testid(driver, data_testid=f"setting-option-{setting_option}")
         click_element(dropdown_option)
-        
-        # Additional steps based on the selected setting option
-        if setting_option == "change-password":
-            # Wait for the "change-password" section to become visible (indicating it's loaded)
-            visibility_of_element_by_xpath(driver, "//div[@class='sc-ur24yu-1 bDuvIg']")
 
-        if setting_option == "open-demo-account":
-            # Wait for the "open-demo-account" section to become visible (indicating it's loaded)
-            visibility_of_element_by_xpath(driver, "//div[@class='sc-ur24yu-1 eqxJBS']")
+        # Mapping setting options to expected text
+        expected_text_map = {
+            "change-password": "Change Password",
+            "open-demo-account": "Open a Demo Account",
+            "notification-setting": "Notification Settings",
+            "linked-device": "Linked Devices"
+        }
+        
+        delay(1)
+        
+        if setting_option in expected_text_map:
+            expected_text = expected_text_map[setting_option]
+            match = wait_for_text_to_be_present_in_element_by_xpath(driver, f"//div[contains(normalize-space(text()), '{expected_text}')]", text=expected_text),
+            if not match:
+                raise AssertionError(f"Expected to display '{expected_text}' modal")
 
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
+        
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import get_label_of_element, visibility_of_element_by_testid, find_element_by_testid
+from constants.helper.element import bulk_spinner_element, get_label_of_element, trigger_click, visibility_of_element_by_testid, find_element_by_testid
 
 
 """
@@ -108,8 +108,9 @@ def get_trade_snackbar_banner(driver):
             snackbar_msg.append(take_profit_match.group(1))
             success_message_headers.append("Take Profit")
 
-        closeBtn = find_element_by_testid(driver, data_testid="notification-close-button")
-        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", closeBtn)
+        close_btn = find_element_by_testid(driver, data_testid="notification-close-button")
+        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", close_btn)
+        trigger_click(driver, element=close_btn)
         
         # Create a DataFrame with the snackbar message details
         order_notification_message = pd.DataFrame([snackbar_msg], columns=success_message_headers)
@@ -147,16 +148,9 @@ def get_neg_snackbar_banner(driver):
     """
     try:
         
-        neg_message_headers = [
-            "Invalid order",
-            "Order action failed"
-        ]
+        neg_message_headers = ["Invalid order", "Order action failed"]
         
-        description_messages = [
-        "Invalid Stop loss or Take profit", 
-        "Invalid Price submitted", 
-        # "Trading general error. Please try again later."
-        ]
+        description_messages = ["Invalid Stop loss or Take profit", "Invalid Price submitted"]
 
         # Wait for the snackbar message to be visible
         visibility_of_element_by_testid(driver, data_testid="notification-box")
@@ -175,8 +169,9 @@ def get_neg_snackbar_banner(driver):
         else:
             assert False, f"Invalid message header: {extracted_header}" if message_header else "Message header not found"
 
-        closeBtn = find_element_by_testid(driver, data_testid="notification-close-button")
-        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", closeBtn)
+        close_btn = find_element_by_testid(driver, data_testid="notification-close-button")
+        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", close_btn)
+        trigger_click(driver, element=close_btn)
         
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -205,11 +200,11 @@ def get_bulk_snackbar_banner(driver):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
-        valid_message_headers = [
-            "Bulk closure of open positions",
-            "Bulk deletion of pending orders"
-        ]
         
+        valid_message_headers = ["Bulk closure of open positions", "Bulk deletion of pending orders"]
+        
+        bulk_spinner_element(driver)
+
         # Wait for the snackbar message to be visible
         visibility_of_element_by_testid(driver, data_testid="notification-box")
         
@@ -226,9 +221,15 @@ def get_bulk_snackbar_banner(driver):
         if extracted_header not in valid_message_headers:
             raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
     
-        closeBtn = find_element_by_testid(driver, data_testid="notification-close-button")
-        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", closeBtn)
+        close_btn = find_element_by_testid(driver, data_testid="notification-close-button")
+        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", close_btn)
+        trigger_click(driver, element=close_btn)
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""

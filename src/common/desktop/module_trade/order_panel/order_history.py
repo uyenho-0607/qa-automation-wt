@@ -110,7 +110,7 @@ def is_within_range(date_str, start_dt, end_dt):
 
 
 
-def OH_closeDate(driver, startDate, endDate, target_startMonth, target_endMonth):
+def OH_closeDate(driver, startDate: str, endDate: str, target_startMonth: str, target_endMonth: str):
     """
     Verifies that the "Closed Date" values from the Order History table are within the specified date range.
 
@@ -120,8 +120,8 @@ def OH_closeDate(driver, startDate, endDate, target_startMonth, target_endMonth)
     Arguments:
     - startDate (str): The start date in the format '03'.
     - endDate (str): The end date in the format '05'.
-    - target_startMonth (str): The target start month for calendar selection. (e.g. datetime.strptime("October 2024", "%B %Y"))
-    - target_endMonth (str): The target end month for calendar selection. (e.g. datetime.strptime("November 2024", "%B %Y"))
+    - target_startMonth (str): The target start month for calendar selection. (e.g. datetime.strptime("October 2025", "%B %Y"))
+    - target_endMonth (str): The target end month for calendar selection. (e.g. datetime.strptime("November 2025", "%B %Y"))
 
     Raises:
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.

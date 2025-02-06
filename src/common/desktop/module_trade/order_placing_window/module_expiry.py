@@ -19,7 +19,7 @@ def select_specified_date(driver, trade_type, expiryDate, targetMonth):
     Arguments:
     - trade_type: The type of trade (e.g., "trade", "edit") to locate the expiry date field.
     - expiryDate: The expiry date to be selected (e.g., "15").
-    - targetMonth (datetime): The target month (e.g., datetime object for "Dec 2024").
+    - targetMonth (datetime): The target month (e.g., datetime object for "Dec 2025").
 
     Raises:
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.

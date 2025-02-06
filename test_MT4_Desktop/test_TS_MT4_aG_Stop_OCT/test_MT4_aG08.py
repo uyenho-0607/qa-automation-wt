@@ -3,7 +3,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_stop_order, modify_stop_order, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radioButton, trade_stop_order, modify_stop_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data, append_orderIDs_to_csv
 
 
@@ -38,6 +38,7 @@ class TC_MT4_aG08():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
@@ -47,7 +48,7 @@ class TC_MT4_aG08():
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Enable OCT"):
-                toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
+                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
 
             """ Place Stop Order """
 
@@ -61,9 +62,7 @@ class TC_MT4_aG08():
                 original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Trade Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Pending Order",
-                                   df2=trade_snackbar_banner_df, name2="Snackbar Banner Message",
-                                   required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Pending Order", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_snackbar_banner_df)
@@ -80,24 +79,20 @@ class TC_MT4_aG08():
 
             with allure.step("Retrieve the Updated Order Panel data"):
                 updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Updated Pending Order", row_number=[1])
-                append_orderIDs_to_csv(order_ids=updated_orderID, filename="MT4_Desktop_Stop_OCT.csv")
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order",
-                                   df2=edit_snackbar_banner_df, name2="Snackbar Banner Message",
-                                   required_columns=["Symbol", "Type", "Size", "Units", "Stop Loss", "Take Profit"])
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)
                     
             with allure.step("Verify if it is the same orderIDs"):
                 if original_orderID == updated_orderID:
+                    append_orderIDs_to_csv(order_ids=updated_orderID, filename="MT4_Desktop_Stop_OCT.csv")
                     assert True, "orderID are the same"
                 else:
                     assert False, f"Place orderID - {original_orderID} and Modified orderID - {updated_orderID} not matched"
 
-
-                        
         finally:
             shutdown(main_driver)
             

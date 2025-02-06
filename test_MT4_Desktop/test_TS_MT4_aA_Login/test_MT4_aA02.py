@@ -17,12 +17,13 @@ class TC_MT4_aA02():
         Member able login to Web Trader via Live Account tab
         """
         )
-    
+ 
     def test_TC02(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
@@ -31,8 +32,6 @@ class TC_MT4_aA02():
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout") 
 
-
-                        
         finally:
             shutdown(main_driver)
             

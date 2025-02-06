@@ -8,9 +8,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 
 from constants.helper.error_handler import handle_exception
 
+from constants.helper.screenshot import take_screenshot
 from constants.main import DRIVER_WAIT_DURATION
 
 clickable_element = EC.element_to_be_clickable
@@ -65,6 +67,7 @@ def find_list_of_elements_by_testid(driver, data_testid):
 def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
     return driver.find_elements(By.CSS_SELECTOR, css_selector)
 
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 ELEMENTI IS VISIBLE / INVISIBILITY
@@ -92,6 +95,8 @@ def is_element_present_by_xpath(driver, xpath: str) -> bool:
     except Exception:
         # If element is not found, return False
         return False
+
+
 
 # Ensures the element is both present in the DOM and visible.
 def wait_for_element_visibility(driver, locator, duration: int | None = None) -> WebElement:
@@ -169,7 +174,7 @@ def clear_input_field(element):
     element.click()
     # Keep attempting to clear the field until it's empty
     while element.get_attribute("value") != "":
-        element.send_keys(Keys.CONTROL + 'a') # Select all text (use Keys.CONTROL for Windows/Linux)
+        element.send_keys(Keys.COMMAND + 'a') # Select all text (use Keys.CONTROL for Windows/Linux)
         element.send_keys(Keys.DELETE) # Delete the selected text
 
 """
@@ -301,6 +306,14 @@ def javascript_click(driver, element):
         assert False, f"{str(e)}\n{traceback.format_exc()}"
 
 
+def trigger_click(driver, element):
+    try:
+        # Triggers a click event on the given element using JavaScript.
+        driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", element)
+    except Exception as e:
+        assert False, f"{str(e)}\n{traceback.format_exc()}"
+
+
 #  To check if a specific element on a web page has a cursor style of "not-allowed". 
 def is_element_disabled_by_cursor(driver, element):
     return driver.execute_script("return window.getComputedStyle(arguments[0]).cursor == 'not-allowed';", element)
@@ -321,13 +334,12 @@ def is_element_disabled_by_cursor(driver, element):
 def spinner_element(driver):
     try:
         invisibility_of_element_by_testid(driver, data_testid="spin-loader")
-    # except TimeoutError:
-    #     assert False, "Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct."
     except Exception as e:
+        # Attach a screenshot with the function name in the filename
+        take_screenshot(driver, f"Exception_Screenshot")
         # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
-        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct.")
-
+        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow")
+    
 
 def bulk_spinner_element(driver, timeout=10):
     try:
@@ -337,7 +349,7 @@ def bulk_spinner_element(driver, timeout=10):
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
-        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct.")
+        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow")
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

@@ -8,13 +8,12 @@ from common.desktop.module_login.utils import login_wt
 
 # Member Portal - Login via Demo CMS account
 class TC_MT4_aA04():
-               
+
     @allure.title("TC_MT4_aA04")
 
     @allure.description(
         """
-        Member unable login with wrong credentials in CRM Live tab
-        - correct accountID with wrong password
+        Members can select a language from the login page, and the selected language is applied upon login.
         """
         )
     
@@ -23,13 +22,11 @@ class TC_MT4_aA04():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
-            
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="crm", testcaseID="TC01", expect_failure=True) 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", set_language=True)
 
-
-                        
         finally:
             shutdown(main_driver)
             

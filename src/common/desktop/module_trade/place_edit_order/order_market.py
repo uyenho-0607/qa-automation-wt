@@ -1,10 +1,12 @@
+from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, populate_element
 
 from common.desktop.module_chart.chart import chart_minMax
 from common.desktop.module_trade.order_panel.orderPanel_info import button_orderPanel_action
 from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, pointsDistance
-from common.desktop.module_trade.order_placing_window.utils import button_tradeModule, label_onePointEqual, input_size_volume, button_OCT_buy_sell_type, fillPolicy_type, handle_stopLoss, handle_takeProfit, button_trade_action, handle_stopLoss, handle_takeProfit, close_partialSize
+from common.desktop.module_trade.order_placing_window.utils import verify_volume_minMax_buttons, button_buy_sell_type, button_tradeModule, label_onePointEqual, input_size_volume, fillPolicy_type, handle_stopLoss, handle_takeProfit, button_trade_action, handle_stopLoss, handle_takeProfit, close_partialSize
+
 
 
 """
@@ -100,7 +102,7 @@ def calculate_take_profit(driver, trade_type, tp_type, option, label_onePointsEq
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def trade_oct_market_order(driver, option, chart_fullscreen=None, set_Chart: bool = False, set_OCT: bool = True):
+def trade_oct_market_order(driver, indicator_type, chart_fullscreen=None, set_Chart: bool = False, set_OCT: bool = True):
     try:
         
         spinner_element(driver)
@@ -113,8 +115,9 @@ def trade_oct_market_order(driver, option, chart_fullscreen=None, set_Chart: boo
         
         # Input the size/volume
         input_size_volume(driver)
-        
-        button_OCT_buy_sell_type(driver, option)
+                
+        indicator_type = button_buy_sell_type(driver, indicator_type)
+        return indicator_type
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -136,7 +139,7 @@ def trade_oct_market_order(driver, option, chart_fullscreen=None, set_Chart: boo
 def trade_market_order(driver, trade_type, option, chart_fullscreen=None, sl_type=None, tp_type=None, set_Chart: bool = False, set_fillPolicy: bool = False, set_stopLoss: bool = True,  stopLoss_flag: bool = True, set_takeProfit: bool = True, takeProfit_flag: bool = True):
     try:
 
-        # spinner_element(driver)
+        spinner_element(driver)
 
         if set_Chart:
             chart_minMax(driver, chart_fullscreen)
@@ -163,7 +166,9 @@ def trade_market_order(driver, trade_type, option, chart_fullscreen=None, sl_typ
             calculate_take_profit(driver, trade_type, tp_type, option, label_onePointsEqual, current_price, takeProfit_flag)
 
         button_trade_action(driver, trade_type)
-    
+        
+        spinner_element(driver)
+
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -204,6 +209,8 @@ def modify_market_order(driver, trade_type, row_number, sl_type=None, tp_type=No
         # Perform the trade action (Update Order)
         button_trade_action(driver, trade_type)
         
+        spinner_element(driver)
+        
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -221,14 +228,26 @@ def modify_market_order(driver, trade_type, row_number, sl_type=None, tp_type=No
 """
 
 # For closing market and deleting pending order
-def close_delete_order(driver, row_number, order_action, set_marketSize:bool = False, set_fillPolicy:bool = False, clearField: bool = False, delete_button: bool = False):
+def close_delete_order(driver, row_number, order_action, actions: list = None, trade_type=None, set_marketSize:bool = False, set_negMarket:bool = False, set_fillPolicy:bool = False, clearField: bool = False, delete_button: bool = False):
     try:
- 
+
+        spinner_element(driver)
+        
+        if trade_type == "close-order":            
+            _, lot_size = button_tradeModule(driver, module_Type="specification")
+
         # Clicking on the action (Edit / Close / Delete)
         button_orderPanel_action(driver, order_action, row_number, delete_button)
         
         if set_marketSize:
             close_partialSize(driver, set_fillPolicy, clearField)
+        
+        # Test the (- / +) button, (Min / Max) button and validation check
+        if set_negMarket:
+            verify_button_behavior_at_min_max(driver, trade_type, lot_size=lot_size)
+            verify_volume_minMax_buttons(driver, trade_type, actions, lot_size=lot_size)
+            verify_invalid_size_volume_input(driver, trade_type)
+
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

@@ -2,9 +2,9 @@ import pandas as pd
 
 from tabulate import tabulate
 
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import find_list_of_elements_by_xpath, visibility_of_element_by_xpath
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import find_list_of_elements_by_xpath, spinner_element, visibility_of_element_by_xpath
 
 
 """
@@ -28,6 +28,8 @@ def get_table_body(driver):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
+        spinner_element(driver)
+
         # Locate and return the <tbody> element with the data-testid 'list' that is visible on the page
         return visibility_of_element_by_xpath(driver, ".//tbody[contains(@data-testid, 'list')]")
     

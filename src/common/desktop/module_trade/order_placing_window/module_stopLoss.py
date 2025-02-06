@@ -106,10 +106,6 @@ def btn_minMax_stopLoss(driver, trade_type, type, minMax, number_of_clicks):
             # Update initial_value for next iteration
             initial_value = updated_value
 
-            # attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
-            # attach_text(f"{updated_value:.6f}" if type == "price" else str(updated_value), 
-            #             name=f"Final value: {updated_value:.6f}" if type == "price" else f"Final value: {updated_value}")
-            
         # Final check: ensure total increment or decrement matches the expected value
         final_value = float(input_field.get_attribute("value")) if type == "price" else int(input_field.get_attribute("value"))
         expected_value = initial_value + (increment * number_of_clicks) if minMax == "increase" else initial_value - (increment * number_of_clicks)

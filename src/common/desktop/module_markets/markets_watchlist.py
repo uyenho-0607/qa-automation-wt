@@ -58,11 +58,13 @@ def market_watchlist(driver):
         if symbols:
             random_symbol = random.choice(symbols) # Randomly choose one symbol from the list
             label_symbol = random_symbol.text  # Get the symbol's name/text
-            attach_text("Symbol selected is: " + label_symbol, name="Market Watchlist Section")
+            attach_text("Selected Symbol is: " + label_symbol, name="Market Watchlist Section")
             click_element(random_symbol)  # Click on the selected symbol
-        else:
+        else:            
+            no_items_message = visibility_of_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
+            msg = get_label_of_element(no_items_message)
             # Raise an error if no symbols were found
-            raise ValueError("No symbols found")
+            raise AssertionError(f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab")
 
         # Verify if the correct symbol is displayed in the chart (ensuring the click was successful)
         chart_symbol_name = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="symbol-overview-id", text=label_symbol)
@@ -148,8 +150,8 @@ def scroll_and_retrieve_data(driver):
     # Print all unique data once after scrolling is complete
     print("Unique Data Retrieved:", len(data_loaded))
     print("\n".join(sorted(data_loaded)))  # Print sorted data for readability
-    
     return list(data_loaded)
+
 
 
 
@@ -171,6 +173,7 @@ def market_watchlist_filter(driver):
         
         delay(1)
         
+        # Randomly select any of the tabs (e.g Shares / Forex / Index / Commodities / Crypto)
         selected_option = find_list_of_elements_by_xpath(driver, "//div[@class='sc-jekbnu-1 gQDQZK  fit']/div[@class='sc-jekbnu-2 dKFAqJ']/div")
         if selected_option:
             random_category = random.choice(selected_option)
@@ -179,16 +182,10 @@ def market_watchlist_filter(driver):
             javascript_click(driver, element=random_category)
         else:
             assert False, "No categories found"
-
-        visibility_of_element_by_xpath(driver, "//div[@class='sc-a1ymba-0 gThDmX']")
-        
-        # Locate all checkboxes (both checked and unchecked)
-        # unchecked_checkboxes = find_list_of_elements_by_xpath(driver, "(//div[@class='sc-1byafbj-1 gdFGzr'])[1]")
-        # checked_checkboxes = find_list_of_elements_by_xpath(driver, "(//div[contains(@class, 'sc-1byafbj-1 dwXOtc')])[1]")
         
         # Locate all checkboxes (both checked and unchecked)
         unchecked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[@class='sc-1byafbj-1 gdFGzr']")
-        checked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[contains(@class, 'sc-1byafbj-1 dwXOtc')]")
+        checked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[contains(@class, 'sc-1byafbj-1 dTVOzk')]")
         
         # Combine both unchecked and checked checkboxes into a list
         all_checkboxes = unchecked_checkboxes + checked_checkboxes
@@ -196,22 +193,19 @@ def market_watchlist_filter(driver):
         # Choose a random checkbox from the combined list
         random_checkbox = random.choice(all_checkboxes)
         
-        delay(2)
-        
-        # Determine if we should check or uncheck it
-        if random_checkbox in unchecked_checkboxes:
+        # The code checks whether the randomly selected checkbox is part of the unchecked list:
+        if random_checkbox in unchecked_checkboxes: # If the checkbox is originally unchecked
             # Check the checkbox
             click_element(element=random_checkbox)
             action = "checked"
             expected_symbol_visibility = True  # If checked, the symbol should be visible
-        else:
-            # Uncheck the checkbox
+        else: # If the checkbox is originally checked
             click_element(element=random_checkbox)
             action = "unchecked"
             expected_symbol_visibility = False  # If unchecked, the symbol should not be visible
 
         # Navigate to the parent container to locate the associated text
-        symbol_name = random_checkbox.find_element(By.XPATH, "./ancestor::div[contains(@class, 'sc-1byafbj-0 KiIAV')]")
+        symbol_name = random_checkbox.find_element(By.XPATH, ".//ancestor::div[contains(@class, 'sc-1byafbj-0 KiIAV')]")
         filter_symbol_name = symbol_name.text.strip()  # Extract and clean up the text
 
         # Print the action taken and symbol name
@@ -233,7 +227,7 @@ def market_watchlist_filter(driver):
 
         alert_msg = handle_alert_success(driver)
         if alert_msg != "All changes are saved.":
-            raise AssertionError(f"Does not match the expected message")
+            raise AssertionError(f"Receive {alert_msg} instead of the expected message")
 
         # Locate 'X' button
         close = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']")
@@ -291,3 +285,8 @@ def market_watchlist_filter(driver):
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""

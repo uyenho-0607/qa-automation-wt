@@ -1,7 +1,7 @@
-from common.desktop.module_symbol.search_symbol import input_symbol, symbol_watchlist
+from common.desktop.module_symbol.search_symbol import input_symbol, clear_search_history
 
 
 __all__ = [
     'input_symbol',
-    'symbol_watchlist'
+    'clear_search_history'
 ]

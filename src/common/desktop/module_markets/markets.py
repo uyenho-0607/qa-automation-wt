@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import spinner_element, get_label_of_element, click_element, visibility_of_element_by_xpath, find_element_by_xpath, find_list_of_elements_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import javascript_click, spinner_element, click_element, visibility_of_element_by_xpath, find_element_by_xpath, find_list_of_elements_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.desktop.module_subMenu.utils import menu_button
 
@@ -21,7 +21,7 @@ def get_options():
         "My Trade": {
             "menu_name": "My Trade",
             "button_xpath": "(//span[@class='sc-1fdsqm5-2 gXxxIv'])[1]", # My Trade - button text
-            "symbol_xpath": "//div[@class='sc-1cdfgfd-2 dXKVYB']", # symbol lists xpath
+            "symbol_xpath": "//div[@class='sc-1cdfgfd-2 clUWhI']", # symbol lists xpath
             "arrow_xpath": "(//div[@class='sc-1fdsqm5-0 crbctM'])[1]//*[name()='svg']",
             "tab_xpath": ["//div[@data-testid='tab-asset-order-type-open-positions']", "//div[text()='All']"] # trade - button text
         },
@@ -49,15 +49,15 @@ def get_options():
         "Signal": {
             "menu_name": "Signal",
             "button_xpath": "(//span[@class='sc-1fdsqm5-2 gXxxIv'])[4]", # Signal - button text
-            "symbol_xpath": "//tr[@class='sc-18g2plp-3 sc-18g2plp-5 sc-nazh05-2 iDCtfw imPFkd']//div[@class='sc-iubs14-5 fFEJmt']",
-            "fav_xpath": "(//tr[@class='sc-18g2plp-3 sc-18g2plp-5 sc-nazh05-2 iDCtfw imPFkd']//div[@class='sc-1tkgbp9-0 iDQeCs'])[1]",
-            "unfav_xpath": "(//tr[@class='sc-18g2plp-3 sc-18g2plp-5 sc-nazh05-2 iDCtfw imPFkd']//div[@class='sc-1tkgbp9-0 hwMknn'])[1]",
+            "symbol_xpath": "//tr[contains(@class, 'iDCtfw imPFkd')]//div[@class='sc-iubs14-5 fFEJmt']",
+            "fav_xpath": "(//tr[contains(@class, 'imPFkd')]//div[@class='sc-1tkgbp9-0 kLQFAh'])[1]",
+            "unfav_xpath": "(//tr[contains(@class, 'imPFkd')]//div[@class='sc-1tkgbp9-0 hwMknn'])[1]",
             "arrow_xpath": "((//div[@class='sc-1fdsqm5-0 crbctM'])[4]//*[name()='svg'])",
             "tab_xpath": ["//div[text()='Signal List']", "//div[text()='Favourite Signals']"]  # List of possible tab options
         },
         "News": {
             "menu_name": "News",
-            "button_xpath": "(//span[@class='sc-1fdsqm5-2 gXxxIv'])[5]", # Signal - button text
+            "button_xpath": "(//span[@class='sc-1fdsqm5-2 gXxxIv'])[5]", # News - button text
             "arrow_xpath": "((//div[@class='sc-1fdsqm5-0 crbctM'])[5]//*[name()='svg'])",
             "tab_xpath": ["//div[@data-testid='side-bar-option-news']"]  # List of possible tab options
         }
@@ -68,7 +68,7 @@ def select_top_loser_dropdown(driver):
     """
     Select the 'Top Loser' from the dropdown menu.
     """
-    dropdown_arrow = visibility_of_element_by_xpath(driver, "//div[@class='sc-mxgjzk-0 bCqfTz']")
+    dropdown_arrow = visibility_of_element_by_xpath(driver, "//div[@class='sc-mxgjzk-0 ctlLnC']")
     click_element(dropdown_arrow)
 
     dropdown_value = find_element_by_xpath(driver, "//div[contains(@class, 'sc-mxgjzk-2') and text()='Top Loser']")
@@ -90,6 +90,8 @@ def handle_signal_option(driver, option_name, option):
     """
     Handle the logic for the 'Signal' market option, dealing with favorite vs. unfavorite states.
     """
+    delay(1)
+    
     if option_name == "Signal":
         states = [
             {
@@ -116,8 +118,7 @@ def handle_signal_option(driver, option_name, option):
                 continue
         
         # If neither state is matched, raise an exception or return a default value
-        raise Exception("Neither favorite nor unfavorite state detected.")
-
+        raise Exception("Neither the xpath is wrong")
 
 
 def select_random_symbol(driver, option):
@@ -147,7 +148,7 @@ def verify_selected_tab(driver, option):
             if "selected" in tab.get_attribute("class"):
                 # Check for Favourite Signals tab
                 if tab_text == "Favourite Signals":
-                    if "//div[@class='sc-1tkgbp9-0 iDQeCs']" in option.get("fav_xpath"):  # Replace with actual expected value
+                    if "//div[@class='sc-1tkgbp9-0 kLQFAh']" in option.get("fav_xpath"):  # Replace with actual expected value
                         attach_text(f"Trade / Asset page: {tab_text} tab is pre-selected", name=f"Redirecting to the correct tab for: {option.get('menu_name')}")
                         return
                     else:
@@ -338,9 +339,11 @@ def news_section(driver):
         # Redirect to the Markets page
         menu_button(driver, menu="markets")
         
-        # Delay to allow elements to load
-        delay(0.5)
+        spinner_element(driver)
         
+        # Delay to allow elements to load
+        delay(2)
+
         # Find all news items in the Markets section
         news = find_list_of_elements_by_xpath(driver, "//div[@class='sc-b6bkin-1 esEYzr']")
         
@@ -353,11 +356,11 @@ def news_section(driver):
             selected_news = random.choice(news)
             
             # Get the text of the selected news item and print it
-            news_text = selected_news.text
-            print(f"Randomly selected news item: {news_text}")
-            
+            market_news_text = selected_news.text
+            attach_text(market_news_text, name="Randomly selected news item: ")
+
             # Click the selected news item to navigate to its detail page
-            click_element(element=selected_news)
+            javascript_click(driver, element=selected_news)
         else:
             # Raise an error if no news items are found on the Markets page
             raise ValueError("No news found on the Markets page")
@@ -375,17 +378,15 @@ def news_section(driver):
             for new_item in news_items:
                 # Check if the 'selected' class is in the element's class attribute
                 if new_item and "selected" in new_item.get_attribute("class").split():
-                    news_text = new_item.text
+                    signal_news_text = new_item.text
                     # label_news = re.sub(r'\S+ \S+ - \d+ (minutes?|hours?) ago', '', news_text)
                     # print(f"{label_news.strip()} is pre-selected\n")
-
                     # Verify that the news item on the News page matches the randomly selected one
-                    if news_text.strip() == news_text.strip():
-                        attach_text(news_text, name="Match found: The news text matches the selected news in market page.")
+                    if signal_news_text.strip() == market_news_text.strip():
+                        attach_text(signal_news_text, name="Match found: The news text pre-selected on the new page aligns with the selected news on the market page.")
                         assert True
                     else:
-                        print("No match: The news text does not match the selected news in market page.")
-                        assert False
+                        assert False, "No match: The news text does not match the selected news in market page."
                     break  # Exit after finding the active tab
         else:
             # Raise an error if no news items are found on the News page
@@ -408,47 +409,6 @@ def news_section(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-
-def myTrade_order222(driver, symbol_name, trade_direction):
-    """
-    Verify that the specified symbol appears in the 'My Trade' section at the top row.
-    
-    Arguments:
-        symbol_name: The name of the symbol to verify (e.g., "LTCUSD.std").
-        
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
-    """
-    
-    try:
-        
-        # Redirect to the Markets page
-        menu_button(driver, menu="markets")
-        
-        # Wait till the spinner icon no longer display
-        spinner_element(driver)
-        
-        # Wait until the rows in 'My Trade' section are loaded
-        symbol_element = visibility_of_element_by_xpath(driver, "(//div[@class='sc-1cdfgfd-2 dXKVYB'])[1]")
-        displayed_symbol = get_label_of_element(element=symbol_element)
-        
-        if displayed_symbol != symbol_name:
-            raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")
-                
-        # Buy / Sell value
-        direction_element = visibility_of_element_by_xpath(driver, "(//div[@class='sc-1g7mcs0-2 bcaoRQ']/span)[1]")
-        label_direction = get_label_of_element(element=direction_element)
-
-        if label_direction.upper() != trade_direction.upper():
-            raise AssertionError(f"Order type '{trade_direction}' does not match displayed type '{label_direction}'")
-        
-    except Exception as e:
-        # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
-        
-        
-        
-        
         
 def myTrade_order(driver, symbol_name, order_type):
     try:
@@ -462,7 +422,7 @@ def myTrade_order(driver, symbol_name, order_type):
         top_row = visibility_of_element_by_xpath(driver, "//div[@class='sc-1g7mcs0-0 iiKKcu'][1]")
         
         # Validate symbol name in the top row
-        displayed_symbol = top_row.find_element(By.XPATH, "//div[@class='sc-1cdfgfd-2 dXKVYB']").text.strip()
+        displayed_symbol = top_row.find_element(By.XPATH, "//div[@class='sc-1cdfgfd-2 clUWhI']").text.strip()
         
         if displayed_symbol != symbol_name:
             raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")

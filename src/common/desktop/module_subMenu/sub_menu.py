@@ -25,6 +25,9 @@ def menu_button(driver, menu: str):
         # Click on the found menu element with an optional wait to ensure the action is completed
         click_element_with_wait(driver, element=menu_selection)
         
+        if "selected" in menu_selection.get_attribute("class"):
+            return menu_selection.text.strip().lower()
+
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

@@ -4,7 +4,7 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_limit_order, close_delete_order, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, close_delete_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 
@@ -34,6 +34,7 @@ class TC_MT4_aN06():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
@@ -43,7 +44,7 @@ class TC_MT4_aN06():
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Enable OCT"):
-                toggle_radioButton_OCT(driver=main_driver, desired_state="checked")
+                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
 
             """ Place Stop Order """
 
@@ -82,14 +83,10 @@ class TC_MT4_aN06():
             with allure.step("Retrieve the Order History data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
 
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order",
-                                   df2=order_history_df, name2="Order History",
-                                   required_columns=["Open Date", "Symbol", "Order No.", "Type", "Size", "Units", "Take Profit", "Stop Loss"])
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=order_history_df, name2="Order History")
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, snackbar_banner_df, order_history_df)
-                        
-
                         
         finally:
             shutdown(main_driver)

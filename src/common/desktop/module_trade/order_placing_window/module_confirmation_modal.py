@@ -20,7 +20,7 @@ def trade_ordersConfirmationDetails(driver, trade_type):
     from the confirmation modal, and creates a DataFrame with the extracted data.
 
     Arguments:
-    - trade_type: The type of trade (e.g., "edit", "create") to adjust the logic for extraction.
+    - trade_type: The type of trade (e.g.,  "trade", "edit") to adjust the logic for extraction.
 
     Returns:
     - trade_order_details (DataFrame): A DataFrame containing the trade confirmation details extracted from the modal.

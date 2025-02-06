@@ -1,6 +1,5 @@
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-
 from constants.helper.element import click_element, spinner_element, visibility_of_element_by_testid, find_element_by_testid
 from constants.helper.error_handler import handle_exception
 
@@ -24,7 +23,7 @@ def modal_announcement(driver, button: str = "got-it"):
     """
     try:
         # Wait for the login process to complete (spinner disappears)
-        # spinner_element(driver)
+        spinner_element(driver)
 
         # Wait for the feature announcement modal to be visible
         visibility_of_element_by_testid(driver, data_testid="feature-announcement-modal")

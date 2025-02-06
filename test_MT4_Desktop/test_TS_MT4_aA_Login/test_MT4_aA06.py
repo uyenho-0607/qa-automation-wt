@@ -13,8 +13,8 @@ class TC_MT4_aA06():
 
     @allure.description(
         """
-        Member unable login with wrong credentials in Demo tab
-        - wrong accountID and password
+        Member unable login with wrong credentials in Live tab
+        - correct accountID with wrong password
         """
         )
     
@@ -23,13 +23,12 @@ class TC_MT4_aA06():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo", testcaseID="TC03", expect_failure=True) 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC02", expect_failure=True) 
                 
-
-                        
         finally:
             shutdown(main_driver)
             

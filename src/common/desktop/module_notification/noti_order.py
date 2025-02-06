@@ -96,7 +96,7 @@ def get_orderNotification_msg(driver, order_id: str):
                 order_Notification_Message = extract_order_data_details(driver, [order_data], headers, section_name="Notification Order Message")
                 overall = tabulate(order_Notification_Message.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
                 # Attach the formatted table to the report
-                attach_text(overall, name="Notification Order Message")
+                attach_text(overall, name=f"Notification Order Message - {order_id}")
                 
                 # Return the DataFrame containing the order notification message
                 return order_Notification_Message

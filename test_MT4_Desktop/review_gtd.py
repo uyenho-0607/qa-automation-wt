@@ -4,6 +4,7 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol 
 from common.desktop.module_trade.utils import review_pending_orderIDs
+from data_config.fileHandler import group_orders_by_username
 from data_config.utils import read_orderIDs_from_csv
 
 
@@ -24,27 +25,19 @@ class TC_aD02():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
-
-            with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC01")
 
             with allure.step("Read orderIDs from CSV"):
-                orderIDs = read_orderIDs_from_csv(filename="MT4_Desktop_Limit_OCT.csv")
+                orderIDs = read_orderIDs_from_csv(filename="MT4_Desktop_Limit.csv")
         
             with allure.step("Ensure the OrderID is display in order panel table"):
-                # Check order IDs in Order History table
-                failed_order_ids = review_pending_orderIDs(driver=main_driver, order_ids=orderIDs, order_panel="tab-asset-order-type-history")
-                if failed_order_ids:
-                    failed_order_ids = review_pending_orderIDs(driver=main_driver, order_ids=failed_order_ids, order_panel="tab-asset-order-type-pending-orders")
-                    if failed_order_ids:
-                        review_pending_orderIDs(driver=main_driver, order_ids=failed_order_ids, order_panel="tab-asset-order-type-open-positions")
-            
-
-                        
+                # # Check order IDs in Order History table
+                review_pending_orderIDs(driver=main_driver, order_ids=orderIDs)
+                
         finally:
             shutdown(main_driver)
             
