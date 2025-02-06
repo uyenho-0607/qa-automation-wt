@@ -174,7 +174,7 @@ def clear_input_field(element):
     element.click()
     # Keep attempting to clear the field until it's empty
     while element.get_attribute("value") != "":
-        element.send_keys(Keys.COMMAND + 'a') # Select all text (use Keys.CONTROL for Windows/Linux)
+        element.send_keys(Keys.CONTROL + 'a') # Select all text (use Keys.CONTROL for Windows/Linux)
         element.send_keys(Keys.DELETE) # Delete the selected text
 
 """
