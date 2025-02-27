@@ -56,8 +56,6 @@ class TC_MT4_aP09():
                                     target_endMonth=datetime.strptime("October 2024", "%B %Y"))
             
         finally:
-            stop_screen_recording(ffmpeg_process)
-            
             shutdown(main_driver)
-
-            attach_video_to_allure(screen_recording_file, class_name)
+            
+            attach_session_video_to_allure(session_id)

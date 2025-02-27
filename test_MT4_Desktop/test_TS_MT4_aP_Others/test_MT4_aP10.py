@@ -38,8 +38,6 @@ class TC_MT4_aP10():
                 toggle_order_panel_sort(driver=main_driver, tab_order_type="history")
                                         
         finally:
-            stop_screen_recording(ffmpeg_process)
-            
             shutdown(main_driver)
-
-            attach_video_to_allure(screen_recording_file, class_name)
+            
+            attach_session_video_to_allure(session_id)

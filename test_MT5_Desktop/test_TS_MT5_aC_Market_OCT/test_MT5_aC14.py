@@ -106,8 +106,6 @@ class TC_MT5_aC14():
                     assert False, f"Place orderID - {original_orderID} and Modified orderID - {updated_orderID} not matched"
 
         finally:
-            stop_screen_recording(ffmpeg_process)
-            
             shutdown(main_driver)
-
-            attach_video_to_allure(screen_recording_file, class_name)
+            
+            attach_session_video_to_allure(session_id)
