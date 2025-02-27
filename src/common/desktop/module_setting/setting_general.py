@@ -1,8 +1,8 @@
-from constants.helper.color_element import get_body_color
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 
-from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, find_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.color_element import get_body_color
+from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
 
 
 
@@ -16,11 +16,12 @@ from constants.helper.element import click_element, find_element_by_testid, java
 
 def accountInformation(driver):
     # To open the account linkage profile
-    accountInfo = find_element_by_xpath(driver, "//div[@class='sc-ck4lnb-1 bxVapH']")
+    accountInfo = find_element_by_testid(driver, data_testid="account-selector")
     javascript_click(driver, element=accountInfo)
     
     # Wait for the modal display
-    visibility_of_element_by_xpath(driver, "//div[@class='sc-189z816-0 bElbxd']")
+    # visibility_of_element_by_xpath(driver, "//div[@class='sc-189z816-0 rJxDJ']")
+    delay(2)
     
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -64,6 +65,9 @@ def button_setting(driver, setting_option: str):
         }
         
         delay(1)
+        # demo-account-completion-modal-title
+        # change-password-modal-title
+        # demo-account-creation-modal-title
         
         if setting_option in expected_text_map:
             expected_text = expected_text_map[setting_option]
@@ -128,7 +132,7 @@ def button_theme(driver, theme_option=None):
                 elif color == "rgb(234, 236, 239)":
                     print("Dark theme detected in System settings")
                 else:
-                    print("Unexpected color for System theme", color)
+                    assert False, f"Unexpected color for System theme {color}"
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

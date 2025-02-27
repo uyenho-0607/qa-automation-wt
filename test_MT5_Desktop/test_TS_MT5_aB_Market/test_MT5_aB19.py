@@ -5,10 +5,11 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton_OCT, trade_market_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
+@allure.parent_suite("MT5 Membersite - Desktop - Trade - Market Order")
 
 @allure.epic("MT5 Desktop TS_aB - Market")
 
@@ -29,22 +30,22 @@ class TC_MT5_aB19():
         Member able to partial close a Market order
         """
         )
-
+    
     def test_TC19(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
+        
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="live")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
 
             with allure.step("Disable OCT"):
-                toggle_radioButton_OCT(driver=main_driver)
+                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
 
             """ Place Market Order """
 
@@ -58,12 +59,12 @@ class TC_MT5_aB19():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, _ = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Trade Open Position", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Trade Open Position", row_number=[1])
                 
             """ End of Place Order """
             
             with allure.step("Order Panel: Open Position - Click on Close to Partial close an order"):
-                close_delete_order(driver=main_driver,row_number=[1], order_action="close", set_marketSize=True, clearField=True, set_fillPolicy=True)
+                close_delete_order(driver=main_driver, row_number=[1], order_action="close", set_marketSize=True, clearField=True, set_fillPolicy=True)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
@@ -80,19 +81,18 @@ class TC_MT5_aB19():
 
             with allure.step("Retrieve the Order History data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
-            
+
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position", df2=order_history_df, name2="Order History", compare_volume=False, compare_units=False)
+
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
                 noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=original_orderID)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
-
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
-                                   df2=noti_msg_df, name2="Notification Order Message",
-                                   required_columns=["Symbol", "Order No."])
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_msg_df, name2="Notification Order Message", compare_volume=False, compare_units=False, compare_profit_loss=True)
 
                 # Concatenate all dataframes in the order_details_list into a single dataframe
                 noti_order_df = pd.concat(noti_order_details, ignore_index=True)
@@ -101,20 +101,13 @@ class TC_MT5_aB19():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
-                                   df2=noti_order_df, name2="Notification Order Details",
-                                   required_columns=["Open Date", "Symbol", "Order No.", "Type", "Take Profit", "Stop Loss", "Swap", "Commission"])
-
-            with allure.step("Print Final Result for Closed Order"):
-                process_and_print_data(order_history_df, snackbar_banner_df, noti_msg_df, noti_order_df)
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_order_df, name2="Notification Order Details", compare_volume=False, compare_units=False, compare_profit_loss=True)
                 
             """End of comparison on Order History and newly closed order"""
 
-            with allure.step("Print Final Result"):
+            with allure.step("Print Final Result for Closed Order"):
                 process_and_print_data(order_history_df, snackbar_banner_df, noti_msg_df, noti_order_df)
-
-
-                        
+                            
         finally:
             shutdown(main_driver)
             

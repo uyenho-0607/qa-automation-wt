@@ -6,6 +6,7 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_trade.order_panel.utils import update_column_visibility
 
+@allure.parent_suite("MT4 Membersite - Desktop - Others")
 
 @allure.epic("MT4 Desktop TS_aP - Others")
 
@@ -24,7 +25,6 @@ class TC_MT4_aP11():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             

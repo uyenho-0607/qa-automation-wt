@@ -13,10 +13,22 @@ from constants.helper.error_handler import handle_exception
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
+# def normalize_value(value):
+#     """
+#     Normalize numeric values by stripping commas and trailing zeros.
+#     """
+#     if isinstance(value, str):
+#         # Remove commas and trailing zeros after the decimal point
+#         return value.replace(',', '').rstrip('0').rstrip('.') if '.' in value else value
+#     return str(value)  # Return the value as a string if it's not a string already
+
+
 def normalize_value(x):
     """Normalize numeric values by removing commas and trailing zeros."""
+    """Normalize numeric values by removing commas, trailing zeros, and leading plus signs."""
     # Convert to string and remove commas
-    s = str(x).replace(',', '')
+    # s = str(x).replace(',', '')
+    s = str(x).replace(',', '').lstrip('+')
     # Check if the string represents a number (integer or decimal)
     if re.match(r'^-?\d*\.?\d+$', s):
         if '.' in s:
@@ -32,7 +44,7 @@ def normalize_value(x):
         return s
     
 
-def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = False, compare_profit_loss: bool = False):
+def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = True, compare_units: bool = True, compare_profit_loss: bool = False):
     """
     Compare two dataframes and automatically detect columns for comparison, ignoring trailing zeros and commas.
 
@@ -54,19 +66,29 @@ def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = Fa
         if not isinstance(df2, pd.DataFrame):
             raise TypeError(f"df2 is not a DataFrame, it is a {type(df2)}")
 
+# Check if either of the dataframes is empty
+        if df1.empty or df2.empty:
+            raise ValueError("One or both of the dataframes are empty.")
+        
         # Find common columns for comparison
         common_columns = list(set(df1.columns) & set(df2.columns))
 
-        # If 'Volume' should not be compared, exclude it from the common columns
-        # if not compare_volume and "Volume" in common_columns:
-        #     common_columns.remove("Volume")
-            
-
         # # If 'Volume, Profit/Loss' should not be compared, exclude it from the common columns
-        for column, condition in [("Volume", compare_volume), ("Profit/Loss", compare_profit_loss)]:
+        # for column, condition in [("Volume", compare_volume), ("Profit/Loss", compare_profit_loss), ("Units", compare_units)]:
+        #     if not condition and column in common_columns:
+        #         common_columns.remove(column)
+        
+        # Handle "Volume" or "Size" dynamically
+        size_columns = ["Volume", "Size"]
+        for column in size_columns:
+            if column in common_columns:
+                if not compare_volume:  # If the flag is False, exclude the column from comparison
+                    common_columns.remove(column)
+
+        # If Profit/Loss should not be compared, exclude it from the common columns
+        for column, condition in [("Profit/Loss", compare_profit_loss), ("Units", compare_units)]:
             if not condition and column in common_columns:
                 common_columns.remove(column)
-
 
         if not common_columns:
             raise ValueError("No common columns found between the two dataframes")
@@ -114,9 +136,11 @@ def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = Fa
                 attach_text(error_message, name="Mismatch Details")
                 assert False, error_message
             else:
-                attach_text(f"All values match for {orderID}", name="Values Comparison Result")
+                attach_text(f"All values match for {orderID}", name=f"Comparison on {name1} and {name2} Result")
 
     except Exception as e:
+        print(f"An error occurred during dataframe comparison between {name1} and {name2}. Error: {str(e)}")
+        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
@@ -134,7 +158,7 @@ def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = Fa
 
 def process_and_print_data(*dfs, group_by_order_no: bool = False):
     try:
-            
+
         # Concatenate the dataframes
         master_df = pd.concat(dfs)
         

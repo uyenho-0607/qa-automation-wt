@@ -1,11 +1,11 @@
-from common.desktop.module_login.webTrader_login import select_account_type
-from constants.helper.driver import access_url, url_changes
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import click_element, find_element_by_testid, find_element_by_xpath, spinner_element, visibility_of_element_by_testid, get_label_of_element, populate_element, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.error_handler import handle_exception
+from constants.helper.driver import access_url, get_current_url
+from constants.helper.element import click_element, find_element_by_testid, spinner_element, visibility_of_element_by_testid, get_label_of_element, populate_element, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_announcement.utils import modal_announcement
+from common.desktop.module_login.webTrader_login import select_account_type
 
 
 """
@@ -27,15 +27,18 @@ def populate_password_fields(driver, old_password, new_password, confirm_passwor
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     # Locate and populate the old password input field
-    old_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[1]")
+    # old_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[1]")
+    old_password_input = find_element_by_testid(driver, data_testid="change-password-modal-old-password")
     populate_element(element=old_password_input, text=old_password)
 
     # Locate and populate the new password input field
-    new_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[2]")
+    # new_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[2]")
+    new_password_input = find_element_by_testid(driver, data_testid="change-password-modal-new-password")
     populate_element(element=new_password_input, text=new_password)
 
     # Locate and populate the confirm password input field
-    confirm_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[3]")
+    # confirm_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[3]")
+    confirm_password_input = find_element_by_testid(driver, data_testid="change-password-modal-confirm-new-password")
     populate_element(element=confirm_password_input, text=confirm_password)
 
 """
@@ -61,7 +64,8 @@ def submit_and_handle_alert(driver, expected_alert_type, login_username, login_p
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     # Find the submit button and click it
-    submit_button = find_element_by_xpath(driver, "//button[contains(normalize-space(text()), 'Submit')]")
+    # submit_button = find_element_by_xpath(driver, "//button[contains(normalize-space(text()), 'Submit')]")
+    submit_button = find_element_by_testid(driver, data_testid="change-password-modal-confirm")
     click_element(element=submit_button)
     
     # Try to capture the alert message and type
@@ -69,7 +73,7 @@ def submit_and_handle_alert(driver, expected_alert_type, login_username, login_p
 
     if alert_message:
         # Extract the label/message from the alert
-        label_message = get_label_of_element(alert_message)
+        label_message = get_label_of_element(element=alert_message)
         print(f"Label message: {label_message}")
 
         # Check if the actual alert type matches the expected one
@@ -190,8 +194,8 @@ def handle_success(driver, label_message, login_username, login_password, params
         # Log the user out
         button_setting(driver, setting_option="logout")
         
-        # Check for URL change after logging out
-        _, current_url = url_changes(driver)
+        # Get the current URL after logout
+        current_url = get_current_url(driver)
         
         # Assert that the URL should change to the login page
         if "web/login" in current_url:
@@ -294,8 +298,9 @@ def handle_error(driver, label_message):
             break  # Stop after finding the first matching error message
 
     # Close the modal dialog
-    close_btn = find_element_by_xpath(driver, "//div[@class='sc-1ui89tt-3 dXSCMa']")
-    click_element(element=close_btn)
+    # btn_close = find_element_by_xpath(driver, "//div[@class='sc-1ui89tt-3 dXSCMa']")
+    btn_close = find_element_by_testid(driver, data_testid="change-password-modal-close")
+    click_element(element=btn_close)
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

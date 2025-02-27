@@ -68,27 +68,8 @@ def launch_wt(driver, server: str, client_name: str, device_type: str, env_type:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-import csv
 
-def get_username_from_csv(order_id, filename):
-    """Retrieve the username associated with a given order ID from the CSV file."""
-    try:
-        with open(filename, 'r', newline='') as csvfile:
-            csv_reader = csv.reader(csvfile)
-            next(csv_reader)  # Skip header
-            
-            for row in csv_reader:
-                if row and row[0] == str(order_id):  # Convert order_id to string for comparison
-                    return row[1]  # Return the associated username
-    except FileNotFoundError:
-        print(f"File '{filename}' not found.")
-    
-    return None  # Return None if no match is found
-
-
-
-
-def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None, selected_language: str = None, expect_failure: bool = False, use_crm_cred: bool = False) -> None:
+def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None, selected_language: str = None, expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False) -> None:
     """
     This function automates the login process for a web trader platform (WT) using credentials from a JSON file.
     The function handles both valid and invalid login scenarios and supports choosing between CRM or regular credentials.
@@ -96,7 +77,7 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     Arguments:
     - driver: The Selenium WebDriver instance used for browser automation.
     - server: The server (e.g., "MT4", "MT5") for which the login is performed.
-    - client_name: The client name (e.g., "Lirunex") to be used for the login.
+    - client_name: The client name (e.g., "Lirunex")to be used for the login.
     - testcaseID: The ID of the test case (if specific credentials are needed for invalid credentials).
     - expect_failure: A boolean flag to indicate whether a failed login scenario is expected.
     - use_crm_cred: A boolean flag to decide whether to use CRM credentials or standard credentials.
@@ -108,7 +89,6 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     - ValueError: If invalid inputs or missing values are encountered (e.g., server not found, missing testcaseID).
     """
 
-    
     # Load credentials from the JSON file
     data = get_credentials()
 
@@ -121,7 +101,7 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
         if expect_failure:
             if testcaseID is None:
                 raise ValueError("testcaseID must be provided for Invalid_Credential.")
-            
+        
             # Select the "Invalid_Credential" type and search for the matching testcaseID
             credential_type = "Invalid_Credential"
             valid_testcases = [testcase for testcase in server_data.get(credential_type, [])
@@ -130,15 +110,24 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
                 raise ValueError(f"Testcase ID '{testcaseID}' not found in {credential_type} for server '{server}'")
             testcase = valid_testcases[0]
         else:
-            # If expect_failure is False, decide between CRM_Credential or Credential without testcaseID
-            credential_type = "CRM_Credential" if use_crm_cred else "Credential"
+            # If expect_failure is False, decide between CRM_Credential, Credential, or Read_Only_Access
+            if use_read_only_access:
+                # If Read_Only_Access is requested, select from that category
+                credential_type = "Read_Only_Access"
+            elif use_investor_cred:
+                credential_type = "Investor_Account"
+            elif use_crm_cred:
+                # Otherwise, use CRM_Credential if specified
+                credential_type = "CRM_Credential"
+            else:
+                # Default to Credential
+                credential_type = "Credential"
 
             # If a testcaseID is provided, attempt to find the specific testcase
             if testcaseID:
                 valid_testcases = [testcase for testcase in server_data.get(credential_type, [])
                                     if testcase["TestcaseID"] == testcaseID]
                 if not valid_testcases:
-                    # raise ValueError(f"❌ No {credential_type} data available  for server '{server}'")
                     raise ValueError(f"Testcase ID '{testcaseID}' not found in {credential_type} for server '{server}'")
                 testcase = valid_testcases[0]
             else:
@@ -200,7 +189,7 @@ def handle_alert_error(driver, expect_failure: bool):
     # Locate the error message notification element by its test ID.
     error_message_notification = visibility_of_element_by_testid(driver, data_testid="alert-error")
     # Extract the text (label) of the error message from the notification element.
-    error_message = get_label_of_element(error_message_notification)
+    error_message = get_label_of_element(element=error_message_notification)
     # Attach the extracted error message to the logs for reporting purposes.
     attach_text(error_message, name="Error message found:")
     
@@ -238,6 +227,9 @@ def handle_login_result(driver, expect_failure: bool = False, selected_language:
     """
     try:
         
+        # Wait till the spinner icon no longer display
+        spinner_element(driver)
+        
         # Language-specific verification map
         language_specific_text = {
             "English": "Trade",
@@ -253,9 +245,6 @@ def handle_login_result(driver, expect_failure: bool = False, selected_language:
 
         # Determine the text to wait for based on the selected language
         verification_text = language_specific_text.get(selected_language, "Trade")
-        
-        # Wait till the spinner icon no longer display
-        spinner_element(driver)
 
         # Wait until the text is present in the specified element
         match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="side-bar-option-trade", text=verification_text)
@@ -302,9 +291,10 @@ def select_account_type(driver, account_type: str):
     Returns:
     - None: This function performs the action of selecting the account type tab.
     """
+
     # Locate the account type selector element by its test ID.
     acct_type_selector = visibility_of_element_by_testid(driver, data_testid=f"tab-login-account-type-{account_type}")
-    
+
     # Perform a JavaScript click action on the located account type element.
     javascript_click(driver, element=acct_type_selector)
 
@@ -321,7 +311,7 @@ def select_account_type(driver, account_type: str):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, account_type, server: str, client_name: str, testcaseID: str = None, device_type: str = "Desktop", env_type: str = "Release_SIT", expect_failure: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
+def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "SIT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 
@@ -361,7 +351,7 @@ def login_wt(driver, account_type, server: str, client_name: str, testcaseID: st
         # Step 3: Perform the login action using the `wt_user_login` function. 
         # This handles credential retrieval, entry into the login form, and the actual login process.
         if set_username:
-            username, password = wt_user_login(driver, server, client_name, testcaseID, selected_language, expect_failure, use_crm_cred)
+            username, password = wt_user_login(driver, server, client_name, testcaseID, selected_language, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
             return params_wt_url, username, password
     
     except Exception as e:

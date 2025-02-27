@@ -4,17 +4,18 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_setting.utils import button_setting
 
+@allure.parent_suite("MT5 Membersite - Desktop - Login")
 
 @allure.epic("MT5 Desktop TS_aA - Login")
 
-# Member Portal - Login via Demo CMS account
+# Member Portal
 class TC_MT5_aA02():
 
     @allure.title("TC_MT5_aA02")
 
     @allure.description(
         """
-        Member able login to Web Trader via Demo Account tab
+        Member able login to Web Trader via Live Account tab
         """
         )
     
@@ -23,15 +24,13 @@ class TC_MT5_aA02():
         main_driver = self.driver
         session_id = main_driver.session_id
         
-
-        
         try:
-            
+
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="demo")
-            
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                
             with allure.step("Successfully Logout"):
-                button_setting(driver=main_driver, setting_option="logout")
+                button_setting(driver=main_driver, setting_option="logout") 
 
         finally:
             shutdown(main_driver)

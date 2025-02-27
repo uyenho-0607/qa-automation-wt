@@ -5,6 +5,7 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_oct_market_order, modify_market_order, get_trade_snackbar_banner, get_neg_snackbar_banner, extract_order_info
 
+@allure.parent_suite("MT4 Membersite - Desktop - Negative Scenarios")
 
 @allure.epic("MT4 Desktop TS_aQ - Negative Scenarios")
 
@@ -26,12 +27,11 @@ class TC_MT4_aQ03():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")

@@ -4,15 +4,16 @@ import traceback
 
 from selenium.webdriver.common.by import By
 
-from common.desktop.module_subMenu.sub_menu import menu_button
-from common.desktop.module_trade.order_panel.op_filter import perform_sorting
-from common.desktop.module_trade.order_panel.orderPanel_info import type_orderPanel
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, click_element, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
-from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
-from common.desktop.module_chart.chart import get_chart_symbol_name
+
 from data_config.utils import append_orderIDs_to_csv
+from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_chart.chart import get_chart_symbol_name
+from common.desktop.module_trade.order_panel.op_filter import perform_sorting
+from common.desktop.module_trade.order_panel.orderPanel_info import type_orderPanel
+from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 
 
 """
@@ -155,7 +156,7 @@ def bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type):
                     symbol_name.click()
                     spinner_element(driver)
                     print(f"Clicked on symbol with {options_dropdown}: {label_symbolName}")
-                    break                
+                    break
             
             elif options_dropdown in ['profit', 'loss']:
                 # Determine if we are looking for profit or loss orders
@@ -269,7 +270,7 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
         type_orderPanel(driver, tab_order_type, sub_tab, position)
         
         if set_sorting:
-            perform_sorting(driver, random_choice=True)
+            perform_sorting(driver, tab_order_type, random_choice=True)
         
         delay(0.5)
         
@@ -304,7 +305,8 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
                 row_data.append(chart_symbol_name)
 
             # Extract the order ID from the row
-            order_id_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")
+            # order_id_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")
+            order_id_cell = row.find_element(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")
             order_id = order_id_cell.text.strip()
             
             # Locate the close button in the row and check if it's disabled

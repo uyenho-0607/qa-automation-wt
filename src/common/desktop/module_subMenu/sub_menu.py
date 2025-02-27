@@ -8,7 +8,7 @@ from constants.helper.element import click_element_with_wait, visibility_of_elem
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# menu button (Trade / Market / Asset / Signal / Calendar / News
+# menu button (Trade / Market / Asset / Signal / Calendar / News)
 def menu_button(driver, menu: str):
     """
     Navigates to a specified menu in the sidebar by clicking on it.

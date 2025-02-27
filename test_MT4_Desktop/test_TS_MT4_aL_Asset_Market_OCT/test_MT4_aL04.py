@@ -10,6 +10,7 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_oct_mark
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
+@allure.parent_suite("MT4 Membersite - Desktop - Asset - Modify / Close Market Order")
 
 @allure.epic("MT4 Desktop TS_aL - Asset OCT - Modify / Close Market Order")
 
@@ -34,12 +35,11 @@ class TC_MT4_aL04():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
                 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -82,8 +82,7 @@ class TC_MT4_aL04():
             with allure.step("Retrieve the Order History data and compare against Open Position data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
 
-                compare_dataframes(driver=main_driver, df1=asset_order_df, name1="Asset Open Position",
-                                   df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=asset_order_df, name1="Asset Open Position", df2=order_history_df, name2="Order History")
 
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
@@ -93,7 +92,7 @@ class TC_MT4_aL04():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_msg_df, name2="Notification Order Message")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_msg_df, name2="Notification Order Message", compare_profit_loss=True)
 
                 # Concatenate all dataframes in the order_details_list into a single dataframe
                 noti_order_df = pd.concat(noti_order_details, ignore_index=True)
@@ -102,7 +101,7 @@ class TC_MT4_aL04():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_order_df, name2="Notification Order Details")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_order_df, name2="Notification Order Details", compare_profit_loss=True)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, snackbar_banner_df, noti_msg_df, noti_order_df, order_history_df)

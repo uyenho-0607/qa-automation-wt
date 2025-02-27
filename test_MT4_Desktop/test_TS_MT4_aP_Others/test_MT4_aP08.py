@@ -5,6 +5,7 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_trade.utils import asset_symbolName
 
+@allure.parent_suite("MT4 Membersite - Desktop - Others")
 
 @allure.epic("MT4 Desktop TS_aP - Others")
 
@@ -23,12 +24,11 @@ class TC_MT4_aP08():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
     
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu="assets")

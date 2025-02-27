@@ -1,8 +1,8 @@
 import re
 from tabulate import tabulate
 
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, visibility_of_element_by_testid, spinner_element
 
 from common.desktop.module_notification.noti_general import notification_bell
@@ -83,7 +83,8 @@ def get_orderNotification_msg(driver, order_id: str):
                 pnl_header_present = "of" in message.text
                 if pnl_header_present:
                     headers.append("Close Price")
-                    pnl_match = re.search(r"of\s([+-]?[\d.]+)", message.text)
+                    # pnl_match = re.search(r"of\s([+-]?[\d.]+)", message.text)
+                    pnl_match = re.search(r"of\s([+-]?\d+(?:,\d{3})*(?:\.\d+)?)", message.text)
                     order_data.append(pnl_match.group(1)) #if pnl_match else None)
                     headers.append("Profit/Loss")
                 else:

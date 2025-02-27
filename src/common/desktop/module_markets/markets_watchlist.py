@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import get_label_of_element, javascript_click, spinner_element, visibility_of_element_by_testid, visibility_of_element_by_xpath, find_element_by_xpath, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import get_label_of_element, javascript_click, spinner_element, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_present_by_xpath, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid
 
 from common.desktop.module_subMenu.utils import menu_button
 
@@ -35,18 +35,31 @@ def market_watchlist(driver):
         menu_button(driver, menu="markets")
         
         # Ensure the tabs are visible
-        visibility_of_element_by_xpath(driver, "//div[@class='sc-jekbnu-1 gQDQZK']")
+        # visibility_of_element_by_xpath(driver, "//div[@data-testid='watchlist-tabs']/div")
         
         delay(1)
-        
+
         # Randomly select a tab
-        selected_option = find_list_of_elements_by_xpath(driver, "//div[@class='sc-jekbnu-2 dKFAqJ']/div")
-        print(len(selected_option))
+        selected_option = find_list_of_elements_by_xpath(driver, "//div[@data-testid='watchlist-tabs']/div")
         if selected_option:
             random_category = random.choice(selected_option)
             selected_category_text = random_category.text
             print(f"Selected category: {selected_category_text}")
             click_element(element=random_category)
+            if selected_category_text.strip() == "Favourites":
+                delay(0.5)
+                msg_validate = is_element_present_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
+                print(msg_validate)
+                if msg_validate:
+                    no_items_message = visibility_of_element_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
+                    msg = get_label_of_element(element=no_items_message)
+                    # Exclude the "Favourites" category and select a new category randomly
+                    selected_option = [category for category in selected_option if category.text.strip() != "Favourites"]
+                    if selected_option:  # Ensure there are other options to select from
+                        random_category = random.choice(selected_option)
+                        selected_category_text = random_category.text.strip()
+                        print(f"No items found in Favourites, selecting another category: {selected_category_text}")
+                        click_element(element=random_category)
         else:
             assert False, "No categories found"
         
@@ -54,15 +67,16 @@ def market_watchlist(driver):
         spinner_element(driver)
         
         # Locate all symbols in the selected category
-        symbols = find_list_of_elements_by_xpath(driver, "//div[@class='sc-1cyjrzn-1 dIPaVz']//div[@class='sc-iubs14-5 fFEJmt']")
+        symbols = find_list_of_elements_by_testid(driver, data_testid="watchlist-symbol")
         if symbols:
             random_symbol = random.choice(symbols) # Randomly choose one symbol from the list
             label_symbol = random_symbol.text  # Get the symbol's name/text
             attach_text("Selected Symbol is: " + label_symbol, name="Market Watchlist Section")
             click_element(random_symbol)  # Click on the selected symbol
-        else:            
-            no_items_message = visibility_of_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
-            msg = get_label_of_element(no_items_message)
+        else:
+            # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
+            no_items_message = visibility_of_element_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
+            msg = get_label_of_element(element=no_items_message)
             # Raise an error if no symbols were found
             raise AssertionError(f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab")
 
@@ -72,8 +86,7 @@ def market_watchlist(driver):
         # Assert that the symbol in the chart matches the selected symbol
         assert chart_symbol_name, f"Chart symbol mismatch: expected '{label_symbol}', found '{chart_symbol_name}'"
     
-        tab = visibility_of_element_by_xpath(driver, "//div[text()='All']")
-            
+        tab = visibility_of_element_by_testid(driver, data_testid="tab-all")    
         if tab:  # Ensure the tab is visible
             tab_text = tab.text
             if "selected" in tab.get_attribute("class"):
@@ -98,7 +111,6 @@ def market_watchlist(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-
 def handle_alert_success(driver):
     """
     This function handles the expected login error scenario by checking for the error notification 
@@ -117,11 +129,11 @@ def handle_alert_success(driver):
 
 
 
-
 def scroll_and_retrieve_data(driver):
     # Locate the scrollable div
-    visibility_of_element_by_xpath(driver, "//div[@class='sc-byup2e-0 sc-byup2e-1 jgsOaW cNTlIE']")
-    scrollable_div = find_element_by_xpath(driver, "//div[@class='sc-1nbbe4z-1 kyIxkQ']/div/div[1]")
+    visibility_of_element_by_testid(driver ,data_testid="watchlist-list-item")
+    
+    scrollable_div = find_element_by_xpath(driver, "(//div[@data-testid='watchlist-list']//div)[2]")
     
     # Store the current scroll height to detect when scrolling stops
     last_scroll_height = 0
@@ -134,7 +146,7 @@ def scroll_and_retrieve_data(driver):
         delay(0.5)
 
         # Collect visible data (modify as needed for the content inside the div)
-        rows = scrollable_div.find_elements(By.XPATH, "//div[@class='sc-1cyjrzn-1 dIPaVz']//div[@class='sc-iubs14-5 fFEJmt']")  # Adjust for your row or item selector
+        rows = scrollable_div.find_elements(By.XPATH, "//div[@data-testid='watchlist-symbol']")  # Adjust for your row or item selector
         for row in rows:
             data_loaded.add(row.text.strip())  # Save row content or other unique data
         
@@ -148,10 +160,9 @@ def scroll_and_retrieve_data(driver):
         last_scroll_height = current_scroll_height
 
     # Print all unique data once after scrolling is complete
-    print("Unique Data Retrieved:", len(data_loaded))
-    print("\n".join(sorted(data_loaded)))  # Print sorted data for readability
+    # print("Unique Data Retrieved:", len(data_loaded))
+    # print("\n".join(sorted(data_loaded)))  # Print sorted data for readability
     return list(data_loaded)
-
 
 
 
@@ -161,32 +172,31 @@ def market_watchlist_filter(driver):
         menu_button(driver, menu="markets")
         
         # Locate all symbols in the selected category
-        filter = visibility_of_element_by_xpath(driver, "//div[@class='sc-jekbnu-3 QuCNL']")
+        filter = visibility_of_element_by_testid(driver, data_testid="symbol-preference")
         click_element(element=filter)  # Click on the selected symbol
         
         # Wait for the "Show/Hide Symbol" modal to appear
-        visibility_of_element_by_xpath(driver, "//div[@class='sc-ur24yu-1 eqxJBS']")
-        
-        result = wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[text()='Show/Hide Symbol']", text="Show/Hide Symbol")
+        result = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="symbol-preference-label", text="Show/Hide Symbol")
         if not result:
             raise AssertionError("Show/Hide Symbol not found")
         
         delay(1)
         
         # Randomly select any of the tabs (e.g Shares / Forex / Index / Commodities / Crypto)
-        selected_option = find_list_of_elements_by_xpath(driver, "//div[@class='sc-jekbnu-1 gQDQZK  fit']/div[@class='sc-jekbnu-2 dKFAqJ']/div")
+        selected_option = find_list_of_elements_by_xpath(driver, "//div[@data-testid='symbol-preference-tabs']/div")
         if selected_option:
             random_category = random.choice(selected_option)
-            selected_category_text = random_category.text
+            # selected_category_text = random_category.text
+            selected_category_text = random_category.text.lower()
             print(f"Selected category: {selected_category_text}")
             javascript_click(driver, element=random_category)
         else:
             assert False, "No categories found"
         
         # Locate all checkboxes (both checked and unchecked)
-        unchecked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[@class='sc-1byafbj-1 gdFGzr']")
-        checked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[contains(@class, 'sc-1byafbj-1 dTVOzk')]")
-        
+        unchecked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[@data-testid='symbol-preference-option-unchecked']/div")
+        checked_checkboxes = find_list_of_elements_by_xpath(driver, "//div[@data-testid='symbol-preference-option-checked']/div")
+
         # Combine both unchecked and checked checkboxes into a list
         all_checkboxes = unchecked_checkboxes + checked_checkboxes
 
@@ -205,7 +215,7 @@ def market_watchlist_filter(driver):
             expected_symbol_visibility = False  # If unchecked, the symbol should not be visible
 
         # Navigate to the parent container to locate the associated text
-        symbol_name = random_checkbox.find_element(By.XPATH, ".//ancestor::div[contains(@class, 'sc-1byafbj-0 KiIAV')]")
+        symbol_name = random_checkbox.find_element(By.XPATH, ".//ancestor::div[contains(@data-testid, 'symbol-preference-option-')]")
         filter_symbol_name = symbol_name.text.strip()  # Extract and clean up the text
 
         # Print the action taken and symbol name
@@ -213,7 +223,7 @@ def market_watchlist_filter(driver):
 
         # If the filter symbol is 'Show all', get the full list of symbols
         if filter_symbol_name == 'Show all':
-            filter_symbols = find_list_of_elements_by_xpath(driver, "//div[@class='sc-1y7v0bd-0 fQRgGF']")
+            filter_symbols = find_list_of_elements_by_xpath(driver, "//div[contains(@data-testid, 'symbol-preference-option-')]")
             print(len(filter_symbols))
             filter_symbol_list = [symbol.text.strip() for symbol in filter_symbols]
             print(f"Full list of symbols: {filter_symbol_list} {action}")
@@ -222,7 +232,7 @@ def market_watchlist_filter(driver):
             filter_symbol_list = [filter_symbol_name]
 
         # Save changes
-        save_button = find_element_by_xpath(driver, "//button[text()='Save Changes']")
+        save_button = find_element_by_testid(driver, data_testid="symbol-preference-save")
         click_element(element=save_button)
 
         alert_msg = handle_alert_success(driver)
@@ -230,11 +240,13 @@ def market_watchlist_filter(driver):
             raise AssertionError(f"Receive {alert_msg} instead of the expected message")
 
         # Locate 'X' button
-        close = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']")
+        close = find_element_by_testid(driver, data_testid="symbol-preference-close")
         click_element(close)
+        
+        # delay(1)
 
         # Navigate to the selected category
-        watchlist_option = visibility_of_element_by_xpath(driver, f"//div[@class='sc-jekbnu-2 dKFAqJ']//div[text()='{selected_category_text}']")
+        watchlist_option = visibility_of_element_by_testid(driver, data_testid=f"tab-{selected_category_text}")
         click_element(element=watchlist_option)
         
         delay(0.5)
@@ -256,7 +268,7 @@ def market_watchlist_filter(driver):
                         assert False, f"Extra symbols in market watchlist not in filter_symbol_list: {', '.join(extra_symbols)}"
 
             else:
-                no_items_message = visibility_of_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
+                no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
                 msg = get_label_of_element(no_items_message)
                 if msg == "No items available.":
                     print(f"{msg} is displayed")

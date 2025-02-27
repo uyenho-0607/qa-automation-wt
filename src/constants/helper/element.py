@@ -8,7 +8,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.common.exceptions import TimeoutException
 
 from constants.helper.error_handler import handle_exception
 
@@ -44,6 +43,12 @@ def find_element_by_xpath_with_wait(driver, xpath_string, duration: int | None =
     element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element((By.XPATH, xpath_string)))
     return element_on_focus
 
+def find_element_by_testid_with_wait(driver, data_testid, duration: int | None = None) -> WebElement:
+    wait_duration = derive_wait_duration(duration)
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element((By.XPATH, data_test_id_string)))
+    return element_on_focus
+
 # Use WebDriver to find for element to according to specified css_selector string
 def find_element_by_css(driver, css_selector) -> WebElement:
     return driver.find_element(By.CSS_SELECTOR, css_selector)
@@ -74,16 +79,16 @@ def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
+
 def is_element_present_by_testid(driver, data_testid: str) -> bool:
     try:
         # Try to find the element
-        data_test_id_string = data_test_id_pattern.format(data_testid)
-        find_element_by_testid(driver, data_test_id_string)
+        find_element_by_testid(driver, data_testid)
         # Use WebDriver to find for element to according to specified xpath string
         return True
     except Exception:
         # If element is not found, return False
-        return False
+        return False    
     
 
 def is_element_present_by_xpath(driver, xpath: str) -> bool:
@@ -95,7 +100,6 @@ def is_element_present_by_xpath(driver, xpath: str) -> bool:
     except Exception:
         # If element is not found, return False
         return False
-
 
 
 # Ensures the element is both present in the DOM and visible.
@@ -116,15 +120,21 @@ def visibility_of_element_by_testid(driver, data_testid, duration: int | None = 
 
 
 # Waits for the element to either: Not be in the DOM, or be in the DOM but not visible.
-def invisibility_of_element_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
+def invisibility_of_element_by_xpath(driver, xpath, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
-    return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((By.XPATH, xpath)))
+    try:
+        return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((By.XPATH, xpath)))
+    except:
+        return False # Return False if timeout occurs
 
 
-def invisibility_of_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
+def invisibility_of_element_by_testid(driver, data_testid, duration: int | None = None) -> bool:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
-    return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((By.XPATH, data_test_id_string)))
+    try:
+        return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((By.XPATH, data_test_id_string)))
+    except:
+        return False  # Return False if timeout occurs
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -174,7 +184,7 @@ def clear_input_field(element):
     element.click()
     # Keep attempting to clear the field until it's empty
     while element.get_attribute("value") != "":
-        element.send_keys(Keys.CONTROL + 'a') # Select all text (use Keys.CONTROL for Windows/Linux)
+        element.send_keys(Keys.CONTROL + 'a') # Select all text (use Keys.CONTROL for Windows/Linux - Keys.COMMAND for Mac)
         element.send_keys(Keys.DELETE) # Delete the selected text
 
 """
@@ -290,13 +300,20 @@ def iframe(driver, duration: int | None = None) -> None:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
+
+def javascript_scroll(driver, element):
+    try:
+        driver.execute_script("arguments[0].scrollIntoView();", element)
+    except Exception as e:
+        assert False, f"{str(e)}\n{traceback.format_exc()}"
+
+
+
 # Javascript click
 def javascript_click(driver, element):
     try:
    
         """Use JavaScript to click on the given web element """
-        # driver.execute_script("arguments[0].click();", element)
-
         driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", element)
 
         # Execute JavaScript to scale the page content to 80%
@@ -317,6 +334,12 @@ def trigger_click(driver, element):
 #  To check if a specific element on a web page has a cursor style of "not-allowed". 
 def is_element_disabled_by_cursor(driver, element):
     return driver.execute_script("return window.getComputedStyle(arguments[0]).cursor == 'not-allowed';", element)
+
+
+# def is_element_disabled(driver, element):
+#     is_disabled_attr = element.get_attribute("disabled") is not None
+#     is_disabled_cursor = driver.execute_script("return window.getComputedStyle(arguments[0]).cursor == 'not-allowed';", element)
+#     return is_disabled_attr or is_disabled_cursor
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

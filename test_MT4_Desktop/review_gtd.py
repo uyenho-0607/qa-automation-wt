@@ -1,4 +1,5 @@
 import allure
+from common.desktop.module_assets.account_info import get_server_local_time
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
@@ -8,10 +9,13 @@ from data_config.fileHandler import group_orders_by_username
 from data_config.utils import read_orderIDs_from_csv
 
 
-# Member Portal 
+@allure.parent_suite("MT4 Membersite - Pending Order Review")
+
+@allure.epic("MT4 Desktop TS_aU - Pending Order Review")
+
+# Member Portal
 class TC_aD02():
 
-    
     @allure.title("TC_MT4_aD")
 
     @allure.description(
@@ -24,7 +28,6 @@ class TC_aD02():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
@@ -32,7 +35,8 @@ class TC_aD02():
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC01")
 
             with allure.step("Read orderIDs from CSV"):
-                orderIDs = read_orderIDs_from_csv(filename="MT4_Desktop_Limit.csv")
+                # get_server_local_time(driver=main_driver)
+                orderIDs = read_orderIDs_from_csv(filename="MT4_Desktop_Pending_Order.csv")
         
             with allure.step("Ensure the OrderID is display in order panel table"):
                 # # Check order IDs in Order History table

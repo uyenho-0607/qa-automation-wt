@@ -2,12 +2,11 @@ import re
 from decimal import Decimal
 from collections import defaultdict
 
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import get_label_of_element, find_list_of_elements_by_xpath
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import get_label_of_element, find_list_of_elements_by_testid
 
 from common.desktop.module_setting.setting_general import accountInformation
-
 
 
 """
@@ -22,7 +21,8 @@ def sum_by_currency(driver):
         
         currency_totals = defaultdict(lambda: Decimal('0'))
         
-        amounts = find_list_of_elements_by_xpath(driver, "//div[@class='sc-3lrinj-1 AzVAk']")
+        # Get the each account balance details
+        amounts = find_list_of_elements_by_testid(driver, data_testid="account-option-balance")
         
         for amount in amounts:
             text = amount.text.strip()
@@ -33,7 +33,8 @@ def sum_by_currency(driver):
                 value = Decimal(value_str)
                 currency_totals[currency] += value
         
-        total_balance_elements = find_list_of_elements_by_xpath(driver, "//div[@class='sc-h7om0g-0 hcOEZB']/span")
+        # Get the total account balance details
+        total_balance_elements = find_list_of_elements_by_testid(driver, data_testid="account-total-balance")
         
         for total_balance_element in total_balance_elements:
             label_total_balance = get_label_of_element(element=total_balance_element)
@@ -61,5 +62,4 @@ def sum_by_currency(driver):
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""     
-        
+"""

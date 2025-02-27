@@ -1,8 +1,6 @@
-
 from constants.helper.driver import delay
 from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, spinner_element
 from constants.helper.error_handler import handle_exception
-
 
 
 """
@@ -48,7 +46,7 @@ def get_chart_symbol_name(driver):
 
 # Min / Max the Chart
 def chart_minMax(driver, chart_fullscreen: str):
-    """    
+    """ 
     This function will wait for the page to load, ensure that the spinner element is not visible,
     and then click the fullscreen button to either expand or collapse the chart window.
     

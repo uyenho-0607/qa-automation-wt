@@ -8,6 +8,7 @@ from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 
+@allure.parent_suite("MT4 Membersite - Desktop - Others")
 
 @allure.epic("MT4 Desktop TS_aP - Others")
 
@@ -26,12 +27,11 @@ class TC_MT4_aP09():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -39,7 +39,7 @@ class TC_MT4_aP09():
             with allure.step("Select the Order Panel: Order History"):
                 type_orderPanel(driver=main_driver, tab_order_type="history")
 
-            with allure.step("Retrieve the Order Panel data"):        
+            with allure.step("Retrieve the Order Panel data"):
                 OH_closeDate(driver=main_driver, startDate="3", endDate="4",
                                     target_startMonth=datetime.strptime("October 2024", "%B %Y"),
                                     target_endMonth=datetime.strptime("October 2024", "%B %Y"))
@@ -50,7 +50,7 @@ class TC_MT4_aP09():
             with allure.step("Select the Order Panel: Order History"):
                 type_orderPanel(driver=main_driver, tab_order_type="history")
 
-            with allure.step("Retrieve the Order Panel data"):        
+            with allure.step("Retrieve the Order Panel data"):
                 OH_closeDate(driver=main_driver, startDate="3", endDate="4",
                                     target_startMonth=datetime.strptime("October 2024", "%B %Y"),
                                     target_endMonth=datetime.strptime("October 2024", "%B %Y"))

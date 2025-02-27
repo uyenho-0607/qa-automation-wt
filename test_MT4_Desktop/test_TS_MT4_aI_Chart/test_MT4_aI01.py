@@ -10,6 +10,7 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_market_o
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
+@allure.parent_suite("MT4 Membersite - Desktop - Trade - Chart - Place Order")
 
 @allure.epic("MT4 Desktop TS_aI - Chart - Order Placing Window")
 
@@ -33,12 +34,11 @@ class TC_MT4_aI01():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -56,8 +56,7 @@ class TC_MT4_aI01():
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details",
-                                   df2=snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details", df2=snackbar_banner_df, name2="Snackbar Banner Message")
             
             with allure.step("Close the Trade Modal"):
                 chart_trade_modal_close(driver=main_driver)

@@ -6,6 +6,7 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_setting.utils import switch_or_delete_account, handle_password_prompt_on_account_switch
 
+@allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
 @allure.epic("MT4 Desktop TS_aT - Setting")
 
@@ -24,7 +25,6 @@ class TC_MT4_aT06():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             

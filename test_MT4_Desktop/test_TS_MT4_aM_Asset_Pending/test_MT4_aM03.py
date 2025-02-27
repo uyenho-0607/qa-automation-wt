@@ -7,10 +7,11 @@ from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_stop_order, modify_stop_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
+@allure.parent_suite("MT4 Membersite - Desktop - Asset - Modify / Delete Pending Order")
 
 @allure.epic("MT4 Desktop TS_aM - Asset - Modify / Delete Pending Order")
 
-# Member Portal 
+# Member Portal
 class TC_MT4_aM01():
  
     @allure.title("TC_MT4_aM01")
@@ -38,12 +39,11 @@ class TC_MT4_aM01():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -74,7 +74,7 @@ class TC_MT4_aM01():
                 menu_button(driver=main_driver, menu="assets")
                 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Asset Pending Orders", row_number=[1])
+                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Asset Pending Order", row_number=[1])
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:

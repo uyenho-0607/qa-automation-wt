@@ -1,6 +1,5 @@
 import random
 
-from constants.helper.driver import delay, url_changes
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, find_element_by_xpath, find_list_of_elements_by_xpath
 
@@ -23,13 +22,13 @@ def linked_devices_modal(driver, set_terminate: bool = True):
         
         if set_terminate:
             # Click on the terminate button
-            terminate_btn = find_element_by_xpath(driver, "//div[@class='sc-1b49kuv-0 sc-5juhuq-0 eyDFgk bwVZIu']")
-            click_element(terminate_btn)
+            btn_terminate = find_element_by_xpath(driver, "//div[@class='sc-1b49kuv-0 sc-5juhuq-0 eyDFgk bwVZIu']")
+            click_element(btn_terminate)
             
             alert_msg = handle_alert_success(driver)
             if alert_msg != "Session terminated successfully":
                 raise AssertionError(f"Receive {alert_msg} instead of the expected message")
-        else:            
+        else:
             terminate_single = find_list_of_elements_by_xpath(driver, "(//div[@class='sc-6to9kt-4 dNMFZG'])[2]/div")
             initial_count = len(terminate_single)  # Store the initial count
             print(initial_count)
@@ -45,13 +44,12 @@ def linked_devices_modal(driver, set_terminate: bool = True):
                 
                 # Get the updated count and verify
                 updated_count = len(find_list_of_elements_by_xpath(driver, "(//div[@class='sc-6to9kt-4 dNMFZG'])[2]/div"))
-                print("update count", updated_count)
                 if updated_count != initial_count - 1:
                     raise AssertionError(f"Expected {initial_count - 1} active sessions, but found {updated_count}")
 
         # Click on the 'X' button
-        close_btn = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']//*[name()='svg']")
-        click_element(close_btn)
+        btn_close = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']//*[name()='svg']")
+        click_element(btn_close)
     
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -60,7 +58,3 @@ def linked_devices_modal(driver, set_terminate: bool = True):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-
-
-# (//div[@class='sc-6to9kt-4 dNMFZG'])[2]/div

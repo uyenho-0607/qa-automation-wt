@@ -1,4 +1,4 @@
-from datetime import datetime
+from dateutil.parser import parse
 
 from constants.helper.element import click_element, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, javascript_click
 from constants.helper.error_handler import handle_exception
@@ -34,14 +34,16 @@ def select_specified_date(driver, trade_type, expiryDate, targetMonth):
         while True:
             # Get the current month and year displayed on the calendar
             year_month = find_element_by_xpath_with_wait(driver, "//button[@class='react-calendar__navigation__label']").text
-            currentMonth = datetime.strptime(year_month, "%b %Y")
+            # currentMonth = datetime.strptime(year_month, "%b %Y")
+            currentMonth = parse(year_month)
+
             # If the current month matches the target month, break the loop
             if currentMonth == targetMonth:
                 break
             else:
                 # Click the "next" button to move to the next month
-                next_btn = find_element_by_xpath_with_wait(driver, "//button[contains(@class, 'react-calendar__navigation__next-button')]")
-                click_element(next_btn)
+                btn_next = find_element_by_xpath_with_wait(driver, "//button[contains(@class, 'react-calendar__navigation__next-button')]")
+                click_element(btn_next)
         
         # Locate and select the expiry date from the calendar
         start_date_picker = find_element_by_xpath_with_wait(driver, f"//div[contains(@class, 'month-view__days')]/button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{expiryDate}']")

@@ -1,17 +1,19 @@
+import re
 from tabulate import tabulate
+from dateutil.parser import parse
 
 from selenium.webdriver.common.by import By
 
-from common.desktop.module_setting.setting_general import button_setting
-from common.desktop.module_subMenu.sub_menu import menu_button
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import wait_for_element_visibility, spinner_element, javascript_click, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
+from constants.helper.element import is_element_present_by_xpath, wait_for_element_visibility, spinner_element, javascript_click, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, is_element_present_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath
+
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 from common.desktop.module_chart.chart import get_chart_symbol_name
-
-
+from common.desktop.module_assets.account_info import get_server_local_time
+from common.desktop.module_setting.setting_general import button_setting
+from common.desktop.module_subMenu.sub_menu import menu_button
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 ASSET - SYMBOL NAME
@@ -76,15 +78,41 @@ def asset_symbolName(driver, row_number):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# Choose order type (Open Position / Pending Order / Order History)
-def count_orderPanel(driver, tab_order_type, sub_tab=None, position: bool = False):
+# Retrieve the total count for order type (Open Position / Pending Order)
+
+def count_orderPanel(driver):
     try:
+        def process_tabs(menu_name):
+            current_tab = menu_button(driver, menu=menu_name)
+            counts = {}  # Dictionary to store counts for each tab
+            
+            for tab in ["open-positions", "pending-orders"]:
+                _, button_name = type_orderPanel(driver, tab_order_type=tab)
+                
+                # Extract the number using regex
+                count = int(re.search(r'\d+', button_name).group())
+                counts[tab] = count  # Store the count for the tab
+            
+            return current_tab, counts  # Return both tab name and counts
         
-        type_orderPanel(driver, tab_order_type, sub_tab, position)
+        # Process "trade" menu
+        current_tab, trade_counts = process_tabs("trade")
+        if current_tab == "trade":
+            print(f"Total counts for 'Trade': {trade_counts}")
+            
+            # Check if any tab in "trade" exceeds 30 orders
+            for tab, count in trade_counts.items():
+                if count > 30:
+                    assert False, f"Trade - {tab} should not have more than 30 orders (current count: {count})"
         
+        # Process "assets" menu
+        current_tab, asset_counts = process_tabs("assets")
+        if current_tab == "assets":
+            # Since no max count is defined for assets, just print or log the counts
+            print(f"Total counts for 'Assets': {asset_counts}")
 
     except Exception as e:
-        # Handle any exceptions that occur during the execution
+        # Handle any exceptions that occur during execution
         handle_exception(driver, e)
 
 """
@@ -131,7 +159,7 @@ def type_orderPanel(driver, tab_order_type, sub_tab=None, position: bool = False
                 orderHistory_position = find_element_by_testid(driver, data_testid=f"tab-asset-order-type-history-{sub_tab}")
                 click_element(orderHistory_position)
         
-        return label_count
+        return tab_order_type, label_count
     
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -150,14 +178,13 @@ def type_orderPanel(driver, tab_order_type, sub_tab=None, position: bool = False
 """
 
 # order panel - Track / Close (Delete) / Edit button
-def button_orderPanel_action(driver, order_action, row_number, delete_button: bool = False):
+def button_orderPanel_action(driver, order_action, row_number):
     """
     Performs actions (edit, close, delete) on specified rows in the order panel.
 
     Arguments:
     - order_action (str): The action to perform on the order (e.g., 'track', 'edit', 'close').
     - row_number (list or int): The row(s) to perform the action on (can be a single row number or a list of row numbers).
-    - delete_button (bool, optional): If True, the delete button for a pending order is clicked. Default is False.
 
     Raises:
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
@@ -167,32 +194,26 @@ def button_orderPanel_action(driver, order_action, row_number, delete_button: bo
         # Ensure row_number is a list, even if a single row number is passed
         # if isinstance(row_number, int):
         #     row_number = [row_number]
-        
-        # delay(2)
-        
+                
         # Loop through the provided row numbers to click the action button for each row
         for row in row_number:
             # Find the action button (e.g., edit, close) for the specified row
             action_button = find_element_by_xpath(driver, f"(//div[contains(@data-testid, 'button-{order_action}')])[{row}]")
             click_element(action_button)
-
-        # If delete_button is True, click the delete order button (For OCT)
-        if delete_button:
-            # local_delete_button = find_element_by_testid(driver, data_testid="close-order-button-submit")
-            local_delete_button = find_element_by_xpath(driver, "//button[contains(normalize-space(text()), 'Delete Order')]")
-            click_element(local_delete_button)
+        
+        delay(0.2)
         
         # Handle order-specific confirmation modals based on the order_action
-        if order_action == "edit":
-            visibility_of_element_by_testid(driver, data_testid="edit-confirmation-modal")
-
-        if order_action == "close":
-            try:
-                 # Handle the close action specifically
-                visibility_of_element_by_xpath(driver, "//div[@class='sc-ur24yu-1 eqxJBS']")
-            except Exception as e:
-                pass
-                
+        match = is_element_present_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
+        if match:
+            visibility_of_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
+        
+        
+        # If delete_button is True, click the delete order button (For OCT)
+        if is_element_present_by_testid(driver, data_testid="confirmation-modal-button-submit"):
+            delete_button = find_element_by_testid(driver, data_testid="confirmation-modal-button-submit")
+            click_element(delete_button)
+   
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -245,7 +266,7 @@ def get_orderID(driver, row_number):
             table_row = table_body.find_element(By.XPATH, f".//tr[{row}]")
             
             # Find the order ID element within the row
-            order_id_element = table_row.find_element(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")
+            order_id_element = table_row.find_element(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")
             
             # Append the extracted order ID to the list
             order_ids.append(order_id_element.text)
@@ -301,6 +322,8 @@ def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab
         
         # if response.status_code == 200:
         spinner_element(driver)
+        
+        delay(2)
 
         # Locate the table body and header
         table_body = get_table_body(driver)
@@ -318,16 +341,16 @@ def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab
             table_row = table_body.find_element(By.XPATH, f".//tr[{row}]")
 
             # Locate and extract the order ID from the current row
-            order_id_element = table_row.find_element(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")
+            order_id_element = table_row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
             order_ids.append(order_id_element.text)
 
             # Extract data from the row for the table content
-            cells = table_row.find_elements(By.XPATH, ".//th[1] | .//td")
+            cells = table_row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
 
             row_data = []
-            for cell in cells:            
+            for cell in cells:
                 wait_for_element_visibility(driver, cell)
-                row_data.append(cell.text)
+                row_data.append(cell.text.strip())
             
             # Add the chart symbol name if it exists
             if chart_symbol_name:
@@ -395,7 +418,7 @@ def get_order_panel_name(order_panel):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 REVIEW ORDERIDs FROM CSV
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""        
+"""
 
 
 def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = False):
@@ -434,10 +457,16 @@ def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = Fa
             # For each order ID still in the failed list, check if it exists in the table
             for order_id in failed_order_ids[:]:  # Iterate over a copy of the list to allow modification
 
+                # Convert the strings to datetime objects
+                # datetime_format = '%Y-%m-%d %H:%M:%S'
+                dateTime = get_server_local_time(driver)
+                # Automatically parse any valid datetime format
+                current_datetime = parse(dateTime)
+
                 # Loop through each row to find a matching order ID
                 for row in rows:
                     # spinner_element(driver)
-                    order_id_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")
+                    order_id_cell = row.find_element(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")
                     if order_id in order_id_cell.text:
                         
                         if tab_order_type == "open-positions":
@@ -450,6 +479,16 @@ def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = Fa
                             expiry_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-expiry')]")
                             expiry_text = expiry_cell.text
                             print(f"Expiry text for Order ID {order_id}: {expiry_text}")
+                            
+                            # Extract the 'Expiry' column text from the same row
+                            expiry_date_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-expiry-date')]")
+                            # expiry_date_text = expiry_date_cell.text
+                            expiry_date = get_label_of_element(element=expiry_date_cell)
+                            
+                            # Automatically parse any valid datetime format
+                            expiry_date_text = parse(expiry_date)
+
+                            print(f"Expiry Date text for Order ID {order_id}: {expiry_date_text}")
 
                             if expiry_text == "Good Till Cancelled":
                                 print(f"Expected to be remain from table {order_id}")
@@ -457,6 +496,26 @@ def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = Fa
                             elif expiry_text == "Good Till Day":
                                 print(f"Expected to be removed from table {order_id}")
                                 result_message += f"Order ID {order_id}: Expected to be removed from table (Good Till Day)\n"
+                            elif expiry_text == "Specified Date":
+                                # Compare the datetime objects
+                                if expiry_date_text > current_datetime:
+                                    print(f"{expiry_date_text} is later than {current_datetime}")
+                                elif expiry_date_text < current_datetime:
+                                    print(f"{expiry_date_text} is earlier than {current_datetime}")
+                                    result_message += f"Order ID {order_id}: Expected to be removed from table (Specified Date)\n"
+                                    assert False, f"Order ID {order_id}: Expected to be removed from table (Specified Date)"
+                                else:
+                                    print(f"{expiry_date_text} is the same as {current_datetime}")
+                            elif expiry_text == "Specified Date and Time":
+                                # Compare the datetime objects
+                                if expiry_date_text > current_datetime:
+                                    print(f"{expiry_date_text} is later than {current_datetime}")
+                                elif expiry_date_text < current_datetime:
+                                    print(f"{expiry_date_text} is earlier than {current_datetime}")
+                                    result_message += f"Order ID {order_id}: Expected to be removed from table (Specified Date and Time)\n"
+                                    assert False, f"Order ID {order_id}: Expected to be removed from table (Specified Date and Time)"
+                                else:
+                                    print(f"{expiry_date_text} is the same as {current_datetime}")
 
                         # Check if we're dealing with the "order-history" tab
                         elif tab_order_type == "history":
@@ -465,7 +524,6 @@ def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = Fa
                             status_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-status')]")
                             status_text = status_cell.text
                             print(f"Status text for Order ID {order_id}: {status_text}")
-                                
                             if status_text in ["CANCELLED", "Canceled"]:
                                 print("cancel")
                                 result_message += f"Order ID {order_id}: Status is Cancelled as expected\n"
@@ -538,7 +596,7 @@ def check_orderIDs_in_table(driver, order_ids, tab_order_type, section_name: str
 
         # Extract rows and order IDs from the table
         table_rows = table_body.find_elements(By.XPATH, ".//tr")
-        table_order_ids = [element.text for element in table_body.find_elements(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")]
+        table_order_ids = [element.text for element in table_body.find_elements(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")]
         
         # Extract headers and check for chart symbol
         thead_data = get_table_headers(driver)

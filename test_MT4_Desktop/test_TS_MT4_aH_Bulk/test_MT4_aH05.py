@@ -6,13 +6,14 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_trade.utils import toggle_radioButton, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
 from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, read_orderIDs_from_csv
 
+@allure.parent_suite("MT4 Membersite - Desktop - Trade - Bulk Close /Delete Order")
 
 @allure.epic("MT4 Desktop TS_aH - Bulk Close / Delete Orders")
 
 # Member Portal
-class TC_MT4_aH04():
+class TC_MT4_aH05():
 
-    @allure.title("TC_MT4_aH04")
+    @allure.title("TC_MT4_aH05")
 
     @allure.description(
         """
@@ -20,15 +21,14 @@ class TC_MT4_aH04():
         """
         )
     
-    def test_TC04(self, chromeDriver):
+    def test_TC05(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Disable OCT"):
                 toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
@@ -48,8 +48,7 @@ class TC_MT4_aH04():
                 order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type="history", section_name="Order History")
             
             with allure.step("Comparison on Order History and Pending Order table"):
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
-                                   df2=pending_order_df, name2="Pending Order")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=pending_order_df, name2="Pending Order")
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, order_history_df, group_by_order_no=True)

@@ -1,4 +1,3 @@
-from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, populate_element
 
@@ -6,6 +5,7 @@ from common.desktop.module_chart.chart import chart_minMax
 from common.desktop.module_trade.order_panel.orderPanel_info import button_orderPanel_action
 from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, pointsDistance
 from common.desktop.module_trade.order_placing_window.utils import verify_volume_minMax_buttons, button_buy_sell_type, button_tradeModule, label_onePointEqual, input_size_volume, fillPolicy_type, handle_stopLoss, handle_takeProfit, button_trade_action, handle_stopLoss, handle_takeProfit, close_partialSize
+from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
 
 
 
@@ -228,16 +228,16 @@ def modify_market_order(driver, trade_type, row_number, sl_type=None, tp_type=No
 """
 
 # For closing market and deleting pending order
-def close_delete_order(driver, row_number, order_action, actions: list = None, trade_type=None, set_marketSize:bool = False, set_negMarket:bool = False, set_fillPolicy:bool = False, clearField: bool = False, delete_button: bool = False):
+def close_delete_order(driver, row_number, order_action, actions: list = None, trade_type=None, set_marketSize:bool = False, set_negMarket:bool = False, set_fillPolicy:bool = False, clearField: bool = False):
     try:
 
         spinner_element(driver)
         
-        if trade_type == "close-order":            
-            _, lot_size = button_tradeModule(driver, module_Type="specification")
+        if trade_type == "close-order":
+            _, lot_size, vol_step = button_tradeModule(driver, module_Type="specification")
 
         # Clicking on the action (Edit / Close / Delete)
-        button_orderPanel_action(driver, order_action, row_number, delete_button)
+        button_orderPanel_action(driver, order_action, row_number)
         
         if set_marketSize:
             close_partialSize(driver, set_fillPolicy, clearField)
@@ -245,9 +245,8 @@ def close_delete_order(driver, row_number, order_action, actions: list = None, t
         # Test the (- / +) button, (Min / Max) button and validation check
         if set_negMarket:
             verify_button_behavior_at_min_max(driver, trade_type, lot_size=lot_size)
-            verify_volume_minMax_buttons(driver, trade_type, actions, lot_size=lot_size)
+            verify_volume_minMax_buttons(driver, trade_type, actions, size_volume_step=vol_step)
             verify_invalid_size_volume_input(driver, trade_type)
-
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

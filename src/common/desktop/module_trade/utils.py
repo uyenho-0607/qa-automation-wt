@@ -1,6 +1,4 @@
-# Negative scenario
-from common.desktop.module_trade.negative_scenario_order.utils import neg_trade_market_order, neg_modify_market_order, neg_trade_limit_order, neg_modify_limit_order, neg_trade_stop_order, neg_modify_stop_order, neg_trade_stopLimit_order, neg_modify_stopLimit_order
-
+# Place / Edit Order
 from common.desktop.module_trade.place_edit_order.utils import trade_oct_market_order, trade_market_order, modify_market_order, close_delete_order, trade_limit_order, modify_limit_order, trade_stop_order, modify_stop_order, trade_stopLimit_order, modify_stopLimit_order
 
 # Order Placing Window
@@ -18,22 +16,6 @@ from common.desktop.module_trade.bulk_action.utils import button_bulk_operation
 
 
 __all__ = [
-
-        
-# """
-# ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-#                                                 NEGATIVE SCENARIO ORDER
-# ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-# """
-
-    'neg_trade_market_order',
-    'neg_modify_market_order',
-    'neg_trade_limit_order',
-    'neg_modify_limit_order',    
-    'neg_trade_stop_order',
-    'neg_modify_stop_order',
-    'neg_trade_stopLimit_order',
-    'neg_modify_stopLimit_order',
     
 # """
 # ---------------------------------------------------------------------------------------------------------------------------------------------------- 

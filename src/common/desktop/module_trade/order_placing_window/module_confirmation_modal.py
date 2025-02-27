@@ -3,9 +3,10 @@ import pandas as pd
 
 from tabulate import tabulate
 
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, visibility_of_element_by_xpath, get_label_of_element
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, visibility_of_element_by_xpath, get_label_of_element
+
 
 
 """
@@ -80,7 +81,7 @@ def trade_ordersConfirmationDetails(driver, trade_type):
             extracted_orderID = get_label_of_element(order_number_elements)
 
             # If the order number element exists, process it
-            if order_number_elements:       
+            if order_number_elements:
                 order_number = re.search(r'\d+', extracted_orderID).group() # Extract numerical order ID
                 result.append(order_number) # Append the order number to the result list
                 

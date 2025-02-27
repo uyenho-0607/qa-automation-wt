@@ -1,7 +1,10 @@
 import random
+from selenium.webdriver.common.by import By
 
+from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element_with_wait, find_list_of_elements_by_xpath, populate_element, find_list_of_elements_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import click_element_with_wait, find_element_by_testid, populate_element, find_list_of_elements_by_testid, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
+
 from data_config.fileHandler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
 
@@ -76,41 +79,74 @@ def input_symbol(driver, server: str, client_name: str, symbol_type: str = "Symb
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
         
-        
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                CLEAR SEARCH HISTORY
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
 def clear_search_history(driver):
+
+    def get_delete_buttons():
+        return find_list_of_elements_by_testid(driver, "symbol-input-search-items-delete")
+
+    def get_symbol_name(delete_button):
+        container = delete_button.find_element(By.XPATH, ".//ancestor::div[@data-testid='symbol-input-search-items']")
+        symbol_element = container.find_element(By.XPATH, ".//span[@data-testid='symbol-input-search-items-symbol']")
+        return get_label_of_element(element=symbol_element).strip()
+
+    def log_symbols(message, buttons):
+        print(message)
+        symbols = [get_symbol_name(btn) for btn in buttons]
+        for idx, name in enumerate(symbols):
+            print(f"Index {idx}: {name}")
+
+    def delete_random_item(initial_count):
+        delete_buttons = get_delete_buttons()
+        selected_index = random.randint(0, len(delete_buttons) - 1)
+        selected_symbol = get_symbol_name(delete_buttons[selected_index])
+        print(f"Deleting symbol: (Index {selected_index}): {selected_symbol}")
+        click_element_with_wait(driver, element=delete_buttons[selected_index])
+        delay(1)
+
+        updated_count = len(get_delete_buttons())
+        if updated_count != initial_count - 1:
+            raise AssertionError(f"Items remaining: {updated_count} (Expected {initial_count - 1})")
+
     try:
+        spinner_element(driver)
         
-        # Find the search input field for symbols
-        search_input = visibility_of_element_by_testid(driver, data_testid="symbol-input-search")
+        search_input = visibility_of_element_by_testid(driver, "symbol-input-search")
         click_element_with_wait(driver, element=search_input)
-        
-        # Locate the search history items and iterate through them
-        search_history_items = find_list_of_elements_by_xpath(driver, "//div[@data-testid='symbol-input-search-items']//div[@class='sc-1jx9xug-5 gVqGuT']")
-        
-        # Locate all clear buttons (bin or x)
-        clear_btns = find_list_of_elements_by_xpath(driver, "//div[@class='sc-1jx9xug-8 kXyyDI']")
-        
-        if clear_btns:
-            # If there's more than one button (Delete All / Delete One)
-            # Assuming the first button is always the "bin" (delete all) and subsequent ones are "x"
-            for idx, clear_btn in enumerate(clear_btns):
-                # If it's the first clear button, consider it as the bin (delete all)
-                # if idx == 0:
-                #     clear_btn.click()
-                #     print("Cleared all search history.")
-                #     break  # Exit after clicking the "bin" icon (delete all)
-                # else:
-                if idx >= 1:
-                    # Click the "x" icon (delete specific item)
-                    clear_btn.click()
-                    symbol_name = search_history_items[idx].text  # Get the name of the symbol being deleted
-                    print(f"Deleted search item: {symbol_name}")
-        
-        else:
-            print("No clear buttons found in search history.")
-        
+
+        # Initial state check
+        initial_buttons = get_delete_buttons()
+        initial_count = len(initial_buttons)
+        if initial_count == 0:
+            raise AssertionError("No search history items found")
+
+        # Delete single random item
+        print(f"\nInitial count: {initial_count}")
+        log_symbols("Available symbols before deletion:", initial_buttons)
+        delete_random_item(initial_count)
+
+        # Clear remaining history
+        remaining_buttons = get_delete_buttons()
+        log_symbols("\nRemaining symbols before full clear:", remaining_buttons)
+        bin_button = find_element_by_testid(driver, "symbol-input-search-history-delete")
+        click_element_with_wait(driver, element=bin_button)
+        delay(1)
+
+        # Final verification
+        final_count = len(get_delete_buttons())
+        if final_count != 0:
+            raise AssertionError(f"Clear all failed - Remaining items: {final_count}")
+
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
-
-
+        
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""

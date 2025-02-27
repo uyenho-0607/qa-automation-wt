@@ -6,6 +6,7 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner
 
+@allure.parent_suite("MT4 Membersite - Desktop - Others")
 
 @allure.epic("MT4 Desktop TS_aP - Others")
 
@@ -24,12 +25,11 @@ class TC_MT4_aP01():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live") 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")

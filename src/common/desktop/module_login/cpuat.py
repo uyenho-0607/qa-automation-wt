@@ -2,12 +2,11 @@ import os
 import json
 import traceback
 
-from data_config.encrypt_decrypt import decrypt_and_print
+from constants.helper.screenshot import take_screenshot
 from constants.helper.driver import access_url, wait, switch_to_new_window
 from constants.helper.element import click_element, find_element_by_xpath, populate_element, find_element_by_xpath_with_wait, click_element_with_wait, populate_element_with_wait
-from constants.helper.screenshot import take_screenshot
 
-
+from data_config.encrypt_decrypt import decrypt_and_print
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -116,7 +115,7 @@ def cpuat_user_login(self, platform: str, testcaseID: str) -> None:
 """
 
 def btn_webTrader(self):
-    try:    
+    try: 
         cpuat_webTrader = find_element_by_xpath_with_wait(self.driver, "//span[contains(text(),'Web Trader')]")
         
         click_element_with_wait(self.driver, element=cpuat_webTrader)

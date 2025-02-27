@@ -1,8 +1,8 @@
-import random
 import re
+import random
 
 from constants.helper.driver import delay
-from constants.helper.element import click_element, find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
+from constants.helper.element import find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
 from constants.helper.error_handler import handle_exception
 
 
@@ -92,7 +92,10 @@ def button_tradeModule(driver, module_Type: str):
             minLotSize = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-min-lot-size']/div[2]")
             label_minLotSize = float(get_label_of_element(minLotSize))
             
-            return label_contractSize, label_minLotSize
+            volume_step = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-lot-size-step']/div[2]")
+            label_volume_step = float(get_label_of_element(volume_step))
+
+            return label_contractSize, label_minLotSize, label_volume_step
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

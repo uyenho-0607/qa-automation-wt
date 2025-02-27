@@ -7,6 +7,7 @@ from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_trade.utils import toggle_radioButton, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
 from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, read_orderIDs_from_csv
 
+@allure.parent_suite("MT4 Membersite - Desktop - Asset - Bulk Close / Delete Order")
 
 @allure.epic("MT4 Desktop TS_aO - Asset OCT - Bulk Close / Delete Orders")
 
@@ -26,11 +27,12 @@ class TC_MT4_aO05():
         main_driver = self.driver
         
         # Get the class name dynamically
-
+        class_name = self.__class__.__name__
+        ffmpeg_process, screen_recording_file = start_screen_recording(class_name)
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
                 
             with allure.step("Enable OCT"):
                 toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
@@ -53,8 +55,7 @@ class TC_MT4_aO05():
                 order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type="history", section_name="Order History")
         
             with allure.step("Comparison on Order History and Pending Order table"):
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History",
-                                   df2=pending_order_df, name2="Pending Order")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=pending_order_df, name2="Pending Order")
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, order_history_df, group_by_order_no=True)

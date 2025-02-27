@@ -6,10 +6,11 @@ from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, modify_limit_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, append_orderIDs_to_csv
 
+@allure.parent_suite("MT4 Membersite - Desktop - Trade - Limit Order")
 
 @allure.epic("MT4 Desktop TS_aD - Limit")
 
-# Member Portal 
+# Member Portal
 class TC_MT4_aD01():
 
     @allure.title("TC_MT4_aD01")
@@ -34,12 +35,11 @@ class TC_MT4_aD01():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", testcaseID="TC01")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -97,8 +97,8 @@ class TC_MT4_aD01():
                     
             with allure.step("Verify if it is the same orderIDs"):
                 if original_orderID == updated_orderID:
-                    clear_orderIDs_csv(filename="MT4_Desktop_Limit.csv")
-                    append_orderIDs_to_csv(order_ids=updated_orderID, filename="MT4_Desktop_Limit.csv")
+                    clear_orderIDs_csv(filename="MT4_Desktop_Pending_Order.csv")
+                    append_orderIDs_to_csv(order_ids=updated_orderID, filename="MT4_Desktop_Pending_Order.csv")
                     assert True, "orderID are the same"
                 else:
                     assert False, f"Place orderID - {original_orderID} and Modified orderID - {updated_orderID} not matched"

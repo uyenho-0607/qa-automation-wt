@@ -3,9 +3,10 @@ import traceback
 from datetime import datetime
 
 from constants.helper.driver import delay
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import spinner_element, click_element, click_element_with_wait, find_list_of_elements_by_testid, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, get_label_of_element
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import find_list_of_elements_by_xpath, spinner_element, click_element, click_element_with_wait, find_list_of_elements_by_testid, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, get_label_of_element
+
 from common.desktop.module_trade.order_panel.op_general import get_table_body, get_table_headers
 
 
@@ -31,28 +32,28 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
+        spinner_element(driver)
+        
         # Open the calendar by clicking on the calendar button
         calendar_button = visibility_of_element_by_testid(driver, data_testid="calender-button-assets")
         click_element_with_wait(driver, element=calendar_button)
 
         # Find the next, previous, and year-month navigation buttons
-        next_btn = visibility_of_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__next-button')]")
+        btn_next = visibility_of_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__next-button')]")
 
-        prev_btn = visibility_of_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__prev-button')]")
+        btn_prev = visibility_of_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__prev-button')]")
 
         year_month = visibility_of_element_by_xpath(driver, "//button[@class='react-calendar__navigation__label']")
         
         # Navigate to the target start month
         while True:
             current_startMonth = datetime.strptime(year_month.text, "%B %Y")
-            print("current start month", current_startMonth)
             if current_startMonth == target_startMonth:
-                print("target start month", target_startMonth)
                 break
             elif current_startMonth < target_startMonth:
-                next_btn.click() # Move to the next month
+                btn_next.click() # Move to the next month
             else:
-                prev_btn.click()  # Move to the previous month
+                btn_prev.click()  # Move to the previous month
         
         # Select the start date from the calendar
         startDate_picker = visibility_of_element_by_xpath(driver, f"//div[starts-with(@class, 'react-calendar__month-view__days')]//button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{startDate}']")
@@ -61,14 +62,12 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
         # Navigate to the target end month
         while True:
             current_endMonth = datetime.strptime(year_month.text, "%B %Y")
-            print("current end month", current_endMonth)
             if current_endMonth == target_endMonth:
-                print("target end month", target_endMonth)
                 break
             elif current_endMonth < target_endMonth:
-                next_btn.click() # Move to the next month
+                btn_next.click() # Move to the next month
             else:
-                prev_btn.click()  # Move to the previous month
+                btn_prev.click()  # Move to the previous month
         
         # Select the end date from the calendar
         endDate_picker = visibility_of_element_by_xpath(driver, f"//div[starts-with(@class, 'react-calendar__month-view__days')]//button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{endDate}']")
@@ -157,6 +156,12 @@ def OH_closeDate(driver, startDate: str, endDate: str, target_startMonth: str, t
         
         # Extract all elements containing the "Close Date" values
         OH_closeDate_elements = find_list_of_elements_by_testid(driver, data_testid="asset-history-column-close-date")
+        if not OH_closeDate_elements:
+            # # Check if the table has any data
+            empty_message_elements = find_list_of_elements_by_xpath(driver, "//tbody[contains(@data-testid, '-list')]//div[@data-testid='empty-message']")
+            if empty_message_elements:
+                empty_message = empty_message_elements[0].text.strip()
+                assert False, f"Table is empty. Message: '{empty_message}'"
         
         # Iterate over each close date element
         for element in OH_closeDate_elements:
@@ -167,6 +172,7 @@ def OH_closeDate(driver, startDate: str, endDate: str, target_startMonth: str, t
             else:
                 attach_text(f"{table_date} is outside the datepicker range {date_content}", name=f"Order History Date: {table_date}")
                 assert False,  f"An exception occurred: {str(e)}\n{traceback.format_exc()}"
+
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

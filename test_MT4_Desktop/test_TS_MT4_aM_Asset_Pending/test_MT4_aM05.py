@@ -7,6 +7,7 @@ from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
+@allure.parent_suite("MT4 Membersite - Desktop - Asset - Modify / Delete Pending Order")
 
 @allure.epic("MT4 Desktop TS_aM - Asset - Modify / Delete Pending Order")
 
@@ -32,12 +33,11 @@ class TC_MT4_aM05():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -68,7 +68,7 @@ class TC_MT4_aM05():
                 menu_button(driver=main_driver, menu="assets")
 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Pending Order", row_number=[1])
+                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Asset Pending Order", row_number=[1])
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -77,7 +77,7 @@ class TC_MT4_aM05():
             """ Delete Pending Order """
 
             with allure.step("Order Panel: Pending Order - Click on Delete button"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close", delete_button=True)
+                close_delete_order(driver=main_driver, row_number=[1], order_action="close")
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
@@ -85,7 +85,7 @@ class TC_MT4_aM05():
             with allure.step("Retrieve the Order History data"):
                 _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
 
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Asset Pending Order", df2=order_history_df, name2="Order History")
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, snackbar_banner_df, order_history_df)

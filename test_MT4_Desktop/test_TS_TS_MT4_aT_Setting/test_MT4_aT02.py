@@ -6,6 +6,7 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_setting.utils import switch_account_type
 
+@allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
 @allure.epic("MT4 Desktop TS_aT - Setting")
 
@@ -24,12 +25,11 @@ class TC_MT4_aT02():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live") 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
                 
             with allure.step("Click on the 'Switch to Demo Account' tab"):
                 switch_account_type(driver=main_driver, account_type="demo")

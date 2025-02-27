@@ -108,9 +108,9 @@ def get_trade_snackbar_banner(driver):
             snackbar_msg.append(take_profit_match.group(1))
             success_message_headers.append("Take Profit")
 
-        close_btn = find_element_by_testid(driver, data_testid="notification-close-button")
-        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", close_btn)
-        trigger_click(driver, element=close_btn)
+        btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
+        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", btn_close)
+        trigger_click(driver, element=btn_close)
         
         # Create a DataFrame with the snackbar message details
         order_notification_message = pd.DataFrame([snackbar_msg], columns=success_message_headers)
@@ -169,9 +169,9 @@ def get_neg_snackbar_banner(driver):
         else:
             assert False, f"Invalid message header: {extracted_header}" if message_header else "Message header not found"
 
-        close_btn = find_element_by_testid(driver, data_testid="notification-close-button")
-        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", close_btn)
-        trigger_click(driver, element=close_btn)
+        btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
+        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", btn_close)
+        trigger_click(driver, element=btn_close)
         
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -221,9 +221,8 @@ def get_bulk_snackbar_banner(driver):
         if extracted_header not in valid_message_headers:
             raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
     
-        close_btn = find_element_by_testid(driver, data_testid="notification-close-button")
-        # driver.execute_script("arguments[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));", close_btn)
-        trigger_click(driver, element=close_btn)
+        btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
+        trigger_click(driver, element=btn_close)
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

@@ -6,6 +6,7 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, close_delete_order
 
+@allure.parent_suite("MT4 Membersite - Desktop - Others")
 
 @allure.epic("MT4 Desktop TS_aP - Others")
 
@@ -28,12 +29,11 @@ class TC_MT4_aP03():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live") 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
@@ -51,7 +51,7 @@ class TC_MT4_aP03():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Order Panel: Open Position - Click on Close to Partial close an order"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close", actions=[("increase", 5), ("decrease", 3)], trade_type="close-order", set_negMarket=True)
+                close_delete_order(driver=main_driver, row_number=[1], order_action="close", actions=[("increase", 3), ("decrease", 2)], trade_type="close-order", set_negMarket=True)
 
         finally:
             shutdown(main_driver)

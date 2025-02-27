@@ -1,8 +1,8 @@
-from common.desktop.module_trade.order_placing_window.opw_button_action import label_onePointEqual
-from constants.helper.element import clear_input_field, find_element_by_testid, javascript_click
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import clear_input_field, find_element_by_testid, javascript_click
 
+from common.desktop.module_trade.order_placing_window.opw_button_action import label_onePointEqual
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

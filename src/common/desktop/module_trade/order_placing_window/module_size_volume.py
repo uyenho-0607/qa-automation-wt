@@ -1,14 +1,13 @@
-import re
 import random
 from selenium.webdriver.common.by import By
 
-
-from common.desktop.module_trade.order_placing_window.opw_button_action import button_tradeModule
 from constants.helper.driver import delay
-from constants.helper.element import click_element, click_element_with_wait, get_label_of_element, visibility_of_element_by_testid, clear_input_field, find_element_by_testid, populate_element_with_wait
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
+from constants.helper.element import click_element, get_label_of_element, visibility_of_element_by_testid, clear_input_field, find_element_by_testid, populate_element_with_wait
+
 from common.desktop.module_trade.order_placing_window.module_fill_policy import fillPolicy_type
+from common.desktop.module_trade.order_placing_window.opw_button_action import button_tradeModule
 
 
 """
@@ -97,7 +96,7 @@ def swap_units_volume_conversion(driver, module_Type, target_state="volume"):
         delay(0.5)
 
         # Retrieve contract size and navigate to the trade module
-        contract_size, _ = button_tradeModule(driver, module_Type="specification")
+        contract_size, _, _ = button_tradeModule(driver, module_Type="specification")
         if not contract_size or contract_size <= 0:
             raise ValueError("Invalid contract size fetched")
         print("Contract Size:", contract_size)
@@ -165,9 +164,9 @@ def input_size_volume(driver, target_state="volume"):
                 
         # Determine state and value range based on 'swap' and 'desired_state'
         if state == "volume": # (swap to volume)
-            min_val, max_val = 1, 100
+            min_val, max_val = 1, 20 # MT5, else be 100
         else:  # If state is 'volume' (swap to units)
-            min_val, max_val = 1000, 10000
+            min_val, max_val = 10, 200
 
         # Randomly decide whether to generate an integer or a decimal within the specified range
         if random.choice([True, False]):
@@ -176,7 +175,9 @@ def input_size_volume(driver, target_state="volume"):
         else:
             # Generate a random decimal within the specified range, rounded to two decimal places
             random_value = round(random.uniform(min_val, max_val), 2)
-        print("random", random_value)
+            
+        print("random generated size/volume", random_value)
+        
         # Populate the input field with the random value
         populate_element_with_wait(driver, element=size_input, text=str(random_value))
         
@@ -218,6 +219,7 @@ def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = F
         # Extract the max value text and convert it to a float
         max_value_text = max_value_element.text.split()[1]  # Assuming the text is like "Max: 100.0"
         max_value = float(max_value_text)
+        print("max value", max_value)
                 
         # Determine the appropriate minimum value step based on the magnitude of max_value
         if max_value < 0.1:
@@ -228,12 +230,14 @@ def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = F
             min_value_step = 0.01  # Default to 0.01 step for larger values
 
         # Randomly decide whether to generate an integer or a decimal
-        if random.choice([True, False]) and max_value >= 1.0:  # Only generate integers if max_value >= 1.0
+        if random.choice([True, False]) and max_value > 1.0:  # Only generate integers if max_value >= 1.0
             # Generate a random integer between 1 and the retrieved maximum value
             random_value = random.randint(1, int(max_value))
         else:
             # Generate a random decimal between 0 and the retrieved maximum value with the appropriate step
             random_value = round(random.uniform(min_value_step, max_value), 2)
+
+        print("random value for partial close", random_value)
             
         partialClose_input = find_element_by_testid(driver, data_testid="close-order-input-volume")
         
@@ -250,7 +254,6 @@ def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = F
         # Find the submit button and click it to submit the partial close order
         action_button = find_element_by_testid(driver, data_testid="close-order-button-submit")
         click_element(element=action_button)
-        # click_element_with_wait(driver, element=action_button)
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -268,17 +271,18 @@ def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = F
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def verify_volume_minMax_buttons(driver, trade_type, actions: list, lot_size=None):
+def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_step=None):
     """
     This function simulates clicks on the min/max button for adjusting the trade volume size,
-    checks if the volume size is incremented or decremented correctly, and ensures the correct
-    final value based on the number of clicks and placeholder increment.
+    checks if the volume size is incremented or decremented correctly, considering the step's precision,
+    and ensures the correct final value based on the number of clicks and step increment.
 
     Arguments:
     - trade_type: The type of trade (e.g., 'trade', 'close-order').
     - actions: A list of tuples where each tuple contains (minMax, number_of_clicks). 
                'minMax' can be 'increase' or 'decrease'.
                'number_of_clicks' is the number of clicks to simulate for that action.
+    - size_volume_step: The step size for volume increments/decrements.
 
     Raises:
     - ValueError: If 'minMax' is neither 'increase' nor 'decrease'.
@@ -292,62 +296,74 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, lot_size=Non
         # Step 2: Short delay to ensure element visibility (if required)
         delay(0.5)
         
-        # Step 3: Locate the min/max button and volume input field
+        # Step 3: Locate the volume input field
         input_field = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume")
 
         # Step 4: Get the initial value of the input field and set it to 0.0 if empty
         initial_value_str = input_field.get_attribute("value")
         initial_value = float(initial_value_str) if initial_value_str.strip() else 0.0
-        print(f"{trade_type} value: ", initial_value)
         
-        if trade_type == "trade":
-            # Step 5: Get the placeholder value to determine the increment size
-            placeholder_value = input_field.get_attribute('placeholder')
-            increment = float(re.search(r'([\d\.]+)', placeholder_value).group(1))
+        # Step 5: Determine the decimal places based on size_volume_step
+        if size_volume_step is not None:
+            # Convert to a string to find decimal places
+            step_str = f"{size_volume_step:.10f}".rstrip('0').rstrip('.')
+            if '.' in step_str:
+                decimal_places = len(step_str.split('.')[1])
+            else:
+                decimal_places = 0
         else:
-            # Step 3: Locate the min/max button and volume input field
-            increment = lot_size
-            print("Specification - Lot Size / Volume: ", increment)
+            decimal_places = 0  # Default, though size_volume_step should be provided
+        
+        print(f"Specification - Lot Size / Volume Step: {size_volume_step} (Decimal places: {decimal_places})")
 
         # Step 6: Loop over the actions and perform clicks for each one
         for minMax, number_of_clicks in actions:
-            # Step 6.1: Locate the min/max button
             button_minMax = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume-{minMax}")
-            
+            initial_value_before_action = initial_value  # Save initial value before this action
+
             for i in range(number_of_clicks):
                 click_element(button_minMax)
                 
-                # Get the updated value after the click and set it to 0.0 if empty
+                # Get the updated value after the click
                 updated_value_str = input_field.get_attribute("value")
                 updated_value = float(updated_value_str) if updated_value_str.strip() else 0.0
-                print(f"Size - updated value after click {i+1}: {updated_value}")
+                print(f"Size - updated value after {minMax} click {i+1}: {updated_value}")
 
-                # Step 6.2: Verify that each increment/decrement matches the expected change
+                # Calculate expected value after this click
                 if minMax == "increase":
-                    difference = updated_value - initial_value
-                    assert abs(difference - increment) < 1e-6, f"Value did not increment by {increment} after click {i+1}. Difference: {difference:.6f}"
-                elif minMax == "decrease":
-                    difference = initial_value - updated_value
-                    assert abs(difference - increment) < 1e-6, f"Value did not decrement by {increment} after click {i+1}. Difference: {difference:.6f}"
+                    expected_value = initial_value + size_volume_step
                 else:
-                    raise ValueError("Invalid value for minMax. Must be 'increase' or 'decrease'.")
+                    expected_value = initial_value - size_volume_step
+                
+                # Round to the step's decimal places
+                expected_rounded = round(expected_value, decimal_places)
+                
+                # Verify the updated value matches the rounded expected value
+                assert abs(updated_value - expected_rounded) < 1e-6, (f"After {i+1} {minMax} click(s): Expected {expected_rounded}, got {updated_value}")
+                
+                initial_value = updated_value  # Update for next iteration
 
-                # Update initial_value to be the updated_value for the next iteration
-                initial_value = updated_value
-
-            # Final check: ensure total increment or decrement matches the expected value
+            # Final check after all clicks in this action
             final_value = float(input_field.get_attribute("value"))
-            expected_value = initial_value + (increment * number_of_clicks) if minMax == "increase" else initial_value - (increment * number_of_clicks)
             
-            # Assert if the final value doesn't match the expected value
-            assert abs(final_value - expected_value), f"Final value does not match expected value. Expected: {expected_value:.2f}, Got: {final_value:.2f}"
+            # Calculate total expected value for the action
+            if minMax == "increase":
+                total_expected = initial_value_before_action + (size_volume_step * number_of_clicks)
+            else:
+                total_expected = initial_value_before_action - (size_volume_step * number_of_clicks)
+            
+            total_expected_rounded = round(total_expected, decimal_places)
+            
+            assert abs(final_value - total_expected_rounded) < 1e-6, (
+                f"Final value mismatch after {number_of_clicks} {minMax} clicks: "
+                f"Expected {total_expected_rounded}, got {final_value}"
+            )
 
-            # Log the number of clicks and the final value
+            # Logging
             attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {number_of_clicks} times")
-            attach_text(f"{final_value:.2f}", name=f"Final value: {final_value:.2f}")
+            attach_text(f"{final_value:.{decimal_places}f}", name=f"Final value: {final_value:.{decimal_places}f}")
         
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """
@@ -365,7 +381,7 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, lot_size=Non
 def verify_button_behavior_at_min_max(driver, trade_type, lot_size):
     try:
         
-        # Step 1: Locate the input field for the current value
+        # Step 1: Locate the (Trade / Close) input field for the current value
         input_field = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume")
 
         # Step 2: Retrieve the current value from the input field

@@ -4,11 +4,11 @@ import pandas as pd
 from tabulate import tabulate
 
 from constants.helper.driver import delay
+from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import find_element_by_xpath, get_label_of_element
 
 from common.desktop.module_subMenu.utils import menu_button
-from constants.helper.screenshot import attach_text
 
 
 """
@@ -162,9 +162,6 @@ def asset_account_currency(driver):
         account_name = find_element_by_xpath(driver, "//div[@class='sc-1noy9f2-2 kohjey']")
         label_accountName = get_label_of_element(account_name)
 
-        # Extract the text after "LIVE" or "DEMO"
-        # match = re.search(r"(?<=\b(LIVE|DEMO)\s)(.*)", label_accountName).group(2)
-
         # Extract account type (LIVE or DEMO) and the name after it
         match = re.search(r"(?<=\b(LIVE|DEMO)\s)(.*)", label_accountName)
         if match:
@@ -188,6 +185,29 @@ def asset_account_currency(driver):
         label_balance = get_label_of_element(balance)
         print(f"Account Balance: {label_balance}")
         
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+        
+        
+        
+         
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+    
+def get_server_local_time(driver):
+    try:
+        # Find the time label element by XPath
+        time_label_element = find_element_by_xpath(driver, "//div[@class='sc-kzsad3-0 eJBKdL']")
+        
+        # Extract the full text (e.g., "Server Time : 2025-02-06 08:56:23") and Split the string on the time part (after the colon and space)
+        date_time_text = get_label_of_element(element=time_label_element).split(" : ")[1]
+        # print("Date time label", date_time_text)
+        
+        return date_time_text
+    
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

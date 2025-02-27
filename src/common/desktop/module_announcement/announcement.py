@@ -1,7 +1,7 @@
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
-from constants.helper.element import click_element, spinner_element, visibility_of_element_by_testid, find_element_by_testid
 from constants.helper.error_handler import handle_exception
+from constants.helper.element import click_element, spinner_element, visibility_of_element_by_testid, find_element_by_testid
 
 
 """
@@ -38,7 +38,6 @@ def modal_announcement(driver, button: str = "got-it"):
         else:
             # Handle any other exceptions that occur during the execution
             handle_exception(driver, e)
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

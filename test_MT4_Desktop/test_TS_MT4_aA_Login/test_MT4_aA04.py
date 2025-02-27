@@ -3,10 +3,11 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 
+@allure.parent_suite("MT4 Membersite - Desktop - Login")
 
 @allure.epic("MT4 Desktop TS_aA - Login")
 
-# Member Portal - Login via Demo CMS account
+# Member Portal- Login via Demo CMS account
 class TC_MT4_aA04():
 
     @allure.title("TC_MT4_aA04")
@@ -21,7 +22,6 @@ class TC_MT4_aA04():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             with allure.step("Login to Web Trader Membersite"):

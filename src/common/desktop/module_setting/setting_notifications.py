@@ -1,12 +1,9 @@
 
-from constants.helper.driver import access_url, delay, url_changes
 from constants.helper.error_handler import handle_exception
+from constants.helper.driver import access_url, get_current_url
 
-from constants.helper.element import wait_for_text_to_be_present_in_element_by_xpath
-
-from common.desktop.module_trade.order_placing_window.module_OCT import toggle_radioButton
 from common.desktop.module_notification.noti_system import noti_newDevice
-
+from common.desktop.module_trade.order_placing_window.module_OCT import toggle_radioButton
 from common.desktop.module_setting.setting_changePwd import perform_login
 from common.desktop.module_setting.setting_general import button_setting
 
@@ -28,8 +25,8 @@ def notification_settings_modal(driver, category: str, desired_state: str, login
         # Log the user out
         button_setting(driver, setting_option="logout")
     
-        # Check for URL change after logging out
-        _, current_url = url_changes(driver)
+        # Get the current URL after logout
+        current_url = get_current_url(driver)
         
         # Assert that the URL should change to the login page
         if "web/login" in current_url:

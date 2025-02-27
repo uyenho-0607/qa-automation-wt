@@ -1,7 +1,7 @@
 import random
 
-from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
+from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid
 
 

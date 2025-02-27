@@ -4,8 +4,9 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_markets.utils import news_section
+from common.desktop.module_markets.utils import market_select_symbols, market_watchlist
 
+@allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
 @allure.epic("MT4 Desktop TS_aR - Markets")
 
@@ -16,7 +17,10 @@ class TC_MT4_aR06():
 
     @allure.description(
         """
-        Member able to redirect to the News page upon clicking on News content
+        Member able to redirect to the correct page upon clicking on [Symbols]
+        - My Trade
+        - Top Picks
+        - Top Gainer / Top Loser
         """
         )
     
@@ -24,16 +28,27 @@ class TC_MT4_aR06():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
-                
-            with allure.step("News"):
-                news_section(driver=main_driver)
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
+            with allure.step("My Trade - Click on [Symbols] and redirect to Trade screen"):
+                market_select_symbols(driver=main_driver, option_name="My Trade")
+                
+            with allure.step("Top Picks - Click on [Symbols] and redirect to Trade screen - Top Picks tab pre-selected"):
+                market_select_symbols(driver=main_driver, option_name="Top Picks")
+
+            with allure.step("Top Gainer - Click on [Symbols] and redirect to Trade screen - Top Gainer tab pre-selected"):
+                market_select_symbols(driver=main_driver, option_name="Top Gainer")
+            
+            with allure.step("Top Loser - Click on [Symbols] and redirect to Trade screen - Top Loser tab pre-selected"):
+                market_select_symbols(driver=main_driver, option_name="Top Loser")
+
+            with allure.step("Market Watchlist"):
+                market_watchlist(driver=main_driver)
+                
         finally:
             shutdown(main_driver)
             

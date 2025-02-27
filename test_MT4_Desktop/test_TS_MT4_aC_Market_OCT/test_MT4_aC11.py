@@ -9,10 +9,11 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_market_o
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
+@allure.parent_suite("MT4 Membersite - Desktop - Trade - Market Order")
 
 @allure.epic("MT4 Desktop TS_aC - Market OCT")
 
-# Member Portal 
+# Member Portal
 class TC_MT4_aC11():
 
     @allure.title("TC_MT4_aC11")
@@ -34,12 +35,11 @@ class TC_MT4_aC11():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
         
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live")
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
