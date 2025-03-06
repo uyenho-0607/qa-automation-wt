@@ -8,12 +8,12 @@ from common.desktop.module_setting.utils import link_account
 
 @allure.parent_suite("MT5 Membersite - Desktop - Setting")
 
-@allure.epic("MT5 Desktop TS_aV - Setting")
+@allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV05():
+class TC_mt5_av05():
 
-    @allure.title("TC_MT5_aV05")
+    @allure.title("tc_mt5_av05")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT5_aV05():
         """
         )
     
-    def test_TC05(self, chromeDriver):
+    def test_tc05(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

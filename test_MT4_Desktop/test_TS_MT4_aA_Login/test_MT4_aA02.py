@@ -6,12 +6,12 @@ from common.desktop.module_setting.utils import button_setting
 
 @allure.parent_suite("MT4 Membersite - Desktop - Login")
 
-@allure.epic("MT4 Desktop TS_aA - Login")
+@allure.epic("MT4 Desktop ts_aa - Login")
 
 # Member Portal
-class TC_MT4_aA02():
+class TC_mt4_aa02():
 
-    @allure.title("TC_MT4_aA02")
+    @allure.title("tc_mt4_aa02")
 
     @allure.description(
         """
@@ -19,7 +19,7 @@ class TC_MT4_aA02():
         """
         )
     
-    def test_TC02(self, chromeDriver):
+    def test_tc02(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

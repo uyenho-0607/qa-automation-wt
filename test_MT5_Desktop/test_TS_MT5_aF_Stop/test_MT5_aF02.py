@@ -10,12 +10,12 @@ from data_config.utils import compare_dataframes, process_and_print_data, append
 
 @allure.parent_suite("MT5 Membersite - Desktop - Trade - Stop Order")
 
-@allure.epic("MT5 Desktop TS_aF- Stop")
+@allure.epic("MT5 Desktop ts_af- Stop")
 
 # Member Portal
-class TC_MT5_aF02():
+class TC_mt5_af02():
 
-    @allure.title("TC_MT5_aF02")
+    @allure.title("tc_mt5_af02")
     
     @allure.description(
         """
@@ -33,7 +33,7 @@ class TC_MT5_aF02():
         """
     )
         
-    def test_TC02(self, chromeDriver):
+    def test_tc02(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

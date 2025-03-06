@@ -6,14 +6,15 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_trade.order_panel.utils import update_column_visibility
 
+
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
-@allure.epic("MT4 Desktop TS_aP - Others")
+@allure.epic("MT4 Desktop ts_ap - Others")
 
 # Member Portal
-class TC_MT4_aP11():
+class TC_mt4_ap11():
 
-    @allure.title("TC_MT4_aP11")
+    @allure.title("tc_mt4_ap11")
 
     @allure.description(
         """
@@ -21,7 +22,7 @@ class TC_MT4_aP11():
         """
         )
     
-    def test_TC11(self, chromeDriver):
+    def test_tc11(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

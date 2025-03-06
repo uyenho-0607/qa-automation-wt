@@ -9,12 +9,12 @@ from common.desktop.module_markets.utils import market_redirect_arrow, market_wa
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
-@allure.epic("MT4 Desktop TS_aR - Markets")
+@allure.epic("MT4 Desktop ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR06():
+class TC_mt4_ar06():
 
-    @allure.title("TC_MT4_aR06")
+    @allure.title("tc_mt4_ar06")
 
     @allure.description(
         """
@@ -27,7 +27,7 @@ class TC_MT4_aR06():
         """
         )
     
-    def test_TC06(self, chromeDriver):
+    def test_tc06(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -50,7 +50,7 @@ class TC_MT4_aR06():
                 market_redirect_arrow(driver=main_driver, option_name="Top Loser")
                 
             with allure.step("Signal - Click on [>] and redirect to Signal screen - Fav Signal / Signal List tab pre-selected"):
-                market_redirect_arrow(driver=main_driver, option_name="Signald")
+                market_redirect_arrow(driver=main_driver, option_name="Signal")
                 
             with allure.step("News - Click on [>] and redirect to News screen"):
                 market_redirect_arrow(driver=main_driver, option_name="News")

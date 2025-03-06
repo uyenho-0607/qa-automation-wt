@@ -8,12 +8,12 @@ from common.desktop.module_symbol.utils import clear_search_history
 
 @allure.parent_suite("MT5 Membersite - Desktop - Markets")
 
-@allure.epic("MT5 Desktop TS_aT - Markets")
+@allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT08():
+class TC_mt5_at08():
 
-    @allure.title("TC_MT5_aT08")
+    @allure.title("tc_mt5_at08")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT5_aT08():
         """
         )
     
-    def test_TC08(self, chromeDriver):
+    def test_tc08(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

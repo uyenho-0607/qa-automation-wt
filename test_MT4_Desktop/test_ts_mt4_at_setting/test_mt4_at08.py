@@ -8,12 +8,12 @@ from common.desktop.module_setting.utils import open_demo_account_screen
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
-@allure.epic("MT4 Desktop TS_aT - Setting")
+@allure.epic("MT4 Desktop ts_at - Setting")
 
 # Member Portal
-class TC_MT4_aT08():
+class TC_mt4_at08():
 
-    @allure.title("TC_MT4_aT08")
+    @allure.title("tc_mt4_at08")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT4_aT08():
         """
         )
     
-    def test_TC08(self, chromeDriver):
+    def test_tc08(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

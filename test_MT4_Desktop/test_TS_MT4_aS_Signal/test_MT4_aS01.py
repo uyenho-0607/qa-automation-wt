@@ -9,12 +9,12 @@ from common.desktop.module_signal.signal import signal_search_feature
 
 @allure.parent_suite("MT4 Membersite - Desktop - Signal")
 
-@allure.epic("MT4 Desktop TS_aS - Signal")
+@allure.epic("MT4 Desktop ts_as - Signal")
 
 # Member Portal
-class TC_MT4_aS01():
+class TC_mt4_as01():
 
-    @allure.title("TC_MT4_aS01")
+    @allure.title("tc_mt4_as01")
 
     @allure.description(
         """
@@ -24,7 +24,7 @@ class TC_MT4_aS01():
         """
         )
     
-    def test_TC01(self, chromeDriver):
+    def test_tc01(self, chromeDriver):
 
         self.driver = chromeDriver
         main_driver = self.driver

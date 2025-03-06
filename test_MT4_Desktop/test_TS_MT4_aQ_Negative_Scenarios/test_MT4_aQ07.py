@@ -7,12 +7,12 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_or
 
 @allure.parent_suite("MT4 Membersite - Desktop - Negative Scenarios")
 
-@allure.epic("MT4 Desktop TS_aQ - Negative Scenarios")
+@allure.epic("MT4 Desktop ts_aq - Negative Scenarios")
 
 # Member Portal
-class TC_MT4_aQ07():
+class TC_mt4_aq07():
 
-    @allure.title("TC_MT4_aQ07")
+    @allure.title("tc_mt4_aq07")
 
     @allure.description(
         """
@@ -23,7 +23,7 @@ class TC_MT4_aQ07():
         """
         )
     
-    def test_TC07(self, chromeDriver):
+    def test_tc07(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

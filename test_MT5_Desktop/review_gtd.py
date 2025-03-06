@@ -14,7 +14,7 @@ from data_config.utils import read_orderIDs_from_csv
 # Member Portal
 class TC_aX02():
     
-    @allure.title("TC_MT4_aX")
+    @allure.title("tc_mt4_ax")
 
     @allure.description(
         """

@@ -28,7 +28,7 @@ def decrypt_and_print(encrypted_data):
 # Encrypting usernames and storing encrypted values
 print("\nEncrypting Usernames:")
 encrypted_usernames = []
-usernames = ["909131"] # MetatraderID
+usernames = ["9093131"] # MetatraderID
 for username in usernames:
     encrypted_username = encrypt_and_print(username)
     encrypted_usernames.append(encrypted_username)
@@ -38,7 +38,7 @@ for username in usernames:
 # Encrypting passwords and storing encrypted values
 print("\nEncrypting Passwords:")
 encrypted_passwords = []
-passwords = ["Asd1232"] # Password
+passwords = ["Asd123"] # Password
 for password in passwords:
     encrypted_password = encrypt_and_print(password)
     encrypted_passwords.append(encrypted_password)

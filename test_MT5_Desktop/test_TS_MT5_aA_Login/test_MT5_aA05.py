@@ -5,12 +5,12 @@ from common.desktop.module_login.utils import login_wt
 
 @allure.parent_suite("MT5 Membersite - Desktop - Login")
 
-@allure.epic("MT5 Desktop TS_aA - Login")
+@allure.epic("MT5 Desktop ts_aa - Login")
 
 # Member Portal
-class TC_MT5_aA05():
+class TC_mt5_aa05():
                
-    @allure.title("TC_MT5_aA05")
+    @allure.title("tc_mt5_aa05")
 
     @allure.description(
         """
@@ -19,7 +19,7 @@ class TC_MT5_aA05():
         """
         )
     
-    def test_TC05(self, chromeDriver):
+    def test_tc05(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

@@ -8,12 +8,12 @@ from common.desktop.module_setting.utils import notification_settings_modal
 
 @allure.parent_suite("MT5 Membersite - Desktop - Setting")
 
-@allure.epic("MT5 Desktop TS_aV - Setting")
+@allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV11():
+class TC_mt5_av11():
 
-    @allure.title("TC_MT5_aV11")
+    @allure.title("tc_mt5_av11")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT5_aV11():
         """
         )
     
-    def test_TC11(self, chromeDriver):
+    def test_tc11(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

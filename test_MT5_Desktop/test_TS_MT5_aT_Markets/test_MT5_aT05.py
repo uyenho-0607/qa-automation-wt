@@ -11,12 +11,12 @@ from common.desktop.module_markets.utils import myTrade_order
 
 @allure.parent_suite("MT5 Membersite - Desktop - Markets")
 
-@allure.epic("MT5 Desktop TS_aT - Markets")
+@allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT05():
+class TC_mt5_at05():
 
-    @allure.title("TC_MT5_aT05")
+    @allure.title("tc_mt5_at05")
 
     @allure.description(
         """
@@ -24,7 +24,7 @@ class TC_MT5_aT05():
         """
         )
     
-    def test_TC05(self, chromeDriver):
+    def test_tc05(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

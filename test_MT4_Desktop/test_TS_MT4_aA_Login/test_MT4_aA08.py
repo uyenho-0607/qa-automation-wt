@@ -6,12 +6,12 @@ from common.desktop.module_login.webTrader_login import forgot_password
 
 @allure.parent_suite("MT4 Membersite - Desktop - Login")
 
-@allure.epic("MT4 Desktop TS_aA - Login")
+@allure.epic("MT4 Desktop ts_aa - Login")
 
 # Member Portal
-class TC_MT4_aA08():
+class TC_mt4_aa08():
 
-    @allure.title("TC_MT4_aA08")
+    @allure.title("tc_mt4_aa08")
 
     @allure.description(
         """
@@ -19,7 +19,7 @@ class TC_MT4_aA08():
         """
         )
     
-    def test_TC08(self, chromeDriver):
+    def test_tc08(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

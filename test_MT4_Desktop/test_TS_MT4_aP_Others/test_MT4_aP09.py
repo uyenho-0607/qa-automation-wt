@@ -10,12 +10,12 @@ from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
-@allure.epic("MT4 Desktop TS_aP - Others")
+@allure.epic("MT4 Desktop ts_ap - Others")
 
 # Member Portal
-class TC_MT4_aP09():
+class TC_mt4_ap09():
 
-    @allure.title("TC_MT4_aP09")
+    @allure.title("tc_mt4_ap09")
 
     @allure.description(
         """
@@ -23,7 +23,7 @@ class TC_MT4_aP09():
         """
         )
     
-    def test_TC09(self, chromeDriver):
+    def test_tc09(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

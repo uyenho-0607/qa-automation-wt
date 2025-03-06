@@ -4,24 +4,25 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.setting_accountDetails import sum_by_currency
+from common.desktop.module_education.education import education_video
 
-@allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
-@allure.epic("MT4 Desktop TS_aT - Setting")
+@allure.parent_suite("MT5 Membersite - Desktop - Education Video")
+
+@allure.epic("MT5 Desktop ts_aw - Education Video")
 
 # Member Portal
-class TC_MT4_aT01():
+class TC_mt5_aw01():
 
-    @allure.title("TC_MT4_aT01")
+    @allure.title("tc_mt5_aw01")
 
     @allure.description(
         """
-        Ensure the total balance display correctly
+        Ensure the video can be played
         """
         )
     
-    def test_TC01(self, chromeDriver):
+    def test_tc01(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -29,12 +30,12 @@ class TC_MT4_aT01():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
                 
-            with allure.step("Verify the total balance label account is correct"):
-                sum_by_currency(driver=main_driver)
+            with allure.step("Verify the video is playing"):
+                education_video(driver=main_driver)
 
-        finally:
+        finally:          
             shutdown(main_driver)
-            
+
             attach_session_video_to_allure(session_id)

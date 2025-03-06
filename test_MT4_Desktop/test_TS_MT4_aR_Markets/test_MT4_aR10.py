@@ -9,12 +9,12 @@ from common.desktop.module_markets.utils import news_section
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
-@allure.epic("MT4 Desktop TS_aR - Markets")
+@allure.epic("MT4 Desktop ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR10():
+class TC_mt4_ar10():
 
-    @allure.title("TC_MT4_aR10")
+    @allure.title("tc_mt4_ar10")
 
     @allure.description(
         """
@@ -22,13 +22,11 @@ class TC_MT4_aR10():
         """
         )
     
-    def test_TC10(self, chromeDriver):
+    def test_tc10(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
- 
-        # Get the class name dynamically
-        class_name = self.__class__.__name__
-        ffmpeg_process, screen_recording_file = start_screen_recording(class_name)
+        session_id = main_driver.session_id
+
         
         try:
             

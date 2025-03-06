@@ -4,24 +4,24 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import switch_account_type
+from common.desktop.module_setting.setting_linked_devices import linked_devices_modal
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
-@allure.epic("MT4 Desktop TS_aT - Setting")
+@allure.epic("MT4 Desktop ts_at - Setting")
 
 # Member Portal
-class TC_MT4_aT03():
+class TC_mt4_at12():
 
-    @allure.title("TC_MT4_aT03")
+    @allure.title("tc_mt4_at12")
 
     @allure.description(
         """
-        Member able to switch account (Live)
+        Linked Devices - Validate system can terminate all/ individual session
         """
         )
     
-    def test_TC03(self, chromeDriver):
+    def test_tc12(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -29,11 +29,11 @@ class TC_MT4_aT03():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo") 
-                
-            with allure.step("Click on the 'Switch to Live Account' tab"):
-                switch_account_type(driver=main_driver, account_type="live")
-                
+               login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+
+            with allure.step("Enable Linked Device OCT"):
+                linked_devices_modal(driver=main_driver, set_terminate=False)
+
         finally:
             shutdown(main_driver)
             

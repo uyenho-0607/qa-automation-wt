@@ -5,22 +5,22 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_readAccess.utils import read_only_access
 
-@allure.parent_suite("MT4 Membersite - Desktop - Others")
 
-@allure.epic("MT4 Desktop TS_aP - Others")
+@allure.parent_suite("MT5 Membersite - Desktop - Others")
+
+@allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT4_aP97():
+class TC_mt5_ar13():
 
-    @allure.title("TC_MT4_aP97")
-
+    @allure.title("tc_mt5_ar13")
     @allure.description(
         """
         Member unable to place trade with Read Only Access enable
         """
         )
     
-    def test_TC97(self, chromeDriver):
+    def test_tc13(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -35,8 +35,6 @@ class TC_MT4_aP97():
 
             with allure.step("Asset page"):
                 read_only_access(driver=main_driver)
-
-
 
         finally:
             shutdown(main_driver)

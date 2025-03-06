@@ -8,12 +8,12 @@ from common.desktop.module_setting.setting_accountDetails import sum_by_currency
 
 @allure.parent_suite("MT5 Membersite - Desktop - Setting")
 
-@allure.epic("MT5 Desktop TS_aV - Setting")
+@allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV01():
+class TC_mt5_av01():
 
-    @allure.title("TC_MT5_aV01")
+    @allure.title("tc_mt5_av01")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT5_aV01():
         """
         )
     
-    def test_TC01(self, chromeDriver):
+    def test_tc01(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

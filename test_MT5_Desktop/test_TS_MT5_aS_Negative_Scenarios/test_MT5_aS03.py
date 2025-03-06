@@ -7,12 +7,12 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_oct_mark
 
 @allure.parent_suite("MT5 Membersite - Desktop - Negative Scenarios")
 
-@allure.epic("MT5 Desktop TS_aS - Negative Scenarios")
+@allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS03():
+class TC_mt5_as03():
 
-    @allure.title("TC_MT5_aS03")
+    @allure.title("tc_mt5_as03")
 
     @allure.description(
         """
@@ -23,7 +23,7 @@ class TC_MT5_aS03():
         """
         )
 
-    def test_TC03(self, chromeDriver):
+    def test_tc03(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

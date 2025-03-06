@@ -9,22 +9,20 @@ from common.desktop.module_login.utils import login_wt
 
 @allure.parent_suite("MT5 Membersite - Desktop - Markets")
 
-@allure.epic("MT5 Desktop TS_aT - Markets")
+@allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT03():
+class TC_mt5_at03():
 
-    @allure.title("TC_MT5_aT03")
+    @allure.title("tc_mt5_at03")
 
     @allure.description(
         """
-        Member able to 
-        - verify the login pre-selected tab
-        - fav or unfav symbol for each of the section
+        Member able to fav or unfav symbol for each of the section
         """
         )
     
-    def test_TC03(self, chromeDriver):
+    def test_tc03(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

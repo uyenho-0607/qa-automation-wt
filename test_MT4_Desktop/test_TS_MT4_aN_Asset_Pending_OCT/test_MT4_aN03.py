@@ -9,12 +9,12 @@ from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT4 Membersite - Desktop - Asset - Modify / Delete Pending Order")
 
-@allure.epic("MT4 Desktop TS_aN - Asset - Modify / Delete Pending Order OCT")
+@allure.epic("MT4 Desktop ts_an - Asset - Modify / Delete Pending Order OCT")
 
 # Member Portal
-class TC_MT4_aN03():
+class TC_mt4_an03():
  
-    @allure.title("TC_MT4_aN03")
+    @allure.title("tc_mt4_an03")
 
     @allure.description(
         """
@@ -35,7 +35,7 @@ class TC_MT4_aN03():
         """
     )
     
-    def test_TC03(self, chromeDriver):
+    def test_tc03(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

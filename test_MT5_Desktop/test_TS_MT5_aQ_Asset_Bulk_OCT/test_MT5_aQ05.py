@@ -9,12 +9,12 @@ from data_config.utils import compare_dataframes, process_and_print_data, clear_
 
 @allure.parent_suite("MT5 Membersite - Desktop - Asset - Bulk Close / Delete Order")
 
-@allure.epic("MT5 Desktop TS_aQ - Asset OCT - Bulk Close / Delete Orders")
+@allure.epic("MT5 Desktop ts_aq - Asset OCT - Bulk Close / Delete Orders")
 
 # Member Portal
-class TC_MT5_aQ05():
+class TC_mt5_aq05():
 
-    @allure.title("TC_MT5_aQ05")
+    @allure.title("tc_mt5_aq05")
 
     @allure.description(
         """
@@ -22,7 +22,7 @@ class TC_MT5_aQ05():
         """
         )
     
-    def test_TC05(self, chromeDriver):
+    def test_tc05(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         

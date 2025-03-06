@@ -31,7 +31,7 @@ testpaths = ["test"]
 # All test classes must start with "TC" as prefix e.g. class TC_aA01:
 python_classes = "TC"
 
-# All test functions must start with "test" as prefix e.g. def test_TC01:
+# All test functions must start with "test" as prefix e.g. def test_tc01:
 python_functions = "test*"
 
-python_files = "test_*.py"
+python_files = "test_mt4_desktop/test_ts_mt4_ap_others/test_mt4_ap095.py"

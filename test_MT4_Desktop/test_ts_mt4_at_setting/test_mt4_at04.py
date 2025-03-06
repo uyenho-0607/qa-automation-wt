@@ -4,24 +4,24 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import switch_account_type
+from common.desktop.module_setting.utils import button_theme
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
-@allure.epic("MT4 Desktop TS_aT - Setting")
+@allure.epic("MT4 Desktop ts_at - Setting")
 
 # Member Portal
-class TC_MT4_aT02():
+class TC_mt4_at04():
 
-    @allure.title("TC_MT4_aT02")
+    @allure.title("tc_mt4_at04")
 
     @allure.description(
         """
-        Member able to switch account (Demo)
+        Switch theme
         """
         )
     
-    def test_TC02(self, chromeDriver):
+    def test_tc04(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -31,9 +31,9 @@ class TC_MT4_aT02():
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
                 
-            with allure.step("Click on the 'Switch to Demo Account' tab"):
-                switch_account_type(driver=main_driver, account_type="demo")
-                
+            with allure.step("Switch theme"):
+                button_theme(driver=main_driver)
+
         finally:
             shutdown(main_driver)
             

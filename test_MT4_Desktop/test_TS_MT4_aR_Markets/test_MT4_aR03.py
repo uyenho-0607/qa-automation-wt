@@ -9,12 +9,12 @@ from common.desktop.module_markets.trade_watchlist import toggle_symbol_favorite
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
-@allure.epic("MT4 Desktop TS_aR - Markets")
+@allure.epic("MT4 Desktop ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR03():
+class TC_mt4_ar03():
 
-    @allure.title("TC_MT4_aR03")
+    @allure.title("tc_mt4_ar03")
 
     @allure.description(
         """
@@ -22,7 +22,7 @@ class TC_MT4_aR03():
         """
         )
     
-    def test_TC03(self, chromeDriver):
+    def test_tc03(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

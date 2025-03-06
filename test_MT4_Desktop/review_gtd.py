@@ -11,12 +11,12 @@ from data_config.utils import read_orderIDs_from_csv
 
 @allure.parent_suite("MT4 Membersite - Pending Order Review")
 
-@allure.epic("MT4 Desktop TS_aU - Pending Order Review")
+@allure.epic("MT4 Desktop ts_au - Pending Order Review")
 
 # Member Portal
 class TC_aD02():
 
-    @allure.title("TC_MT4_aD")
+    @allure.title("tc_mt4_ad")
 
     @allure.description(
         """

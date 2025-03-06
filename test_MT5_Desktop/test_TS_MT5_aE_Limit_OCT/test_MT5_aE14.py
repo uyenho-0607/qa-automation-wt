@@ -10,12 +10,12 @@ from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT5 Membersite - Desktop - Trade - Limit Order")
 
-@allure.epic("MT5 Desktop TS_aE - Limit OCT")
+@allure.epic("MT5 Desktop ts_ae - Limit OCT")
 
 # Member Portal
-class TC_MT5_aE14():
+class TC_mt5_ae14():
 
-    @allure.title("TC_MT5_aE14")
+    @allure.title("tc_mt5_ae14")
     
     @allure.description(
         """
@@ -34,7 +34,7 @@ class TC_MT5_aE14():
         """
     )
     
-    def test_TC14(self, chromeDriver):
+    def test_tc14(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

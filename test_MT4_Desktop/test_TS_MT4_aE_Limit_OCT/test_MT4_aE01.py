@@ -8,12 +8,12 @@ from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT4 Membersite - Desktop - Trade - Limit Order")
 
-@allure.epic("MT4 Desktop TS_aE - Limit OCT")
+@allure.epic("MT4 Desktop ts_ae - Limit OCT")
 
 # Member Portal
-class TC_MT4_aE01():
+class TC_mt4_ae01():
 
-    @allure.title("TC_MT4_aE01")
+    @allure.title("tc_mt4_ae01")
 
     @allure.description(
         """
@@ -31,7 +31,7 @@ class TC_MT4_aE01():
         """
     )
     
-    def test_TC01(self, chromeDriver):
+    def test_tc01(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

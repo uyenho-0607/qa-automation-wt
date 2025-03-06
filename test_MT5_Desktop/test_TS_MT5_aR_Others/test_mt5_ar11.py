@@ -1,0 +1,49 @@
+import allure
+
+
+from constants.helper.driver import shutdown
+from constants.helper.screenshot import attach_session_video_to_allure
+from common.desktop.module_login.utils import login_wt
+from common.desktop.module_trade.order_panel.utils import update_column_visibility
+
+
+@allure.parent_suite("MT5 Membersite - Desktop - Others")
+
+@allure.epic("MT5 Desktop ts_ar - Others")
+
+# Member Portal
+class TC_mt5_ar11():
+
+    @allure.title("tc_mt5_ar11")
+
+    @allure.description(
+        """
+        Member able to update the column visibility with the table header updated
+        """
+        )
+    
+    def test_tc11(self, chromeDriver):
+        self.driver = chromeDriver
+        main_driver = self.driver
+        session_id = main_driver.session_id
+        
+        try:
+            
+            with allure.step("Login to Web Trader Membersite"):
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC01")
+
+            with allure.step("Validate Column Visibility from Trade to Asset"):
+                update_column_visibility(driver=main_driver, tab_order_type="open-positions")
+                update_column_visibility(driver=main_driver, tab_order_type="pending-orders")
+                update_column_visibility(driver=main_driver, tab_order_type="history")
+                
+            with allure.step("Validate Column Visibility from Asset to Trade"):
+                update_column_visibility(driver=main_driver, tab_order_type="open-positions", set_menu=True)
+                update_column_visibility(driver=main_driver, tab_order_type="pending-orders", set_menu=True)
+                update_column_visibility(driver=main_driver, tab_order_type="history", set_menu=True)
+
+        finally:
+            shutdown(main_driver)
+            
+            attach_session_video_to_allure(session_id)
+

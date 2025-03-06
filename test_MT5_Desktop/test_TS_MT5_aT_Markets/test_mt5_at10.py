@@ -7,33 +7,30 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_markets.announcements import announcement_validation
 
 
-@allure.parent_suite("MT4 Membersite - Desktop - Markets")
+@allure.parent_suite("MT5 Membersite - Desktop - Markets")
 
-@allure.epic("MT4 Desktop TS_aR - Markets")
+@allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT4_aR10():
+class TC_mt5_at10():
 
-    @allure.title("TC_MT4_aR10")
+    @allure.title("tc_mt5_at10")
 
     @allure.description(
         """
-        Member able to redirect to the News page upon clicking on News content
+        Announcement Validation
         """
         )
     
-    def test_TC10(self, chromeDriver):
+    def test_tc10(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
- 
-        # Get the class name dynamically
-        class_name = self.__class__.__name__
-        ffmpeg_process, screen_recording_file = start_screen_recording(class_name)
-        
+        session_id = main_driver.session_id
+
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
                 
             with allure.step("Announcement"):
                 announcement_validation(driver=main_driver)

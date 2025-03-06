@@ -8,12 +8,12 @@ from common.desktop.module_trade.utils import toggle_radioButton, swap_units_vol
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
-@allure.epic("MT4 Desktop TS_aP - Others")
+@allure.epic("MT4 Desktop ts_ap - Others")
 
 # Member Portal
-class TC_MT4_aP02():
+class TC_mt4_ap02():
 
-    @allure.title("TC_MT4_aP02")
+    @allure.title("tc_mt4_ap02")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT4_aP02():
         """
         )
     
-    def test_TC02(self, chromeDriver):
+    def test_tc02(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

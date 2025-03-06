@@ -6,14 +6,15 @@ from constants.helper.screenshot import attach_session_video_to_allure
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_signal.signal import express_interest
 
+
 @allure.parent_suite("MT5 Membersite - Desktop - Signal")
 
-@allure.epic("MT5 Desktop TS_aU - Signal")
+@allure.epic("MT5 Desktop ts_au - Signal")
 
 # Member Portal
-class TC_MT5_aU02():
+class TC_mt5_au03():
 
-    @allure.title("TC_MT5_aU02")
+    @allure.title("tc_mt5_au03")
 
     @allure.description(
         """
@@ -21,7 +22,7 @@ class TC_MT5_aU02():
         """
         )
     
-    def test_TC02(self, chromeDriver):
+    def test_tc03(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

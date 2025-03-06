@@ -7,12 +7,12 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_market_o
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
-@allure.epic("MT4 Desktop TS_aP - Others")
+@allure.epic("MT4 Desktop ts_ap - Others")
 
 # Member Portal
-class TC_MT4_aP05():
+class TC_mt4_ap05():
 
-    @allure.title("TC_MT4_aP05")
+    @allure.title("tc_mt4_ap05")
 
     @allure.description(
         """
@@ -22,7 +22,7 @@ class TC_MT4_aP05():
         """
         )
     
-    def test_TC05(self, chromeDriver):
+    def test_tc05(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

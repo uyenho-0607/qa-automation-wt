@@ -4,24 +4,25 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import button_theme
+from common.desktop.module_education.education import education_video, video_redirection
 
-@allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
-@allure.epic("MT4 Desktop TS_aT - Setting")
+@allure.parent_suite("MT4 Membersite - Desktop - Education Video")
+
+@allure.epic("MT4 Desktop ts_ax - Education Video")
 
 # Member Portal
-class TC_MT4_aT04():
+class TC_mt4_ax02():
 
-    @allure.title("TC_MT4_aT04")
+    @allure.title("tc_mt4_ax02")
 
     @allure.description(
         """
-        Switch theme
+        Ensure the video is redirected to the correct website
         """
         )
     
-    def test_TC04(self, chromeDriver):
+    def test_tc02(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -31,8 +32,8 @@ class TC_MT4_aT04():
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
                 
-            with allure.step("Switch theme"):
-                button_theme(driver=main_driver)
+            with allure.step("Verify the video is redirected to the correct website"):
+                video_redirection(driver=main_driver)
 
         finally:
             shutdown(main_driver)

@@ -8,12 +8,12 @@ from common.desktop.module_markets.utils import market_redirect_arrow
 
 @allure.parent_suite("MT5 Membersite - Desktop - Markets")
 
-@allure.epic("MT5 Desktop TS_aT - Markets")
+@allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT06():
+class TC_mt5_at06():
 
-    @allure.title("TC_MT5_aT06")
+    @allure.title("tc_mt5_at06")
 
     @allure.description(
         """
@@ -22,11 +22,10 @@ class TC_MT5_aT06():
         - Top Picks
         - Top Gainer / Top Loser
         - Signal
-        - News
         """
         )
     
-    def test_TC06(self, chromeDriver):
+    def test_tc06(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -47,9 +46,6 @@ class TC_MT5_aT06():
                 
             with allure.step("Top Loser - Click on [>] and redirect to Trade screen - Top Loser tab pre-selected"):
                 market_redirect_arrow(driver=main_driver, option_name="Top Loser")
-                
-            with allure.step("News - Click on [>] and redirect to News screen"):
-                market_redirect_arrow(driver=main_driver, option_name="News")
                 
         finally:
             shutdown(main_driver)

@@ -11,12 +11,12 @@ from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT4 Membersite - Desktop - Trade - Market Order")
 
-@allure.epic("MT4 Desktop TS_aB - Market")
+@allure.epic("MT4 Desktop ts_ab - Market")
 
 # Member Portal
-class TC_MT4_aB12():
+class TC_mt4_ab12():
 
-    @allure.title("TC_MT4_aB12")
+    @allure.title("tc_mt4_ab12")
 
     @allure.description(
         """
@@ -31,7 +31,7 @@ class TC_MT4_aB12():
         """
     )
     
-    def test_TC12(self, chromeDriver):
+    def test_tc12(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

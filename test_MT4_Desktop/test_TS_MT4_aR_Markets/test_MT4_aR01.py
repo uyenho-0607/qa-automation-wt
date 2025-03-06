@@ -9,12 +9,12 @@ from common.desktop.module_symbol.search_symbol import symbol_search_feature
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
-@allure.epic("MT4 Desktop TS_aR - Markets")
+@allure.epic("MT4 Desktop ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR01():
+class TC_mt4_ar01():
 
-    @allure.title("TC_MT4_aR01")
+    @allure.title("tc_mt4_ar01")
 
     @allure.description(
         """
@@ -24,7 +24,7 @@ class TC_MT4_aR01():
         """
         )
     
-    def test_TC01(self, chromeDriver):
+    def test_tc01(self, chromeDriver):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
