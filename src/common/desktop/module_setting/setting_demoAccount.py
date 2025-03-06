@@ -7,7 +7,6 @@ from faker import Faker
 from tabulate import tabulate
 from difflib import get_close_matches
  
-from common.desktop.module_markets.markets import verify_no_orders_in_my_trades
 from constants.helper.screenshot import attach_text
 from constants.helper.driver import delay, get_current_url
 from constants.helper.error_handler import handle_exception
@@ -16,6 +15,7 @@ from constants.helper.element import spinner_element, clear_input_field, click_e
 from common.desktop.module_setting.utils import button_setting, capture_alert
 from common.desktop.module_announcement.utils import modal_announcement
 from common.desktop.module_trade.order_panel.utils import extract_order_data_details
+from common.desktop.module_markets.markets import verify_no_orders_in_my_trades
 
 
 """
@@ -256,7 +256,7 @@ def get_copied_banner(driver):
             raise AssertionError(f"Invalid message header: {extracted_header}, Message: {label_message}")
         
         # Close the notification
-        btn_close = find_element_by_testid(driver, "notification-close-button")
+        btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
         trigger_click(driver, element=btn_close)
         
         # Get and validate clipboard content

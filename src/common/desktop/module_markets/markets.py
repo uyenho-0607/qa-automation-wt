@@ -409,7 +409,6 @@ def news_section(driver):
         delay(2)
 
         # Find all news items in the Markets section
-        # news = find_list_of_elements_by_xpath(driver, "//div[@class='sc-b6bkin-1 esEYzr']")
         news = find_list_of_elements_by_testid(driver, data_testid="market-news-content-text")
         
          # Check if any news items were found

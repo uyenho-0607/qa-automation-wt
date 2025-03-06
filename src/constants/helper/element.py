@@ -263,36 +263,11 @@ def get_label_of_element(element: WebElement) -> str:
 
     return label
 
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                SWITCH TO IFRAME
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# Switches to the iframe content
-def iframe(driver, duration: int | None = None) -> None:
-    try:
-        wait_duration = derive_wait_duration(duration)
-
-        # Wait until the iframe is available and switch to it
-        WebDriverWait(driver, wait_duration).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, "(//iframe)[1]")))
-
-        # Wait until the element inside the iframe is visible
-        element = WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '[data-testid="YOUR_TESTID"]')))
-
-        # Check if the element is displayed
-        is_displayed = element.is_displayed()
-
-        # Print the result
-        print(f"Element is displayed: {is_displayed}")
-
-    finally:
-        # Don't forget to switch back to the main content
-        driver.switch_to.default_content()
-
-        # Close the driver
-        driver.quit()
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

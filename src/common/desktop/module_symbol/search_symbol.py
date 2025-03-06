@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element_with_wait, find_element_by_testid, populate_element, find_list_of_elements_by_testid, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
+from constants.helper.element import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, is_element_present_by_testid, populate_element, find_list_of_elements_by_testid, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
 
 from data_config.fileHandler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
@@ -80,6 +80,83 @@ def input_symbol(driver, server: str, client_name: str, symbol_type: str = "Symb
 """
         
 
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                SEARCH FUNCTION (EXACT / WILDCARD SEARCH)
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+def perform_search(driver, input_search):
+        # Find the search input field for symbols
+        search_input = visibility_of_element_by_testid(driver, data_testid="symbol-input-search")
+        click_element(element=search_input)
+        
+        if is_element_present_by_testid(driver, data_testid="symbol-input-search-history-delete"):
+            btn_bin = visibility_of_element_by_testid(driver, "symbol-input-search-history-delete")
+            click_element_with_wait(driver, element=btn_bin)
+
+        clear_input_field(element=search_input)
+
+        # Enter the first few characters of the selected symbol into the search input
+        populate_element(element=search_input, text=input_search)
+        
+        spinner_element(driver)
+
+        delay(2.5)
+        
+        # Wait for search results
+        if is_element_present_by_testid(driver, data_testid="symbol-input-search-items"):
+            search_results = find_list_of_elements_by_testid(driver, data_testid="symbol-input-search-items")
+            print("Total row found", len(search_results))
+            matched_rows = []
+            for result in search_results:
+                text = result.text  # Remove parentheses
+                if input_search in text:
+                    matched_rows.append(text)
+
+            # Print results or raise an error if no match is found
+            if matched_rows:
+                # print(f"✅ Matching rows found for '{input_search}': {matched_rows}")
+                print(f"✅ Matching rows found for '{input_search}':\n" + "\n".join(matched_rows))
+            else:
+                raise AssertionError(f"No matching row found for symbol: {input_search}")
+        else:
+            no_items_message = visibility_of_element_by_xpath(driver, "//*[contains(text(), 'Type something to search')]")
+            msg = get_label_of_element(no_items_message)
+            raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+
+
+def symbol_search_feature(driver, server: str, client_name: str, symbol_type: str = "Symbols", desired_symbol_name: str = None):
+    try:
+        # Load available symbols for the given platform, client, and symbol type
+        symbols = read_symbol_file(server, client_name, symbol_type)
+
+        # If no specific symbol is given, randomly select one
+        if desired_symbol_name is None:
+            desired_symbol_name = random.choice(symbols)
+        else:
+            # Check if the desired symbol is in the available symbols list
+            if desired_symbol_name not in symbols:
+                raise ValueError(f"The desired symbol '{desired_symbol_name}' is not in the list of available symbols.")
+        
+        # Perform an exact match search (full symbol)
+        perform_search(driver, input_search=desired_symbol_name)
+        
+        # Perform a wildcard match search (first two letters)
+        perform_search(driver, input_search=desired_symbol_name[:2])
+
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 CLEAR SEARCH HISTORY
@@ -113,7 +190,6 @@ def clear_search_history(driver):
         updated_count = len(get_delete_buttons())
         if updated_count != initial_count - 1:
             raise AssertionError(f"Items remaining: {updated_count} (Expected {initial_count - 1})")
-
     try:
         spinner_element(driver)
         
@@ -134,8 +210,8 @@ def clear_search_history(driver):
         # Clear remaining history
         remaining_buttons = get_delete_buttons()
         log_symbols("\nRemaining symbols before full clear:", remaining_buttons)
-        bin_button = find_element_by_testid(driver, "symbol-input-search-history-delete")
-        click_element_with_wait(driver, element=bin_button)
+        btn_bin = find_element_by_testid(driver, "symbol-input-search-history-delete")
+        click_element_with_wait(driver, element=btn_bin)
         delay(1)
 
         # Final verification

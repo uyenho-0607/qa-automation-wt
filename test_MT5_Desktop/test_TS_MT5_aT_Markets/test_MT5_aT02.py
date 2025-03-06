@@ -1,6 +1,6 @@
 import allure
 
-from common.desktop.module_markets.trade_watchlist import toggle_symbol_favorite_status
+from common.desktop.module_markets.trade_watchlist import handle_pre_selected_tab
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
@@ -18,9 +18,7 @@ class TC_MT5_aT02():
 
     @allure.description(
         """
-        Member able to 
-        - verify the login pre-selected tab
-        - fav or unfav symbol for each of the section
+        Member able to verify the login pre-selected tab
         """
         )
     
@@ -33,9 +31,9 @@ class TC_MT5_aT02():
             
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
-                
-            with allure.step("Toggle to Fav/Unfav the star"):
-                toggle_symbol_favorite_status(driver=main_driver)
+
+            with allure.step("Check the pre-selected tab is correct"):
+                handle_pre_selected_tab(driver=main_driver)
 
         finally:
             shutdown(main_driver)

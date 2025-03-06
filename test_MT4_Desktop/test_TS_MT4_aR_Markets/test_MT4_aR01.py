@@ -4,7 +4,8 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_markets.trade_watchlist import handle_pre_selected_tab
+from common.desktop.module_symbol.search_symbol import symbol_search_feature
+
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
@@ -17,7 +18,9 @@ class TC_MT4_aR01():
 
     @allure.description(
         """
-        Member able to verify the login pre-selected tab
+        Member able to search for symbols
+        - Wildcard search
+        - Exact match
         """
         )
     
@@ -32,7 +35,7 @@ class TC_MT4_aR01():
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Check the pre-selected tab is correct"):
-                handle_pre_selected_tab(driver=main_driver)
+                symbol_search_feature(driver=main_driver, server="MT4", client_name="Lirunex")
 
         finally:
             shutdown(main_driver)

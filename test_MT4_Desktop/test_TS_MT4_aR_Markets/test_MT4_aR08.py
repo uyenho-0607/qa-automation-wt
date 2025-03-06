@@ -4,7 +4,8 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_symbol.utils import clear_search_history
+from common.desktop.module_markets.utils import market_watchlist_filter
+
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
 
@@ -17,7 +18,7 @@ class TC_MT4_aR08():
 
     @allure.description(
         """
-        Members can clear the search result history
+        Members can filter the symbols to display or hide them
         """
         )
     
@@ -30,9 +31,9 @@ class TC_MT4_aR08():
             
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
-
-            with allure.step("Clear Search History"):
-                clear_search_history(driver=main_driver)
+                
+            with allure.step("Market Watchlist"):
+                market_watchlist_filter(driver=main_driver)
 
         finally:
             shutdown(main_driver)

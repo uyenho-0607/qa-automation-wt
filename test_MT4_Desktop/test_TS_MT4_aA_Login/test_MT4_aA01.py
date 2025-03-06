@@ -8,7 +8,7 @@ from common.desktop.module_setting.utils import button_setting
 
 @allure.epic("MT4 Desktop TS_aA - Login")
 
-# Member Portal- Login via CRM account
+# Member Portal
 class TC_MT4_aA01():
 
     @allure.title("TC_MT4_aA01")

@@ -70,10 +70,9 @@ def attach_video_to_allure():
     #     allure.attach(video_bytes, name=f"{class_name} - Passed Screen Recording", attachment_type=allure.attachment_type.MP4)
     # os.remove(file_path)
 
-def attach_session_video_to_allure(sessionId):
-    print('attach video')
-    s3SessionVideoUrl = f'<a href="{seleniumGridS3BucketUrl}/videos/{sessionId}.mp4">Session Video</a>'.format(seleniumGridS3BucketUrl, sessionId)
 
+def attach_session_video_to_allure(sessionId):
+    s3SessionVideoUrl = f'<a href="{seleniumGridS3BucketUrl}/videos/{sessionId}.mp4">Session Video</a>'.format(seleniumGridS3BucketUrl, sessionId)
     allure.attach(s3SessionVideoUrl, name="Screen Recording Link", attachment_type=allure.attachment_type.HTML)
 
 """

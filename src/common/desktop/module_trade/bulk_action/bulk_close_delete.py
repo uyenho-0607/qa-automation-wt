@@ -256,8 +256,8 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
                             break
                     if not found:
                         # Check for pagination
-                        next_button = visibility_of_element_by_xpath(driver, "//div[@class='sc-erzke0-0 kStcxm']//div[2]")
-                        # if next_button and next_button[0].is_enabled():
+                        # next_button = visibility_of_element_by_xpath(driver, "//div[@class='sc-erzke0-0 kStcxm']//div[2]")
+                        next_button = find_element_by_testid(driver, data_testid="pagination-next")
                         if next_button.is_enabled():
                             next_button.click()
                             spinner_element(driver)
@@ -297,7 +297,7 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
 
         # Loop through each row in the table body
         for row in table_body.find_elements(By.TAG_NAME, "tr"):
-            cells = row.find_elements(By.XPATH, ".//th[1] | .//td")
+            cells = row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
             row_data = [cell.text for cell in cells]
 
             # Append the chart symbol name to the row data if applicable
@@ -305,18 +305,17 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
                 row_data.append(chart_symbol_name)
 
             # Extract the order ID from the row
-            # order_id_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'order-id')]")
-            order_id_cell = row.find_element(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")
+            order_id_cell = row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
             order_id = order_id_cell.text.strip()
             
             # Locate the close button in the row and check if it's disabled
-            btn_close_row = row.find_element(By.XPATH, ".//div[contains(@data-testid, 'button-close')]")
+            btn_close_row = row.find_element(By.XPATH, ".//*[contains(@data-testid, 'button-close')]")
             close_disabled = is_element_disabled_by_cursor(driver, element=btn_close_row) 
 
             # Check if the symbol name element exists (for Asset Page)
             if symbol_name_element:
                 # Locate the symbol name cell and check if it's disabled
-                symbol_name_row = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
+                symbol_name_row = row.find_element(By.XPATH, ".//*[contains(@data-testid, 'column-symbol')]/span")
                 symbol_disabled = is_element_disabled_by_cursor(driver, element=symbol_name_row)
 
                 # Check the state of symbol name and close button and handle accordingly

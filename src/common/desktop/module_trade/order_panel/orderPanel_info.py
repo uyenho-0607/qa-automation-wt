@@ -266,7 +266,7 @@ def get_orderID(driver, row_number):
             table_row = table_body.find_element(By.XPATH, f".//tr[{row}]")
             
             # Find the order ID element within the row
-            order_id_element = table_row.find_element(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")
+            order_id_element = table_row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
             
             # Append the extracted order ID to the list
             order_ids.append(order_id_element.text)
@@ -466,7 +466,7 @@ def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = Fa
                 # Loop through each row to find a matching order ID
                 for row in rows:
                     # spinner_element(driver)
-                    order_id_cell = row.find_element(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")
+                    order_id_cell = row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
                     if order_id in order_id_cell.text:
                         
                         if tab_order_type == "open-positions":
@@ -596,7 +596,7 @@ def check_orderIDs_in_table(driver, order_ids, tab_order_type, section_name: str
 
         # Extract rows and order IDs from the table
         table_rows = table_body.find_elements(By.XPATH, ".//tr")
-        table_order_ids = [element.text for element in table_body.find_elements(By.XPATH, ".//th[contains(@data-testid, 'order-id')]")]
+        table_order_ids = [element.text for element in table_body.find_elements(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")]
         
         # Extract headers and check for chart symbol
         thead_data = get_table_headers(driver)
@@ -614,7 +614,7 @@ def check_orderIDs_in_table(driver, order_ids, tab_order_type, section_name: str
                 # Find the index of the order_id in table_order_ids
                 index = table_order_ids.index(order_id)
                 row = table_rows[index]
-                cells = row.find_elements(By.XPATH, "./th[1] | ./td")
+                cells = row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
                 row_data = [cell.text for cell in cells]
                 
                 # Add chart symbol if applicable

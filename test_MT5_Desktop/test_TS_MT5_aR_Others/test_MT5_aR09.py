@@ -57,3 +57,4 @@ class TC_MT4_aR09():
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)
+

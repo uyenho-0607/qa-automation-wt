@@ -8,7 +8,7 @@ from common.desktop.module_setting.utils import button_setting
 
 @allure.epic("MT5 Desktop TS_aA - Login")
 
-# Member Portal- Login via Demo CMS account
+# Member Portal
 class TC_MT5_aA03():
             
     @allure.title("TC_MT5_aA03")

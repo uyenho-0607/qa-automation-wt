@@ -110,3 +110,4 @@ class TC_MT5_aC11():
             shutdown(main_driver)
             
             attach_session_video_to_allure(session_id)
+

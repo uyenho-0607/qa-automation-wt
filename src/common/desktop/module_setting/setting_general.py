@@ -2,7 +2,7 @@ from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 
 from constants.helper.color_element import get_body_color
-from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 
 
 
@@ -19,8 +19,6 @@ def accountInformation(driver):
     accountInfo = find_element_by_testid(driver, data_testid="account-selector")
     javascript_click(driver, element=accountInfo)
     
-    # Wait for the modal display
-    # visibility_of_element_by_xpath(driver, "//div[@class='sc-189z816-0 rJxDJ']")
     delay(2)
     
 """
@@ -53,7 +51,7 @@ def button_setting(driver, setting_option: str):
         click_element(find_element_by_testid(driver, data_testid="setting-button"))
         
         # Click on the specified setting option
-        dropdown_option = find_element_by_testid(driver, data_testid=f"setting-option-{setting_option}")
+        dropdown_option = visibility_of_element_by_testid(driver, data_testid=f"setting-option-{setting_option}")
         click_element(dropdown_option)
 
         # Mapping setting options to expected text
@@ -61,7 +59,8 @@ def button_setting(driver, setting_option: str):
             "change-password": "Change Password",
             "open-demo-account": "Open a Demo Account",
             "notification-setting": "Notification Settings",
-            "linked-device": "Linked Devices"
+            "linked-device": "Linked Devices",
+            "contact-information": "Contact Information"
         }
         
         delay(1)

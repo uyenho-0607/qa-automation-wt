@@ -2,9 +2,9 @@ import random
 import logging
 
 
-from constants.helper.driver import access_url, delay
+from constants.helper.driver import access_url, delay, get_current_url, switch_to_new_window, url_changes
 from constants.helper.screenshot import attach_text
-from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, spinner_element, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import click_element, click_element_with_wait, is_element_present_by_xpath, find_element_by_xpath, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 from constants.helper.error_handler import handle_exception
 
 from data_config.encrypt_decrypt import decrypt_and_print
@@ -138,11 +138,10 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
                 testcase = random.choice(server_data[credential_type])
         
         # Retrieve the username and password from the selected testcase
-        login_username_encrypted = testcase["Username"]
+        login_username = testcase["Username"]
         login_password_encrypted = testcase["Password"]
 
         # Decrypt the credentials
-        login_username = decrypt_and_print(login_username_encrypted)
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Enter the username and password into the login form
@@ -165,6 +164,63 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     else:
         # Raise an error if the server is not found in the credential data
         raise ValueError(f"Server '{server}' not found in credential data")
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                HANDLE LOGIN RESULT
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+def handle_login_result(driver, expect_failure: bool = False, selected_language: str = None):
+    """
+    Handles the login result by verifying the presence of the expected text based on the selected language.
+    """
+    try:
+        
+        # Language-specific verification map
+        language_specific_text = {
+            "English": "Trade",
+            "简体中文": "交易",
+            "繁体中文": "交易",
+            "ภาษาไทย": "เทรด",
+            "Tiếng Việt": "Giao dịch",
+            "Melayu": "Perdagangan",
+            "Bahasa Indonesia": "Berdagang",
+            "Japanese": "取引",
+            "Korean": "거래"
+        }
+        
+        # Wait till the spinner icon no longer display
+        # spinner_element(driver)
+    
+        # Determine the text to wait for based on the selected language
+        verification_text = language_specific_text.get(selected_language, "Trade")
+
+        # Wait until the text is present in the specified element
+        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="side-bar-option-trade", text=verification_text)
+
+        # If the account balance is found, the login is successful
+        if match:
+            # If login succeeded but failure was expected, log the unexpected success and fail the test
+            if expect_failure:
+                attach_text("Expected failure, but login succeeded without any error. Test failed as expected failure condition was not met.", name="Unexpected Success")
+                assert False, "Expected failure, but login succeeded without error."
+            
+            # If login is successful and no failure was expected, process the modal announcement (if applicable)
+            modal_announcement(driver)
+            assert True  # Pass the test as login succeeded as expected
+        else:
+            # If account balance was not found, the login failed. Handle the error scenario.
+            handle_alert_error(driver, expect_failure)
+
+    except Exception as e:
+        handle_exception(driver, e)
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -208,65 +264,6 @@ def handle_alert_error(driver, expect_failure: bool):
     
     # Return the error message for further processing or validation.
     return error_message
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                HANDLE LOGIN RESULT
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-def handle_login_result(driver, expect_failure: bool = False, selected_language: str = None):
-    """
-    Handles the login result by verifying the presence of the expected text based on the selected language.
-    """
-    try:
-        
-        # Wait till the spinner icon no longer display
-        spinner_element(driver)
-        
-        # Language-specific verification map
-        language_specific_text = {
-            "English": "Trade",
-            "简体中文": "交易",
-            "繁体中文": "交易",
-            "ภาษาไทย": "เทรด",
-            "Tiếng Việt": "Giao dịch",
-            "Melayu": "Perdagangan",
-            "Bahasa Indonesia": "Berdagang",
-            "Japanese": "取引",
-            "Korean": "거래"
-        }
-
-        # Determine the text to wait for based on the selected language
-        verification_text = language_specific_text.get(selected_language, "Trade")
-
-        # Wait until the text is present in the specified element
-        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="side-bar-option-trade", text=verification_text)
-
-        # If the account balance is found, the login is successful
-        if match:
-            # If login succeeded but failure was expected, log the unexpected success and fail the test
-            if expect_failure:
-                attach_text("Expected failure, but login succeeded without any error. Test failed as expected failure condition was not met.", name="Unexpected Success")
-                assert False, "Expected failure, but login succeeded without error."
-            
-            # If login is successful and no failure was expected, process the modal announcement (if applicable)
-            modal_announcement(driver)
-            assert True  # Pass the test as login succeeded as expected
-        else:
-            # If account balance was not found, the login failed. Handle the error scenario.
-            handle_alert_error(driver, expect_failure)
-
-    except Exception as e:
-        handle_exception(driver, e)
-
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -335,7 +332,7 @@ def login_wt(driver, server: str, client_name: str, testcaseID: str = None, acco
     """
     
     try:
-            
+        
         # Step 1: Launch and navigate to the WebTrader platform URL based on the provided parameters.
         params_wt_url = launch_wt(driver, server, client_name, device_type, env_type)
 
@@ -454,3 +451,55 @@ def select_and_verify_language(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
+        
+def forgot_password(driver, server: str, client_name: str, account_type: str, email: str, accountID: str = None, device_type: str = "Desktop", env_type: str = "SIT"):
+    try:
+        # Step 1: Launch WebTrader platform
+        launch_wt(driver, server, client_name, device_type, env_type)
+        
+        # Step 2: Select account type (CRM/Live/Demo)
+        select_account_type(driver, account_type)
+        
+        # Step 3: Verify and click the 'Forgot Password' button
+        if not is_element_present_by_xpath(driver, "//*[normalize-space(text())='Forgot Password?']"):
+            raise AssertionError("Forgot Password button not found")
+        
+        # Locate the forgot Password button
+        btn_forgot_password = visibility_of_element_by_xpath(driver, "//*[normalize-space(text())='Forgot Password?']")
+
+        # Perform a JavaScript click action on the located account type element.
+        javascript_click(driver, element=btn_forgot_password)
+                
+        # Step 4: Wait for 'Reset Password' page
+        wait_for_text_to_be_present_in_element_by_xpath(driver, "//*[normalize-space(text())='Reset Password']", text="Reset Password")
+        
+        # Step 5: Input email
+        input_email = find_element_by_xpath(driver, "//input[@placeholder='user@gmail.com']")
+        populate_element(element=input_email, text=email)
+        
+        # Step 6: Input account ID if required
+        if account_type == "live" and accountID:
+            input_accountID = find_element_by_xpath(driver, "//input[@placeholder='Enter your account ID']")
+            populate_element(element=input_accountID, text=accountID)
+        
+        # Step 7: Click 'Submit' button
+        click_element(element=find_element_by_xpath(driver, "//*[normalize-space(text())='Submit']"))
+        
+        
+        if wait_for_text_to_be_present_in_element_by_xpath(driver, "//*[normalize-space(text())='FXCRM Invalid Login']", text="FXCRM Invalid Login"):
+            error_msg = find_element_by_xpath(driver, "//*[normalize-space(text())='FXCRM Invalid Login']")
+            raise AssertionError("Error message promoted", error_msg.text)
+        
+        # Step 8: Verify success message and navigate to Contact Support
+        elif wait_for_text_to_be_present_in_element_by_xpath(driver, "//*[normalize-space(text())='Help is on the way!']", text="Help is on the way!"):
+            btn_contact_support = find_element_by_xpath(driver, "//*[normalize-space(text())='Contact Support']")
+            click_element(element=btn_contact_support)
+            
+            # Switch to the new window
+            switch_to_new_window(driver)
+            
+            # Step 9: Capture and print the current URL
+            print(get_current_url(driver))
+    
+    except Exception as e:
+        handle_exception(driver, e)

@@ -8,6 +8,7 @@ from common.desktop.module_trade.utils import toggle_radioButton, trade_ordersCo
 from common.desktop.module_signal.utils import button_copyTrade, handle_order_type
 from data_config.utils import compare_dataframes, process_and_print_data
 
+
 @allure.parent_suite("MT5 Membersite - Desktop - Signal")
 
 @allure.epic("MT5 Desktop TS_aU - Signal")

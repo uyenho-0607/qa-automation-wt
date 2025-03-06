@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, spinner_element, is_element_present_by_xpath, find_element_by_xpath, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, invisibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath, is_element_disabled_by_cursor, populate_element
+from constants.helper.element import clear_input_field, click_element, spinner_element, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, invisibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath, is_element_disabled_by_cursor, populate_element
 from constants.helper.screenshot import attach_text
 
 from common.desktop.module_subMenu.utils import menu_button
@@ -15,36 +15,97 @@ from common.desktop.module_chart.utils import get_chart_symbol_name
 from common.desktop.module_trade.order_placing_window.utils import input_size_volume, button_trade_action
 
 
-
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                CLOSED FLAT / CLOSED LOSS / CLOSED PROFIT - COPY TO ORDER BUTTON DISABLED
+                                                SIGNAL SEARCH FUNCTION (EXACT / WILDCARD SEARCH)
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def signal_search_feature(driver, input_search: str):
-    try:
-        
-        # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
-        
-        # Wait for any spinner element to disappear
-        spinner_element(driver)
-        
-        input_signal_search = find_element_by_xpath(driver, "//div[@class='sc-1mh8ki8-0 bvKpbO']//input")
-        populate_element(element=input_signal_search, text=input_search)
-        
-    except Exception as e:
-        # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
+def perform_search(driver, input_search):
+    # Locate the search input field and enter the search query
+    input_signal_search = find_element_by_xpath(driver, "//input[@placeholder='Search signals']")
+    clear_input_field(element=input_signal_search)
+    populate_element(element=input_signal_search, text=input_search)
+    delay(1)
     
+    # Wait for search results
+    if is_element_present_by_testid(driver, data_testid="signal-list"):
+        tbody = visibility_of_element_by_testid(driver, data_testid="signal-list")
+        rows = tbody.find_elements(By.XPATH, ".//tr")
+        
+        matched_rows = []  # Initialize an empty list to store matching rows
+
+        for row in rows:
+            symbol_element = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-symbol']")
+            symbol_text = symbol_element.text  # Extract the symbol text
+            
+            # Check if the input search term is in the extracted symbol text
+            if input_search in symbol_text:
+                matched_rows.append(symbol_text)
+
+        # Print results or raise an error if no match is found
+        if matched_rows:
+            print(f"✅ Matching rows found for '{input_search}': {matched_rows}")
+        else:
+            raise AssertionError(f"No matching row found for symbol: {input_search}")
+    else:
+        no_items_message = visibility_of_element_by_xpath(driver, "//*[contains(text(), 'No items available')]")
+        msg = get_label_of_element(no_items_message)
+        raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+
+
+def signal_search_feature(driver):
+    try:
+        # Navigate to the 'Signal' menu
+        menu_button(driver, menu="signal")
+
+        # Wait for any spinner to disappear
+        spinner_element(driver)
+
+        # Open the signal list
+        btn_signal_list = visibility_of_element_by_testid(driver, data_testid="signal-filter-all")
+        click_element(element=btn_signal_list)
+        
+        delay(1)
+
+        # Wait for the signal list table to load
+        if is_element_present_by_testid(driver, data_testid="signal-list"):
+            tbody = visibility_of_element_by_testid(driver, data_testid="signal-list")
+            
+            # Get all rows in the table (limit to 10)
+            rows = tbody.find_elements(By.XPATH, ".//tr")[:10]
+            
+            # Extract symbol names from the rows
+            symbol_list = []
+            for row in rows:
+                row_symbol_element = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-symbol']")
+                symbol_text = get_label_of_element(row_symbol_element)
+                symbol_list.append(symbol_text)
+
+            if not symbol_list:
+                raise AssertionError("No symbols found in the signal list")
+            
+            # Randomly pick a symbol from the list
+            selected_symbol = random.choice(symbol_list)
+            print(f"🔍 Selected symbol: {selected_symbol}")
+            
+            # Perform an exact match search (full symbol)
+            perform_search(driver, input_search=selected_symbol)
+            
+            # Perform a wildcard match search (first two letters)
+            perform_search(driver, input_search=selected_symbol[:2])
+
+        else:
+            raise AssertionError("Signal list table not found")
+
+    except Exception as e:
+        # Handle exceptions with a dedicated function
+        handle_exception(driver, e)
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -131,7 +192,7 @@ def verify_copy_to_order_is_disabled(driver):
 
         # Loop through the rows to find a valid tradable symbol
         for row in rows:
-            row_status = row.find_element(By.XPATH, ".//span[@data-testid='signal-row-order-status']")
+            row_status = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-order-status']")
             label_status = get_label_of_element(row_status)
             print(f"Checking row with status: {label_status}")
             
@@ -200,7 +261,7 @@ def select_valid_signal_to_trade(driver):
         # Loop through the rows to find a valid tradable symbol
         for row in rows:
             # Find the status column for the current row
-            row_status = row.find_element(By.XPATH, ".//span[@data-testid='signal-row-order-status']")
+            row_status = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-order-status']")
             label_status = get_label_of_element(row_status)
             print(f"Checking row with status: {label_status}")
             

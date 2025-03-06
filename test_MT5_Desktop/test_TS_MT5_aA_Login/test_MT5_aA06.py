@@ -7,7 +7,7 @@ from common.desktop.module_login.utils import login_wt
 
 @allure.epic("MT5 Desktop TS_aA - Login")
 
-# Member Portal- Login via Demo CMS account
+# Member Portal
 class TC_MT5_aA06():
 
     @allure.title("TC_MT5_aA06")

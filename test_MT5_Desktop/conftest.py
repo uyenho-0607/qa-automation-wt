@@ -1,10 +1,29 @@
 import pytest
 import chromedriver_autoinstaller
 
+import logging
+
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
+
+
+"""
+@pytest.fixture(scope="class")
+def chromeDriver() -> WebDriver:
+    options = webdriver.ChromeOptions()
+    options.add_experimental_option("detach", True)
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    return driver
+
+"""
+
+
+# Configure logging
+# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+# logger = logging.getLogger(__name__)
 
 
 
@@ -28,24 +47,13 @@ def chromeDriver() -> WebDriver:
 
     options.page_load_strategy = 'eager'  # Wait for full page load (Options: 'normal', 'eager', 'none')
 
-    # options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+    options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
     
     # options.add_experimental_option("detach", True) # allows the Chrome browser to stay open after the script finishes.
     
-    # service = Service()
-    # driver = webdriver.Chrome(service=service, options=options)
+    service = Service()
+    driver = webdriver.Chrome(service=service, options=options)
     
-    driver = webdriver.Remote('http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub', options=options)
+    # driver = webdriver.Remote('http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub', options=options)
 
     return driver
-
-
-
-# @pytest.fixture(scope="class")
-# def safariDriver() -> Generator[WebDriver, None, None]:
-#     # Initialize Safari WebDriver directly
-#     driver = webdriver.Safari()
-
-#     yield driver  # This allows the test to use the driver
-
-#     driver.quit() # Cleanup after tests

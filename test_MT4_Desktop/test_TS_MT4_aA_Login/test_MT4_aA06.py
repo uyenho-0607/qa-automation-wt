@@ -7,15 +7,15 @@ from common.desktop.module_login.utils import login_wt
 
 @allure.epic("MT4 Desktop TS_aA - Login")
 
-# Member Portal- Login via Demo CMS account
+# Member Portal
 class TC_MT4_aA06():
 
     @allure.title("TC_MT4_aA06")
 
     @allure.description(
         """
-        Member unable login with wrong credentials in Live tab
-        - correct accountID with wrong password
+        Member unable login with wrong credentials in Demo tab
+        - wrong accountID and password
         """
         )
     
@@ -27,7 +27,7 @@ class TC_MT4_aA06():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC02", expect_failure=True) 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo", testcaseID="TC03", expect_failure=True) 
                 
         finally:
             shutdown(main_driver)
