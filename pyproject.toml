@@ -34,4 +34,4 @@ python_classes = "TC"
 # All test functions must start with "test" as prefix e.g. def test_TC01:
 python_functions = "test*"
 
-python_files = "test_MT4_Desktop/test_TS_MT4_aA_Login/test_*.py"
+python_files = "test_*.py"
