@@ -5,7 +5,7 @@ from constants.helper.element import click_element, find_element_by_testid, spin
 
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_announcement.utils import modal_announcement
-from common.desktop.module_login.webTrader_login import select_account_type
+from common.desktop.module_login.webtrader_login import select_account_type
 
 
 """
@@ -298,7 +298,6 @@ def handle_error(driver, label_message):
             break  # Stop after finding the first matching error message
 
     # Close the modal dialog
-    # btn_close = find_element_by_xpath(driver, "//div[@class='sc-1ui89tt-3 dXSCMa']")
     btn_close = find_element_by_testid(driver, data_testid="change-password-modal-close")
     click_element(element=btn_close)
 

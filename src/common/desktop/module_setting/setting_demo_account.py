@@ -162,8 +162,8 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
 
         """ Phone Number field """
         # Handle the Phone Number field
-        dialCode = find_element_by_xpath(driver, "//div[@class='sc-1ks0xwr-0 fSgSbd']")
-        # dialCode = find_element_by_testid(driver, data_testid="country-dial-code-dropdown")
+        # dialCode = find_element_by_xpath(driver, "//div[@class='sc-1ks0xwr-0 fSgSbd']")
+        dialCode = find_element_by_testid(driver, data_testid="country-dial-code")
         click_element(element=dialCode) # Open the dial code dropdown
         
         # Wait for the dial code modal to appear

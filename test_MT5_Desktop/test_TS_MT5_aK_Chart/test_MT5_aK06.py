@@ -1,9 +1,12 @@
 import allure
+import pytest
 
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure, attach_text
+
 from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_chart.utils import chart_minMax, chart_trade_modal_close
 from common.desktop.module_trade.utils import toggle_radioButton, trade_stop_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
@@ -14,9 +17,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ak - Chart - Order Placing Window")
 
 # Member Portal
-class TC_mt5_ak06():
+class TC_MT5_aK06():
 
-    @allure.title("tc_mt5_ak06")
+    @allure.title("TC_MT5_aK06")
         
     @allure.description(
         """
@@ -31,10 +34,14 @@ class TC_mt5_ak06():
         """
     )
     
-    def test_tc06(self, chromeDriver):
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc06(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
+        
+        # Track if the test has failed
+        test_failed = False
         
         try:
 
@@ -48,7 +55,7 @@ class TC_mt5_ak06():
                 toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Place Stop Order"):
-                trade_stop_order(driver=main_driver, trade_type="trade", option="sell", sl_type="price", tp_type="points", expiryType="specified-date", expiryDate="19", targetMonth=parse("Feb 2025"), specifiedDate=True, set_Chart=True, chart_fullscreen="toggle")
+                trade_stop_order(driver=main_driver, trade_type="trade", option="sell", sl_type="price", tp_type="points", expiryType="specified-date", expiryDate="19", targetMonth=parse("April 2025"), specifiedDate=True, set_Chart=True, chart_fullscreen="toggle")
 
             with allure.step("Click on the Trade Confirmation button to update the order"):
                 trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
@@ -75,7 +82,25 @@ class TC_mt5_ak06():
                 process_and_print_data(pending_order_df, trade_tradeConfirmation_df, snackbar_banner_df)
                     
 
+        except Exception as e:
+            test_failed = True  # Mark test as failed
+            if test_failed:
+                attach_text(get_text=str(e), name="Failure Info")
+                button_setting(driver=main_driver, setting_option="logout")
+                raise  # Trigger retry if enabled
+
         finally:
-            shutdown(main_driver)
-            
             attach_session_video_to_allure(session_id)
+
+            # Determine if this is the last attempt
+            rerun_marker = request.node.get_closest_marker("flaky")
+            if rerun_marker:
+                reruns = rerun_marker.kwargs.get("reruns", 0)  # Max retries
+                current_attempt = getattr(request.node, "execution_count", 1)  # Start at 1
+                last_attempt = current_attempt >= (reruns + 1)  # Last attempt happens on final retry
+            else:
+                last_attempt = True  # No retries configured
+
+            # Shutdown the driver if the test passed immediately OR if it's the last retry attempt
+            if last_attempt or not test_failed:
+                shutdown(main_driver)

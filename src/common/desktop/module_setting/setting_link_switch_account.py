@@ -10,7 +10,7 @@ from constants.helper.element import spinner_element, is_element_present_by_test
 
 from common.desktop.module_login.utils import handle_alert_error
 from common.desktop.module_setting.utils import button_setting
-from common.desktop.module_setting.setting_changePwd import perform_login
+from common.desktop.module_setting.setting_change_pwd import perform_login
 from common.desktop.module_setting.setting_general import accountInformation
 
 """

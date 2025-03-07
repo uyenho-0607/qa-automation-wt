@@ -1,9 +1,11 @@
 import allure
+import pytest
 
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_markets.utils import market_redirect_arrow, market_watchlist
 
 
@@ -12,9 +14,9 @@ from common.desktop.module_markets.utils import market_redirect_arrow, market_wa
 @allure.epic("MT4 Desktop ts_ar - Markets")
 
 # Member Portal
-class TC_mt4_ar06():
+class TC_MT4_aR06():
 
-    @allure.title("tc_mt4_ar06")
+    @allure.title("TC_MT4_aR06")
 
     @allure.description(
         """
@@ -25,12 +27,16 @@ class TC_mt4_ar06():
         - Signal
         - News
         """
-        )
+    )
     
-    def test_tc06(self, chromeDriver):
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc06(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
+        
+        # Track if the test has failed
+        test_failed = False
         
         try:
             
@@ -55,7 +61,25 @@ class TC_mt4_ar06():
             with allure.step("News - Click on [>] and redirect to News screen"):
                 market_redirect_arrow(driver=main_driver, option_name="News")
                 
+        except Exception as e:
+            test_failed = True  # Mark test as failed
+            if test_failed:
+                attach_text(get_text=str(e), name="Failure Info")
+                button_setting(driver=main_driver, setting_option="logout")
+                raise  # Trigger retry if enabled
+
         finally:
-            shutdown(main_driver)
-            
             attach_session_video_to_allure(session_id)
+
+            # Determine if this is the last attempt
+            rerun_marker = request.node.get_closest_marker("flaky")
+            if rerun_marker:
+                reruns = rerun_marker.kwargs.get("reruns", 0)  # Max retries
+                current_attempt = getattr(request.node, "execution_count", 1)  # Start at 1
+                last_attempt = current_attempt >= (reruns + 1)  # Last attempt happens on final retry
+            else:
+                last_attempt = True  # No retries configured
+
+            # Shutdown the driver if the test passed immediately OR if it's the last retry attempt
+            if last_attempt or not test_failed:
+                shutdown(main_driver)

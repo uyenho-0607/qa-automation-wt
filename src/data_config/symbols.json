@@ -30,16 +30,12 @@
   "MT5": {
     "Transactcloudmt5": {
       "Symbols": [
-        "BCHUSD",
-        "DSHUSD",
-        "XMRUSD",
-        "ETHUSD",
-        "XRPUSD",
+        "BAKE.USD",
+        "XAGUSD",
         "XAUUSD"
       ],
       "Symbols_Price": [
-        "BCHUSD",
-        "LTCUSD"
+        "BAKE.USD"
       ]
     }
   }

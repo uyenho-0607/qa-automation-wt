@@ -134,7 +134,7 @@ def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = Tr
                 })
                 error_message += mismatched_details.to_string(index=False)
                 attach_text(error_message, name="Mismatch Details")
-                assert False, error_message
+                raise AssertionError(error_message)
             else:
                 attach_text(f"All values match for {orderID}", name=f"Comparison on {name1} and {name2} Result")
 

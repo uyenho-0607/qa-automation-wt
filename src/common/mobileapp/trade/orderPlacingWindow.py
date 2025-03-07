@@ -764,14 +764,14 @@ def manage_stopLimitPrice(driver, trade_type, price_field=None):
 
 def handle_stopLoss(driver, trade_type, sl_type):
     # Locate the stop-loss input element based on trade_type and stop-loss type
-    stopLoss_element = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stoploss-{sl_type}")
+    stop_loss_element = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stoploss-{sl_type}")
     
     # If the trade is being edited, clear the stop-loss input field
     if trade_type == "edit":
-        clear_input_field(stopLoss_element)
+        clear_input_field(stop_loss_element)
 
     # Return the stop-loss element for further actions if required
-    return stopLoss_element
+    return stop_loss_element
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

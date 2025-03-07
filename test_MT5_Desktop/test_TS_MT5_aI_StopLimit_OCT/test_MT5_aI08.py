@@ -1,9 +1,12 @@
 import allure
+import pytest
 
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure, attach_text
+
 from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_stopLimit_order, modify_stopLimit_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
@@ -13,9 +16,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ai - Stop Limit OCT")
 
 # Member Portal
-class TC_mt5_ai08():
+class TC_MT5_aI08():
  
-    @allure.title("tc_mt5_ai08")
+    @allure.title("TC_MT5_aI08")
 
     @allure.description(
         """
@@ -36,10 +39,14 @@ class TC_mt5_ai08():
         """
     )
     
-    def test_tc08(self, chromeDriver):
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc08(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
+        
+        # Track if the test has failed
+        test_failed = False
         
         try:
 
@@ -55,7 +62,7 @@ class TC_mt5_ai08():
             """ Place Stop Limit Order """
 
             with allure.step("Place Stop Limit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="buy", sl_type="points", tp_type="price", expiryType="specified-date-and-time", expiryDate="19", targetMonth=parse("Feb 2025"), hour_option="11", min_option="35", specifiedDate=True)
+                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="buy", sl_type="points", tp_type="price", expiryType="specified-date-and-time", expiryDate="19", targetMonth=parse("April 2025"), hour_option="11", min_option="35", specifiedDate=True)
 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
@@ -94,7 +101,25 @@ class TC_mt5_ai08():
                 else:
                     assert False, f"Place orderID - {original_orderID} and Modified orderID - {updated_orderID} not matched"
 
+        except Exception as e:
+            test_failed = True  # Mark test as failed
+            if test_failed:
+                attach_text(get_text=str(e), name="Failure Info")
+                button_setting(driver=main_driver, setting_option="logout")
+                raise  # Trigger retry if enabled
+
         finally:
-            shutdown(main_driver)
-            
             attach_session_video_to_allure(session_id)
+
+            # Determine if this is the last attempt
+            rerun_marker = request.node.get_closest_marker("flaky")
+            if rerun_marker:
+                reruns = rerun_marker.kwargs.get("reruns", 0)  # Max retries
+                current_attempt = getattr(request.node, "execution_count", 1)  # Start at 1
+                last_attempt = current_attempt >= (reruns + 1)  # Last attempt happens on final retry
+            else:
+                last_attempt = True  # No retries configured
+
+            # Shutdown the driver if the test passed immediately OR if it's the last retry attempt
+            if last_attempt or not test_failed:
+                shutdown(main_driver)

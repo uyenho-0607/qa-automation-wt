@@ -12,7 +12,7 @@ from data_config.utils import append_orderIDs_to_csv
 from common.desktop.module_subMenu.sub_menu import menu_button
 from common.desktop.module_chart.chart import get_chart_symbol_name
 from common.desktop.module_trade.order_panel.op_filter import perform_sorting
-from common.desktop.module_trade.order_panel.orderPanel_info import type_orderPanel
+from common.desktop.module_trade.order_panel.order_panel_info import type_orderPanel
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 
 

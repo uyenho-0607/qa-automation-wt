@@ -6,7 +6,7 @@ from constants.helper.element import click_element, get_label_of_element, is_ele
 
 from common.desktop.module_subMenu.sub_menu import menu_button
 from common.desktop.module_trade.order_panel.op_general import get_table_body
-from common.desktop.module_trade.order_panel.orderPanel_info import type_orderPanel
+from common.desktop.module_trade.order_panel.order_panel_info import type_orderPanel
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

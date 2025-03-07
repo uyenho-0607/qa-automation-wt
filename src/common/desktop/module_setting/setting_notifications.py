@@ -3,8 +3,8 @@ from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, get_current_url
 
 from common.desktop.module_notification.noti_system import noti_newDevice
-from common.desktop.module_trade.order_placing_window.module_OCT import toggle_radioButton
-from common.desktop.module_setting.setting_changePwd import perform_login
+from common.desktop.module_trade.order_placing_window.module_oct import toggle_radioButton
+from common.desktop.module_setting.setting_change_pwd import perform_login
 from common.desktop.module_setting.setting_general import button_setting
 
 

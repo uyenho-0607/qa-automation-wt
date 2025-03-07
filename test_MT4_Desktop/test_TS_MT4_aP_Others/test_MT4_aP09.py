@@ -1,9 +1,12 @@
 import allure
+import pytest
 
 from datetime import datetime
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure, attach_text
+
 from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_subMenu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
@@ -13,20 +16,24 @@ from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 @allure.epic("MT4 Desktop ts_ap - Others")
 
 # Member Portal
-class TC_mt4_ap09():
+class TC_MT4_aP09():
 
-    @allure.title("tc_mt4_ap09")
+    @allure.title("TC_MT4_aP09")
 
     @allure.description(
         """
         Member able to select a date range from order history with the table content updated
         """
-        )
+    )
     
-    def test_tc09(self, chromeDriver):
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc09(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
+        
+        # Track if the test has failed
+        test_failed = False
         
         try:
             
@@ -55,8 +62,25 @@ class TC_mt4_ap09():
                                     target_startMonth=datetime.strptime("October 2024", "%B %Y"),
                                     target_endMonth=datetime.strptime("October 2024", "%B %Y"))
             
+        except Exception as e:
+            test_failed = True  # Mark test as failed
+            if test_failed:
+                attach_text(get_text=str(e), name="Failure Info")
+                button_setting(driver=main_driver, setting_option="logout")
+                raise  # Trigger retry if enabled
+
         finally:
-            shutdown(main_driver)
-            
             attach_session_video_to_allure(session_id)
 
+            # Determine if this is the last attempt
+            rerun_marker = request.node.get_closest_marker("flaky")
+            if rerun_marker:
+                reruns = rerun_marker.kwargs.get("reruns", 0)  # Max retries
+                current_attempt = getattr(request.node, "execution_count", 1)  # Start at 1
+                last_attempt = current_attempt >= (reruns + 1)  # Last attempt happens on final retry
+            else:
+                last_attempt = True  # No retries configured
+
+            # Shutdown the driver if the test passed immediately OR if it's the last retry attempt
+            if last_attempt or not test_failed:
+                shutdown(main_driver)

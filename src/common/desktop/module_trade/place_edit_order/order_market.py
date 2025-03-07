@@ -2,9 +2,9 @@ from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, populate_element
 
 from common.desktop.module_chart.chart import chart_minMax
-from common.desktop.module_trade.order_panel.orderPanel_info import button_orderPanel_action
+from common.desktop.module_trade.order_panel.order_panel_info import button_orderPanel_action
 from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, pointsDistance
-from common.desktop.module_trade.order_placing_window.utils import verify_volume_minMax_buttons, button_buy_sell_type, button_tradeModule, label_onePointEqual, input_size_volume, fillPolicy_type, handle_stopLoss, handle_takeProfit, button_trade_action, handle_stopLoss, handle_takeProfit, close_partialSize
+from common.desktop.module_trade.order_placing_window.utils import verify_volume_minMax_buttons, button_buy_sell_type, button_tradeModule, label_onePointEqual, input_size_volume, fillPolicy_type, handle_stop_loss, handle_takeProfit, button_trade_action, handle_stop_loss, handle_takeProfit, close_partialSize
 from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
 
 
@@ -21,7 +21,7 @@ def calculate_stop_loss(driver, trade_type, sl_type, option, label_onePointsEqua
     
     stopLoss_point = get_sl_point_distance(option, trade_type)
 
-    stopLoss_input = handle_stopLoss(driver, trade_type, sl_type)
+    stopLoss_input = handle_stop_loss(driver, trade_type, sl_type)
 
     if stopLoss_flag: # For Positive scenario
         if sl_type == "price":

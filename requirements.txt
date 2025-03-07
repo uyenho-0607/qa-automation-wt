@@ -18,6 +18,7 @@ pluggy==1.4.0
 pycodestyle==2.11.1
 pyflakes==3.2.0
 pytest==8.0.0
+pytest-rerunfailures==15.0
 setuptools==69.0.3
 wheel==0.42.0
 

@@ -1,18 +1,22 @@
 import allure
+import pytest
+
 from constants.helper.driver import shutdown
-from constants.helper.screenshot import attach_session_video_to_allure
+from constants.helper.screenshot import attach_session_video_to_allure, attach_text
+
 from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info, button_orderPanel_action, btn_minMax_stopLoss, btn_minMax_takeProfit
+from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info, button_orderPanel_action, btn_min_max_stop_loss, btn_minMax_takeProfit
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
 
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_mt5_ar05():
+class TC_MT5_aR05():
 
-    @allure.title("tc_mt5_ar05")
+    @allure.title("TC_MT5_aR05")
 
     @allure.description(
         """
@@ -20,12 +24,16 @@ class TC_mt5_ar05():
         
         Increase/Decrease by button
         """
-        )
+    )
     
-    def test_tc05(self, chromeDriver):
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc05(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
+        
+        # Track if the test has failed
+        test_failed = False
         
         try:
             
@@ -60,14 +68,32 @@ class TC_mt5_ar05():
                 button_orderPanel_action(driver=main_driver, order_action="edit", row_number=[1])
                 
             with allure.step("Increase / Decrease Stop Loss"):
-                btn_minMax_stopLoss(driver=main_driver, trade_type="edit", type="price", minMax="increase", number_of_clicks=5)
-                btn_minMax_stopLoss(driver=main_driver, trade_type="edit", type="points", minMax="decrease", number_of_clicks=3)
+                btn_min_max_stop_loss(driver=main_driver, trade_type="edit", type="price", min_max="increase", number_of_clicks=5)
+                btn_min_max_stop_loss(driver=main_driver, trade_type="edit", type="points", min_max="decrease", number_of_clicks=3)
 
             with allure.step("Increase / Decrease Take Profit"):
                 btn_minMax_takeProfit(driver=main_driver, trade_type="edit", type="price", minMax="decrease", number_of_clicks=5)
                 btn_minMax_takeProfit(driver=main_driver, trade_type="edit", type="points", minMax="increase", number_of_clicks=3)
 
+        except Exception as e:
+            test_failed = True  # Mark test as failed
+            if test_failed:
+                attach_text(get_text=str(e), name="Failure Info")
+                button_setting(driver=main_driver, setting_option="logout")
+                raise  # Trigger retry if enabled
+
         finally:
-            shutdown(main_driver)
-            
             attach_session_video_to_allure(session_id)
+
+            # Determine if this is the last attempt
+            rerun_marker = request.node.get_closest_marker("flaky")
+            if rerun_marker:
+                reruns = rerun_marker.kwargs.get("reruns", 0)  # Max retries
+                current_attempt = getattr(request.node, "execution_count", 1)  # Start at 1
+                last_attempt = current_attempt >= (reruns + 1)  # Last attempt happens on final retry
+            else:
+                last_attempt = True  # No retries configured
+
+            # Shutdown the driver if the test passed immediately OR if it's the last retry attempt
+            if last_attempt or not test_failed:
+                shutdown(main_driver)

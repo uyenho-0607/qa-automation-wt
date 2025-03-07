@@ -2,21 +2,20 @@ import random
 import logging
 
 
-from constants.helper.driver import access_url, delay, get_current_url, switch_to_new_window, url_changes
 from constants.helper.screenshot import attach_text
-from constants.helper.element import click_element, click_element_with_wait, is_element_present_by_xpath, find_element_by_xpath, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 from constants.helper.error_handler import handle_exception
+from constants.helper.element import click_element, click_element_with_wait, is_element_present_by_xpath, find_element_by_xpath, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.driver import access_url, delay, get_current_url, switch_to_new_window
 
 from data_config.encrypt_decrypt import decrypt_and_print
 from data_config.fileHandler import get_URLs, get_credentials
-
 from common.desktop.module_announcement.utils import modal_announcement
 
 
 # Configure logging
 # Log everything at DEBUG level and above
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
-logger = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+# logger = logging.getLogger(__name__)
 
 
 """
@@ -264,7 +263,6 @@ def handle_alert_error(driver, expect_failure: bool):
     
     # Return the error message for further processing or validation.
     return error_message
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -452,7 +450,7 @@ def select_and_verify_language(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
         
-def forgot_password(driver, server: str, client_name: str, account_type: str, email: str, accountID: str = None, device_type: str = "Desktop", env_type: str = "SIT"):
+def forgot_password(driver, server: str, client_name: str, email: str, accountID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "SIT"):
     try:
         # Step 1: Launch WebTrader platform
         launch_wt(driver, server, client_name, device_type, env_type)

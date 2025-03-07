@@ -2,9 +2,9 @@ from constants.helper.error_handler import handle_exception
 from constants.helper.element import populate_element, spinner_element
 
 from common.desktop.module_chart.chart import chart_minMax
-from common.desktop.module_trade.order_panel.orderPanel_info import button_orderPanel_action
+from common.desktop.module_trade.order_panel.order_panel_info import button_orderPanel_action
 from common.desktop.module_trade.place_edit_order.price_related import store_entryPrice, get_current_price, get_edit_order_label, get_random_point_distance, get_sl_point_distance, get_tp_point_distance, pointsDistance
-from common.desktop.module_trade.order_placing_window.utils import button_tradeModule, label_onePointEqual, input_size_volume, handle_entryPrice, handle_stopLoss, handle_takeProfit, expiry, button_trade_action
+from common.desktop.module_trade.order_placing_window.utils import button_tradeModule, label_onePointEqual, input_size_volume, handle_entryPrice, handle_stop_loss, handle_takeProfit, expiry, button_trade_action
 
 
 """
@@ -62,7 +62,7 @@ def calculate_stop_stopLoss(driver, trade_type, sl_type, option, label_onePoints
 
     entryPrice_value = store_entryPrice(entryPrice)
     
-    stopLoss_input = handle_stopLoss(driver, trade_type, sl_type)
+    stopLoss_input = handle_stop_loss(driver, trade_type, sl_type)
 
     if stopLoss_flag: # For Positive scenario
         if sl_type == "price":
