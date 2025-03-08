@@ -6,7 +6,7 @@ from constants.helper.element import click_element, find_element_by_testid, spin
 
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_announcement.utils import modal_announcement
-from common.desktop.module_login.webtrader_login import select_account_type
+from common.desktop.module_login.utils import select_account_type
 
 
 """
