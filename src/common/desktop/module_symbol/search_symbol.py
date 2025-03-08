@@ -5,7 +5,7 @@ from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, is_element_present_by_testid, populate_element, find_list_of_elements_by_testid, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
 
-from data_config.fileHandler import read_symbol_file
+from data_config.file_handler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
 
 

@@ -295,76 +295,60 @@ def get_orderID(driver, row_number):
 # Extract the order table
 def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab=None, position: bool = False):
     """
-    Extract order information including order IDs and other details from the specified rows in the order table.
-
-    Arguments:
-    - tab_order_type: The order type tab to select (e.g., 'open-positions', 'pending-orders', 'order-history').
-    - section_name: The section name for logging purposes.
-    - row_number: A list of row numbers to extract data from.
-    - sub_tab: The sub-tab to select within the order history section (e.g., 'orders-and-deals'). Default is None.
-    - position: Boolean to indicate if position-related data should be included (default is False).
-
-    Returns:
-    - order_ids: A list of extracted order IDs.
-    - orderPanel_data: A DataFrame containing the extracted order details.
-
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    Optimized function to extract order information including order IDs and details.
     """
     
-    # Initialize an empty list to hold the data
     order_ids = []
     table_row_contents = []
 
     try:
-        # Navigate to the specified tab
+        # Navigate to tab
         type_orderPanel(driver, tab_order_type, sub_tab, position)
         
-        # if response.status_code == 200:
+        # Wait for spinner once
         spinner_element(driver)
-        
-        delay(2)
 
-        # Locate the table body and header
+        # Get table body and headers
         table_body = get_table_body(driver)
         thead_data = get_table_headers(driver)
 
-        spinner_element(driver)
-        
-        # Check if the Symbol element exists and retrieve its data
+        # Check if Symbol element exists
         chart_symbol_name = get_chart_symbol_name(driver)
         if chart_symbol_name:
             thead_data.append("Symbol")
 
-        # Extract data from each specified row for order IDs and row details
+        # Extract rows efficiently
         for row in row_number:
             table_row = table_body.find_element(By.XPATH, f".//tr[{row}]")
-
-            # Locate and extract the order ID from the current row
-            order_id_element = table_row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
-            order_ids.append(order_id_element.text)
-
-            # Extract data from the row for the table content
-            cells = table_row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
-
-            row_data = []
-            for cell in cells:
-                wait_for_element_visibility(driver, cell)
-                row_data.append(cell.text.strip())
             
-            # Add the chart symbol name if it exists
+            # Extract Order ID
+            order_id_element = table_row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
+            order_id_text = order_id_element.text.strip()
+            order_ids.append(order_id_text)
+
+            # Extract row data
+            cells = table_row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
+            row_data = [re.sub(r'\s*/\s*', ' / ', cell.text.strip()) for cell in cells]
+            
+            # row_data = []
+            # for cell in cells:
+            #     wait_for_element_visibility(driver, cell)
+            #     # row_data.append(cell.text.strip())
+            #     text = cell.text.strip()
+            #     # Ensure spaces around '/'
+            #     normalized_text = re.sub(r'\s*/\s*', ' / ', text)
+            #     row_data.append(normalized_text)
+            
+            # Append symbol if present
             if chart_symbol_name:
                 row_data.append(chart_symbol_name)
-                
+
             table_row_contents.append(row_data)
 
-        # Attach order IDs text
-        attach_text(order_id_element.text, name="orderID")
+        # Attach extracted order IDs
+        attach_text("\n".join(order_ids), name="orderID")
 
-        # else:
-        #     assert False, f"Failed to fetch data. Status code: {response.status_code}"
-        
-        # Create a DataFrame using the data
+        # Process data into a DataFrame
         orderPanel_data = extract_order_data_details(driver, table_row_contents, thead_data, section_name)
         overall = tabulate(orderPanel_data.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
         attach_text(overall, name=section_name)
@@ -372,13 +356,14 @@ def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab
         return order_ids, orderPanel_data
 
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
+
 
 
 """

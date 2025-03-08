@@ -1,5 +1,3 @@
-import os
-import json
 import base64
 import random
 import pytesseract
@@ -9,13 +7,13 @@ from io import BytesIO
 from PIL import Image
 
 
-from constants.helper.driver import access_url, delay, wait_for_url
+from constants.helper.driver import access_url, delay
 from constants.helper.element import clear_input_field, find_element_by_xpath, get_label_of_element, populate_element_with_wait, visibility_of_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 
 from data_config.encrypt_decrypt import decrypt_and_print
-from data_config.fileHandler import get_URLs, get_credentials, get_success_urls
+from data_config.file_handler import get_URLs, get_credentials
 
 
 """

@@ -120,9 +120,9 @@ def get_sl_point_distance(option, trade_type):
     # Check if the option is valid
     if option in ["buy", "BUY", "BUY LIMIT", "BUY STOP", "BUY STOP LIMIT"]:
         if trade_type == "trade":
-            stopLoss_point = random.randint(400, 800) # Adjust the range as needed
+            stopLoss_point = random.randint(200, 400) # Adjust the range as needed
         else: # For edit
-            stopLoss_point = random.randint(200, 300) # Adjust the range as needed
+            stopLoss_point = random.randint(100, 200) # Adjust the range as needed
     
     elif option in ["sell", "SELL", "SELL LIMIT", "SELL STOP", "SELL STOP LIMIT"]:
         if trade_type == "trade":
@@ -165,9 +165,9 @@ def get_tp_point_distance(option, trade_type):
     
     elif option in ["sell", "SELL", "SELL LIMIT", "SELL STOP", "SELL STOP LIMIT"]:
         if trade_type == "trade":
-            takeProfit_point = random.randint(600, 1000) # Adjust the range as needed
+            takeProfit_point = random.randint(400, 500) # Adjust the range as needed
         else: # For edit
-            takeProfit_point = random.randint(200, 600) # Adjust the range as needed
+            takeProfit_point = random.randint(200, 400) # Adjust the range as needed
     else:
         raise ValueError(f"Invalid option '{option}' provided. Expected 'buy' or 'sell' related options.")
 

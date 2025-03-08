@@ -3,7 +3,7 @@ import traceback
 
 from constants.helper.screenshot import take_screenshot
 from constants.helper.element_android_app import click_element_with_wait, find_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath, populate_element_with_wait, visibility_of_element_by_testid, get_label_of_element
-from data_config.fileHandler import read_symbol_file
+from data_config.file_handler import read_symbol_file
 
 
 """

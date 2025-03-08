@@ -1,7 +1,7 @@
 import asyncio
 import websockets
 
-from data_config.fileHandler import read_token_file
+from data_config.file_handler import read_token_file
 
 
 

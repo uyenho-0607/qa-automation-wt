@@ -8,7 +8,7 @@ from constants.helper.driver import access_url, delay, get_current_url, switch_t
 
 from constants.element_ids import DataTestID
 from data_config.encrypt_decrypt import decrypt_and_print
-from data_config.fileHandler import get_URLs, get_credentials
+from data_config.file_handler import get_URLs, get_credentials
 from common.desktop.module_announcement.utils import modal_announcement
 
 
@@ -315,7 +315,7 @@ def select_account_type(driver, account_type: str):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "UAT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
+def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "SIT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 

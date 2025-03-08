@@ -35,6 +35,7 @@ def calculate_stop_entryPrice(driver, trade_type, option, label_onePointsEqual, 
         elif option in ["sell", "SELL STOP"]:
             entryPrice = current_price + (label_onePointsEqual * min_point_distance)
         
+    print("Entry Price Value", entryPrice)
     populate_element(element=entryPrice_input, text=entryPrice)
 
     # To store the entryPrice
@@ -83,6 +84,7 @@ def calculate_stop_stopLoss(driver, trade_type, sl_type, option, label_onePoints
         elif option in ["sell", "SELL STOP"]:
             stopLoss_value = entryPrice_value - (label_onePointsEqual * min_point_distance)
 
+    print("Stop Loss Value", stopLoss_value)
     populate_element(element=stopLoss_input, text=stopLoss_value)
 
     return stopLoss_value
@@ -128,6 +130,7 @@ def calculate_stop_takeProfit(driver, trade_type, tp_type, option, label_onePoin
         elif option in ["sell", "SELL STOP"]:
             takeProfit_value = entryPrice_value + (label_onePointsEqual * min_point_distance)
 
+    print("Take Profit Value", takeProfit_value)
     populate_element(element=takeProfit_input, text=takeProfit_value)
 
     return takeProfit_value

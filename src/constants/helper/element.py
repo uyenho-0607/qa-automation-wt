@@ -182,6 +182,7 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
 
 # Clear the field
 def clear_input_field(element):
+    print("Platform:", platform.system())  # Print the platform system
     element.click()
     # Keep attempting to clear the field until it's empty
     while element.get_attribute("value") != "":

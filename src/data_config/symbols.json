@@ -30,12 +30,13 @@
   "MT5": {
     "Transactcloudmt5": {
       "Symbols": [
-        "BAKE.USD",
-        "XAGUSD",
-        "XAUUSD"
+        "ALICE.USD"
       ],
       "Symbols_Price": [
-        "BAKE.USD"
+        "BAKE.USD",
+        
+        "XAGUSD",
+        "XAUUSD"
       ]
     }
   }

@@ -5,9 +5,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_symbol.utils import input_symbol 
 from common.desktop.module_trade.utils import review_pending_orderIDs
-from data_config.fileHandler import group_orders_by_username
 from data_config.utils import read_orderIDs_from_csv
 
 @allure.parent_suite("MT5 Membersite - Pending Order Review")
