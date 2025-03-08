@@ -5,6 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 from selenium.webdriver.common.by import By
 
+from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import clear_input_field, click_element, spinner_element, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, invisibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath, is_element_disabled_by_cursor, populate_element
@@ -29,14 +30,14 @@ def perform_search(driver, input_search):
     delay(1)
     
     # Wait for search results
-    if is_element_present_by_testid(driver, data_testid="signal-list"):
-        tbody = visibility_of_element_by_testid(driver, data_testid="signal-list")
+    if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value):
+        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
         rows = tbody.find_elements(By.XPATH, ".//tr")
         
         matched_rows = []  # Initialize an empty list to store matching rows
 
         for row in rows:
-            symbol_element = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-symbol']")
+            symbol_element = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_SYMBOL.value}']")
             symbol_text = symbol_element.text  # Extract the symbol text
             
             # Check if the input search term is in the extracted symbol text
@@ -63,14 +64,14 @@ def signal_search_feature(driver):
         spinner_element(driver)
 
         # Open the signal list
-        btn_signal_list = visibility_of_element_by_testid(driver, data_testid="signal-filter-all")
+        btn_signal_list = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_FILTER_ALL.value)
         click_element(element=btn_signal_list)
         
         delay(1)
 
         # Wait for the signal list table to load
-        if is_element_present_by_testid(driver, data_testid="signal-list"):
-            tbody = visibility_of_element_by_testid(driver, data_testid="signal-list")
+        if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value):
+            tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
             
             # Get all rows in the table (limit to 10)
             rows = tbody.find_elements(By.XPATH, ".//tr")[:10]
@@ -78,7 +79,7 @@ def signal_search_feature(driver):
             # Extract symbol names from the rows
             symbol_list = []
             for row in rows:
-                row_symbol_element = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-symbol']")
+                row_symbol_element = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_SYMBOL.value}']")
                 symbol_text = get_label_of_element(row_symbol_element)
                 symbol_list.append(symbol_text)
 
@@ -137,22 +138,22 @@ def express_interest(driver, click_submit: bool = True):
             click_element(element=btn_submit)
             
             # Wait for snackbar message and extract header & description
-            visibility_of_element_by_testid(driver, "notification-box")
-            message_header = visibility_of_element_by_testid(driver, "notification-title")
+            visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
+            message_header = visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
             extracted_header = get_label_of_element(message_header)
         
             # Validate message header
             if extracted_header != "Your interest has been submitted":
                 raise AssertionError(f"Invalid message header: {extracted_header}")
             
-            result = invisibility_of_element_by_testid(driver, data_testid="confirmation-modal")
+            result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL.value)
             if not result:
                 raise AssertionError("Confirmation dialog should not be visible")
         else:
             btn_cancel = find_element_by_xpath(driver, "//button[normalize-space(text())='Cancel']")
             click_element(element=btn_cancel)
             
-            result = invisibility_of_element_by_testid(driver, data_testid="confirmation-modal")
+            result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL.value)
             if not result:
                 raise AssertionError("Confirmation dialog should not be visible")
             
@@ -183,8 +184,7 @@ def verify_copy_to_order_is_disabled(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = visibility_of_element_by_testid(driver, data_testid="signal-list")
-        
+        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)        
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
 
@@ -192,14 +192,14 @@ def verify_copy_to_order_is_disabled(driver):
 
         # Loop through the rows to find a valid tradable symbol
         for row in rows:
-            row_status = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-order-status']")
+            row_status = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_ORDER_STATUS.value}']")
             label_status = get_label_of_element(row_status)
             print(f"Checking row with status: {label_status}")
             
             if label_status in ["Closed Flat", "Closed Loss", "Closed Profit"]:
                 print(f"'{label_status}' status found.")
                 found_valid_status = True  # Set flag to True
-                click_element(element=row)        
+                click_element(element=row)
                 break
         
         # If no valid status is found, mark the test as skipped
@@ -251,8 +251,8 @@ def select_valid_signal_to_trade(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = visibility_of_element_by_testid(driver, data_testid="signal-list")
-        
+        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)        
+
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
 
@@ -261,7 +261,7 @@ def select_valid_signal_to_trade(driver):
         # Loop through the rows to find a valid tradable symbol
         for row in rows:
             # Find the status column for the current row
-            row_status = row.find_element(By.XPATH, ".//*[@data-testid='signal-row-order-status']")
+            row_status = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_ORDER_STATUS.value}']")
             label_status = get_label_of_element(row_status)
             print(f"Checking row with status: {label_status}")
             

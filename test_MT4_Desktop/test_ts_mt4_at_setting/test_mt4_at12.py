@@ -5,8 +5,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import button_setting
-from common.desktop.module_setting.setting_linked_devices import linked_devices_modal
+from common.desktop.module_setting.utils import notification_settings_modal
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
@@ -19,7 +18,7 @@ class TC_MT4_aT12():
 
     @allure.description(
         """
-        Linked Devices - Validate system can terminate all/ individual session
+        Validation check on the "New Login Devices" is display / hidden
         """
     )
     
@@ -35,16 +34,16 @@ class TC_MT4_aT12():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-               login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+               url, username, password = login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
 
             with allure.step("Enable Linked Device OCT"):
-                linked_devices_modal(driver=main_driver, set_terminate=False)
+                notification_settings_modal(driver=main_driver, category="Linked_Devices", desired_state="unchecked", params_wt_url=url, login_username=username ,login_password=password)
 
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:

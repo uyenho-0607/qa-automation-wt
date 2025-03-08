@@ -1,3 +1,4 @@
+from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, get_current_url
@@ -27,18 +28,15 @@ def populate_password_fields(driver, old_password, new_password, confirm_passwor
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     # Locate and populate the old password input field
-    # old_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[1]")
-    old_password_input = find_element_by_testid(driver, data_testid="change-password-modal-old-password")
+    old_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_OLD_PASSWORD.value)
     populate_element(element=old_password_input, text=old_password)
 
     # Locate and populate the new password input field
-    # new_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[2]")
-    new_password_input = find_element_by_testid(driver, data_testid="change-password-modal-new-password")
+    new_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_NEW_PASSWORD.value)
     populate_element(element=new_password_input, text=new_password)
 
     # Locate and populate the confirm password input field
-    # confirm_password_input = find_element_by_xpath(driver, "(//input[@type='password'])[3]")
-    confirm_password_input = find_element_by_testid(driver, data_testid="change-password-modal-confirm-new-password")
+    confirm_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD.value)
     populate_element(element=confirm_password_input, text=confirm_password)
 
 """
@@ -64,8 +62,7 @@ def submit_and_handle_alert(driver, expected_alert_type, login_username, login_p
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     # Find the submit button and click it
-    # submit_button = find_element_by_xpath(driver, "//button[contains(normalize-space(text()), 'Submit')]")
-    submit_button = find_element_by_testid(driver, data_testid="change-password-modal-confirm")
+    submit_button = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM.value)
     click_element(element=submit_button)
     
     # Try to capture the alert message and type
@@ -127,41 +124,6 @@ def capture_alert(driver):
 
     # If no alert is found, return None with type 'no_alert'
     return None, "no_alert"
-
-
-
-# def capture_alert(driver):
-#     """
-#     Captures the first visible alert message (success or error) based on predefined test IDs.
-
-#     Returns:
-#     - Tuple (alert_message, alert_type) where:
-#         - alert_message: The WebElement representing the alert message.
-#         - alert_type: A string indicating the type of alert ("success" or "error").
-#         If no alert is found, returns (None, None).
-        
-#     Raises:
-#     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
-#     """
-#     # Attempt to capture success or error alerts
-#     try:
-#         alert_message = visibility_of_element_by_testid(driver, data_testid="alert-success")
-#         return alert_message, "success"
-#     except Exception as e:
-#         # Log exception if the success alert is not found
-#         print(f"Error while capturing success alert: {e}")
-#         pass
-
-#     try:
-#         alert_message = visibility_of_element_by_testid(driver, data_testid="alert-error")
-#         return alert_message, "error"
-#     except Exception as e:
-#         # Log exception if the error alert is not found
-#         print(f"Error while capturing error alert: {e}")
-    
-#     # If no alert is found, return None
-#     # return None, None
-#     return None, "no_alert"
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -234,15 +196,15 @@ def perform_login(driver, login_username, login_password):
     select_account_type(driver, account_type="live")
     
     # Find and populate the username input field
-    username_input = find_element_by_testid(driver, data_testid="login-user-id")
+    username_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
     populate_element(element=username_input, text=login_username)
 
     # Find and populate the password input field
-    password_input = find_element_by_testid(driver, data_testid="login-password")
+    password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
     populate_element(element=password_input, text=login_password)
 
     # Submit the login form
-    submit_button = find_element_by_testid(driver, data_testid="login-submit")
+    submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
     click_element(submit_button)
     
     # Wait until the login process completes (spinner disappears)
@@ -298,7 +260,7 @@ def handle_error(driver, label_message):
             break  # Stop after finding the first matching error message
 
     # Close the modal dialog
-    btn_close = find_element_by_testid(driver, data_testid="change-password-modal-close")
+    btn_close = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CLOSE.value)
     click_element(element=btn_close)
 
 """

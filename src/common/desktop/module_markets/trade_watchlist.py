@@ -97,7 +97,7 @@ def toggle_symbol_favorite_status(driver):
     try:
         def get_watchlist_options(exclude="Favourites"):
             """Retrieve watchlist options, excluding a specific category."""
-            options = find_list_of_elements_by_xpath(driver, "//div[@data-testid='watchlist-tabs']/div")    
+            options = find_list_of_elements_by_xpath(driver, "//div[@data-testid='watchlist-tabs']/div")
             
             if not options:
                 assert False, "No categories found"

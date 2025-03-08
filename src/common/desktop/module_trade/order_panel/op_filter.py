@@ -235,7 +235,7 @@ def verify_sort_column(driver, tab_order_type, column_type):
     column_elements = find_list_of_elements_by_xpath(driver, column_xpath_map[column_type])
     column_values = [element.text.strip() for element in column_elements]
 
-    # Clean the values for sorting (keep signs and commas)    
+    # Clean the values for sorting (keep signs and commas)
     def convert_value(value):
         value = value.strip()  # Remove leading/trailing spaces
         

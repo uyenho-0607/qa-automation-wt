@@ -176,7 +176,7 @@ def OH_closeDate(driver, startDate: str, endDate: str, target_startMonth: str, t
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)    
+        handle_exception(driver, e)
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

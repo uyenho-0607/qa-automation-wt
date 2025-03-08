@@ -1,12 +1,12 @@
 import random
 import logging
 
-
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, click_element_with_wait, is_element_present_by_xpath, find_element_by_xpath, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import click_element, click_element_with_wait, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_element_by_testid, find_list_of_elements_by_testid, get_label_of_element, javascript_click, populate_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 from constants.helper.driver import access_url, delay, get_current_url, switch_to_new_window
 
+from constants.element_ids import DataTestID
 from data_config.encrypt_decrypt import decrypt_and_print
 from data_config.fileHandler import get_URLs, get_credentials
 from common.desktop.module_announcement.utils import modal_announcement
@@ -144,15 +144,15 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Enter the username and password into the login form
-        username_input = find_element_by_testid(driver, data_testid="login-user-id")
+        username_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
         populate_element(element=username_input, text=login_username)
 
         # Enter the username and password into the login form
-        password_input = find_element_by_testid(driver, data_testid="login-password")
+        password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
         populate_element(element=password_input, text=login_password)
 
         # Click the login submit button
-        submit_button = find_element_by_testid(driver, data_testid="login-submit")
+        submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
         click_element(submit_button)
 
         # Handle the result of the login (success or failure)
@@ -202,8 +202,7 @@ def handle_login_result(driver, expect_failure: bool = False, selected_language:
         verification_text = language_specific_text.get(selected_language, "Trade")
 
         # Wait until the text is present in the specified element
-        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="side-bar-option-trade", text=verification_text)
-
+        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.SIDE_BAR_OPTION_TRADE.value, text=verification_text)
         # If the account balance is found, the login is successful
         if match:
             # If login succeeded but failure was expected, log the unexpected success and fail the test
@@ -241,28 +240,29 @@ def handle_alert_error(driver, expect_failure: bool):
     Returns:
     - error_message: The error message text extracted from the login failure notification.
     """
-    # Locate the error message notification element by its test ID.
-    error_message_notification = visibility_of_element_by_testid(driver, data_testid="alert-error")
-    # Extract the text (label) of the error message from the notification element.
-    error_message = get_label_of_element(element=error_message_notification)
-    # Attach the extracted error message to the logs for reporting purposes.
-    attach_text(error_message, name="Error message found:")
-    
-    # Handle the expected failure case
-    if expect_failure:
-        # If an expected failure message is found, log it and pass the test
-        if error_message in ["Invalid Login", "Invalid credentials, please try again", "Account already linked"]:
-            attach_text("Expected failure condition met.", name="Expected Failure")
-            assert True  # Pass the test as failure was expected and encountered
+    if is_element_present_by_testid(driver, data_testid=DataTestID.ALERT_ERROR.value):
+        # Locate the error message notification element by its test ID.
+        error_message_notification = visibility_of_element_by_testid(driver, data_testid=DataTestID.ALERT_ERROR.value)
+        # Extract the text (label) of the error message from the notification element.
+        error_message = get_label_of_element(element=error_message_notification)
+        # Attach the extracted error message to the logs for reporting purposes.
+        attach_text(error_message, name="Error message found:")
+        
+        # Handle the expected failure case
+        if expect_failure:
+            # If an expected failure message is found, log it and pass the test
+            if error_message in ["Invalid Login", "Invalid credentials, please try again", "Account already linked"]:
+                attach_text("Expected failure condition met.", name="Expected Failure")
+                assert True  # Pass the test as failure was expected and encountered
+            else:
+                # If an unexpected error message is encountered during the expected failure case, fail the test
+                assert False, f"Expected failure, but received unexpected message: {error_message}"
         else:
-            # If an unexpected error message is encountered during the expected failure case, fail the test
-            assert False, f"Expected failure, but received unexpected message: {error_message}"
-    else:
-        # If login failed unexpectedly (failure was not expected), fail the test
-        assert False, f"Unexpected error message: {error_message}"
+            # If login failed unexpectedly (failure was not expected), fail the test
+            assert False, f"Unexpected error message: {error_message}"
     
-    # Return the error message for further processing or validation.
-    return error_message
+        # Return the error message for further processing or validation.
+        return error_message
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -286,10 +286,19 @@ def select_account_type(driver, account_type: str):
     Returns:
     - None: This function performs the action of selecting the account type tab.
     """
+            
+    button_testids = {
+        "crm": DataTestID.TAB_LOGIN_ACCOUNT_TYPE_CRM.value,
+        "live": DataTestID.TAB_LOGIN_ACCOUNT_TYPE_LIVE.value,
+        "demo": DataTestID.TAB_LOGIN_ACCOUNT_TYPE_DEMO.value
+    }
+    
+    button_testid = button_testids.get(account_type)
+    if not button_testid:
+        raise ValueError(f"Invalid button type: {account_type}")
 
     # Locate the account type selector element by its test ID.
-    acct_type_selector = visibility_of_element_by_testid(driver, data_testid=f"tab-login-account-type-{account_type}")
-
+    acct_type_selector = visibility_of_element_by_testid(driver, data_testid=button_testid)
     # Perform a JavaScript click action on the located account type element.
     javascript_click(driver, element=acct_type_selector)
 
@@ -306,7 +315,7 @@ def select_account_type(driver, account_type: str):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "SIT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
+def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "UAT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 
@@ -360,7 +369,6 @@ def login_wt(driver, server: str, client_name: str, testcaseID: str = None, acco
 """
 
 
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 LANGUAGE SELECTION
@@ -391,11 +399,11 @@ def select_and_verify_language(driver):
         }
 
         # Step 1: Locate the language dropdown
-        language_dropdown = visibility_of_element_by_testid(driver, data_testid="language-dropdown")
+        language_dropdown = visibility_of_element_by_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN.value)
 
         # Step 2: Get all available language options
         click_element_with_wait(driver, element=language_dropdown)
-        languages_options = find_list_of_elements_by_testid(driver, data_testid="language-option")
+        languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.LANGUAGE_OPTION.value)
 
         # Keep track of selected languages to avoid repetition
         selected_languages = []
@@ -419,7 +427,7 @@ def select_and_verify_language(driver):
             delay(0.5)
 
             # Step 5: Verify if the change is reflected
-            submit_button = find_element_by_testid(driver, data_testid="login-submit")
+            submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
             button_text = submit_button.text.strip()
 
             # Get the expected value from the language map
@@ -447,6 +455,13 @@ def select_and_verify_language(driver):
         
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                FORGOT PASSWORD
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
         
@@ -501,3 +516,7 @@ def forgot_password(driver, server: str, client_name: str, email: str, accountID
     
     except Exception as e:
         handle_exception(driver, e)
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""

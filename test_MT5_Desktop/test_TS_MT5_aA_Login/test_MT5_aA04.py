@@ -43,7 +43,7 @@ class TC_MT5_aA04():
             if test_failed:
                 allure.attach(str(e), name="Failure Info", attachment_type=allure.attachment_type.TEXT)
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:

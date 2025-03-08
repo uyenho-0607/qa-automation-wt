@@ -5,27 +5,25 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import button_setting
-from common.desktop.module_setting.setting_contact_information import contact_information
-
+from common.desktop.module_setting.setting_linked_devices import linked_devices_modal
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
 @allure.epic("MT4 Desktop ts_at - Setting")
 
 # Member Portal
-class TC_MT4_aT12():
+class TC_MT4_aT13():
 
-    @allure.title("TC_MT4_aT12")
+    @allure.title("TC_MT4_aT13")
 
     @allure.description(
         """
-        Contact US
+        Linked Devices - Validate system can terminate all/ individual session
         """
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc12(self, chromeDriver, request):
+    def test_tc13(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -37,15 +35,15 @@ class TC_MT4_aT12():
             
             with allure.step("Login to Web Trader Membersite"):
                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
-            
-            with allure.step("Verify Contact Information is displayed"):
-                contact_information(driver=main_driver)
+
+            with allure.step("Enable Linked Device OCT"):
+                linked_devices_modal(driver=main_driver, set_terminate=False)
 
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:

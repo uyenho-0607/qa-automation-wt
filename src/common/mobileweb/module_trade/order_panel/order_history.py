@@ -147,7 +147,7 @@ def is_within_range(date_str, start_dt, end_dt):
 
 def OH_closeDate(driver, startDate, endDate):
     try:
-        spinner_element(driver)        
+        spinner_element(driver)
 
         calendar_datePicker(driver, startDate, endDate)
         

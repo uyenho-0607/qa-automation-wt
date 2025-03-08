@@ -27,7 +27,8 @@ def chromeDriver() -> WebDriver:
 
 
 
-@pytest.fixture(scope="class")
+# @pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def chromeDriver() -> WebDriver:
     # This will install the correct version of ChromeDriver if not already installed
     # To be commented out if using the remote

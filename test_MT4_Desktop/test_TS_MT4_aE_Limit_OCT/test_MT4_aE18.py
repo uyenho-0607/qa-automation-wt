@@ -5,7 +5,6 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, close_delete_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
@@ -84,7 +83,7 @@ class TC_MT4_aE18():
             test_failed = True  # Mark test as failed
             if test_failed:
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:

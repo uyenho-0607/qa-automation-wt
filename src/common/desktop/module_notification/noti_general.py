@@ -1,3 +1,4 @@
+from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import javascript_click, find_element_by_testid
 
@@ -20,7 +21,7 @@ def notification_bell(driver):
     
     try:
         # Wait for the notification bell element to be visible before interacting
-        noti_bell = find_element_by_testid(driver, data_testid="notification-selector")
+        noti_bell = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_SELECTOR.value)
         
         # Use JavaScript to click the notification bell
         javascript_click(driver, element=noti_bell)
@@ -54,9 +55,20 @@ def notification_type(driver, notiType):
     """
     
     try:
-        # Wait for the notification type element to be present
-        notifcation_type = find_element_by_testid(driver, data_testid=f"tab-notification-type-{notiType}")
         
+        button_testids = {
+            "order": DataTestID.TAB_NOTIFICATION_TYPE_ORDER.value,
+            "system": DataTestID.TAB_NOTIFICATION_TYPE_SYSTEM.value,
+            "information": DataTestID.TAB_NOTIFICATION_TYPE_INFORMATION.value
+        }
+        
+        button_testid = button_testids.get(notiType)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {notiType}")
+
+        # Wait for the notification type element to be present
+        notifcation_type = find_element_by_testid(driver, data_testid=button_testid)
+
         # Use JavaScript to click the notification tab
         javascript_click(driver, element=notifcation_type)
 

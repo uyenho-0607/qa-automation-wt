@@ -4,6 +4,7 @@ import random
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
+from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, delay, get_current_url
 from constants.helper.element import spinner_element, is_element_present_by_testid, click_element, populate_element, find_element_by_testid, find_list_of_elements_by_testid, trigger_click, visibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_testid
@@ -27,14 +28,14 @@ def get_account_banner(driver):
         valid_message_headers = ["Account Switched"]
 
         # Wait for the snackbar message to be visible
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
         
         # Wait for the message header to be visible and extract it
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-title")
+        message_header = visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
         extracted_header = get_label_of_element(message_header)
 
         # Extract the message description
-        label_message_description = find_element_by_testid(driver, data_testid="notification-description")
+        label_message_description = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_DESCRIPTION.value)
         label_message = get_label_of_element(label_message_description)
 
         # Check if the header is valid
@@ -44,11 +45,11 @@ def get_account_banner(driver):
         accountID = re.search(r'Account ID:\s*(\d+)', label_message).group(1)
         print("accountID", accountID)
         
-        btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
+        btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_CLOSE_BUTTON.value)
         trigger_click(driver, element=btn_close)
 
         # Retrieve the MetaTrader ID
-        traderID = find_element_by_testid(driver, data_testid="account-id")
+        traderID = find_element_by_testid(driver, data_testid=DataTestID.ACCOUNT_ID.value)
         label_traderID = get_label_of_element(traderID)
         
         assert accountID == label_traderID, f"AccountID does not match. Expected to display {accountID}"
@@ -84,11 +85,11 @@ def switch_account_type(driver, account_type):
         if account_type == "demo":
             setting_option = "switch-to-demo" # Button to switch to the demo account
             expected_label = "Demo Account" # Expected label for demo account
-            testid = "tab-login-account-type-demo" # Test ID for the demo account tab
+            testid = DataTestID.TAB_LOGIN_ACCOUNT_TYPE_DEMO.value # Test ID for the demo account tab
         elif account_type == "live":
             setting_option = "switch-to-live" # Button to switch to the live account
             expected_label = "Live Account" # Expected label for live account
-            testid = "tab-login-account-type-live" # Test ID for the live account tab
+            testid = DataTestID.TAB_LOGIN_ACCOUNT_TYPE_LIVE.value # Test ID for the live account tab
         else:
             # Raise an error if the provided account type is invalid
             raise ValueError("Invalid account type. Must be either 'demo' or 'live'.")
@@ -116,7 +117,7 @@ def switch_account_type(driver, account_type):
 
 def retrieve_accountID(driver):
     # Retrieve the account ID
-    account_id_element = find_element_by_testid(driver, data_testid="link-switch-confirmation-modal-description")
+    account_id_element = find_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_DESCRIPTION.value)
     retrieved_account_id = get_label_of_element(account_id_element).strip()
     label_account_id = re.search(r'Account ID:\s*(\d+)', retrieved_account_id).group(1)
     return label_account_id
@@ -135,8 +136,9 @@ def handle_success(driver, account_id: str, expect_failure: bool):
     label_account_id = retrieve_accountID(driver)
     assert account_id == label_account_id, "Account ID does not match"
     print("Linked Account ID:", label_account_id)
-
-    btn_close = find_element_by_testid(driver, data_testid="link-switch-confirmation-modal-confirm")
+    
+    # Click on the "Close button"
+    btn_close = find_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_CONFIRM.value)
     click_element(btn_close)
     
     delay(1)
@@ -144,8 +146,7 @@ def handle_success(driver, account_id: str, expect_failure: bool):
     accountInformation(driver)
     
     # Ensure account_id exists in the account list
-    account_list = find_list_of_elements_by_testid(driver, data_testid="account-option-detail")
-
+    account_list = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_OPTION_DETAIL.value)
     account_ids = []
     for account in account_list:
         account_id_from_list = get_label_of_element(account).strip()
@@ -163,25 +164,24 @@ def link_account(driver, account_id: str, accountPassword: str, expect_failure: 
         accountInformation(driver)
 
         # Locate and click the "Live Account" tab
-        live_account = find_element_by_testid(driver, data_testid="add-account")
+        live_account = find_element_by_testid(driver, data_testid=DataTestID.ADD_ACCOUNT.value)
         click_element(element=live_account)
         
         # Wait for it to be visible
-        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="link-account-modal-title", text="Link Another Account")
+        wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_TITLE.value, text="Link Another Account")
         
         # Find and populate the accountID and password input field
-        accountID_input = find_element_by_testid(driver, data_testid="link-account-modal-account-id")
+        accountID_input = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_ACCOUNT_ID.value)
         populate_element(element=accountID_input, text=account_id)
         
-        accountID_input = find_element_by_testid(driver, data_testid="link-account-modal-password")
+        accountID_input = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_PASSWORD.value)
         populate_element(element=accountID_input, text=accountPassword)
 
         # Confirm and handle result
-        btn_confirm = find_element_by_testid(driver, data_testid="link-account-modal-confirm")
+        btn_confirm = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_CONFIRM.value)
         click_element(element=btn_confirm)
         
-        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="link-switch-confirmation-modal-title", text="Successfully Linked")
-        if match:
+        if wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_TITLE.value, text="Successfully Linked"):
             handle_success(driver, account_id, expect_failure)
         else:
             handle_alert_error(driver, expect_failure)
@@ -226,7 +226,7 @@ def switch_or_delete_account(driver, option: str, login_password=None, params_wt
         accountInformation(driver)
         
         # Locate all available accounts (excluding the first one)
-        account_list = find_list_of_elements_by_testid(driver, data_testid="account-option-item")
+        account_list = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_OPTION_ITEM.value)
         hoverable_accounts = account_list[1:]  # Exclude the first account
         
         # Randomly select an account from the available list
@@ -262,8 +262,7 @@ def switch_or_delete_account(driver, option: str, login_password=None, params_wt
             click_element(element=button)
             
             # Wait for the confirmation message to appear
-            match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="link-switch-confirmation-modal-title", text=action['action_text'])    
-            if match:
+            if wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_TITLE.value, text=action['action_text']):
                 # Retrieve the account ID displayed in the confirmation dialog
                 label_account_id = retrieve_accountID(driver)
                 
@@ -272,7 +271,7 @@ def switch_or_delete_account(driver, option: str, login_password=None, params_wt
                 print(f"{action['action_type']} Account ID:", label_account_id)
                 
                 # Close the confirmation dialog
-                btn_confirm = find_element_by_testid(driver, data_testid="link-switch-confirmation-modal-confirm")
+                btn_confirm = find_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_CONFIRM.value)
                 click_element(btn_confirm)
                 
         else:
@@ -285,14 +284,13 @@ def switch_or_delete_account(driver, option: str, login_password=None, params_wt
             
         elif option == "delete":
             # Wait for the success message after account deletion
-            match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="link-switch-confirmation-modal-title", text="Successfully remove account")    
-            if match:
+            if wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_TITLE.value, text="Successfully remove account"):
                 # Retrieve the account ID after deletion confirmation
                 label_account_id = retrieve_accountID(driver)
                 assert label_accountID == label_account_id, "Account ID does not match"
                 
                 # Close the success dialog
-                btn_confirm = find_element_by_testid(driver, data_testid="link-switch-confirmation-modal-confirm")
+                btn_confirm = find_element_by_testid(driver, data_testid=DataTestID.LINK_SWITCH_CONFIRMATION_MODAL_CONFIRM.value)
                 click_element(btn_confirm)
                 
                 # Print success message
@@ -339,7 +337,7 @@ def verify_single_account_displayed(driver):
     accountInformation(driver)
     
     # Ensure account_id exists in the account list
-    accounts = find_list_of_elements_by_testid(driver, data_testid="account-option-item")
+    accounts = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_OPTION_ITEM.value)
 
     # Extract only visible accounts
     visible_accounts = [acc.text for acc in accounts if acc.is_displayed()]
@@ -358,30 +356,30 @@ def verify_single_account_displayed(driver):
 def handle_password_prompt_on_account_switch(driver, set_confirmBtn: bool = True, expect_failure: bool = False):
     try:
 
-        match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="link-account-modal-title", text="Please re-enter your password")
-        if match:
+        if wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_TITLE.value, text="Please re-enter your password"):
+            
             # Locate the input field where the take profit value is displayed
-            accountID = find_element_by_testid(driver, data_testid="link-account-modal-account-id")
+            accountID = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_ACCOUNT_ID.value)
             # Determine the initial value and the increment based on the value type (price or points)
             accountID_value = accountID.get_attribute("value")
             print(accountID_value)
             
-            password = find_element_by_testid(driver, data_testid="link-account-modal-password")
+            password = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_PASSWORD.value)
             populate_element(element=password, text="Asd123")
             
             if set_confirmBtn:
                 # Confirm and handle result
-                btn_confirm = find_element_by_testid(driver, data_testid="link-account-modal-confirm")
+                btn_confirm = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_CONFIRM.value)
                 click_element(element=btn_confirm)
                 
                 # Wait a moment to check for an error or success response
-                if is_element_present_by_testid(driver, data_testid="alert-error"):
+                if is_element_present_by_testid(driver, data_testid=DataTestID.ALERT_ERROR.value):
                     handle_alert_error(driver, expect_failure)
                 else:
                     get_account_banner(driver)
             else:
                 # Close the action dialog
-                btn_close = find_element_by_testid(driver, data_testid="link-account-modal-close")
+                btn_close = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_CLOSE.value)
                 click_element(btn_close)
         else:
             # Get the success message for switch account

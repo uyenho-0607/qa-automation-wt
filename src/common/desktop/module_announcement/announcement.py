@@ -1,8 +1,8 @@
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, spinner_element, visibility_of_element_by_testid, find_element_by_testid
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -26,7 +26,7 @@ def modal_announcement(driver, button: str = "got-it"):
         spinner_element(driver)
 
         # Wait for the feature announcement modal to be visible
-        visibility_of_element_by_testid(driver, data_testid="feature-announcement-modal")
+        visibility_of_element_by_testid(driver, data_testid=DataTestID.FEATURE_ANNOUNCEMENT_MODAL.value)
 
         # If the modal is visible, interact with it (click "Got it")
         handle_modal_announcement(driver, button)
@@ -52,7 +52,7 @@ def modal_announcement(driver, button: str = "got-it"):
 """
 
 
-def handle_modal_announcement(driver, button: str):
+def handle_modal_announcement(driver, button_type: str):
     """
     This function handles modal announcements by clicking either the "Got It", "Try It Now", or "Media-Arrow" buttons.
     If the "got-it" button is selected, it clicks all "Got It" buttons until none are found.
@@ -60,19 +60,29 @@ def handle_modal_announcement(driver, button: str):
     If the "media-left" or "media-right" buttons are selected, it clicks those buttons once.
 
     Arguments:
-    - button: The type of button to click ('got-it' or 'try-it-now' or 'media-left', 'media-right'). Defaults to 'got-it'.
+    - button_type: The type of button to click ('got-it' or 'try-it-now' or 'media-left', 'media-right'). Defaults to 'got-it'.
 
     Raises:
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
         # Determine the data-testid based on the button type
-        button_testid = f"feature-announcement-modal-{button}-button"
+        button_testids = {
+            "got-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_GOT_IT_BUTTON.value,
+            "try-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON.value,
+            "media-left": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON.value,
+            "media-right": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON.value
+        }
+        
 
+        button_testid = button_testids.get(button_type)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {button_type}")
+        
         # Attempt to locate the button
         modal_button = find_element_by_testid(driver, data_testid=button_testid)
         
-        if button == "got-it":
+        if button_type == "got-it":
             # Continuously click the "Got It" button until it's no longer found
             while modal_button:
                 click_element(element=modal_button)

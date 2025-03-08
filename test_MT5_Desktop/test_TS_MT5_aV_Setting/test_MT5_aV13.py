@@ -5,9 +5,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import button_setting
-from common.desktop.module_setting.setting_contact_information import contact_information
-
+from common.desktop.module_setting.setting_linked_devices import linked_devices_modal
 
 @allure.parent_suite("MT5 Membersite - Desktop - Setting")
 
@@ -20,7 +18,7 @@ class TC_MT5_aV13():
 
     @allure.description(
         """
-        Contact US
+        Linked Devices
         """
     )
     
@@ -36,16 +34,16 @@ class TC_MT5_aV13():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
-            
-            with allure.step("Verify Contact Information is displayed"):
-                contact_information(driver=main_driver)
+               login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+
+            with allure.step("Enable Linked Device OCT"):
+                linked_devices_modal(driver=main_driver, set_terminate=False)
 
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:

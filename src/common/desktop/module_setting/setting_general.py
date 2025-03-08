@@ -1,11 +1,8 @@
+from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-
 from constants.helper.color_element import get_body_color
 from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
-
-
-
 
 
 """
@@ -16,7 +13,7 @@ from constants.helper.element import click_element, find_element_by_testid, java
 
 def accountInformation(driver):
     # To open the account linkage profile
-    accountInfo = find_element_by_testid(driver, data_testid="account-selector")
+    accountInfo = find_element_by_testid(driver, data_testid=DataTestID.ACCOUNT_SELECTOR.value)
     javascript_click(driver, element=accountInfo)
     
     delay(2)
@@ -33,7 +30,7 @@ def accountInformation(driver):
                                                 SETTING DROPDOWN OPTION
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-        
+
 def button_setting(driver, setting_option: str):
     """
     Navigates to a specific setting option and performs actions based on the selected setting.
@@ -48,10 +45,28 @@ def button_setting(driver, setting_option: str):
     """
     try:
         # Click on the settings button to open the dropdown
-        click_element(find_element_by_testid(driver, data_testid="setting-button"))
+        btn_setting = find_element_by_testid(driver, data_testid=DataTestID.SETTING_BUTTON.value)
+        click_element(element=btn_setting)
+        
+        button_testids = {
+            "switch-to-live": DataTestID.SETTING_OPTION_SWITCH_TO_LIVE.value,
+            "switch-to-demo": DataTestID.SETTING_OPTION_SWITCH_TO_DEMO.value,
+            "open-demo-account": DataTestID.SETTING_OPTION_OPEN_DEMO_ACCOUNT.value,
+            "notification-setting": DataTestID.SETTING_OPTION_NOTIFICATION_SETTING.value,
+            "language": DataTestID.SETTING_OPTION_LANGUGAGE.value,
+            "change-password": DataTestID.SETTING_OPTION_CHANGE_PASSWORD.value,
+            "linked-device": DataTestID.SETTING_OPTION_LINKED_DEVICE.value,
+            "contact-information": DataTestID.SETTING_OPTION_CONTACT_INFORMATION.value,
+            "logout": DataTestID.SETTING_OPTION_LOGOUT.value
+        }
+        
+        button_testid = button_testids.get(setting_option)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {setting_option}")
         
         # Click on the specified setting option
-        dropdown_option = visibility_of_element_by_testid(driver, data_testid=f"setting-option-{setting_option}")
+        dropdown_option = visibility_of_element_by_testid(driver, data_testid=button_testid)
+        delay(0.5)
         click_element(dropdown_option)
 
         # Mapping setting options to expected text
@@ -64,9 +79,6 @@ def button_setting(driver, setting_option: str):
         }
         
         delay(1)
-        # demo-account-completion-modal-title
-        # change-password-modal-title
-        # demo-account-creation-modal-title
         
         if setting_option in expected_text_map:
             expected_text = expected_text_map[setting_option]
@@ -109,7 +121,8 @@ def button_theme(driver, theme_option=None):
         for option in themes:
             
             # Click on the theme switch button to open the theme dropdown
-            setting = find_element_by_testid(driver, data_testid="switch-theme-button")
+            # setting = find_element_by_testid(driver, data_testid="switch-theme-button")
+            setting = find_element_by_testid(driver, data_testid=DataTestID.SWITCH_THEME_BUTTON.value)
             click_element(setting)
             
             # Wait for and click the dropdown option for the current theme (Light, Dark, or System)

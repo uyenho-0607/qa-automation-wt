@@ -60,8 +60,7 @@ def verify_no_orders_in_my_trades(driver):
         match = wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[contains(text(), 'You do not have any trades here')]", text="You do not have any trades here")
         if match:
             text = find_element_by_xpath(driver, "//div[contains(text(), 'You do not have any trades here')]")
-            get_label_of_element(element=text)
-            print("System displayed the test")
+            print(get_label_of_element(element=text))
         
     except Exception as e:
         # Handle any exceptions that occur during the execution

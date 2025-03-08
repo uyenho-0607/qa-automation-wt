@@ -2,6 +2,7 @@ import re
 from decimal import Decimal
 from collections import defaultdict
 
+from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import get_label_of_element, find_list_of_elements_by_testid
@@ -22,7 +23,7 @@ def sum_by_currency(driver):
         currency_totals = defaultdict(lambda: Decimal('0'))
         
         # Get the each account balance details
-        amounts = find_list_of_elements_by_testid(driver, data_testid="account-option-balance")
+        amounts = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_OPTION_BALANCE.value)
         
         for amount in amounts:
             text = amount.text.strip()
@@ -34,8 +35,7 @@ def sum_by_currency(driver):
                 currency_totals[currency] += value
         
         # Get the total account balance details
-        total_balance_elements = find_list_of_elements_by_testid(driver, data_testid="account-total-balance")
-        
+        total_balance_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_TOTAL_BALANCE.value)
         for total_balance_element in total_balance_elements:
             label_total_balance = get_label_of_element(element=total_balance_element)
 

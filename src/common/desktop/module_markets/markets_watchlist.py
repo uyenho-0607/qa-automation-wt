@@ -86,7 +86,7 @@ def market_watchlist(driver):
         # Assert that the symbol in the chart matches the selected symbol
         assert chart_symbol_name, f"Chart symbol mismatch: expected '{label_symbol}', found '{chart_symbol_name}'"
     
-        tab = visibility_of_element_by_testid(driver, data_testid="tab-all")    
+        tab = visibility_of_element_by_testid(driver, data_testid="tab-all")
         if tab:  # Ensure the tab is visible
             tab_text = tab.text
             if "selected" in tab.get_attribute("class"):

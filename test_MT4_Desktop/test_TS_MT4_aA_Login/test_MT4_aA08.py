@@ -4,8 +4,7 @@ import pytest
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
-from common.desktop.module_login.utils import forgot_password, handle_alert_error
-from common.desktop.module_setting.utils import button_setting
+from common.desktop.module_login.utils import forgot_password
 
 
 @allure.parent_suite("MT4 Membersite - Desktop - Login")
@@ -41,7 +40,7 @@ class TC_MT4_aA08():
             test_failed = True  # Mark test as failed
             if test_failed:
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:

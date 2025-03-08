@@ -36,13 +36,13 @@ class TC_MT4_aA06():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo", testcaseID="TC03", expect_failure=True) 
+                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo", testcaseID="TC02", expect_failure=True) 
                 
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:
                 attach_text(get_text=str(e), name="Failure Info")
-                button_setting(driver=main_driver, setting_option="logout")
+                shutdown(main_driver)
                 raise  # Trigger retry if enabled
 
         finally:
