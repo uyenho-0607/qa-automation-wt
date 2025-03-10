@@ -32,7 +32,7 @@ def chromeDriver() -> WebDriver:
 def chromeDriver() -> WebDriver:
     # This will install the correct version of ChromeDriver if not already installed
     # To be commented out if using the remote
-    chromedriver_autoinstaller.install()
+    # chromedriver_autoinstaller.install()
     
     options = Options()
     options.add_argument("--incognito") # Opens the browser in incognito mode
@@ -52,9 +52,9 @@ def chromeDriver() -> WebDriver:
     
     # options.add_experimental_option("detach", True) # allows the Chrome browser to stay open after the script finishes.
     
-    service = Service()
-    driver = webdriver.Chrome(service=service, options=options)
+    # service = Service()
+    # driver = webdriver.Chrome(service=service, options=options)
     
-    # driver = webdriver.Remote('http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub', options=options)
+    driver = webdriver.Remote('http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub', options=options)
 
     return driver

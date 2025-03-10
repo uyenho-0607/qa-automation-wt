@@ -1,5 +1,6 @@
 import allure
 import pytest
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -8,14 +9,15 @@ from common.desktop.module_trade.utils import review_pending_orderIDs
 from data_config.utils import read_orderIDs_from_csv
 
 
-@allure.parent_suite("MT4 Membersite - Pending Order Review")
+@allure.parent_suite("MT4 Membersite - Pending Order Expiry Review")
 
-@allure.epic("MT4 Desktop ts_au - Pending Order Review")
+@allure.epic("MT4 Desktop - Pending Order Expiry Review")
+
 
 # Member Portal
-class TC_aD02():
+class TC_review_pending_order_expiry():
 
-    @allure.title("TC_MT4_aD")
+    @allure.title("TC_review_pending_order_expiry")
 
     @allure.description(
         """
@@ -24,7 +26,7 @@ class TC_aD02():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_review_gtd(self, chromeDriver, request):
+    def test_review_order_expiry(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

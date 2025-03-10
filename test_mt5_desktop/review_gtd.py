@@ -8,15 +8,17 @@ from common.desktop.module_login.utils import login_wt
 from common.desktop.module_trade.utils import review_pending_orderIDs
 from data_config.utils import read_orderIDs_from_csv
 
-@allure.parent_suite("MT5 Membersite - Pending Order Review")
 
-@allure.epic("MT5 Desktop - Pending Order Review")
+@allure.parent_suite("MT5 Membersite - Pending Order Expiry Review")
+
+@allure.epic("MT5 Desktop - Pending Order Expiry Review")
+
 
 # Member Portal
-class TC_aX02():
-    
-    @allure.title("tc_mt4_ax")
+class TC_review_pending_order_expiry():
 
+    @allure.title("TC_review_pending_order_expiry")
+    
     @allure.description(
         """
         Member able to review all the expiry order
@@ -24,7 +26,7 @@ class TC_aX02():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_review_gtd(self, chromeDriver, request):
+    def test_review_order_expiry(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id

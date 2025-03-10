@@ -13,6 +13,7 @@ class DataTestID(Enum):
     LOGIN_SUBMIT = 'login-submit'
     LOGIN_USER_ID = 'login-user-id'
     ALERT_ERROR = 'alert-error'
+    ALERT_SUCCESS = 'alert-success'
     
     TAB_LOGIN_ACCOUNT_TYPE_CRM = 'tab-login-account-type-crm'
     TAB_LOGIN_ACCOUNT_TYPE_LIVE = 'tab-login-account-type-live'
@@ -53,7 +54,33 @@ class DataTestID(Enum):
     SIDE_BAR_OPTION_SIGNAL = 'side-bar-option-signal'
     SIDE_BAR_OPTION_NEWS = 'side-bar-option-news'
     SPIN_LOADER = 'spin-loader'
-
+    
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    MARKET
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
+    
+    WATCHLIST_TABS = 'watchlist-tabs'
+    WATCHLIST_LIST = 'watchlist-list'
+    WATCHLIST_LIST_ITEM = 'watchlist-list-item'
+    WATCHLIST_SYMBOL = 'watchlist-symbol'
+    SYMBOL_PREFERENCE = 'symbol-preference'
+    SYMBOL_PREFERENCE_LABEL = 'symbol-preference-label'
+    SYMBOL_PREFERENCE_TABS = 'symbol-preference-tabs'
+    SYMBOL_PREFERENCE_OPTION_UNCHECKED = 'symbol-preference-option-unchecked'
+    SYMBOL_PREFERENCE_OPTION_CHECKED = 'symbol-preference-option-checked'
+    SYMBOL_PREFERENCE_SAVE = 'symbol-preference-save'
+    SYMBOL_PREFERENCE_CLOSE = 'symbol-preference-close'
+    TAB_ALL = 'tab-all'
+    TAB_FAVOURITES = 'tab-favourites'
+    TAB_FOREX = 'tab-forex'
+    TAB_COMMS = 'tab-comms'
+    TAB_INDEX = 'tab-index'
+    TAB_CRYPTO = 'tab-crypto'
+    
+    
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     SIGNAL
@@ -193,6 +220,9 @@ class DataTestID(Enum):
     SYMBOL_INPUT_SEARCH = 'symbol-input-search'
     SYMBOL_OVERVIEW_ID = 'symbol-overview-id'
     SYMBOL_INPUT_SEARCH_ITEMS = 'symbol-input-search-items'
+    SYMBOL_INPUT_SEARCH_HISTORY_DELETE = 'symbol-input-search-history-delete'
+    SYMBOL_INPUT_SEARCH_ITEMS_DELETE = 'symbol-input-search-items-delete'
+    SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL = 'symbol-input-search-items-symbol'
 
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 

@@ -37,9 +37,6 @@ def asset_account_balance_details(driver):
         account_name = find_element_by_xpath(driver, "//div[@class='sc-1noy9f2-2 kohjey']")
         label_accountName = get_label_of_element(account_name)
 
-        # Extract the text after "LIVE" or "DEMO"
-        # match = re.search(r"(?<=\b(LIVE|DEMO)\s)(.*)", label_accountName).group(2)
-
         # Extract account type (LIVE or DEMO) and the name after it
         match = re.search(r"(?<=\b(LIVE|DEMO)\s)(.*)", label_accountName)
         if match:
@@ -188,10 +185,7 @@ def asset_account_currency(driver):
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
-        
-        
-        
-         
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -211,3 +205,8 @@ def get_server_local_time(driver):
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""

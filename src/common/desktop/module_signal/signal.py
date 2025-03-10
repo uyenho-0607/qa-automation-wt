@@ -184,7 +184,7 @@ def verify_copy_to_order_is_disabled(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)        
+        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
 
@@ -251,7 +251,7 @@ def select_valid_signal_to_trade(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)        
+        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
 
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")

@@ -1,5 +1,6 @@
+from constants.element_ids import DataTestID
 from constants.helper.driver import delay
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, spinner_element
+from constants.helper.element import spinner_element, click_element, find_element_by_testid, is_element_present_by_testid, get_label_of_element, visibility_of_element_by_testid
 from constants.helper.error_handler import handle_exception
 
 
@@ -21,13 +22,12 @@ def get_chart_symbol_name(driver):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
-        # Find the elements that contain the symbol name
-        chart_symbol_name = find_list_of_elements_by_testid(driver, data_testid="symbol-overview-id")
-        
-        # Extract the symbol name from the first element if it exists
-        chart_symbolName = chart_symbol_name[0].text.split()[0] if chart_symbol_name else None
-        return chart_symbolName
-    
+        # Find the elements that contain the symbol name        
+        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value):
+            chart_symbol_name = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value)
+            # # Extract the symbol name from the first element if it exists
+            chart_symbolName = get_label_of_element(element=chart_symbol_name).split()[0]
+            return chart_symbolName
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -63,8 +63,18 @@ def chart_minMax(driver, chart_fullscreen: str):
         # Introduce a slight delay to ensure that the chart is ready for interaction
         delay(0.5)
         
-        # Find the fullscreen button element using the provided data-testid
-        expand_collapse_screen  = find_element_by_testid(driver, data_testid=f"chart-{chart_fullscreen}-fullscreen")
+        # Determine the data-testid based on the button type
+        button_testids = {
+            "toggle": DataTestID.CHART_TOGGLE_FULLSCREEN.value,
+            "exit": DataTestID.CHART_EXIT_FULLSCREEN.value
+        }
+        
+        button_testid = button_testids.get(chart_fullscreen)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {chart_fullscreen}")
+        
+        # Attempt to locate the button
+        expand_collapse_screen = find_element_by_testid(driver, data_testid=button_testid)
         # Click the fullscreen button to toggle the fullscreen state
         click_element(element=expand_collapse_screen)
 
@@ -94,7 +104,7 @@ def chart_trade_modal_close(driver):
     """
     try:
         # Find all elements matching the attribute selector
-        button_trade = find_element_by_testid(driver, data_testid="chart-trade-button-close")
+        button_trade = find_element_by_testid(driver, data_testid=DataTestID.CHART_TRADE_BUTTON_CLOSE.value)
         click_element(element=button_trade)
 
     except Exception as e:

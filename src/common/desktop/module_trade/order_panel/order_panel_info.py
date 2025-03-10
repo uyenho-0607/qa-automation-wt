@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import is_element_present_by_xpath, wait_for_element_visibility, spinner_element, javascript_click, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, is_element_present_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import is_element_present_by_xpath, spinner_element, javascript_click, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, is_element_present_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
 
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 from common.desktop.module_chart.chart import get_chart_symbol_name

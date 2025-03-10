@@ -1,6 +1,7 @@
 import random
 from selenium.webdriver.common.by import By
 
+from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, is_element_present_by_testid, populate_element, find_list_of_elements_by_testid, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
@@ -49,21 +50,18 @@ def input_symbol(driver, server: str, client_name: str, symbol_type: str = "Symb
                 raise ValueError(f"The desired symbol '{desired_symbol_name}' is not in the list of available symbols.")
             
         # Find the search input field for symbols
-        search_input = visibility_of_element_by_testid(driver, data_testid="symbol-input-search")
+        search_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH.value)
         
         # Enter the selected symbol into the search input
         populate_element(element=search_input, text=desired_symbol_name)
 
         # Find and click the dropdown option that matches the desired symbol
-        dropdown = visibility_of_element_by_xpath(driver, f"//div[contains(@data-testid, 'symbol-input-search-items')]//div[normalize-space(text())='{desired_symbol_name}']")
+        dropdown = visibility_of_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.SYMBOL_INPUT_SEARCH_ITEMS.value}']//*[normalize-space(text())='{desired_symbol_name}']")
         click_element_with_wait(driver, element=dropdown)
 
         # Verify that the correct symbol has been selected by checking the chart symbol
-        chart_symbol_name = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="symbol-overview-id", text=desired_symbol_name)
-        
+        if wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value, text=desired_symbol_name):
         # If the symbol is correctly shown, return success
-        if chart_symbol_name:
-            # assert True
             return desired_symbol_name
         else:
             # If the symbol name does not match, log an error
@@ -89,11 +87,11 @@ def input_symbol(driver, server: str, client_name: str, symbol_type: str = "Symb
 
 def perform_search(driver, input_search):
         # Find the search input field for symbols
-        search_input = visibility_of_element_by_testid(driver, data_testid="symbol-input-search")
+        search_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH.value)
         click_element(element=search_input)
         
-        if is_element_present_by_testid(driver, data_testid="symbol-input-search-history-delete"):
-            btn_bin = visibility_of_element_by_testid(driver, "symbol-input-search-history-delete")
+        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE.value):
+            btn_bin = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE.value)
             click_element_with_wait(driver, element=btn_bin)
 
         clear_input_field(element=search_input)
@@ -106,8 +104,8 @@ def perform_search(driver, input_search):
         delay(2.5)
         
         # Wait for search results
-        if is_element_present_by_testid(driver, data_testid="symbol-input-search-items"):
-            search_results = find_list_of_elements_by_testid(driver, data_testid="symbol-input-search-items")
+        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS.value):
+            search_results = find_list_of_elements_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS.value)
             print("Total row found", len(search_results))
             matched_rows = []
             for result in search_results:
@@ -166,11 +164,11 @@ def symbol_search_feature(driver, server: str, client_name: str, symbol_type: st
 def clear_search_history(driver):
 
     def get_delete_buttons():
-        return find_list_of_elements_by_testid(driver, "symbol-input-search-items-delete")
+        return find_list_of_elements_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS_DELETE.value)
 
     def get_symbol_name(delete_button):
-        container = delete_button.find_element(By.XPATH, ".//ancestor::div[@data-testid='symbol-input-search-items']")
-        symbol_element = container.find_element(By.XPATH, ".//span[@data-testid='symbol-input-search-items-symbol']")
+        container = delete_button.find_element(By.XPATH, f".//ancestor::*[@data-testid='{DataTestID.SYMBOL_INPUT_SEARCH_ITEMS.value}']")
+        symbol_element = container.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL.value}']")
         return get_label_of_element(element=symbol_element).strip()
 
     def log_symbols(message, buttons):
@@ -193,7 +191,8 @@ def clear_search_history(driver):
     try:
         spinner_element(driver)
         
-        search_input = visibility_of_element_by_testid(driver, "symbol-input-search")
+        # Click on the search textbox
+        search_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH.value)
         click_element_with_wait(driver, element=search_input)
 
         # Initial state check
@@ -210,7 +209,7 @@ def clear_search_history(driver):
         # Clear remaining history
         remaining_buttons = get_delete_buttons()
         log_symbols("\nRemaining symbols before full clear:", remaining_buttons)
-        btn_bin = find_element_by_testid(driver, "symbol-input-search-history-delete")
+        btn_bin = find_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE.value)
         click_element_with_wait(driver, element=btn_bin)
         delay(1)
 

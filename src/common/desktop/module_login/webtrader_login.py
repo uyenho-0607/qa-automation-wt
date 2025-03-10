@@ -1,5 +1,4 @@
 import random
-import logging
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
