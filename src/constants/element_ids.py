@@ -8,6 +8,7 @@ class DataTestID(Enum):
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     # LOGIN PAGE
+    ADS_SKIP_BUTTON = 'ads-skip-button' # SPLASH SCREEN SKIP
     LOGIN_ACCOUNT_TYPE = 'login-account-type'
     LOGIN_PASSWORD = 'login-password'
     LOGIN_SUBMIT = 'login-submit'
@@ -19,6 +20,17 @@ class DataTestID(Enum):
     TAB_LOGIN_ACCOUNT_TYPE_LIVE = 'tab-login-account-type-live'
     TAB_LOGIN_ACCOUNT_TYPE_DEMO = 'tab-login-account-type-demo'
     
+    
+    # APP - FORGOT PASSWORD MODULE
+    APP_FORGOT_PASSWORD = '//android.widget.TextView[@text="Forgot password?"]'
+    APP_RESET_PASSWORD = '//android.widget.TextView[@text="Reset Password"]'
+    APP_RESET_PASSWORD_EMAIL_ADDRESS = '//android.widget.EditText[@text="Enter your email address"]' # placeholder
+    APP_RESET_PASSWORD_ACCOUNT_ID = '//android.widget.EditText[@text="Enter your account ID"]'
+    APP_RESET_PASSWORD_SUBMIT = '//android.view.ViewGroup[@content-desc="Submit"]'
+    APP_HELP_IS_ON_THE_WAY = '//android.widget.TextView[@text="Help is on the way!"]'
+    APP_CONTACT_SUPPORT = '//android.widget.TextView[@text="Contact Support"]'
+    APP_BACK_TO_LOGIN_SCREEN = '//android.widget.TextView[@text="Back to login screen"]'
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     LOGIN LANGUAGE
@@ -29,6 +41,18 @@ class DataTestID(Enum):
     LANGUAGE_DROPDOWN = 'language-dropdown'
     LANGUAGE_OPTION = 'language-option'
     
+    
+    LANGUAGE_OPTION_APP = '//android.widget.ScrollView//android.view.ViewGroup'
+    LANGUAGE_ENGLISH = '//android.view.ViewGroup[@content-desc="English"]'
+    LANGUAGE_SIMPLIFIED_CHINESE = '//android.view.ViewGroup[@content-desc="简体中文"]'
+    LANGUAGE_TRADICTIONAL_CHINESE = '//android.view.ViewGroup[@content-desc="繁体中文"]'
+    LANGUAGE_THAILAND = '//android.view.ViewGroup[@content-desc="ภาษาไทย"]'
+    LANGUAGE_VIET = '//android.view.ViewGroup[@content-desc="Tiếng Việt"]'
+    LANGUAGE_MELAYU = '//android.view.ViewGroup[@content-desc="Melayu"]'
+    LANGUAGE_INDONESIA = '//android.view.ViewGroup[@content-desc="Bahasa Indonesia"]'
+    LANGUAGE_JAPANESE = '//android.view.ViewGroup[@content-desc="Japanese"]'
+    LANGUAGE_KOREAN = '//android.view.ViewGroup[@content-desc="Korean"]'
+    IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     LOGIN LANGUAGE
@@ -54,7 +78,7 @@ class DataTestID(Enum):
     SIDE_BAR_OPTION_SIGNAL = 'side-bar-option-signal'
     SIDE_BAR_OPTION_NEWS = 'side-bar-option-news'
     SPIN_LOADER = 'spin-loader'
-    
+        
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     MARKET
@@ -78,8 +102,6 @@ class DataTestID(Enum):
     TAB_COMMS = 'tab-comms'
     TAB_INDEX = 'tab-index'
     TAB_CRYPTO = 'tab-crypto'
-    
-    
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -216,6 +238,7 @@ class DataTestID(Enum):
     DROPDOWN_CHART_SETTING_RESET_CHART = 'dropdown-chart-setting-reset-chart'
 
     # SEARCH SYMBOL RELATED
+    SYMBOL_SEARCH_SELECTOR = 'symbol-search-selector'
     SYMBOL_DROPDOWN_RESULT = 'symbol-dropdown-result'
     SYMBOL_INPUT_SEARCH = 'symbol-input-search'
     SYMBOL_OVERVIEW_ID = 'symbol-overview-id'
@@ -455,6 +478,10 @@ class DataTestID(Enum):
     NOTIFICATION_TITLE = 'notification-title'
     NOTIFICATION_DESCRIPTION = 'notification-description'
     NOTIFICATION_CLOSE_BUTTON = 'notification-close-button'
+    
+    # MOBILE / APP
+    NOTIFICATION_BOX_DESCRIPTION = 'notification-box-description'
+    NOTIFICATION_BOX_CLOSE = 'notification-box-close'
 
     
     # NOTIFICATION ORDER DETAILS MODAL
