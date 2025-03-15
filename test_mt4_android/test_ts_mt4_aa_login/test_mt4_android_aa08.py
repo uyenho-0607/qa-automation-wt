@@ -1,10 +1,9 @@
 import allure
-import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import forgot_password
+from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -18,7 +17,7 @@ class TC_MT4_aA08():
 
     @allure.description(
         """
-        Forgot Password via CRM
+        Verify that the system will always save the last login credential when [Remember Me] checked
         """
     )
     
@@ -31,9 +30,8 @@ class TC_MT4_aA08():
         start_recording_mobile(driver=main_driver)
         
         try:
-
-            with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
-                forgot_password(driver=main_driver, account_type="crm", email="test11@test.com")
+            with allure.step("Login to Web Trader Membersite"):
+                toggle_remember_me_checkbox(driver=main_driver, server="MT4", client_name="Lirunex")
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

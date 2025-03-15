@@ -2,24 +2,39 @@ from enum import Enum
 
 class DataTestID(Enum):
     
+    IN_APP_BROWSER_URL_bar = '//android.widget.TextView[@resource-id="com.android.chrome:id/url_bar"]'
+    IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
+    APP_NAVIGATION_BACK_BUTTON = "navigation-back-button"
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     LOGIN PAGE
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     # LOGIN PAGE
+    APP_LOGIN_LOGO = '//android.widget.ImageView'
     ADS_SKIP_BUTTON = 'ads-skip-button' # SPLASH SCREEN SKIP
     LOGIN_ACCOUNT_TYPE = 'login-account-type'
     LOGIN_PASSWORD = 'login-password'
+    APP_LOGIN_PASSWORD_UNMASKED = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[4]/android.view.ViewGroup'
     LOGIN_SUBMIT = 'login-submit'
     LOGIN_USER_ID = 'login-user-id'
     ALERT_ERROR = 'alert-error'
     ALERT_SUCCESS = 'alert-success'
+    LOGIN_ACCOUNT_SIGNUP = 'login-account-signup' # open a demo account button
+    APP_OPEN_DEMO_ACCOUNT = '//android.widget.TextView[@text="Open a Demo Account"]'
     
+    APP_RMB_ME_CHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "Remember me")]/android.view.ViewGroup/android.widget.TextView'
+    APP_RMB_ME_UNCHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "Remember me")]/android.view.ViewGroup'
     TAB_LOGIN_ACCOUNT_TYPE_CRM = 'tab-login-account-type-crm'
     TAB_LOGIN_ACCOUNT_TYPE_LIVE = 'tab-login-account-type-live'
     TAB_LOGIN_ACCOUNT_TYPE_DEMO = 'tab-login-account-type-demo'
     
+    
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    LOGIN PAGE -  FORGOT PASSWORD
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
     
     # APP - FORGOT PASSWORD MODULE
     APP_FORGOT_PASSWORD = '//android.widget.TextView[@text="Forgot password?"]'
@@ -31,9 +46,34 @@ class DataTestID(Enum):
     APP_CONTACT_SUPPORT = '//android.widget.TextView[@text="Contact Support"]'
     APP_BACK_TO_LOGIN_SCREEN = '//android.widget.TextView[@text="Back to login screen"]'
     
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                    LOGIN LANGUAGE
+                                                    LOGIN PAGE -  SIGN UP
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
+    
+    APP_SIGN_UP = '//android.widget.TextView[@text="Sign up"]'
+    APP_SIGN_UP_USERNAME = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[2]/android.widget.EditText'
+    APP_SIGN_UP_TITLE = '(//android.widget.ScrollView//android.widget.TextView)[6]'
+    APP_SIGN_UP_TITLE_DROPDOWN = '//android.widget.ScrollView//android.view.ViewGroup//android.view.ViewGroup'
+    APP_SIGN_UP_TITLE_CANCEL = '//android.widget.TextView[@text="Cancel"]'
+
+    APP_SIGN_UP_FIRST_NAME = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[4]/android.widget.EditText'
+    APP_SIGN_UP_LAST_NAME = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[5]/android.widget.EditText'
+    APP_SIGN_UP_EMAIL = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[6]/android.widget.EditText'
+    APP_SIGN_UP_PASSWORD = '//android.widget.EditText[@text="Password length between 6-20 characters"]'
+    APP_SIGN_UP_COUNTRY_OF_RESIDENCE = '(//android.widget.ScrollView//android.view.ViewGroup)[13]'
+    APP_SIGN_UP_COUNTRY_OF_RESIDENCE_TEXT = '//android.widget.TextView[@text="Country of Residence"]'
+    APP_SIGN_UP_COUNTRY_OF_RESIDENCE_SEARCH = '//android.widget.EditText[@text="Search"]'
+    APP_SIGN_UP_COUNTRY_OF_RESIDENCE_OPTIONS = '//android.widget.ScrollView//android.view.ViewGroup/android.view.ViewGroup'
+    APP_SIGN_UP_PHONE_NUMBER = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[9]/android.widget.EditText'
+    APP_SIGN_UP_CHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "I hereby acknowledge")]/android.view.ViewGroup'
+    APP_SIGN_UP_PROCEED_KYC = '//android.widget.TextView[@text="Proceed to KYC"]'
+        
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    LOGIN PAGE - LANGUAGE
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     
@@ -52,7 +92,6 @@ class DataTestID(Enum):
     LANGUAGE_INDONESIA = '//android.view.ViewGroup[@content-desc="Bahasa Indonesia"]'
     LANGUAGE_JAPANESE = '//android.view.ViewGroup[@content-desc="Japanese"]'
     LANGUAGE_KOREAN = '//android.view.ViewGroup[@content-desc="Korean"]'
-    IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     LOGIN LANGUAGE
@@ -78,6 +117,13 @@ class DataTestID(Enum):
     SIDE_BAR_OPTION_SIGNAL = 'side-bar-option-signal'
     SIDE_BAR_OPTION_NEWS = 'side-bar-option-news'
     SPIN_LOADER = 'spin-loader'
+    
+    
+    APP_SIDE_BAR_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
+    APP_SIDE_BAR_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
+    APP_SIDE_BAR_OPTION_TRADE = '//android.widget.TextView[@text="Trade"]'
+    APP_SIDE_BAR_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
+    APP_SIDE_BAR_OPTION_ASSETS = '//android.widget.TextView[@text="Assets"]'
         
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -480,6 +526,7 @@ class DataTestID(Enum):
     NOTIFICATION_CLOSE_BUTTON = 'notification-close-button'
     
     # MOBILE / APP
+    NOTIFICATION_BOX_TITLE = 'notification-box-title'
     NOTIFICATION_BOX_DESCRIPTION = 'notification-box-description'
     NOTIFICATION_BOX_CLOSE = 'notification-box-close'
 
@@ -500,33 +547,50 @@ class DataTestID(Enum):
 
     SWITCH_THEME_BUTTON = 'switch-theme-button'
     SETTING_BUTTON = 'setting-button'
+    # APP_SETTING_BUTTON = ".//android.widget.TextView[matches(@text, '^\d+$')]/following-sibling::android.widget.TextView[2]"
+    APP_SETTING_BUTTON = ".//android.widget.TextView[matches(@text, '^\\d+$')]/following-sibling::android.widget.TextView[2]"
     SETTING_OPTION_SWITCH_TO_DEMO = 'setting-option-switch-to-demo'
     SETTING_OPTION_SWITCH_TO_LIVE = 'setting-option-switch-to-live'
     SETTING_OPTION_OPEN_DEMO_ACCOUNT = 'setting-option-open-demo-account'
+    SETTING_OPTION_PAYMENT_METHOD = 'setting-option-payment-method'
+    SETTING_OPTION_OCT = 'setting-option-oct'
     SETTING_OPTION_NOTIFICATION_SETTING = 'setting-option-notification-setting'
     SETTING_OPTION_LANGUGAGE = 'setting-option-language'
+    SETTING_OPTION_APPEARANCE = 'setting-option-appearance'
     
     # Change Password
     SETTING_OPTION_CHANGE_PASSWORD = 'setting-option-change-password'
+    APP_SETTING_OPTION_CHANGE_PASSWORD = '//android.widget.TextView[@text="Change Password"]'
     CHANGE_PASSWORD_MODAL_OLD_PASSWORD = 'change-password-modal-old-password'
     CHANGE_PASSWORD_MODAL_NEW_PASSWORD = 'change-password-modal-new-password'
     CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD = 'change-password-modal-confirm-new-password'
     CHANGE_PASSWORD_MODAL_CONFIRM = 'change-password-modal-confirm'
     CHANGE_PASSWORD_MODAL_CLOSE = 'change-password-modal-close'
+    
+    # APP
+    APP_CHANGE_PASSWORD_MODAL_OLD_PASSWORD = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.widget.EditText'
+    APP_CHANGE_PASSWORD_MODAL_NEW_PASSWORD = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[3]/android.widget.EditText'
+    APP_CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[4]/android.widget.EditText'
+    APP_CHANGE_PASSWORD_MODAL_CONFIRM = '//android.view.ViewGroup[@content-desc="Submit"]'
+    
+    
     # END OF CHANGE PASSWORD
     
-    SETTING_OPTION_LINKED_DEVICE = 'setting-option-linked-device'    
+    SETTING_OPTION_LINKED_DEVICE = 'setting-option-linked-device'
+    SETTING_OPTION_BIOMETRICS_SETTING = 'setting-option-biometrics-settings'
+    SETTING_OPTION_REQUEST_CANCEL_ACCOUNT = 'setting-option-request-cancel-account'
     SETTING_OPTION_CONTACT_INFORMATION = 'setting-option-contact-information'
+    SETTING_OPTION_HELP_SUPPORT = 'setting-option-help-support'
+    SETTING_OPTION_ABOUT = 'setting-option-about'
     SETTING_OPTION_LOGOUT = 'setting-option-logout'
-
+    APP_SETTING_OPTION_LOGOUT = '//android.view.ViewGroup[@content-desc="Logout"]'
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     OPEN A DEMO ACCOUNT
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
 
-    LOGIN_ACCOUNT_SIGNUP = 'login-account-signup' # open a demo account button
-    DEMO_ACCOUNT_CREATION_MODAL_CONFIRM = 'demo-account-creation-modal-confirm'
     INPUT_FIELD_VALIDATION = 'input-field-validation'
     DEMO_ACCOUNT_CREATION_MODAL_NAME = 'demo-account-creation-modal-name'
     DEMO_ACCOUNT_CREATION_MODAL_EMAIL = 'demo-account-creation-modal-email'
@@ -536,12 +600,34 @@ class DataTestID(Enum):
     COUNTRY_DIAL_CODE_ITEM = 'country-dial-code-item'
     DEMO_ACCOUNT_CREATION_MODAL_PHONE = 'demo-account-creation-modal-phone'
     DEPOSIT_DROPDOWN_ITEM = 'deposit-dropdown-item'
+    DEMO_ACCOUNT_CREATION_MODAL_CONFIRM = 'demo-account-creation-modal-confirm'
     DEMO_ACCOUNT_CREATION_MODAL_AGREEMENT_UNCHECKED = 'demo-account-creation-modal-agreement-unchecked'
     DEMO_ACCOUNT_COMPLETION_MODAL_TITLE = 'demo-account-completion-modal-title'
     DEMO_COMPLETION_LABEL = 'demo-completion-label'
     DEMO_COMPLETION_VALUE = 'demo-completion-value'
     
-
+    
+    # APP
+    APP_DEMO_ACCOUNT_CREATION_MODAL_NAME = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.view.ViewGroup/android.widget.EditText'
+    APP_DEMO_ACCOUNT_CREATION_MODAL_EMAIL = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup/android.widget.EditText'
+    APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE = '(//android.view.ViewGroup[3]//android.view.ViewGroup)[1]'
+    APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_LABEL = '//android.widget.TextView[@text="Dial Code"]'
+    APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_SEARCH = '//android.widget.EditText[@text="Search"]'
+    APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_ITEM = '//android.widget.ScrollView//android.view.ViewGroup/android.view.ViewGroup'
+    APP_DEMO_ACCOUNT_CREATION_PHONE_NUMBER = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[4]/android.view.ViewGroup/android.widget.EditText'
+    APP_DEMO_ACCOUNT_CREATION_DEPOSIT_AMT = '(//android.view.ViewGroup[5]//android.view.ViewGroup)[1]'
+    APP_DEMO_ACCOUNT_CREATION_DEPOSIT_AMT_OPTIONS = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
+    APP_DEMO_ACCOUNT_CREATION_AGREE_CONTINUE = '//android.widget.TextView[@text="Agree and continue"]'
+    APP_DEMO_ACCOUNT_ERROR_CHECK = '//android.widget.TextView[contains(@text, "required")]'
+    
+    # APP DEMO ACCOUNT CREATTION SCREEN
+    APP_DEMO_ACCOUNT_COMPLETION_COPIED = '//android.widget.TextView[@text="Copy"]'
+    APP_DEMO_ACCOUNT_COMPLETION_TITLE = '//android.widget.TextView[@text="Your demo account has been opened successfully."]'
+    APP_DEMO_ACCOUNT_COMPLETION_LABEL = '//android.widget.TextView[matches(@text, "^(Login|Password|View Only Password|Name|Leverage|Deposit)$")]'
+    APP_DEMO_ACCOUNT_COMPLETION_VALUE = '//android.widget.TextView[matches(@text, "^(Login|Password|View Only Password|Name|Leverage|Deposit)$")]/following-sibling::android.widget.TextView[1]'
+    APP_DEMO_ACCOUNT_COMPLETION_SIGN_IN = '//android.widget.TextView[@text="Sign in"]'
+    
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     ACCOUNT HEALTH
@@ -550,11 +636,17 @@ class DataTestID(Enum):
     
     ACCOUNT_SELECTOR = 'account-selector'
     ACCOUNT_TYPE_TAG = 'account-type-tag'
+    APP_ACCOUNT_TYPE_TAG = '//android.widget.TextView[@text="DEMO"]'
     ACCOUNT_NAME = 'account-name'
+    # APP_ACCOUNT_NAME = '(//android.view.ViewGroup/android.widget.TextView)[3]'
+    APP_ACCOUNT_NAME = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.widget.TextView[1]'
     ACCOUNT_ID = 'account-id'
+    APP_ACCOUNT_ID = '(//android.view.ViewGroup/android.widget.TextView)[4]'
     ACCOUNT_DETAIL = 'account-detail'
+    APP_ACCOUNT_DETAIL = '(//android.view.ViewGroup/android.widget.TextView)[8]'
     ACCOUNT_OPTION_BALANCE = 'account-option-balance'
     ACCOUNT_TOTAL_BALANCE = 'account-total-balance'
+    APP_ACCOUNT_BALANCE = '//android.widget.TextView[@text="Available Balance"]/following-sibling::android.widget.TextView[1]'
     
     # ACCOUNT HEALTH DROPDOWN
     ACCOUNT_OPTION_DETAIL = 'account-option-detail'

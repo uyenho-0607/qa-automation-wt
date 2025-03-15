@@ -235,13 +235,21 @@ def click_element(element: WebElement) -> None:
 
 def click_element_with_wait(driver, element: WebElement, duration: int | None = None) -> None:
     wait_duration = derive_wait_duration(duration)
-
     # Use WebDriverWait to wait for the element to be clickable
     element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element(element))
-
     # Perform the click
     click_element(element_on_focus)
 
+
+def wait_for_element_clickable_xpath(driver, xpath, duration: int | None = None) -> WebElement:
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.element_to_be_clickable((AppiumBy.XPATH, xpath)))
+    
+
+def wait_for_element_clickable_testid(driver, data_testid, duration: int | None = None) -> WebElement:
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.element_to_be_clickable((AppiumBy.XPATH, data_test_id_string)))
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -292,12 +300,16 @@ def get_label_of_element(element) -> str:
     elif class_name in ["UIAStaticText", "UIAButton", "UIATextField"]:
         # For iOS, use 'label', 'name', or 'value'
         label = element.get_attribute("label") or element.get_attribute("name") or element.get_attribute("value")
+        
+    else:
+        element.text
     
     # If no label found, check for other possible attributes
     if not label:
         label = element.text or element.get_attribute("resource-id") or element.get_attribute("hint")
     
-    return label if label else ""
+    # return label if label else ""
+    return label
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -313,7 +325,7 @@ def get_label_of_element(element) -> str:
 #     except TimeoutError:
 #         assert False, "Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct."
         
-        
+
 
 # Checking the loading spinner
 def spinner_element(driver):

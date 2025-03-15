@@ -196,8 +196,8 @@ def perform_login(driver, login_username, login_password):
     select_account_type(driver, account_type="live")
     
     # Find and populate the username input field
-    username_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
-    populate_element(element=username_input, text=login_username)
+    userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
+    populate_element(element=userinput_name, text=login_username)
 
     # Find and populate the password input field
     password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)

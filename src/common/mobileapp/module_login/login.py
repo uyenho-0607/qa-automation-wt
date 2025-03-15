@@ -1,15 +1,17 @@
 import random
+import re
+import subprocess
 
-from common.mobileapp.module_announcement.announcement import modal_announcement
 from constants.element_ids import DataTestID
-from constants.helper.driver import delay, shutdown
+from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
 from data_config.encrypt_decrypt import decrypt_and_print
-from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, get_label_of_element, is_element_present_by_xpath, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, is_element_present_by_testid, visibility_of_element_by_xpath, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, get_label_of_element, is_element_present_by_xpath, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, is_element_present_by_testid, visibility_of_element_by_xpath, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 from data_config.file_handler import get_credentials
 
 
+from common.mobileapp.module_announcement.announcement import modal_announcement
 
 
 
@@ -21,8 +23,7 @@ from data_config.file_handler import get_credentials
 
 def splash_screen(driver):
     if is_element_present_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON.value):
-        # splash_screen = visibility_of_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON.value)
-        splash_screen = find_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON.value)
+        splash_screen = wait_for_element_clickable_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON.value)
         click_element(splash_screen)
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -40,12 +41,8 @@ def splash_screen(driver):
 def check_symbol_element_present(driver):
     """Check if the user is already logged in by searching for an element that only appears after login """
     try:
-        
-        # search_input = visibility_of_element_by_testid(driver, data_testid="symbol-search-selector")
-        search_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_SEARCH_SELECTOR.value)        
-        # element = driver.find_element_by_xpath("//*[@resource-id='logout-button']")
+        search_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_SEARCH_SELECTOR.value)
         return search_input.is_displayed()
-    
     except:
         return False
 
@@ -53,6 +50,29 @@ def check_symbol_element_present(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
+
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                ACCOUNT TYPE SELECTION
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+def authenticate_user(driver, login_username, login_password):
+    
+    # Enter the username and password into the login form
+    userinput_name = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
+    clear_input_field(element=userinput_name)
+    populate_element(element=userinput_name, text=login_username)
+
+    # Enter the username and password into the login form
+    password_input = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
+    clear_input_field(element=password_input)
+    populate_element(element=password_input, text=login_password)
+
+    # Click the login submit button
+    submit_button = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
+    click_element_with_wait(driver, element=submit_button)
 
 
 """
@@ -73,7 +93,7 @@ def select_account_type(driver, account_type: str):
         raise ValueError(f"Invalid button type: {account_type}")
     
     # Locate the account type selector element by its test ID.
-    acct_type_selector = visibility_of_element_by_testid(driver, data_testid=button_testid)
+    acct_type_selector = wait_for_element_clickable_testid(driver, data_testid=button_testid)
     # Perform a JavaScript click action on the located account type element.
     click_element_with_wait(driver, element=acct_type_selector)
 
@@ -88,7 +108,6 @@ def select_account_type(driver, account_type: str):
                                                 WT LOGIN PAGE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
 
 def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None, selected_language: str = None, expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False) -> None:
     
@@ -147,20 +166,8 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     # Decrypt the credentials
     login_password = decrypt_and_print(login_password_encrypted)
     
-    
-    # Enter the username and password into the login form
-    username_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
-    clear_input_field(element=username_input)
-    populate_element(element=username_input, text=login_username)
-
-    # Enter the username and password into the login form
-    password_input = visibility_of_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
-    clear_input_field(element=password_input)
-    populate_element(element=password_input, text=login_password)
-
-    # Click the login submit button
-    submit_button = visibility_of_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
-    click_element(submit_button)
+    # Enter the username / password
+    authenticate_user(driver, login_username, login_password)
 
     # Handle the result of the login (success or failure)
     handle_login_result(driver, expect_failure, selected_language)
@@ -206,9 +213,9 @@ def handle_login_result(driver, expect_failure: bool = False, selected_language:
     verification_text = language_specific_text.get(selected_language, "Trade")
 
     # Wait until the text is present in the specified element
-    match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.SIDE_BAR_OPTION_TRADE.value, text=verification_text)
+    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_SIDE_BAR_OPTION_TRADE.value, text=verification_text):
+        print("Successfully Login")
     # If the account balance is found, the login is successful
-    if match:
         # If login succeeded but failure was expected, log the unexpected success and fail the test
         if expect_failure:
             attach_text("Expected failure, but login succeeded without any error. Test failed as expected failure condition was not met.", name="Unexpected Success")
@@ -241,33 +248,36 @@ def handle_alert_error(driver, expect_failure: bool = None):
     Returns:
     - error_message: The error message text extracted from the login failure notification.
     """
-
-    if is_element_present_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value):
-        # Locate the error message notification element by its test ID.
-        error_message_notification = visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
-        # Extract the text (label) of the error message from the notification element.
-        error_message = get_label_of_element(element=error_message_notification)
-        # Attach the extracted error message to the logs for reporting purposes.
-        attach_text(error_message, name="Error message found:")
-        
-        # Handle the expected failure case
-        if expect_failure:
-            # If an expected failure message is found, log it and pass the test
-            if error_message in ["Invalid Login", "Invalid credentials, please try again", "Account already linked", "FXCRM Invalid Login"]:
-                attach_text("Expected failure condition met.", name="Expected Failure")
-                assert True  # Pass the test as failure was expected and encountered
-            else:
-                # If an unexpected error message is encountered during the expected failure case, fail the test
-                assert False, f"Expected failure, but received unexpected message: {error_message}"
+    
+    spinner_element(driver)
+    
+    # Retrieve the error message notification
+    error_message_notification = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
+    
+    # Extract the text (label) of the error message from the notification element.
+    error_message = get_label_of_element(element=error_message_notification)
+    # Attach the extracted error message to the logs for reporting purposes.
+    attach_text(error_message, name="Error message found:")
+    
+    # Handle the expected failure case
+    if expect_failure:
+        # If an expected failure message is found, log it and pass the test
+        if error_message in ["Invalid Login", "Invalid credentials, please try again", "Account already linked", "FXCRM Invalid Login"]:
+            attach_text("Expected failure condition met.", name="Expected Failure")
+            assert True  # Pass the test as failure was expected and encountered
         else:
-            # If login failed unexpectedly (failure was not expected), fail the test
-            assert False, f"Unexpected error message: {error_message}"
-        
-        # btn_ok = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE.value)
-        # click_element(element=btn_ok)
+            # If an unexpected error message is encountered during the expected failure case, fail the test
+            assert False, f"Expected failure, but received unexpected message: {error_message}"
+    else:
+        # If login failed unexpectedly (failure was not expected), fail the test
+        assert False, f"Unexpected error message: {error_message}"
+    
+    # Click on the Confirm button
+    btn_ok = wait_for_element_clickable_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE.value)
+    click_element(element=btn_ok)
 
-        # Return the error message for further processing or validation.
-        return error_message
+    # Return the error message for further processing or validation.
+    return error_message
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -306,6 +316,7 @@ def login_wt(driver, server: str, client_name: str, testcaseID: str = None, acco
     """
     
     try:
+        
         # Skip the splash screen
         splash_screen(driver)
         
@@ -424,7 +435,6 @@ def select_and_verify_language(driver):
     
     except Exception as e:
         handle_exception(driver, e)
-        
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -441,16 +451,18 @@ def select_and_verify_language(driver):
 def forgot_password(driver, email: str, accountID: str = None, account_type: str = "live"):
     try:
         
+        # Skip the splash screen
+        splash_screen(driver)
+        
         # Step 2: Select account type (CRM/Live/Demo)
         select_account_type(driver, account_type)
         
         # Step 3: Verify and click the 'Forgot Password' button
-        # if not is_element_present_by_xpath(driver, "//*[normalize-space(text())='Forgot Password?']"):
         if not is_element_present_by_xpath(driver, DataTestID.APP_FORGOT_PASSWORD.value):
             raise AssertionError("Forgot Password button not found")
         
         # Locate the forgot Password button
-        btn_forgot_password = visibility_of_element_by_xpath(driver, DataTestID.APP_FORGOT_PASSWORD.value)
+        btn_forgot_password = wait_for_element_clickable_xpath(driver, DataTestID.APP_FORGOT_PASSWORD.value)
         click_element(element=btn_forgot_password)
 
         # Step 4: Wait for 'Reset Password' page
@@ -473,7 +485,13 @@ def forgot_password(driver, email: str, accountID: str = None, account_type: str
             btn_contact_support = find_element_by_xpath(driver, DataTestID.APP_CONTACT_SUPPORT.value)
             click_element(element=btn_contact_support)
             
-            click_element(element=visibility_of_element_by_xpath(driver, DataTestID.IN_APP_BROWSER_CLOSE_BUTTON.value))
+            # Get in-app browser url
+            browser = visibility_of_element_by_xpath(driver, DataTestID.IN_APP_BROWSER_URL_bar.value)
+            print(browser.text)
+            
+            # Click to close in-app browser
+            browser = visibility_of_element_by_xpath(driver, DataTestID.IN_APP_BROWSER_CLOSE_BUTTON.value)
+            click_element(element=browser)
             
             # Redirect back to login screen
             btn_back_to_login = visibility_of_element_by_xpath(driver, DataTestID.APP_BACK_TO_LOGIN_SCREEN.value)
@@ -489,3 +507,19 @@ def forgot_password(driver, email: str, accountID: str = None, account_type: str
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
+
+
+def get_url_from_logcat():
+    logcat_process = subprocess.Popen(["adb", "logcat", "-d"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    logcat_output, _ = logcat_process.communicate()
+
+    # Decode safely, ignoring errors
+    logcat_text = logcat_output.decode("utf-8", errors="ignore")  # FIXED
+
+    # Search for a URL in the log output
+    url_pattern = re.compile(r"https?://[^\s]+")
+    match = url_pattern.search(logcat_text)
+
+    if match:
+        return match.group(0)
+    return None

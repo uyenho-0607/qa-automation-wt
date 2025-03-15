@@ -40,6 +40,38 @@ def get_credentials():
         data = json.load(json_file)
     return data
 
+
+
+def get_credentials(server, read_from_file: bool = True):
+    
+    if read_from_file:
+        if server == "MT4":
+            file_path = os.path.join("src/data_config/mt4_credential.json")
+        else:
+            file_path = os.path.join("src/data_config/mt5_credential.json")
+        
+        with open(file_path, "r") as json_file:
+            data = json.load(json_file)
+    
+    else:
+        data = {
+            'MT4': {
+                'Membersite': {
+                    'credential': {
+                        'username'
+                        'password'
+                    }
+                }
+            }
+        }
+        
+        with open('json_path', 'w') as file:
+            json.dump(data, file, indent=4)
+        
+    return data
+
+
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

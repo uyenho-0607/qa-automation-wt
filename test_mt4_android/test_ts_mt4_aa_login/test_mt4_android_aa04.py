@@ -1,10 +1,9 @@
 import allure
-import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.wt import login_wt
+from common.mobileapp.module_login.utils import login_wt
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -35,7 +34,7 @@ class TC_MT4_aA04():
             
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="crm", testcaseID="TC01", expect_failure=True) 
-
+                
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

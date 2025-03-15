@@ -5,6 +5,7 @@ import time
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from appium import webdriver
 
 from constants.helper.element import spinner_element
 from constants.main import DRIVER_WAIT_DURATION
@@ -171,7 +172,7 @@ def wait_for_page_load(driver, duration: int | None = None):
 
 def shutdown(driver: WebDriver) -> None:
     driver.quit()
-    
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

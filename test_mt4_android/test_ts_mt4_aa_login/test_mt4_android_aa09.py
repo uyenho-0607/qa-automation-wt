@@ -1,10 +1,9 @@
 import allure
-import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import forgot_password
+from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -12,17 +11,17 @@ from common.mobileapp.module_login.utils import forgot_password
 @allure.epic("MT4 Android TS_aA - Login")
 
 # Member Portal
-class TC_MT4_aA09():
+class TC_MT4_aA08():
 
-    @allure.title("TC_MT4_aA09")
+    @allure.title("TC_MT4_aA08")
 
     @allure.description(
         """
-        Forgot Password via Live
+        Verify that the [Remember Me] feature remembers the updated credentials
         """
     )
     
-    def test_tc09(self, android_driver):
+    def test_tc08(self, android_driver):
         self.driver = android_driver
         main_driver = self.driver
 
@@ -31,9 +30,8 @@ class TC_MT4_aA09():
         start_recording_mobile(driver=main_driver)
         
         try:
-
-            with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
-                forgot_password(driver=main_driver, email="test@test.com", accountID="188183338")
+            with allure.step("Login to Web Trader Membersite"):
+                toggle_remember_me_checkbox(driver=main_driver, server="MT4", client_name="Lirunex", testcaseID="TC01", kick_user=False)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
