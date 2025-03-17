@@ -19,7 +19,7 @@ class TC_MT4_aR03():
 
     @allure.description(
         """
-        Member able to fav or unfav symbol for each of the section
+        Member able to fav or unfav symbol
         """
     )
     

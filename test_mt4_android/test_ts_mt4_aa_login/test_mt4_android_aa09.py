@@ -11,9 +11,9 @@ from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
 @allure.epic("MT4 Android TS_aA - Login")
 
 # Member Portal
-class TC_MT4_aA08():
+class TC_MT4_aA09():
 
-    @allure.title("TC_MT4_aA08")
+    @allure.title("TC_MT4_aA09")
 
     @allure.description(
         """
@@ -21,7 +21,7 @@ class TC_MT4_aA08():
         """
     )
     
-    def test_tc08(self, android_driver):
+    def test_tc09(self, android_driver):
         self.driver = android_driver
         main_driver = self.driver
 
@@ -31,7 +31,7 @@ class TC_MT4_aA08():
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                toggle_remember_me_checkbox(driver=main_driver, server="MT4", testcase_id="TC01", kick_user=False)
+                toggle_remember_me_checkbox(driver=main_driver, server="MT4", kick_user=False)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

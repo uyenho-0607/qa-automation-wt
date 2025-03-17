@@ -3,7 +3,7 @@ import allure
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
+from common.mobileapp.module_login.utils import splash_screen, select_account_type, toggle_remember_me_checkbox, verify_login_fields
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -11,17 +11,17 @@ from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
 @allure.epic("MT4 Android TS_aA - Login")
 
 # Member Portal
-class TC_MT4_aA08():
+class TC_MT4_aA10():
 
-    @allure.title("TC_MT4_aA08")
+    @allure.title("TC_MT4_aA10")
 
     @allure.description(
         """
-        Verify that the [Remember Me] feature does not remember incorrect credentials
+        Verify that the [Remember Me] feature does not apply to Demo tab
         """
     )
     
-    def test_tc08(self, android_driver):
+    def test_tc10(self, android_driver):
         self.driver = android_driver
         main_driver = self.driver
 
@@ -30,9 +30,16 @@ class TC_MT4_aA08():
         start_recording_mobile(driver=main_driver)
         
         try:
-            with allure.step("Login to Web Trader Membersite"):
-                toggle_remember_me_checkbox(driver=main_driver, server="MT4", testcase_id="TC01", kick_user=False)
 
+            with allure.step("Launch WT and Click on the 'Demo' Account tab"):
+                # Skip the splash screen
+                splash_screen(driver=main_driver)
+                # Step 2: Select the desired account type (either CRM / Live or Demo) for login.
+                select_account_type(driver=main_driver, account_type="demo")
+                
+            with allure.step("Validate the fields is empty"):
+                verify_login_fields(driver=main_driver, expected_username="", expected_password="")
+                
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

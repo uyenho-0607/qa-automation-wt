@@ -18,7 +18,7 @@ class TC_MT4_aA14():
 
     @allure.description(
         """
-        Forgot Password via Live
+        Forgot Password via CRM
         """
     )
     
@@ -33,7 +33,7 @@ class TC_MT4_aA14():
         try:
 
             with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
-                forgot_password(driver=main_driver, email="test@test.com", accountID="188183338")
+                forgot_password(driver=main_driver, account_type="crm", email="test@test.com")
                 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

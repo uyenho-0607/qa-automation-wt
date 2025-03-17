@@ -1,11 +1,10 @@
 import allure
-import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_setting.setting_demo_account import open_demo_account_screen
+from common.mobileapp.module_setting.setting_demo_account import open_demo_account_error_msg
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -19,7 +18,7 @@ class TC_MT4_aA12():
 
     @allure.description(
         """
-        Member able to open a demo account via login screen
+        Error message checking for demo account creation
         """
     )
     
@@ -32,14 +31,12 @@ class TC_MT4_aA12():
         start_recording_mobile(driver=main_driver)
         
         try:
-            
-            with allure.step("Launch Web Trader Membersite"):
+
+            with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server="MT4", account_type="demo", set_username=False)
 
-            with allure.step("Open demo account by clicking the 'X' button"):
-                # System click on the "X" button
-                open_demo_account_screen(driver=main_driver, set_close_modal=True)
-                # open_demo_account_screen(driver=main_driver)
+            with allure.step("Open demo account"):
+                open_demo_account_error_msg(driver=main_driver)
                 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

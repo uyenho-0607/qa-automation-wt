@@ -1,9 +1,10 @@
 import allure
 
+from common.mobileapp.module_login.remember_me import verify_login_fields
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
+from common.mobileapp.module_login.utils import select_account_type, splash_screen, login_wt, toggle_remember_me_checkbox
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -17,7 +18,7 @@ class TC_MT4_aA08():
 
     @allure.description(
         """
-        Verify that the system will always save the last login credential when [Remember Me] checked
+        Verify that the system saves the last successful login credentials when [Remember Me] is checked and does not remember incorrect credentials.
         """
     )
     
@@ -30,9 +31,30 @@ class TC_MT4_aA08():
         start_recording_mobile(driver=main_driver)
         
         try:
-            with allure.step("Login to Web Trader Membersite"):
-                toggle_remember_me_checkbox(driver=main_driver, server="MT4")
+            with allure.step("Check the 'Rmb me' checkbox > Login to Web Trader Membersite > logout"):
+                username, password = toggle_remember_me_checkbox(driver=main_driver, server="MT4")
+                
+            with allure.step("Input incorrect credential"):
+                login_wt(driver=main_driver, server="MT4", testcase_id="TC02", expect_failure=True) 
 
+            with allure.step("Terminate and relaunch the current active app package"):
+                current_app_package = main_driver.current_package  # Get the active app package
+                print(f"APP packaing: {current_app_package}")
+                
+                main_driver.terminate_app(current_app_package)  # Terminate the app
+                main_driver.activate_app(current_app_package)  # Relaunch the app
+                
+            with allure.step("Skip splash screen"):
+                # Skip the splash screen
+                splash_screen(driver=main_driver)
+
+            with allure.step("Click on the 'LIVE' Account tab"):
+                # Step 2: Select the desired account type (either CRM / Live or Demo) for login.
+                select_account_type(driver=main_driver)
+                
+            with allure.step("Validate the system does not rmb incorrect credential entered previously"):
+                verify_login_fields(driver=main_driver, expected_username=username, expected_password=password)
+                
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             
