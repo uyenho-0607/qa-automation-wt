@@ -343,7 +343,7 @@ def login_wt(driver, server: str, client_name: str, testcaseID: str = None, acco
         # Step 1: Launch and navigate to the WebTrader platform URL based on the provided parameters.
         params_wt_url = launch_wt(driver, server, client_name, device_type, env_type)
 
-        # Step 2: Select the desired account type (either Crm / Live or Demo) for login.
+        # Step 2: Select the desired account type (either CRM / Live or Demo) for login.
         select_account_type(driver, account_type)
         
         # Select and verify language if required

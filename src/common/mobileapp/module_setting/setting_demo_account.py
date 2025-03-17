@@ -104,7 +104,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         
         """ Name field """
         # Generate a random name for the demo account if not provided
-        first_name, _, _ = generate_random_name_and_email()
+        _, first_name, _, _ = generate_random_name_and_email()
         # Fill in the Name field with the generated name
         input_name = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_NAME.value)
         clear_input_field(element=input_name) # Clear any pre-filled value
@@ -112,7 +112,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
 
         """ Email field """
         # Use the provided email or generate a random one
-        email_to_use = user_email if user_email else generate_random_name_and_email()[2]
+        email_to_use = user_email if user_email else generate_random_name_and_email()[3]
         
         # Fill in the Email field        
         input_email = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_EMAIL.value)

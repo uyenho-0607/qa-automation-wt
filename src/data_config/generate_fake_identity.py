@@ -9,27 +9,47 @@ from faker import Faker
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
+# generated_first_names = set()
 
-generated_first_names = set()
+# def generate_random_name_and_email():
+#     """
+#     Generates a random full name with a unique first name and email address using the Faker library.
+    
+#     Returns: 
+#     - Tuple containing a unique first name, last name, and email address
+#     """
+#     fake = Faker()
+    
+#     while True:
+#         full_name = fake.name()
+#         first_name, last_name = full_name.split(" ", 1)
+        
+#         if first_name not in generated_first_names:
+#             generated_first_names.add(first_name)
+#             email = fake.email()
+#             return first_name, last_name, email
+
 
 def generate_random_name_and_email():
     """
-    Generates a random full name with a unique first name and email address using the Faker library.
-    
-    Returns: 
-    - Tuple containing a unique first name, last name, and email address
-    """
-    fake = Faker()
-    
-    while True:
-        full_name = fake.name()
-        first_name, last_name = full_name.split(" ", 1)
-        
-        if first_name not in generated_first_names:
-            generated_first_names.add(first_name)
-            email = fake.email()
-            return first_name, last_name, email
+    Generates a random full name with a unique (first name, last name) combination and a unique email address.
 
+    Returns:
+    - Tuple containing a unique first name, last name, and email address.
+    """
+    
+    generated_names = set()
+    fake = Faker()
+
+    while True:
+        first_name = fake.first_name()
+        last_name = fake.last_name()
+        full_name = f"{first_name}_{last_name}"
+
+        if full_name not in generated_names:
+            generated_names.add(full_name)
+            email = f"{full_name.lower()}{random.randint(1000, 9999)}@example.com"
+            return full_name, first_name, last_name, email
 
 
 # def generate_random_name_and_email():

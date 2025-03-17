@@ -5,7 +5,7 @@ from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
 from data_config.encrypt_decrypt import decrypt_and_print
-from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, get_label_of_element, is_element_present_by_xpath, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, is_element_present_by_testid, visibility_of_element_by_xpath, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, is_element_present_by_xpath, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, is_element_present_by_testid, visibility_of_element_by_xpath, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_xpath
 from data_config.file_handler import get_credentials
 
 
@@ -79,7 +79,7 @@ def authenticate_user(driver, login_username, login_password):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def select_account_type(driver, account_type: str):
+def select_account_type(driver, account_type: str = "live"):
     button_testids = {
         "crm": DataTestID.TAB_LOGIN_ACCOUNT_TYPE_CRM.value,
         "live": DataTestID.TAB_LOGIN_ACCOUNT_TYPE_LIVE.value,
@@ -107,7 +107,7 @@ def select_account_type(driver, account_type: str):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def wt_user_login(driver, server: str, testcase_id: str = None, selected_language: str = None, expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False) -> None:
+def wt_user_login(driver, server: str, testcase_id: str = None, selected_language: str = None, expect_failure: bool = False, use_investor_cred: bool = False, use_read_only_access: bool = False, toggle_remember_me: bool = False, use_crm_cred: bool = False) -> None:
     
     # Load credentials from the JSON file
     data = get_credentials(server)
@@ -130,18 +130,16 @@ def wt_user_login(driver, server: str, testcase_id: str = None, selected_languag
             if not valid_testcases:
                 raise ValueError(f"Testcase ID '{testcase_id}' not found in {credential_type} for server '{server}'")
             testcase = valid_testcases[0]
-        else:
-            # If expect_failure is False, decide between CRM_Credential, Credential, or Read_Only_Access
-            if use_read_only_access:
-                # If Read_Only_Access is requested, select from that category
-                credential_type = "read_only_access"
-            elif use_investor_cred:
+        else:  # If expect_failure is False, decide between CRM_Credential, Credential, or Read_Only_Access
+            if use_investor_cred:
                 credential_type = "investor_account"
-            elif use_crm_cred:
-                # Otherwise, use CRM_Credential if specified
+            elif use_read_only_access: # If Read_Only_Access is requested, select from that category
+                credential_type = "read_only_access"
+            elif toggle_remember_me:
+                credential_type = "toggle_remember_me"
+            elif use_crm_cred: # If use_crm_cred is requested, select from that category
                 credential_type = "crm_credential"
-            else:
-                # Default to Credential
+            else:  # Default to Credential
                 credential_type = "credential"
 
             # If a testcaseID is provided, attempt to find the specific testcase
@@ -206,15 +204,15 @@ def handle_login_result(driver, expect_failure: bool = False, selected_language:
     }
     
     # Wait till the spinner icon no longer display
-    # spinner_element(driver)
-
+    spinner_element(driver)
+    
     # Determine the text to wait for based on the selected language
     verification_text = language_specific_text.get(selected_language, "Trade")
 
+    # If the Trade text is found, the login is successful
     # Wait until the text is present in the specified element
     if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_SIDE_BAR_OPTION_TRADE.value, text=verification_text):
         print("Successfully Login")
-    # If the account balance is found, the login is successful
         # If login succeeded but failure was expected, log the unexpected success and fail the test
         if expect_failure:
             attach_text("Expected failure, but login succeeded without any error. Test failed as expected failure condition was not met.", name="Unexpected Success")
@@ -291,7 +289,7 @@ def handle_alert_error(driver, expect_failure: bool = None):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
+def login_wt(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, use_investor_cred: bool = False, use_read_only_access: bool = False, toggle_remember_me: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 
@@ -324,7 +322,7 @@ def login_wt(driver, server: str, testcase_id: str = None, account_type: str = "
             print("User is already logged in, skipping login steps.")
             return
 
-        # Step 2: Select the desired account type (either Crm / Live or Demo) for login.
+        # Step 2: Select the desired account type (either CRM / Live or Demo) for login.
         select_account_type(driver, account_type)
         
         # Select and verify language if required
@@ -332,13 +330,31 @@ def login_wt(driver, server: str, testcase_id: str = None, account_type: str = "
         if set_language:
             selected_language = select_and_verify_language(driver)
             print("selected language", selected_language)
+        else:
+            # Step 1: Locate the language dropdown
+            language_dropdown = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN.value)
+            language_label = get_label_of_element(language_dropdown).split(",")[0].strip()
+            
+            if language_label != "English":
+                click_element(element=language_dropdown)
+            
+                delay(0.5)
+                
+                # Step 2: Locate the language dropdown options
+                languages_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_LANGUAGE_OPTION.value)
+
+                # Step 3: Click on 'English' from the available options
+                for option in languages_options:
+                    if get_label_of_element(option).split(",")[0].strip() == "English":
+                        click_element(element=option)
+                        break  # Stop once 'English' is clicked
             
         # Step 3: Perform the login action using the `wt_user_login` function. 
         # This handles credential retrieval, entry into the login form, and the actual login process.
         if set_username:
-            username, password = wt_user_login(driver, server, testcase_id, selected_language, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
+            username, password = wt_user_login(driver, server, testcase_id, selected_language, expect_failure, use_investor_cred, use_read_only_access, toggle_remember_me, use_crm_cred)
             return username, password
-    
+
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -381,11 +397,13 @@ def select_and_verify_language(driver):
         }
 
         # Step 1: Locate the language dropdown
-        language_dropdown = visibility_of_element_by_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN.value)
-
-        # Step 2: Get all available language options
+        language_dropdown = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN.value)
         click_element(element=language_dropdown)
-        languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.APP_LANGUAGE_OPTION.value)
+        
+        delay(0.5)
+        
+        # Step 2: Locate the language dropdown options
+        languages_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_LANGUAGE_OPTION.value)
 
         # Keep track of selected languages to avoid repetition
         selected_languages = []
@@ -393,14 +411,22 @@ def select_and_verify_language(driver):
         # Step 3: Select and verify languages
         for i in range(3):  # Repeat for 3 different random languages
             # Filter out languages already selected
-            remaining_languages = [lang for lang in languages_options if lang.text not in selected_languages]
+            # remaining_languages = [lang for lang in languages_options if lang.text not in selected_languages]
 
+            # Filter out languages already selected
+            remaining_languages = []
+            for lang in languages_options:
+                if get_label_of_element(lang).split(",")[0].strip() not in selected_languages:
+                    remaining_languages.append(lang)
+
+            # remaining_languages = [lang for lang in languages_options if get_label_of_element(lang).split(",")[0].strip() not in selected_languages]
+            
             if not remaining_languages:
                 print("No more languages left to select.")
                 break
 
             random_language = random.choice(remaining_languages)
-            selected_language = random_language.text
+            selected_language = get_label_of_element(random_language).split(",")[0].strip()
             print(f"Selected language: {selected_language}")
 
             # Step 4: Click on the selected language
@@ -410,7 +436,8 @@ def select_and_verify_language(driver):
 
             # Step 5: Verify if the change is reflected
             submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
-            button_text = submit_button.text.strip()
+            button_text = get_label_of_element(submit_button).strip()
+            # button_text = submit_button.text.strip()
 
             # Get the expected value from the language map
             expected_text = language_map.get(selected_language)
@@ -427,7 +454,8 @@ def select_and_verify_language(driver):
             # Only click dropdown again if it's **not the last iteration**
             if i < 2:  # Since range(3) means last index is 2
                 click_element(element=language_dropdown)
-                languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.APP_LANGUAGE_OPTION.value)
+                delay(0.5)
+                languages_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_LANGUAGE_OPTION.value)
 
         # Return the last successfully verified language
         return selected_language

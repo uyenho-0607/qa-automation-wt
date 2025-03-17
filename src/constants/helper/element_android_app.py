@@ -292,7 +292,7 @@ def get_label_of_element(element) -> str:
     class_name = element.get_attribute("class")
 
     # For Android elements, check for known class names and retrieve text or content-desc
-    if class_name in ["android.widget.TextView", "android.widget.Button", "android.widget.EditText"]:
+    if class_name in ["android.widget.TextView", "android.view.ViewGroup", "android.widget.Button", "android.widget.EditText"]:
         # For Android, use 'text' or 'content-desc'
         label = element.text or element.get_attribute("content-desc")
     
@@ -303,10 +303,6 @@ def get_label_of_element(element) -> str:
         
     else:
         element.text
-    
-    # If no label found, check for other possible attributes
-    if not label:
-        label = element.text or element.get_attribute("resource-id") or element.get_attribute("hint")
     
     # return label if label else ""
     return label

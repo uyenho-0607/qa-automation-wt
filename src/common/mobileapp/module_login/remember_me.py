@@ -3,13 +3,14 @@
 
 
 from constants.element_ids import DataTestID
+from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element, find_element_by_xpath, get_label_of_element, presence_of_element_located_by_testid, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, is_element_present_by_xpath
+from constants.helper.element_android_app import click_element, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, presence_of_element_located_by_testid, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, is_element_present_by_xpath
 
 from data_config.generate_fake_identity import generate_random_credential
 from common.mobileapp.module_setting.utils import button_setting, change_password
-from common.mobileapp.module_login.login import select_account_type, splash_screen, wt_user_login
+from common.mobileapp.module_login.login import check_symbol_element_present, select_account_type, select_and_verify_language, splash_screen, wt_user_login
 
 
 
@@ -35,7 +36,8 @@ def verify_login_fields(driver, expected_username, expected_password):
                                                 OPEN DEMO ACCOUNT ERROR MESSAGE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, check: bool = True, kick_user: bool = True):
+
+def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, kick_user: bool = True):
     
     try:
         # Skip the splash screen
@@ -44,12 +46,31 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
         # Step 2: Select account type (CRM / Live)
         select_account_type(driver, account_type)
         
+        # Step 3: Locate the language dropdown
+        language_dropdown = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN.value)
+        language_label = get_label_of_element(language_dropdown).split(",")[0].strip()
+        
+        if language_label != "English":
+            click_element(element=language_dropdown)
+        
+            delay(0.5)
+            
+            # Step 4: Locate the language dropdown options
+            languages_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_LANGUAGE_OPTION.value)
+
+            # Step 5: Click on 'English' from the available options
+            for option in languages_options:
+                if get_label_of_element(option).split(",")[0].strip() == "English":
+                    click_element(element=option)
+                    break  # Stop once 'English' is clicked
+                
         # Verify the current checkbox status
         is_checked = is_element_present_by_xpath(driver, DataTestID.APP_RMB_ME_CHECKBOX.value)
         print("Checkbox value:", is_checked)
         
         # Verify the current status
-        if is_checked != check:
+        if is_checked != True:
+        # if is_checked is not True or is_checked is not False:
             # Declare the checkbox xpath
             checkbox_xpath = (DataTestID.APP_RMB_ME_CHECKBOX.value if is_checked else DataTestID.APP_RMB_ME_UNCHECKBOX.value)
             
@@ -57,20 +78,20 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
             checkbox = wait_for_element_clickable_xpath(driver, checkbox_xpath)
             click_element(element=checkbox)
             print("Checkbox toggled")
-        
+                
         # Continue with login process
-        username, password = wt_user_login(driver, server, testcase_id, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
+        username, password = wt_user_login(driver, server, testcase_id, expect_failure, toggle_remember_me=True)
         print(username, password)
-
+        
         # Log the user out
         if kick_user:
-            
+            # Click on the logout button
             button_setting(driver, setting_option="logout")
             
             verify_login_fields(driver, expected_username=username, expected_password=password)
         
         else:
-            
+            # Click on change password button
             button_setting(driver, setting_option="change-password")
             
             credential = generate_random_credential(length=12)
@@ -101,6 +122,8 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
             else:
                 # If the success message doesn't match, handle it as an unexpected message
                 assert False, f"Unexpected success message: {label_message}"
+
+        return username, password
     
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -110,44 +133,3 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-def verify_incorrect_credential(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, check: bool = True, kick_user: bool = True):
-
-    try:
-        
-        # Skip the splash screen
-        splash_screen(driver)
-        
-        # Step 2: Select account type (CRM / Live)
-        select_account_type(driver, account_type)
-        
-        # Verify the current checkbox status
-        is_checked = is_element_present_by_xpath(driver, DataTestID.APP_RMB_ME_CHECKBOX.value)
-        print("Checkbox value:", is_checked)
-        
-        # Verify the current status
-        if is_checked != check:
-            # Declare the checkbox xpath
-            checkbox_xpath = (DataTestID.APP_RMB_ME_CHECKBOX.value if is_checked else DataTestID.APP_RMB_ME_UNCHECKBOX.value)
-            
-            # Click on the checkbox
-            checkbox = wait_for_element_clickable_xpath(driver, checkbox_xpath)
-            click_element(element=checkbox)
-            print("Checkbox toggled")
-        
-        # Continue with login process
-        username, password = wt_user_login(driver, server, client_name, testcaseID, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
-        print(username, password)
-
-        # userinput_name = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
-        # assert userinput_name.get_attribute("text") == expected_username, "Username mismatch"
-
-        # password_unmasked = find_element_by_xpath(driver, DataTestID.APP_LOGIN_PASSWORD_UNMASKED.value)
-        # click_element(element=password_unmasked)
-
-        # password_input = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
-        # assert password_input.get_attribute("text") == expected_password, "Password mismatch"
-
-    except Exception as e:
-        # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)

@@ -86,7 +86,7 @@ class DataTestID(Enum):
     LANGUAGE_DROPDOWN = 'language-dropdown'
     LANGUAGE_OPTION = 'language-option'
     
-    APP_LANGUAGE_OPTION = '//android.widget.ScrollView//android.view.ViewGroup'
+    APP_LANGUAGE_OPTION = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
     LANGUAGE_ENGLISH = '//android.view.ViewGroup[@content-desc="English"]'
     LANGUAGE_SIMPLIFIED_CHINESE = '//android.view.ViewGroup[@content-desc="简体中文"]'
     LANGUAGE_TRADICTIONAL_CHINESE = '//android.view.ViewGroup[@content-desc="繁体中文"]'
@@ -126,9 +126,11 @@ class DataTestID(Enum):
     # APP
     APP_SIDE_BAR_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
     APP_SIDE_BAR_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
-    APP_SIDE_BAR_OPTION_TRADE = '//android.widget.TextView[@text="Trade"]'
+    # APP_SIDE_BAR_OPTION_TRADE = '//android.widget.TextView[@text="Trade"]'
+    APP_SIDE_BAR_OPTION_TRADE = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[3]/android.widget.TextView[2]'
     APP_SIDE_BAR_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
-    APP_SIDE_BAR_OPTION_ASSETS = '//android.widget.TextView[@text="Assets"]'
+    # APP_SIDE_BAR_OPTION_ASSETS = '//android.widget.TextView[@text="Assets"]'
+    APP_SIDE_BAR_OPTION_ASSETS = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[5]'
         
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -588,7 +590,8 @@ class DataTestID(Enum):
     SETTING_OPTION_HELP_SUPPORT = 'setting-option-help-support'
     SETTING_OPTION_ABOUT = 'setting-option-about'
     SETTING_OPTION_LOGOUT = 'setting-option-logout'
-    APP_SETTING_OPTION_LOGOUT = '//android.view.ViewGroup[@content-desc="Logout"]'
+    # APP_SETTING_OPTION_LOGOUT = '//android.view.ViewGroup[@content-desc="Logout"]'
+    APP_SETTING_OPTION_LOGOUT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[7]'
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 

@@ -38,7 +38,7 @@ for username in usernames:
 # Encrypting passwords and storing encrypted values
 print("\nEncrypting Passwords:")
 encrypted_passwords = []
-passwords = ["As8881"] # Password
+passwords = ["Asdf!234"] # Password
 for password in passwords:
     encrypted_password = encrypt_and_print(password)
     encrypted_passwords.append(encrypted_password)

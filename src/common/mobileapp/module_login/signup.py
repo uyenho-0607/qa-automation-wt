@@ -1,12 +1,11 @@
 import random
 
 from constants.element_ids import DataTestID
-from constants.helper.driver import delay, get_current_url
+from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, is_element_present_by_testid, is_element_present_by_xpath, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, visibility_of_element_by_xpath, populate_element, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import click_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, is_element_present_by_xpath, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_xpath, populate_element, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.mobileapp.module_login.login import authenticate_user, handle_login_result, select_account_type, splash_screen
-from constants.helper.screenshot import attach_text
 from data_config.generate_fake_identity import generate_random_name_and_email, generate_random_credential, generate_singapore_phone_number
 
 """
@@ -35,9 +34,9 @@ def app_signup(driver, expect_failure: bool = True, selected_language: str = Non
         if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_SIGN_UP.value, text="Sign up"):
 
             # Generate a random username
-            first_name, last_name, email = generate_random_name_and_email()
+            username, first_name, last_name, email = generate_random_name_and_email()
             input_username = find_element_by_xpath(driver, DataTestID.APP_SIGN_UP_USERNAME.value)
-            populate_element(element=input_username, text=first_name)
+            populate_element(element=input_username, text=username)
             
             # Click to reveal the title dropdown options
             title = find_element_by_xpath(driver, DataTestID.APP_SIGN_UP_TITLE.value)
@@ -76,7 +75,7 @@ def app_signup(driver, expect_failure: bool = True, selected_language: str = Non
             search_country = visibility_of_element_by_xpath(driver, DataTestID.APP_SIGN_UP_COUNTRY_OF_RESIDENCE_SEARCH.value)
             populate_element(element=search_country, text="Singapore")
             
-            delay(2)
+            delay(1)
             
             # Click on the options
             search_country_options = wait_for_element_clickable_xpath(driver, DataTestID.APP_SIGN_UP_COUNTRY_OF_RESIDENCE_OPTIONS.value)
@@ -123,10 +122,7 @@ def app_signup(driver, expect_failure: bool = True, selected_language: str = Non
 
 def get_signup_banner(driver):
     """
-    Extracts the snackbar trade notification message, processes its content, and returns a structured DataFrame with order details.
-
-    Returns: 
-    - pd.DataFrame: A DataFrame containing the extracted trade details from the snackbar banner.
+    Extracts the sign up notification message, processes its content, and returns a structured DataFrame with order details.
     
     Raises:
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
@@ -134,27 +130,24 @@ def get_signup_banner(driver):
     try:
         
         spinner_element(driver)
-        
-        neg_message_headers = ["Success"]
-        
-        description_messages = ["You have successfully regirstered your new account. Please check your email for your account details"]
-        
+
         # Wait for the snackbar message to be visible
         # visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
-
-        # Wait for the message header to be visible
-        message_header = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_TITLE.value)
-        extracted_header = get_label_of_element(message_header)
-
-        # Check if the normalized header is in the list of valid headers
-        if extracted_header in neg_message_headers:
-            label_message_description = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
-            label_message = get_label_of_element(label_message_description)
+        
+        delay(1)
+        
+        label_message_description = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
+        label_message = get_label_of_element(label_message_description)
+        
+        if label_message != "You have successfully registered your new account. Please check your email for your account details.":
+            raise AssertionError(f"Invalid message description: {label_message}")
             
-            if any(msg in label_message for msg in description_messages):
-                attach_text(label_message, name="Description_Message")
-        else:
-            assert False, f"Invalid message header: {extracted_header}" if message_header else "Message header not found"
+        # Wait for the message header to be visible
+        message_title = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_TITLE.value)
+        extracted_title = get_label_of_element(message_title)
+        
+        if extracted_title != "Success":
+            raise AssertionError(f"Invalid message title: {extracted_title}")
 
         btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE.value)
         click_element(btn_close)
@@ -171,7 +164,3 @@ def get_signup_banner(driver):
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
