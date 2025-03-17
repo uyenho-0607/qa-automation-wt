@@ -33,7 +33,7 @@ class TC_MT4_aA13():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo", set_username=False)
+                login_wt(driver=main_driver, server="MT4", account_type="demo", set_username=False)
 
             with allure.step("Open demo account"):
                 open_demo_account_error_msg(driver=main_driver)

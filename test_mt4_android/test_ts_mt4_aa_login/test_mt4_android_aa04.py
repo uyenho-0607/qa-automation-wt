@@ -33,7 +33,7 @@ class TC_MT4_aA04():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="crm", testcaseID="TC01", expect_failure=True) 
+                login_wt(driver=main_driver, server="MT4", account_type="crm", testcase_id="TC01", expect_failure=True) 
                 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

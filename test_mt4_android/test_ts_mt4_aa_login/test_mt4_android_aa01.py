@@ -32,7 +32,7 @@ class TC_MT4_aA01():
         try:
             
             with allure.step("Login with parameter userID & password"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="crm", use_crm_cred=True)
+                login_wt(driver=main_driver, server="MT4", account_type="crm", use_crm_cred=True)
 
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout")

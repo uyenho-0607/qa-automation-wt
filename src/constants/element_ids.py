@@ -2,17 +2,22 @@ from enum import Enum
 
 class DataTestID(Enum):
     
+    # IN-APP BROWSER
     IN_APP_BROWSER_URL_bar = '//android.widget.TextView[@resource-id="com.android.chrome:id/url_bar"]'
     IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
+    
+    # APP < BACK BUTTON
     APP_NAVIGATION_BACK_BUTTON = "navigation-back-button"
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     LOGIN PAGE
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
-    # LOGIN PAGE
-    APP_LOGIN_LOGO = '//android.widget.ImageView'
+
     ADS_SKIP_BUTTON = 'ads-skip-button' # SPLASH SCREEN SKIP
+    
+    APP_LOGIN_LOGO = '//android.widget.ImageView'
     LOGIN_ACCOUNT_TYPE = 'login-account-type'
     LOGIN_PASSWORD = 'login-password'
     APP_LOGIN_PASSWORD_UNMASKED = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[4]/android.view.ViewGroup'
@@ -25,31 +30,31 @@ class DataTestID(Enum):
     
     APP_RMB_ME_CHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "Remember me")]/android.view.ViewGroup/android.widget.TextView'
     APP_RMB_ME_UNCHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "Remember me")]/android.view.ViewGroup'
+    
+    # CRM LIVE ACCOUNT / LIVE ACCOUNT / DEMO ACCOUNT
     TAB_LOGIN_ACCOUNT_TYPE_CRM = 'tab-login-account-type-crm'
     TAB_LOGIN_ACCOUNT_TYPE_LIVE = 'tab-login-account-type-live'
     TAB_LOGIN_ACCOUNT_TYPE_DEMO = 'tab-login-account-type-demo'
     
-    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                    LOGIN PAGE -  FORGOT PASSWORD
+                                                    APP - LOGIN PAGE - FORGOT PASSWORD
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     
     # APP - FORGOT PASSWORD MODULE
     APP_FORGOT_PASSWORD = '//android.widget.TextView[@text="Forgot password?"]'
     APP_RESET_PASSWORD = '//android.widget.TextView[@text="Reset Password"]'
-    APP_RESET_PASSWORD_EMAIL_ADDRESS = '//android.widget.EditText[@text="Enter your email address"]' # placeholder
+    APP_RESET_PASSWORD_EMAIL_ADDRESS = '//android.widget.EditText[@text="Enter your email address"]'
     APP_RESET_PASSWORD_ACCOUNT_ID = '//android.widget.EditText[@text="Enter your account ID"]'
     APP_RESET_PASSWORD_SUBMIT = '//android.view.ViewGroup[@content-desc="Submit"]'
     APP_HELP_IS_ON_THE_WAY = '//android.widget.TextView[@text="Help is on the way!"]'
     APP_CONTACT_SUPPORT = '//android.widget.TextView[@text="Contact Support"]'
     APP_BACK_TO_LOGIN_SCREEN = '//android.widget.TextView[@text="Back to login screen"]'
     
-    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                    LOGIN PAGE -  SIGN UP
+                                                    APP - LOGIN PAGE -  SIGN UP
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     
@@ -81,8 +86,7 @@ class DataTestID(Enum):
     LANGUAGE_DROPDOWN = 'language-dropdown'
     LANGUAGE_OPTION = 'language-option'
     
-    
-    LANGUAGE_OPTION_APP = '//android.widget.ScrollView//android.view.ViewGroup'
+    APP_LANGUAGE_OPTION = '//android.widget.ScrollView//android.view.ViewGroup'
     LANGUAGE_ENGLISH = '//android.view.ViewGroup[@content-desc="English"]'
     LANGUAGE_SIMPLIFIED_CHINESE = '//android.view.ViewGroup[@content-desc="简体中文"]'
     LANGUAGE_TRADICTIONAL_CHINESE = '//android.view.ViewGroup[@content-desc="繁体中文"]'
@@ -92,9 +96,10 @@ class DataTestID(Enum):
     LANGUAGE_INDONESIA = '//android.view.ViewGroup[@content-desc="Bahasa Indonesia"]'
     LANGUAGE_JAPANESE = '//android.view.ViewGroup[@content-desc="Japanese"]'
     LANGUAGE_KOREAN = '//android.view.ViewGroup[@content-desc="Korean"]'
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                    LOGIN LANGUAGE
+                                                    ANNOUNCEMENT MODAL
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     
@@ -118,7 +123,7 @@ class DataTestID(Enum):
     SIDE_BAR_OPTION_NEWS = 'side-bar-option-news'
     SPIN_LOADER = 'spin-loader'
     
-    
+    # APP
     APP_SIDE_BAR_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
     APP_SIDE_BAR_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
     APP_SIDE_BAR_OPTION_TRADE = '//android.widget.TextView[@text="Trade"]'

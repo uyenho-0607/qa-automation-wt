@@ -6,6 +6,7 @@ from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, is_element_present_by_testid, populate_element, find_list_of_elements_by_testid, spinner_element, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
 
+from constants.helper.network_logs import extract_bearer_token
 from data_config.file_handler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
 
@@ -37,6 +38,9 @@ def input_symbol(driver, server: str, client_name: str, symbol_type: str = "Symb
     - AssertionError: If the selected symbol does not match the desired symbol.
     """
     try:
+        
+        # logs = driver.get_log("performance")
+        # extract_bearer_token(logs)
         
         # Load available symbols for the given platform, client, and symbol type
         symbols = read_symbol_file(server, client_name, symbol_type)

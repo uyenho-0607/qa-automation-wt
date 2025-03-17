@@ -34,39 +34,41 @@ def get_URLs():
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_credentials():
-    file_path = os.path.join("src/data_config/credential.json")
-    with open(file_path, "r") as json_file:
-        data = json.load(json_file)
-    return data
+# def get_credentials():
+#     file_path = os.path.join("src/data_config/credential.json")
+#     with open(file_path, "r") as json_file:
+#         data = json.load(json_file)
+#     return data
 
 
 
 def get_credentials(server, read_from_file: bool = True):
     
     if read_from_file:
-        if server == "MT4":
-            file_path = os.path.join("src/data_config/mt4_credential.json")
-        else:
-            file_path = os.path.join("src/data_config/mt5_credential.json")
-        
-        with open(file_path, "r") as json_file:
-            data = json.load(json_file)
-    
-    else:
-        data = {
-            'MT4': {
-                'Membersite': {
-                    'credential': {
-                        'username'
-                        'password'
-                    }
-                }
-            }
+        file_map = {
+            "MT4": "src/data_config/credential/mt4_credential.json",
+            "MT5": "src/data_config/credential/mt5_credential.json",
         }
+        file_path = file_map.get(server)  # No default value
         
-        with open('json_path', 'w') as file:
-            json.dump(data, file, indent=4)
+    else:
+        file_path = os.path.join("src/data_config/credential/credential.json")
+        # data = {
+        #     'MT4': {
+        #         'Membersite': {
+        #             'credential': {
+        #                 'username'
+        #                 'password'
+        #             }
+        #         }
+        #     }
+        # }
+     
+    if not file_path:
+        raise ValueError(f"Invalid server type: {server}")
+    
+    with open(file_path, "r") as json_file:
+        data = json.load(json_file)
         
     return data
 

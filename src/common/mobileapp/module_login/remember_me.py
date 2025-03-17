@@ -35,7 +35,7 @@ def verify_login_fields(driver, expected_username, expected_password):
                                                 OPEN DEMO ACCOUNT ERROR MESSAGE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-def toggle_remember_me_checkbox(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, check: bool = True, kick_user: bool = True):
+def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, check: bool = True, kick_user: bool = True):
     
     try:
         # Skip the splash screen
@@ -59,7 +59,7 @@ def toggle_remember_me_checkbox(driver, server: str, client_name: str, testcaseI
             print("Checkbox toggled")
         
         # Continue with login process
-        username, password = wt_user_login(driver, server, client_name, testcaseID, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
+        username, password = wt_user_login(driver, server, testcase_id, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
         print(username, password)
 
         # Log the user out

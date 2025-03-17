@@ -18,7 +18,8 @@
         "USDJPY.std",
         "USOIL.std",
         "UKOIL.std",
-        "XRPUSD.std"
+        "XRPUSD.std",
+        "XAUUSD.std"
       ],
       "Symbols_Price": [
         "DASHUSD.std",

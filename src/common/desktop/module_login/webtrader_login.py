@@ -88,13 +88,14 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     """
 
     # Load credentials from the JSON file
-    data = get_credentials()
+    data = get_credentials(server, read_from_file=False)
 
     # Check if the server exists in the data
     if server in data:
         # Retrieve the specific server data for the given client and "MemberSite"
         server_data = data[server].get(client_name, {}).get("MemberSite", {})
-
+        # server_data = data[server]["MemberSite"]
+        
         # If expect_failure is True, use Invalid_Credential and require testcaseID
         if expect_failure:
             if testcaseID is None:

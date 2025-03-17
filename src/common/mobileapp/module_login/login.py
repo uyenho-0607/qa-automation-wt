@@ -1,13 +1,11 @@
 import random
-import re
-import subprocess
 
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
 from data_config.encrypt_decrypt import decrypt_and_print
-from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, get_label_of_element, is_element_present_by_xpath, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, is_element_present_by_testid, visibility_of_element_by_xpath, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, get_label_of_element, is_element_present_by_xpath, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, is_element_present_by_testid, visibility_of_element_by_xpath, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_xpath
 from data_config.file_handler import get_credentials
 
 
@@ -109,48 +107,49 @@ def select_account_type(driver, account_type: str):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None, selected_language: str = None, expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False) -> None:
+def wt_user_login(driver, server: str, testcase_id: str = None, selected_language: str = None, expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False) -> None:
     
     # Load credentials from the JSON file
-    data = get_credentials()
+    data = get_credentials(server)
     
     # Check if the server exists in the data
     if server in data:
         # Retrieve the specific server data for the given client and "MemberSite"
-        server_data = data[server].get(client_name, {}).get("MemberSite", {})
+        # server_data = data[server].get(client_name, {}).get("MemberSite", {})
+        server_data = data[server]["MemberSite"]
 
-        # If expect_failure is True, use Invalid_Credential and require testcaseID
+        # If expect_failure is True, use invalid_credential and require testcaseID
         if expect_failure:
-            if testcaseID is None:
-                raise ValueError("testcaseID must be provided for Invalid_Credential.")
+            if testcase_id is None:
+                raise ValueError("testcaseID must be provided for invalid_credential.")
         
-            # Select the "Invalid_Credential" type and search for the matching testcaseID
-            credential_type = "Invalid_Credential"
+            # Select the "invalid_credential" type and search for the matching testcaseID
+            credential_type = "invalid_credential"
             valid_testcases = [testcase for testcase in server_data.get(credential_type, [])
-                                if testcase["TestcaseID"] == testcaseID]
+                                if testcase["testcase_id"] == testcase_id]
             if not valid_testcases:
-                raise ValueError(f"Testcase ID '{testcaseID}' not found in {credential_type} for server '{server}'")
+                raise ValueError(f"Testcase ID '{testcase_id}' not found in {credential_type} for server '{server}'")
             testcase = valid_testcases[0]
         else:
             # If expect_failure is False, decide between CRM_Credential, Credential, or Read_Only_Access
             if use_read_only_access:
                 # If Read_Only_Access is requested, select from that category
-                credential_type = "Read_Only_Access"
+                credential_type = "read_only_access"
             elif use_investor_cred:
-                credential_type = "Investor_Account"
+                credential_type = "investor_account"
             elif use_crm_cred:
                 # Otherwise, use CRM_Credential if specified
-                credential_type = "CRM_Credential"
+                credential_type = "crm_credential"
             else:
                 # Default to Credential
-                credential_type = "Credential"
+                credential_type = "credential"
 
             # If a testcaseID is provided, attempt to find the specific testcase
-            if testcaseID:
+            if testcase_id:
                 valid_testcases = [testcase for testcase in server_data.get(credential_type, [])
-                                    if testcase["TestcaseID"] == testcaseID]
+                                    if testcase["testcase_id"] == testcase_id]
                 if not valid_testcases:
-                    raise ValueError(f"Testcase ID '{testcaseID}' not found in {credential_type} for server '{server}'")
+                    raise ValueError(f"Testcase ID '{testcase_id}' not found in {credential_type} for server '{server}'")
                 testcase = valid_testcases[0]
             else:
                 # If no testcaseID is provided, randomly select a testcase from available credentials
@@ -160,8 +159,8 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
                 testcase = random.choice(server_data[credential_type])
         
     # Retrieve the username and password from the selected testcase
-    login_username = testcase["Username"]
-    login_password_encrypted = testcase["Password"]
+    login_username = testcase["username"]
+    login_password_encrypted = testcase["password"]
     
     # Decrypt the credentials
     login_password = decrypt_and_print(login_password_encrypted)
@@ -292,7 +291,7 @@ def handle_alert_error(driver, expect_failure: bool = None):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
+def login_wt(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 
@@ -337,7 +336,7 @@ def login_wt(driver, server: str, client_name: str, testcaseID: str = None, acco
         # Step 3: Perform the login action using the `wt_user_login` function. 
         # This handles credential retrieval, entry into the login form, and the actual login process.
         if set_username:
-            username, password = wt_user_login(driver, server, client_name, testcaseID, selected_language, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
+            username, password = wt_user_login(driver, server, testcase_id, selected_language, expect_failure, use_read_only_access, use_investor_cred, use_crm_cred)
             return username, password
     
     except Exception as e:
@@ -386,7 +385,7 @@ def select_and_verify_language(driver):
 
         # Step 2: Get all available language options
         click_element(element=language_dropdown)
-        languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.LANGUAGE_OPTION_APP.value)
+        languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.APP_LANGUAGE_OPTION.value)
 
         # Keep track of selected languages to avoid repetition
         selected_languages = []
@@ -428,7 +427,7 @@ def select_and_verify_language(driver):
             # Only click dropdown again if it's **not the last iteration**
             if i < 2:  # Since range(3) means last index is 2
                 click_element(element=language_dropdown)
-                languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.LANGUAGE_OPTION_APP.value)
+                languages_options = find_list_of_elements_by_testid(driver, data_testid=DataTestID.APP_LANGUAGE_OPTION.value)
 
         # Return the last successfully verified language
         return selected_language
@@ -507,19 +506,3 @@ def forgot_password(driver, email: str, accountID: str = None, account_type: str
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-
-def get_url_from_logcat():
-    logcat_process = subprocess.Popen(["adb", "logcat", "-d"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    logcat_output, _ = logcat_process.communicate()
-
-    # Decode safely, ignoring errors
-    logcat_text = logcat_output.decode("utf-8", errors="ignore")  # FIXED
-
-    # Search for a URL in the log output
-    url_pattern = re.compile(r"https?://[^\s]+")
-    match = url_pattern.search(logcat_text)
-
-    if match:
-        return match.group(0)
-    return None

@@ -31,7 +31,7 @@ class TC_MT4_aA08():
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                toggle_remember_me_checkbox(driver=main_driver, server="MT4", client_name="Lirunex", testcaseID="TC01", kick_user=False)
+                toggle_remember_me_checkbox(driver=main_driver, server="MT4", testcase_id="TC01", kick_user=False)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

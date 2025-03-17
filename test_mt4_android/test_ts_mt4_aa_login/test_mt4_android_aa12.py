@@ -34,7 +34,7 @@ class TC_MT4_aA12():
         try:
             
             with allure.step("Launch Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="demo", set_username=False)
+                login_wt(driver=main_driver, server="MT4", account_type="demo", set_username=False)
 
             with allure.step("Open demo account by clicking the 'X' button"):
                 # System click on the "X" button
