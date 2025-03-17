@@ -10,8 +10,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 # from appium.webdriver.webdriver import WebDriver
 
-
-from constants.main import DRIVER_WAIT_DURATION
+from constants.element_ids import DataTestID
+from constants.helper.error_handler import handle_exception
+from constants.helper.screenshot import take_screenshot
+from constants.main import APP_WAIT_DURATION
 
 clickable_element = EC.element_to_be_clickable
 
@@ -19,7 +21,7 @@ data_test_id_pattern = "//*[@resource-id='{}']"
 
 
 def derive_wait_duration(duration: int | None = None) -> int:
-    return duration if duration is not None else DRIVER_WAIT_DURATION
+    return duration if duration is not None else APP_WAIT_DURATION
 
 
 """
@@ -55,6 +57,14 @@ def find_element_by_xpath_with_wait(driver, xpath_string, duration: int | None =
     element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element((AppiumBy.XPATH, xpath_string)))
     return element_on_focus
 
+
+def find_element_by_testid_with_wait(driver, data_testid, duration: int | None = None) -> WebElement:
+    wait_duration = derive_wait_duration(duration)
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element((AppiumBy.XPATH, data_test_id_string)))
+    return element_on_focus
+
+
 # Use WebDriver to find for element to according to specified css_selector string
 def find_element_by_css(driver, css_selector) -> WebElement:
     return driver.find_element(AppiumBy.CSS_SELECTOR, css_selector)
@@ -85,29 +95,34 @@ def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# def visibility_of_element_by_xpath(driver, xpath_string, timeout=10) -> WebElement:
-#     return WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((AppiumBy.XPATH, xpath_string)))
+def is_element_present_by_testid(driver, data_testid: str) -> bool:
+    try:
+        # Try to find the element
+        # find_element_by_testid(driver, data_testid)
+        find_element_by_xpath_with_wait(driver, data_testid)
+        # Use WebDriver to find for element to according to specified xpath string
+        return True
+    except Exception:
+        # If element is not found, return False
+        return False    
+    
 
+def is_element_present_by_xpath(driver, xpath: str) -> bool:
+    try:
+        # Try to find the element
+        # find_element_by_xpath(driver, xpath)
+        find_element_by_xpath_with_wait(driver, xpath)
+        # Use WebDriver to find for element to according to specified xpath string
+        return True
+    except Exception:
+        # If element is not found, return False
+        return False
+    
 
-# def visibility_of_element_by_testid(driver, data_testid, timeout=5) -> WebElement:
-#     data_test_id_string = data_test_id_pattern.format(data_testid)
-#     visibility_of_element = WebDriverWait(driver, timeout).until(EC.visibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-#     return visibility_of_element
-
-
-# def invisibility_of_element_by_xpath(driver, xpath, timeout=25):
-#     # wait_duration = derive_wait_duration(duration)
-#     element = WebDriverWait(driver, timeout).until(EC.invisibility_of_element_located((AppiumBy.XPATH, xpath)))
-#     return element
-
-
-# def invisibility_of_element_by_testid(driver, data_testid, timeout=25):
-# # def invisibility_of_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
-#     data_test_id_string = data_test_id_pattern.format(data_testid)
-#     # wait_duration = derive_wait_duration(duration)
-#     invisibility_of_element = WebDriverWait(driver, timeout).until(EC.invisibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-#     return invisibility_of_element
-
+# Ensures the element is both present in the DOM and visible.
+def wait_for_element_visibility(driver, locator, duration: int | None = None) -> WebElement:
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(locator)) is not None
 
 
 def visibility_of_element_by_xpath(driver, xpath_string, duration: int | None = None) -> WebElement:
@@ -122,19 +137,24 @@ def visibility_of_element_by_testid(driver, data_testid, duration: int | None = 
     return visibility_of_element
 
 
-
 def invisibility_of_element_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
+    # wait_duration = derive_wait_duration(duration)
+    # element = WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, xpath)))
+    # return element
     wait_duration = derive_wait_duration(duration)
-    element = WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, xpath)))
-    return element
+    try:
+        return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, xpath)))
+    except:
+        return False # Return False if timeout occurs
 
 
-def invisibility_of_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
+def invisibility_of_element_by_testid(driver, data_testid, duration: int | None = None) -> bool:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
-    invisibility_of_element = WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-    return invisibility_of_element
-
+    try:
+        return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
+    except:
+        return False  # Return False if timeout occurs
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -142,30 +162,17 @@ def invisibility_of_element_by_testid(driver, data_testid, duration: int | None 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# def presence_of_element_located_by_testid(driver, data_testid, timeout=5) -> WebElement:
-#     data_test_id_string = data_test_id_pattern.format(data_testid)
-#     # wait_duration = derive_wait_duration(duration)
-#     # Wait for the spinner to appear
-#     WebDriverWait(driver, timeout).until(EC.presence_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-
-
-# def presence_of_element_located_by_xpath(driver, xpath, timeout=5) -> WebElement:
-#     # wait_duration = derive_wait_duration(duration)
-#     # Wait for the spinner to appear
-#     WebDriverWait(driver, timeout).until(EC.presence_of_element_located((AppiumBy.XPATH, xpath)))
-
-
 def presence_of_element_located_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
     wait_duration = derive_wait_duration(duration)
     # Wait for the spinner to appear
-    WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, xpath)))
+    return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, xpath)))
 
 
 def presence_of_element_located_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
     # Wait for the spinner to appear
-    WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, data_test_id_string)))
+    return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, data_test_id_string)))
 
 
 """
@@ -197,6 +204,7 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
         #         element_on_focus.send_keys("\n") # iOS Enter key
         #     else:
         #         raise Exception("Unsupported platform: " + platform)
+        
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 TO AUTO SCROLL INTO VIEW
@@ -206,10 +214,14 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
 # Clear the field
 def clear_input_field(element):
     element.click()
+    element.clear()
     # Keep attempting to clear the field until it's empty
-    while element.get_attribute("value") != "":
-        element.send_keys(Keys.COMMAND + 'a') # Select all text (use Keys.CONTROL for Windows/Linux)
-        element.send_keys(Keys.DELETE) # Delete the selected text
+    # while element.get_attribute("text") != "":
+    #     element.send_keys(Keys.CONTROL, "a")  # Select all text
+    #     element.send_keys(Keys.BACKSPACE)  # Delete selected text
+    #     element.clear()
+    # driver.set_value(element, "")
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -223,13 +235,21 @@ def click_element(element: WebElement) -> None:
 
 def click_element_with_wait(driver, element: WebElement, duration: int | None = None) -> None:
     wait_duration = derive_wait_duration(duration)
-
     # Use WebDriverWait to wait for the element to be clickable
     element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element(element))
-
     # Perform the click
     click_element(element_on_focus)
 
+
+def wait_for_element_clickable_xpath(driver, xpath, duration: int | None = None) -> WebElement:
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.element_to_be_clickable((AppiumBy.XPATH, xpath)))
+    
+
+def wait_for_element_clickable_testid(driver, data_testid, duration: int | None = None) -> WebElement:
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.element_to_be_clickable((AppiumBy.XPATH, data_test_id_string)))
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -237,18 +257,15 @@ def click_element_with_wait(driver, element: WebElement, duration: int | None = 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# def wait_for_text_to_be_present_in_element_by_xpath(driver, xpath, text, timeout=30) -> bool:
 def wait_for_text_to_be_present_in_element_by_xpath(driver, xpath, text, duration: int | None = None) -> bool:
     try:
         wait_duration = derive_wait_duration(duration)
-
         WebDriverWait(driver, wait_duration).until(EC.text_to_be_present_in_element((AppiumBy.XPATH, xpath), text))
         return True
     except:
         return False
     
-    
-# def wait_for_text_to_be_present_in_element_by_testid(driver, data_testid, text, timeout=30):
+
 def wait_for_text_to_be_present_in_element_by_testid(driver, data_testid, text, duration: int | None = None) -> bool:
     try:
         data_test_id_string = data_test_id_pattern.format(data_testid)
@@ -258,92 +275,41 @@ def wait_for_text_to_be_present_in_element_by_testid(driver, data_testid, text, 
     except:
         return False
     
+
+def wait_for_element_value(driver, element, expected_value, duration: int | None = None) -> bool:
+    wait_duration = derive_wait_duration(duration)
+    WebDriverWait(driver, wait_duration).until(lambda _: element.get_attribute("value") == expected_value)
+    return True
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 RETRIEVE THE LABEL CONTENT
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-
 def get_label_of_element(element) -> str:
-    # Retrieve the tag name of element
-    tag_name = element.tag_name
+    # Get the class name of the element
+    class_name = element.get_attribute("class")
 
-    # For mobile elements, use 'text', 'label', or 'content-desc'
-    if tag_name in ["android.widget.TextView", "android.widget.Button", "android.widget.EditText"]:
-        # For Android elements, use 'text' or 'content-desc'
+    # For Android elements, check for known class names and retrieve text or content-desc
+    if class_name in ["android.widget.TextView", "android.widget.Button", "android.widget.EditText"]:
+        # For Android, use 'text' or 'content-desc'
         label = element.text or element.get_attribute("content-desc")
-
-    elif tag_name in ["XCUIElementTypeButton", "XCUIElementTypeStaticText", "XCUIElementTypeTextField"]:
-        # For iOS elements, use 'label'
-        label = element.get_attribute("label") or element.get_attribute("value")
     
+    # For iOS elements, check for common class names
+    elif class_name in ["UIAStaticText", "UIAButton", "UIATextField"]:
+        # For iOS, use 'label', 'name', or 'value'
+        label = element.get_attribute("label") or element.get_attribute("name") or element.get_attribute("value")
+        
     else:
-        print(f"Unable to retrieve label for element: {tag_name}")
-        label = None
+        element.text
     
-    # label = element.text
+    # If no label found, check for other possible attributes
+    if not label:
+        label = element.text or element.get_attribute("resource-id") or element.get_attribute("hint")
     
+    # return label if label else ""
     return label
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                SWITCH TO IFRAME
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-# Switches to the iframe content
-def iframe(driver):
-    try:
-        # Wait until the iframe is available and switch to it
-        WebDriverWait(driver, 20).until(EC.frame_to_be_available_and_switch_to_it((AppiumBy.XPATH, "(//iframe)[1]")))
-
-        # Wait until the element inside the iframe is visible
-        element = WebDriverWait(driver, 20).until(EC.visibility_of_element_located((AppiumBy.CSS_SELECTOR, '[data-testid="YOUR_TESTID"]'))) # Replace with the actual data-testid
-
-        # Check if the element is displayed
-        is_displayed = element.is_displayed()
-
-        # Print the result
-        print(f"Element is displayed: {is_displayed}")
-
-    finally:
-        # Don't forget to switch back to the main content
-        driver.switch_to.default_content()
-
-        # Close the driver
-        driver.quit()
-        
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                TO AUTO SCROLL INTO VIEW
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-# Javascript click
-def javascript_click(driver, element):
-    try:
-   
-        """Use JavaScript to click on the given web element """
-        # driver.execute_script("arguments[0].click();", element)
-        driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", element)
-   
-        # Execute JavaScript to scale the page content to 80%
-        # driver.execute_script("document.body.style.zoom='75%'")
-        
-    except Exception as e:
-        assert False, f"{str(e)}\n{traceback.format_exc()}"
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -351,10 +317,34 @@ def javascript_click(driver, element):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 # Checking the loading spinner
+# def spinner_element(driver):
+#     try:
+        
+#         invisibility_of_element_by_testid(driver, data_testid="spin-loader")
+
+#     except TimeoutError:
+#         assert False, "Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct."
+        
+
+
+# Checking the loading spinner
 def spinner_element(driver):
     try:
-        
-        invisibility_of_element_by_testid(driver, data_testid="spin-loader")
+        # invisibility_of_element_by_testid(driver, data_testid="spin-loader")
+        invisibility_of_element_by_testid(driver, data_testid=DataTestID.SPIN_LOADER.value)
+    except Exception as e:
+        # Attach a screenshot with the function name in the filename
+        take_screenshot(driver, f"Exception_Screenshot")
+        # Handle any exceptions that occur during the execution
+        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow")
+    
 
-    except TimeoutError:
-        assert False, "Timeout waiting for loading icon to disappear. Check if the API is slow or the selector is correct."
+def bulk_spinner_element(driver, timeout=10):
+    try:
+        # invisibility_of_element_by_testid(driver, data_testid="spin-loader")
+        # Wait for the spinner to disappear
+        WebDriverWait(driver, timeout).until(EC.invisibility_of_element((AppiumBy.CSS_SELECTOR, "[data-testid='spin-loader']")))
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+        raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow")

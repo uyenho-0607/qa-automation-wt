@@ -102,8 +102,8 @@ def ra_user_login(driver, platform: str, testcaseID: str, expect_failure: bool =
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Fill in the username and password fields
-        username_input = visibility_of_element_by_xpath(driver, "(//input[contains(@class,'mantine-4eck0i')])[1]")
-        populate_element_with_wait(driver, element=username_input, text=login_username)
+        userinput_name = visibility_of_element_by_xpath(driver, "(//input[contains(@class,'mantine-4eck0i')])[1]")
+        populate_element_with_wait(driver, element=userinput_name, text=login_username)
 
         password_input = find_element_by_xpath(driver, "//input[@type='password']")
         populate_element_with_wait(driver, element=password_input, text=login_password)

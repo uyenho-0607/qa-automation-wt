@@ -96,8 +96,8 @@ def bo_user_login(driver, platform: str, client_name: str, testcaseID: str, expe
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Fill in the username and password fields
-        username_input = visibility_of_element_by_xpath(driver, "(//input[@type='text'])[1]")
-        populate_element_with_wait(driver, element=username_input, text=login_username)
+        userinput_name = visibility_of_element_by_xpath(driver, "(//input[@type='text'])[1]")
+        populate_element_with_wait(driver, element=userinput_name, text=login_username)
 
         password_input = find_element_by_xpath(driver, "//input[@type='password']")
         populate_element_with_wait(driver, element=password_input, text=login_password)

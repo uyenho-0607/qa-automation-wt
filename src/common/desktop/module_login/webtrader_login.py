@@ -88,13 +88,14 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
     """
 
     # Load credentials from the JSON file
-    data = get_credentials()
+    data = get_credentials(server, read_from_file=False)
 
     # Check if the server exists in the data
     if server in data:
         # Retrieve the specific server data for the given client and "MemberSite"
         server_data = data[server].get(client_name, {}).get("MemberSite", {})
-
+        # server_data = data[server]["MemberSite"]
+        
         # If expect_failure is True, use Invalid_Credential and require testcaseID
         if expect_failure:
             if testcaseID is None:
@@ -143,8 +144,8 @@ def wt_user_login(driver, server: str, client_name: str, testcaseID: str = None,
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Enter the username and password into the login form
-        username_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
-        populate_element(element=username_input, text=login_username)
+        userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
+        populate_element(element=userinput_name, text=login_username)
 
         # Enter the username and password into the login form
         password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
@@ -314,7 +315,7 @@ def select_account_type(driver, account_type: str):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "SIT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
+def login_wt(driver, server: str, client_name: str, testcaseID: str = None, account_type: str = "live", device_type: str = "Desktop", env_type: str = "UAT", expect_failure: bool = False, use_read_only_access: bool = False, use_investor_cred: bool = False, use_crm_cred: bool = False, set_language: bool = False, set_username: bool = True) -> None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
     It launches the platform, selects the account type (Crm/Live/Demo), and logs into the member's site 

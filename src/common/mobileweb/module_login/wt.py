@@ -89,8 +89,8 @@ def wt_user_login(driver, platform: str, client_name: str, device_type: str, env
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Assuming these functions exist in your automation framework
-        username_input = find_element_by_testid(driver, data_testid="login-user-id")
-        populate_element_with_wait(driver, element=username_input, text=login_username)
+        userinput_name = find_element_by_testid(driver, data_testid="login-user-id")
+        populate_element_with_wait(driver, element=userinput_name, text=login_username)
 
         password_input = find_element_by_testid(driver, data_testid="login-password")
         populate_element_with_wait(driver, element=password_input, text=login_password)

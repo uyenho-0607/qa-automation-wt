@@ -80,7 +80,6 @@ def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-
 def is_element_present_by_testid(driver, data_testid: str) -> bool:
     try:
         # Try to find the element
@@ -264,7 +263,7 @@ def get_label_of_element(element: WebElement) -> str:
         if label is None:
             label = element.get_attribute("aria-label")
     else:
-        print("Unable to retrieve label: {tag_name}")
+        print(f"Unable to retrieve label: {tag_name}")
 
     return label
 
