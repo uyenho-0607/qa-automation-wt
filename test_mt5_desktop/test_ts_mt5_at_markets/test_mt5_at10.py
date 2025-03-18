@@ -29,6 +29,9 @@ class TC_MT5_aT10():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        # Track if the test has failed
+        test_failed = False
+        
         try:
             
             with allure.step("Login to Web Trader Membersite"):
