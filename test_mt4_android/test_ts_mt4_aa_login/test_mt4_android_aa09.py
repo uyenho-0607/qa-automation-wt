@@ -1,4 +1,5 @@
 import allure
+from enums.main import Server
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
@@ -31,7 +32,7 @@ class TC_MT4_aA09():
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                toggle_remember_me_checkbox(driver=main_driver, server="MT4", kick_user=False)
+                toggle_remember_me_checkbox(driver=main_driver, server=Server.MT4, kick_user=False)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

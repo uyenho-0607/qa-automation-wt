@@ -9,7 +9,7 @@ from datetime import datetime
 from selenium.webdriver.common.by import By
 
 from constants.helper.driver import delay
-from constants.helper.element_android_app import click_element, click_element_with_wait, clear_input_field, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, spinner_element, visibility_of_element_by_testid, get_label_of_element, populate_element_with_wait, javascript_click
+from constants.helper.element_android_app import click_element, click_element_with_wait, clear_input_field, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, spinner_element, find_visible_element_by_testid, get_label_of_element, populate_element_with_wait, javascript_click
 from constants.helper.screenshot import take_screenshot, attach_text
 
 
@@ -48,7 +48,7 @@ def toggle_radioButton_OCT(driver, desired_state="unchecked"):
 
                 # Confirm the action if needed
                 if desired_state == "checked":
-                    oct_confirm = visibility_of_element_by_testid(driver, data_testid="oct-modal-button-confirm")
+                    oct_confirm = find_visible_element_by_testid(driver, data_testid="oct-modal-button-confirm")
                     click_element(oct_confirm)
                 return
             
@@ -81,7 +81,7 @@ def label_onePointEqual(driver, trade_type):
     try:
         
         # Locate the One Ppoint Equal label element
-        onePointsEqual = visibility_of_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
+        onePointsEqual = find_visible_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
         label_onePointsEqual = get_label_of_element(onePointsEqual)
 
         # Regular expression to find the number after "equals:"
@@ -112,7 +112,7 @@ def button_tradeModule(driver):
     try:
         spinner_element(driver)
         
-        button_trade = visibility_of_element_by_testid(driver, data_testid="trade-button-order")
+        button_trade = find_visible_element_by_testid(driver, data_testid="trade-button-order")
         # click_element(button_trade)
         click_element_with_wait(driver, element=button_trade)
 
@@ -191,10 +191,10 @@ def button_OCT_buy_sell_type(driver, option):
 def dropdown_orderType(driver, partial_text=None):
     try:
         
-        type_dropdown = visibility_of_element_by_testid(driver, data_testid="trade-dropdown-order-type")
+        type_dropdown = find_visible_element_by_testid(driver, data_testid="trade-dropdown-order-type")
         click_element(type_dropdown)
 
-        orderType_options = visibility_of_element_by_testid(driver, data_testid=f"trade-dropdown-order-type-{partial_text}")
+        orderType_options = find_visible_element_by_testid(driver, data_testid=f"trade-dropdown-order-type-{partial_text}")
         click_element(orderType_options)
         
         return partial_text
@@ -231,7 +231,7 @@ def swap_units_volume(driver, desired_state):
         for state, testid in swap_options.items():
             try:
 
-                visibility_of_element_by_testid(driver, testid)
+                find_visible_element_by_testid(driver, testid)
                 current_state = state
                 print(f"Current button state: Swap to {state.capitalize()}")
 
@@ -346,7 +346,7 @@ def input_oct_size_volume(driver):
     try:
 
         # Find the input field for trade volume using its data-testid
-        size_input = visibility_of_element_by_testid(driver, data_testid="trade-input-volume")
+        size_input = find_visible_element_by_testid(driver, data_testid="trade-input-volume")
 
         # Randomly decide whether to generate an integer or a decimal
         if random.choice([True, False]):  # Randomly choose between True (integer) or False (decimal)

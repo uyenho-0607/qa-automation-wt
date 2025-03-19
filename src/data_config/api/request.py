@@ -4,14 +4,20 @@ import requests
 
 from constants.helper.error_handler import handle_exception
 from data_config.file_handler import read_token_file
+from enums.main import API_Environment
 
 
-def create_mt4_market_order(driver, iterations=5, delay=0):
+
+def create_mt4_market_order(driver, env=API_Environment.MT4_UAT, iterations=5, delay=0):
     try:
-            
-        # url = "https://lirunex-mb.webtrader-sit.s20ip12.com/api/trade/v2/market"
-        url = "https://lirunex-mb.webtrader-uat.s20ip12.com/api/trade/v2/market"
         
+        # Ensure env is an instance of Environment Enum
+        if not isinstance(env, API_Environment):
+            raise ValueError(f"Invalid environment: {env}")
+
+        url = env.value  # Get URL from Enum
+
+        # Payload
         payload = json.dumps({
         "orderType": 1,
         "symbol": "DASHUSD.std",

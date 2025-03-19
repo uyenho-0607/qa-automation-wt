@@ -1,10 +1,10 @@
 import allure
+from enums.main import LoginResultState, Server
 
-from common.mobileapp.module_login.remember_me import verify_login_fields
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import select_account_type, splash_screen, login_wt, toggle_remember_me_checkbox
+from common.mobileapp.module_login.utils import select_account_type, splash_screen, login_wt, toggle_remember_me_checkbox, verify_login_fields
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -32,10 +32,10 @@ class TC_MT4_aA08():
         
         try:
             with allure.step("Check the 'Rmb me' checkbox > Login to Web Trader Membersite > logout"):
-                username, password = toggle_remember_me_checkbox(driver=main_driver, server="MT4")
+                username, password = toggle_remember_me_checkbox(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Input incorrect credential"):
-                login_wt(driver=main_driver, server="MT4", testcase_id="TC02", expect_failure=True) 
+                login_wt(driver=main_driver, server=Server.MT4, testcase_id="TC02", expectation=LoginResultState.FAILURE) 
 
             with allure.step("Terminate and relaunch the current active app package"):
                 current_app_package = main_driver.current_package  # Get the active app package

@@ -1,5 +1,5 @@
 import allure
-import pytest
+from enums.main import AccountType, Server
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
@@ -34,7 +34,7 @@ class TC_MT4_aA11():
         try:
             
             with allure.step("Launch Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", account_type="demo", set_username=False)
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO, set_username=False)
 
             with allure.step("Open demo account by clicking the 'X' button"):
                 # System click on the "X" button

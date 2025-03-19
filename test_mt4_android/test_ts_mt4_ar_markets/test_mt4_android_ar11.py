@@ -1,45 +1,46 @@
 import allure
-from enums.main import AccountType, Server
+import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_setting.setting_demo_account import open_demo_account_error_msg
+from common.mobileapp.module_announcement.utils import announcement_validation
 
 
+@allure.parent_suite("MT4 Membersite - Android - Markets")
 
-@allure.parent_suite("Membersite - Android - Login")
-
-@allure.epic("MT4 Android TS_aA - Login")
+@allure.epic("MT4 Android ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aA12():
+class TC_MT4_aR11():
 
-    @allure.title("TC_MT4_aA12")
+    @allure.title("TC_MT4_aR11")
 
     @allure.description(
         """
-        Error message checking for demo account creation
+        Announcement Validation
         """
     )
     
-    def test_tc12(self, android_driver):
-        self.driver = android_driver
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc11(self, chromeDriver, request):
+        self.driver = chromeDriver
         main_driver = self.driver
+        session_id = main_driver.session_id
 
         # Get the class name dynamically
         class_name = self.__class__.__name__
         start_recording_mobile(driver=main_driver)
         
         try:
-
+            
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO, set_username=False)
-
-            with allure.step("Open demo account"):
-                open_demo_account_error_msg(driver=main_driver)
+                login_wt(driver=main_driver, server=Server.MT4, client_name="Lirunex")
                 
+            with allure.step("Announcement"):
+                announcement_validation(driver=main_driver)
+
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

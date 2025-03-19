@@ -1,5 +1,5 @@
 import asyncio
-import websockets
+import websockets # type: ignore
 
 from data_config.file_handler import read_token_file
 

@@ -4,7 +4,6 @@ from appium.options.android import UiAutomator2Options
 
 
 @pytest.fixture(scope="function")
-# def android_driver(appium_server_url="http://localhost:4723/wd/hub"):
 def android_driver(appium_server_url="http://localhost:4723"):
     # Set up desired capabilities using UiAutomator2Options
     options = UiAutomator2Options()
@@ -26,7 +25,6 @@ def android_driver(appium_server_url="http://localhost:4723"):
     options.app_activity = "com.aquariux.lirunex.uat.MainActivity"
     
     options.no_reset = True  # Do not reset app state
-    # options.full_reset = False
     options.new_command_timeout = 300  # Timeout for app initialization
     options.set_capability("unicodeKeyboard", True)
     options.set_capability("resetKeyboard", True)

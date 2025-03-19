@@ -2,15 +2,18 @@
 
 
 
+from common.mobileapp.module_login.language import select_english_language
 from constants.element_ids import DataTestID
+from enums.main import AccountType, CredentialType, LoginResultState
+
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, presence_of_element_located_by_testid, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, is_element_present_by_xpath
+from constants.helper.element_android_app import click_element, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, find_presence_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, is_element_present_by_xpath
 
-from data_config.generate_fake_identity import generate_random_credential
+from data_config.generate_dummy_data import generate_random_credential
 from common.mobileapp.module_setting.utils import button_setting, change_password
-from common.mobileapp.module_login.login import check_symbol_element_present, select_account_type, select_and_verify_language, splash_screen, wt_user_login
+from common.mobileapp.module_login.utils import select_account_type, splash_screen, wt_user_login
 
 
 
@@ -21,13 +24,13 @@ from common.mobileapp.module_login.login import check_symbol_element_present, se
 """
 
 def verify_login_fields(driver, expected_username, expected_password):
-    userinput_name = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
+    userinput_name = find_element_by_testid_with_wait(driver, data_testid=DataTestID.LOGIN_USER_ID)
     assert userinput_name.get_attribute("text") == expected_username, "Username mismatch"
 
-    password_unmasked = find_element_by_xpath(driver, DataTestID.APP_LOGIN_PASSWORD_UNMASKED.value)
+    password_unmasked = find_element_by_xpath(driver, DataTestID.APP_LOGIN_PASSWORD_UNMASKED)
     click_element(element=password_unmasked)
 
-    password_input = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
+    password_input = find_element_by_testid_with_wait(driver, data_testid=DataTestID.LOGIN_PASSWORD)
     assert password_input.get_attribute("text") == expected_password, "Password mismatch"
 
 
@@ -37,7 +40,13 @@ def verify_login_fields(driver, expected_username, expected_password):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, account_type: str = "live", expect_failure: bool = False, kick_user: bool = True):
+
+
+def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, 
+                                account_type: AccountType = AccountType.LIVE, 
+                                expectation: LoginResultState = LoginResultState.SUCCESS,
+                                credential_type: CredentialType = CredentialType.TOGGLE_REMEMBER_ME,
+                                kick_user: bool = True):
     
     try:
         # Skip the splash screen
@@ -47,40 +56,23 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
         select_account_type(driver, account_type)
         
         # Step 3: Locate the language dropdown
-        language_dropdown = wait_for_element_clickable_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN.value)
-        language_label = get_label_of_element(language_dropdown).split(",")[0].strip()
-        
-        if language_label != "English":
-            click_element(element=language_dropdown)
-        
-            delay(0.5)
-            
-            # Step 4: Locate the language dropdown options
-            languages_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_LANGUAGE_OPTION.value)
-
-            # Step 5: Click on 'English' from the available options
-            for option in languages_options:
-                if get_label_of_element(option).split(",")[0].strip() == "English":
-                    click_element(element=option)
-                    break  # Stop once 'English' is clicked
+        select_english_language(driver)
                 
         # Verify the current checkbox status
-        is_checked = is_element_present_by_xpath(driver, DataTestID.APP_RMB_ME_CHECKBOX.value)
-        print("Checkbox value:", is_checked)
+        is_checked = is_element_present_by_xpath(driver, DataTestID.APP_RMB_ME_CHECKBOX)
         
         # Verify the current status
         if is_checked != True:
         # if is_checked is not True or is_checked is not False:
             # Declare the checkbox xpath
-            checkbox_xpath = (DataTestID.APP_RMB_ME_CHECKBOX.value if is_checked else DataTestID.APP_RMB_ME_UNCHECKBOX.value)
+            checkbox_xpath = (DataTestID.APP_RMB_ME_CHECKBOX if is_checked else DataTestID.APP_RMB_ME_UNCHECKBOX)
             
             # Click on the checkbox
-            checkbox = wait_for_element_clickable_xpath(driver, checkbox_xpath)
+            checkbox = find_element_by_xpath_with_wait(driver, checkbox_xpath)
             click_element(element=checkbox)
-            print("Checkbox toggled")
                 
         # Continue with login process
-        username, password = wt_user_login(driver, server, testcase_id, expect_failure, toggle_remember_me=True)
+        username, password = wt_user_login(driver, server, testcase_id, expectation, credential_type)
         print(username, password)
         
         # Log the user out
@@ -95,13 +87,12 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
             button_setting(driver, setting_option="change-password")
             
             credential = generate_random_credential(length=12)
-            print("Generated credential:", credential)
             
             # Change account password
             change_password(driver, old_password=password, new_password=credential, confirm_password=credential)
             
             # Retrieve the error message notification
-            success_message_notification = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
+            success_message_notification = find_presence_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION)
             
             # Extract the text (label) of the error message from the notification element.
             label_message = get_label_of_element(element=success_message_notification)
@@ -111,7 +102,7 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, ac
                 attach_text(label_message, name="Success message found:")
                 
                 # Click on the Confirm button
-                btn_ok = wait_for_element_clickable_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE.value)
+                btn_ok = find_element_by_testid_with_wait(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE)
                 click_element(element=btn_ok)
                 
                 # Log the user out

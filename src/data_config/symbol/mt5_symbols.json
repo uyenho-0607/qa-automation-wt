@@ -1,0 +1,13 @@
+{
+  "MT5": {
+      "Symbols": [
+        "BAKE.USD",
+        "XAGUSD",
+        "XAUUSD"
+      ],
+
+      "Symbols_Price": [
+        "BAKE.USD"
+      ]
+    }
+}

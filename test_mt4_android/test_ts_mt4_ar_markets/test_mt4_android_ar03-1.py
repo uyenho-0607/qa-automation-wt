@@ -1,31 +1,35 @@
 import allure
-from enums.main import Server
+import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_setting.utils import button_setting
+from common.mobileapp.module_symbol.search_symbol import symbol_search_feature
 
 
-@allure.parent_suite("Membersite - Android - Login")
+@allure.parent_suite("MT4 Membersite - Android - Markets")
 
-@allure.epic("MT4 Android TS_aA - Login")
+@allure.epic("MT4 Android ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aA02():
+class TC_MT4_aR01():
 
-    @allure.title("TC_MT4_aA02")
+    @allure.title("TC_MT4_aR01")
 
     @allure.description(
         """
-        Member able login to Web Trader via Live Account tab
+        Member able to search for symbols
+        - Wildcard search
+        - Exact match
         """
     )
-        
-    def test_TC02(self, android_driver):
-        self.driver = android_driver
+    
+    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
+    def test_tc01(self, chromeDriver, request):
+        self.driver = chromeDriver
         main_driver = self.driver
+        session_id = main_driver.session_id
 
         # Get the class name dynamically
         class_name = self.__class__.__name__
@@ -33,12 +37,12 @@ class TC_MT4_aA02():
         
         try:
             
-            with allure.step("Login with parameter userID & password"):
+            with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server=Server.MT4)
 
-            with allure.step("Successfully Logout"):
-                button_setting(driver=main_driver, setting_option="logout")
-                
+            with allure.step("Check the pre-selected tab is correct"):
+                symbol_search_feature(driver=main_driver, server=Server.MT4)
+
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

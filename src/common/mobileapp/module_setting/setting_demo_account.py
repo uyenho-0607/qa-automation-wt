@@ -5,17 +5,18 @@ import re
 from tabulate import tabulate
 from difflib import get_close_matches
 
+from enums.main import Setting
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import clear_input_field, click_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, populate_element, presence_of_element_located_by_testid, spinner_element, visibility_of_element_by_testid, visibility_of_element_by_xpath, wait_for_element_clickable_testid, wait_for_element_clickable_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import clear_input_field, click_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, populate_element, find_presence_element_by_testid, spinner_element, find_visible_element_by_testid, find_visible_element_by_xpath, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.mobileapp.module_subMenu.sub_menu import menu_button
 from common.mobileapp.module_setting.utils import button_setting
 from common.mobileapp.module_announcement.announcement import modal_announcement
 from common.mobileweb.module_trade.order_panel.op_general import extract_order_data_details
-from data_config.generate_fake_identity import generate_random_name_and_email, generate_singapore_phone_number, generate_random_credential
+from data_config.generate_dummy_data import generate_random_name_and_email, generate_singapore_phone_number, generate_random_credential
 
 
 """
@@ -29,17 +30,17 @@ def open_demo_account_error_msg(driver, setting: bool = False):
     try:
         # Open the demo account settings if the setting flag is True
         if setting:
-            button_setting(driver, setting_option="open-demo-account")
+            button_setting(driver, setting_option=Setting.OPEN_DEMO_ACCOUNT)
         else:
-            demo_button = wait_for_element_clickable_xpath(driver, DataTestID.APP_OPEN_DEMO_ACCOUNT.value)
+            demo_button = find_element_by_xpath_with_wait(driver, DataTestID.APP_OPEN_DEMO_ACCOUNT)
             click_element(element=demo_button)
             
         # Click the "Next" button to proceed
-        btn_next = wait_for_element_clickable_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_AGREE_CONTINUE.value)
+        btn_next = find_element_by_xpath_with_wait(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_AGREE_CONTINUE)
         click_element(element=btn_next)
 
         # Retrieve error messages
-        error_msgs = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_ERROR_CHECK.value)
+        error_msgs = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_ERROR_CHECK)
         error_msgs_content = [get_label_of_element(msg).strip() for msg in error_msgs]
 
         # Expected error messages
@@ -80,7 +81,7 @@ def open_demo_account_error_msg(driver, setting: bool = False):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def open_demo_account_screen(driver, new_password=None, confirm_password=None, setting: bool = False, set_close_modal: bool = False, user_email: str = None):
+def open_demo_account_screen(driver, new_password=None, confirm_password=None, setting: bool = False, set_close_modal: bool = False):
     """
     Opens a demo account by filling in necessary details such as name, email, phone number, deposit, and checkbox.
      - Handles account creation and optionally closes the modal dialog or proceeds with further steps.
@@ -97,61 +98,54 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
 
         # Open the demo account settings if the setting flag is True
         if setting:
-            button_setting(driver, setting_option="open-demo-account")
+            button_setting(driver, setting_option=Setting.OPEN_DEMO_ACCOUNT)
         else:
-            demo_button = wait_for_element_clickable_xpath(driver, DataTestID.APP_OPEN_DEMO_ACCOUNT.value)
+            demo_button = find_element_by_xpath_with_wait(driver, DataTestID.APP_OPEN_DEMO_ACCOUNT)
             click_element(element=demo_button)
         
         """ Name field """
         # Generate a random name for the demo account if not provided
-        _, first_name, _, _ = generate_random_name_and_email()
+        _, first_name, _, email = generate_random_name_and_email()
         # Fill in the Name field with the generated name
-        input_name = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_NAME.value)
+        input_name = find_visible_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_NAME)
         clear_input_field(element=input_name) # Clear any pre-filled value
         populate_element(element=input_name, text=first_name)  # Populate the input field with the random name
 
         """ Email field """
-        # Use the provided email or generate a random one
-        email_to_use = user_email if user_email else generate_random_name_and_email()[3]
-        
         # Fill in the Email field        
-        input_email = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_EMAIL.value)
-        populate_element(element=input_email, text=email_to_use)  # Populate the input field with the email
+        input_email = find_visible_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_EMAIL)
+        populate_element(element=input_email, text=email)  # Populate the input field with the email
 
         """ Phone Number field """
         # Handle the Phone Number field
-        dialCode = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE.value)
-        # dialCode = find_element_by_testid(driver, data_testid=DataTestID.COUNTRY_DIAL_CODE.value)
-        click_element(element=dialCode) # Open the dial code dropdown
-        
-        # Wait for the dial code modal to appear
-        # visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_LABEL.value)
-        
+        dial_code = find_visible_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE)
+        click_element(element=dial_code) # Open the dial code dropdown
+                
         # Search for and select 'Singapore' from the dial code options
-        dialCode_search = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_SEARCH.value)
-        populate_element(element=dialCode_search, text="Singapore")
+        dial_code_search = find_visible_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_SEARCH)
+        populate_element(element=dial_code_search, text="Singapore")
 
         delay(1)
 
         # Select the Singapore dial code option
-        dialCode_dropdown = wait_for_element_clickable_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_ITEM.value)
-        click_element(element=dialCode_dropdown)
+        dial_code_dropdown = find_element_by_xpath_with_wait(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_MODAL_COUNTRY_DIAL_CODE_ITEM)
+        click_element(element=dial_code_dropdown)
                 
         # Generate a random Singapore phone number
         phone_number = generate_singapore_phone_number()
         # Populate the phone number input field with the generated phone number
-        input_phone_number = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_PHONE_NUMBER.value)
+        input_phone_number = find_visible_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_PHONE_NUMBER)
         populate_element(element=input_phone_number, text=phone_number)
         
         """ Deposit field """
         # Handle the Deposit field
-        deposit = visibility_of_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_DEPOSIT_AMT.value)
+        deposit = find_visible_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_DEPOSIT_AMT)
         click_element(element=deposit) # Open the deposit dropdown
 
         delay(1)
 
         # Wait for all deposit options to appear
-        deposit_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_DEPOSIT_AMT_OPTIONS.value)
+        deposit_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_DEPOSIT_AMT_OPTIONS)
         # Select a random deposit option from the dropdown
         random_deposit_option = random.choice(deposit_options)
         
@@ -159,7 +153,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         click_element(element=random_deposit_option)
 
         # Click the "Next" button to proceed
-        btn_next = wait_for_element_clickable_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_AGREE_CONTINUE.value)
+        btn_next = find_element_by_xpath_with_wait(driver, DataTestID.APP_DEMO_ACCOUNT_CREATION_AGREE_CONTINUE)
         click_element(element=btn_next)
 
         # Handle the demo account ready screen (either close the modal or proceed to sign-in)
@@ -196,23 +190,22 @@ def get_copied_banner(driver):
     """
     try:
         # Click the "Copy" button
-        btn_copied = find_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_COPIED.value)
+        btn_copied = find_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_COPIED)
         click_element(element=btn_copied)
         
         # Wait for snackbar message and extract header & description
-        visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
+        find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX)
         
         # Retrieve the message
-        label_message_description = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
+        label_message_description = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION)
         label_message = get_label_of_element(element=label_message_description)
         attach_text(label_message, name="Description_Message")
         
         # Close the notification
-        btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE.value)
+        btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE)
         click_element(btn_close)
         
         # Get and validate clipboard content
-        # clipboard_text = pyperclip.paste().strip()
         clipboard_text = driver.get_clipboard_text()
 
         pattern = (
@@ -229,18 +222,6 @@ def get_copied_banner(driver):
             attach_text(clipboard_text, name="✅ Copied account creation details")
         else:
             raise AssertionError("❌ Copy function failed or incorrect format.")
-        
-        # Retrieve the account details label
-        # demo_account_details = find_list_of_elements_by_xpath(driver, "//div[@class='sc-zee84o-4 hXfwHX']")
-        # if demo_account_details:
-        #     formatted_text = []
-        #     for element in demo_account_details:
-        #         text = get_label_of_element(element)
-        #         formatted_text.append(" ".join(text.split("\n")))  # Remove newlines and join words
-        #     final_result = "\n".join(formatted_text)  # Join all elements into a single string
-            
-        # if clipboard_text != final_result:
-        #     raise AssertionError("❌ Copy function failed or incorrect format.")
                 
     except Exception as e:
         handle_exception(driver, e)
@@ -286,14 +267,14 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         spinner_element(driver)
 
         # Verify the presence of the "Your Demo Account is Ready!" message
-        match = wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_TITLE.value, text="Your demo account has been opened successfully.")
+        match = wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_TITLE, text="Your demo account has been opened successfully.")
         if not match:
             raise AssertionError("Expected to redirect to 'Your Demo Account is Ready!' modal")
         
         delay(2)
         
         # Retrieve header labels and map them
-        header_elements = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_LABEL.value)
+        header_elements = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_LABEL)
         header_labels = [header_mapping.get(element.text, element.text) for element in header_elements]
         header_labels.append("Currency")  # For handling Deposit currency
 
@@ -301,7 +282,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         demo_account_details = {label: "N/A" for label in header_labels}
 
         # Retrieve account detail values from the page
-        demoAccount_elements = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_VALUE.value)
+        demoAccount_elements = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_VALUE)
         # Iterate through account details and populate the dictionary
         for idx, element in enumerate(demoAccount_elements):
             label = get_label_of_element(element).strip()
@@ -328,14 +309,11 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         attach_text(overall, name="Your Demo Account is Ready!")
 
         # Check the URL before closing the modal
-        wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_TITLE.value, text="Your demo account has been opened successfully.")
+        wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_TITLE, text="Your demo account has been opened successfully.")
 
         # Handle modal dialog based on `set_close` flag
         if set_close:
             get_copied_banner(driver)
-            # if text == demo_account_info
-            # modal_close = find_element_by_xpath(driver, "//div[@class='sc-1dvc755-6 hyBcLN']//*[name()='svg']")
-            # click_element(modal_close)
         else:
             handle_sign_in(driver, demo_account_details, new_password, confirm_password)
 
@@ -354,7 +332,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_sign_in(driver, demo_account_details, new_password: str = None, confirm_password: str = None):
+def handle_sign_in(driver, demo_account_details):
     """
     Handles the sign-in process after demo account creation.
 
@@ -365,27 +343,27 @@ def handle_sign_in(driver, demo_account_details, new_password: str = None, confi
     """
     try:
         # Find and click the 'Sign In' button to navigate to the login page from the modal dialog
-        sign_in_button = find_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_SIGN_IN.value)
+        sign_in_button = find_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_SIGN_IN)
         click_element(sign_in_button)
 
         # Wait for a brief moment to ensure the page has time to load
         delay(0.5)
         
-        assert visibility_of_element_by_xpath(driver, DataTestID.APP_LOGIN_LOGO.value)
+        assert find_visible_element_by_xpath(driver, DataTestID.APP_LOGIN_LOGO)
 
         # Validate the login username by checking if it matches the demo account username
-        userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
+        userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID)
         assert userinput_name.get_attribute("text") == demo_account_details["Login"], "Username mismatch"
         
-        password_unmasked = find_element_by_xpath(driver, DataTestID.APP_LOGIN_PASSWORD_UNMASKED.value)
+        password_unmasked = find_element_by_xpath(driver, DataTestID.APP_LOGIN_PASSWORD_UNMASKED)
         click_element(element=password_unmasked)
         
         # Validate the login password by checking if it matches the demo account password
-        password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
+        password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD)
         assert password_input.get_attribute("text") == demo_account_details["Password"], "Password mismatch"
 
         # Find and click the 'Submit' button to proceed with the login
-        submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
+        submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT)
         click_element(submit_button)
 
         delay(2)
@@ -420,10 +398,10 @@ def validate_account_details(driver, demo_account_details):
     """
     
     # Ensure that the "DEMO" text is displayed to confirm we're on the demo account
-    wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_ACCOUNT_TYPE_TAG.value, text="DEMO")
+    wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_ACCOUNT_TYPE_TAG, text="DEMO")
 
     # Validate the Account Balance displayed matches the expected value from demo_account_details
-    account_balance = get_label_of_element(find_element_by_xpath(driver, DataTestID.APP_ACCOUNT_BALANCE.value))
+    account_balance = get_label_of_element(find_element_by_xpath(driver, DataTestID.APP_ACCOUNT_BALANCE))
     # Extract the numerical value of the account balance from the displayed text using regex
     balance_value = re.search(r'\$(\d{1,3}(?:,\d{3})*)', account_balance).group(1)
     assert balance_value == demo_account_details["Deposit"], "Account balance mismatch"
@@ -432,15 +410,15 @@ def validate_account_details(driver, demo_account_details):
     menu_button(driver, menu="assets")
 
     # Validate the Account Name displayed matches the expected value from demo_account_details
-    account_name = get_label_of_element(visibility_of_element_by_xpath(driver, DataTestID.APP_ACCOUNT_NAME.value))
+    account_name = get_label_of_element(find_visible_element_by_xpath(driver, DataTestID.APP_ACCOUNT_NAME))
     assert account_name == demo_account_details["Name"], f"Account name mismatch, {account_name}"
 
     # Validate the LoginID (Trader ID) displayed matches the expected value from demo_account_details
-    trader_id = get_label_of_element(find_element_by_xpath(driver, DataTestID.APP_ACCOUNT_ID.value))
+    trader_id = get_label_of_element(find_element_by_xpath(driver, DataTestID.APP_ACCOUNT_ID))
     assert trader_id == demo_account_details["Login"], "LoginID mismatch"
 
     # Validate the USD / Leverage information
-    usd_leverage = get_label_of_element(find_element_by_xpath(driver, DataTestID.APP_ACCOUNT_DETAIL.value))
+    usd_leverage = get_label_of_element(find_element_by_xpath(driver, DataTestID.APP_ACCOUNT_DETAIL))
     match = re.search(r"(\w+)\s*\|\s*([\d:]+)", usd_leverage)
     assert match.group(1) == demo_account_details["Currency"], f"Currency mismatch. Expected {demo_account_details["Currency"]} but found {match.group(1)}"
     assert match.group(2) == demo_account_details["Leverage"], f"Leverage mismatch. Expected {demo_account_details["Leverage"]} but found {match.group(2)}"
@@ -461,29 +439,28 @@ def validate_account_details(driver, demo_account_details):
 def handle_changePassword(driver, demo_account_details):
 
     # Step 1: Navigate to the Change Password section
-    button_setting(driver, setting_option="change-password")
+    button_setting(driver, setting_option=Setting.CHANGE_PASSWORD)
     
     credential = generate_random_credential(length=12)
-    print("cred", credential)
     
     # Locate and populate the old password input field
-    old_password_input = visibility_of_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_OLD_PASSWORD.value)
+    old_password_input = find_visible_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_OLD_PASSWORD)
     populate_element(element=old_password_input, text=demo_account_details["Password"])
 
     # Locate and populate the new password input field
-    new_password_input = find_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_NEW_PASSWORD.value)
+    new_password_input = find_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_NEW_PASSWORD)
     populate_element(element=new_password_input, text=credential)
 
     # Locate and populate the confirm password input field
-    confirm_password_input = find_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD.value)
+    confirm_password_input = find_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD)
     populate_element(element=confirm_password_input, text=credential)
 
     # Find the submit button and click it
-    submit_button = find_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_CONFIRM.value)
+    submit_button = find_element_by_xpath(driver, DataTestID.APP_CHANGE_PASSWORD_MODAL_CONFIRM)
     click_element(element=submit_button)
     
     # Retrieve the error message notification
-    success_message_notification = presence_of_element_located_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION.value)
+    success_message_notification = find_presence_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION)
     
     # Extract the text (label) of the error message from the notification element.
     label_message = get_label_of_element(element=success_message_notification)
@@ -493,7 +470,7 @@ def handle_changePassword(driver, demo_account_details):
         attach_text(label_message, name="Success message found:")
         
         # Click on the Confirm button
-        btn_ok = wait_for_element_clickable_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE.value)
+        btn_ok = find_element_by_testid_with_wait(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE)
         click_element(element=btn_ok)
         
         # Log the user out

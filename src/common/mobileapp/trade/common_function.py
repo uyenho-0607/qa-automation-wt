@@ -6,7 +6,7 @@ from tabulate import tabulate
 
 
 from constants.helper.screenshot import attach_text, take_screenshot
-from constants.helper.element_android_app import find_element_by_testid, find_list_of_elements_by_xpath, spinner_element, visibility_of_element_by_xpath
+from constants.helper.element_android_app import find_element_by_testid, find_list_of_elements_by_xpath, spinner_element, find_visible_element_by_xpath
 
 
 """
@@ -21,7 +21,7 @@ def get_table_body(driver):
         # Wait till the spinner icon no longer display
         spinner_element(driver)
         
-        return visibility_of_element_by_xpath(driver, ".//tbody[contains(@data-testid, 'list')]")
+        return find_visible_element_by_xpath(driver, ".//tbody[contains(@data-testid, 'list')]")
     
     except Exception as e:
         # Attach a screenshot in case of an exception
@@ -46,7 +46,7 @@ def get_table_headers(driver):
     try:
         
         # Wait till the element is visible
-        visibility_of_element_by_xpath(driver, "//div[contains(@data-testid, 'label')]")
+        find_visible_element_by_xpath(driver, "//div[contains(@data-testid, 'label')]")
         
         thead_rows = find_list_of_elements_by_xpath(driver, "//div[contains(@data-testid, 'label')]")
         thead_data = [header.text for header in thead_rows if header.text.strip() != '']

@@ -2,7 +2,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element, spinner_element, find_element_by_xpath, visibility_of_element_by_testid, find_element_by_testid, get_label_of_element
+from constants.helper.element_android_app import click_element, spinner_element, find_element_by_xpath, find_visible_element_by_testid, find_element_by_testid, get_label_of_element
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -52,7 +52,7 @@ def modal_announcement(driver, button: str = "got-it"):
         spinner_element(driver)
 
         # Wait for the feature announcement modal to be visible
-        visibility_of_element_by_testid(driver, data_testid=DataTestID.FEATURE_ANNOUNCEMENT_MODAL.value)
+        find_visible_element_by_testid(driver, data_testid=DataTestID.FEATURE_ANNOUNCEMENT_MODAL.value)
 
         # If the modal is visible, interact with it (click "Got it")
         handle_modal_announcement(driver, button)

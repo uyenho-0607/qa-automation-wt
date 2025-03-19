@@ -2,7 +2,7 @@ import random
 import traceback
 
 from constants.helper.driver import delay
-from constants.helper.element_android_app import click_element, find_element_by_testid, get_label_of_element, visibility_of_element_by_testid, spinner_element
+from constants.helper.element_android_app import click_element, find_element_by_testid, get_label_of_element, find_visible_element_by_testid, spinner_element
 from constants.helper.screenshot import take_screenshot
 from common.mobileapp.trade.orderPlacingWindow import dropdown_orderType
 
@@ -206,7 +206,7 @@ def get_current_price(driver, trade_type, option=None, partial_text=None):
 
         if trade_type == "trade" and option in ["buy", "sell"]:
             # find the buy or sell button
-            priceValue = visibility_of_element_by_testid(driver, data_testid=f"{trade_type}-button-order-{option}")
+            priceValue = find_visible_element_by_testid(driver, data_testid=f"{trade_type}-button-order-{option}")
             click_element(priceValue)
         
             order_type = dropdown_orderType(driver, partial_text)
@@ -214,7 +214,7 @@ def get_current_price(driver, trade_type, option=None, partial_text=None):
             if order_type == "market":
                 # Retrieve the opposite price for market orders without clicking
                 opposite_option = "sell" if option == "buy" else "buy"
-                opposite_price_element = visibility_of_element_by_testid(driver, data_testid=f"trade-live-{opposite_option}-price")
+                opposite_price_element = find_visible_element_by_testid(driver, data_testid=f"trade-live-{opposite_option}-price")
                 print("test price", opposite_price_element.text)
                 opposite_price = get_label_of_element(opposite_price_element)
                 # opposite_price = get_label_of_element(opposite_price_element).replace(',', '')
@@ -222,13 +222,13 @@ def get_current_price(driver, trade_type, option=None, partial_text=None):
                 return float(opposite_price)
             else:
                 # Retrieve the main price for Pending Orders
-                price_element = visibility_of_element_by_testid(driver, data_testid=f"trade-live-{option}-price")
+                price_element = find_visible_element_by_testid(driver, data_testid=f"trade-live-{option}-price")
                 price_value = get_label_of_element(price_element).replace(',', '')
                 print(f"Pending Order - {option.capitalize()} Price: {price_value}")
                 return float(price_value)
     
         else:  # For Edit
-            price_element = visibility_of_element_by_testid(driver, data_testid="edit-symbol-price")
+            price_element = find_visible_element_by_testid(driver, data_testid="edit-symbol-price")
             current_price = get_label_of_element(price_element).replace(',', '')
             print("Edit - Current Price: ", current_price)
             return float(current_price)

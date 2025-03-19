@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text, take_screenshot
-from constants.helper.element_android_app import click_element, click_element_with_wait, get_label_of_element, spinner_element, visibility_of_element_by_testid, find_element_by_testid
+from constants.helper.element_android_app import click_element, click_element_with_wait, get_label_of_element, spinner_element, find_visible_element_by_testid, find_element_by_testid
 
 
 """
@@ -33,10 +33,10 @@ def get_trade_snackbar_banner(driver):
         spinner_element(driver)
         
         # Wait for the snackbar message to be visible
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        find_visible_element_by_testid(driver, data_testid="notification-box")
         
         # Wait for the message header to be visible and extract it
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-box-title")
+        message_header = find_visible_element_by_testid(driver, data_testid="notification-box-title")
         extracted_header = get_label_of_element(message_header)
 
         # Check if the header is valid
@@ -153,10 +153,10 @@ def get_neg_snackbar_banner(driver):
         # "Trading general error. Please try again later."
         ]
 
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        find_visible_element_by_testid(driver, data_testid="notification-box")
         
         # Wait for the message header to be visible and extract it
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-box-title")
+        message_header = find_visible_element_by_testid(driver, data_testid="notification-box-title")
         extracted_header = get_label_of_element(message_header)
 
         # Check if the normalized header is in the list of valid headers
@@ -200,10 +200,10 @@ def get_bulk_snackbar_banner(driver):
             "Bulk deletion of pending orders"
         ]
         
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        find_visible_element_by_testid(driver, data_testid="notification-box")
         
         # Wait for the message header to be visible and extract it
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-box-title")
+        message_header = find_visible_element_by_testid(driver, data_testid="notification-box-title")
         extracted_header = get_label_of_element(message_header)
 
         # Check if the normalized header is in the list of valid headers

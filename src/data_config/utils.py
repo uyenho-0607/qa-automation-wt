@@ -1,5 +1,5 @@
 from data_config.encrypt_decrypt import encrypt_and_print, decrypt_and_print
-from data_config.file_handler import get_URLs, get_credentials, get_success_urls, read_symbol_file, append_orderIDs_to_csv, read_orderIDs_from_csv, clear_orderIDs_csv, append_token_file, read_token_file
+from data_config.file_handler import get_URLs, get_credentials, read_symbol_file, append_orderIDs_to_csv, read_orderIDs_from_csv, clear_orderIDs_csv, append_token_file, read_token_file
 
 
 
@@ -15,7 +15,6 @@ __all__ = [
     # orderCsvHandler
     'get_URLs',
     'get_credentials',
-    'get_success_urls',
     'read_symbol_file',
     'append_orderIDs_to_csv',
     'read_orderIDs_from_csv',

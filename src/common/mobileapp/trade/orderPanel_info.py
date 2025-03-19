@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 
 from constants.helper.driver import delay
 from constants.helper.screenshot import take_screenshot, attach_text
-from constants.helper.element_android_app import spinner_element, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, find_element_by_xpath_with_wait, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
+from constants.helper.element_android_app import spinner_element, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, find_element_by_xpath_with_wait, find_visible_element_by_xpath, find_visible_element_by_testid, get_label_of_element
 from common.mobileweb.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 from common.mobileweb.module_chart.chart import get_chart_symbol_name
 
@@ -72,7 +72,7 @@ def asset_symbolName(driver, row_number):
 def type_orderPanel(driver, tab_order_type):
     try:
 
-        orderPanel_type = visibility_of_element_by_xpath(driver, f"//div[@data-testid='tab-asset-order-type-{tab_order_type}']")
+        orderPanel_type = find_visible_element_by_xpath(driver, f"//div[@data-testid='tab-asset-order-type-{tab_order_type}']")
 
         click_element_with_wait(driver, element=orderPanel_type)
 
@@ -245,7 +245,7 @@ def extract_order_info(driver, tab_order_type, section_name, row_number):
         order_ids.append(order_id_element.text)
         
         # Append the symbol name only once after the loop
-        chart_symbol_name = visibility_of_element_by_testid(driver, data_testid="asset-detailed-header-symbol")
+        chart_symbol_name = find_visible_element_by_testid(driver, data_testid="asset-detailed-header-symbol")
         thead_data.append("Symbol")
         table_row_contents.append(chart_symbol_name.text)
 

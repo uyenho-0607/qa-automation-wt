@@ -1,4 +1,6 @@
 import allure
+from enums.main import AccountType, CredentialType, Server
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
@@ -32,7 +34,7 @@ class TC_MT4_aA01():
         try:
             
             with allure.step("Login with parameter userID & password"):
-                login_wt(driver=main_driver, server="MT4", account_type="crm", use_crm_cred=True)
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
 
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout")

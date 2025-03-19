@@ -4,7 +4,7 @@ import pandas as pd
 
 from constants.helper.driver import delay
 from constants.helper.screenshot import take_screenshot
-from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid, find_list_of_elements_by_testid, visibility_of_element_by_testid, spinner_element
+from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, spinner_element
 
 
 """
@@ -151,7 +151,7 @@ def get_noti_ordersDetails(driver):
         
         # if response.status_code == 200:
 
-        visibility_of_element_by_testid(driver, "notification-order-details-modal")
+        find_visible_element_by_testid(driver, "notification-order-details-modal")
         
         noti_rows = find_list_of_elements_by_testid(driver, data_testid="notification-order-details-label")
 
