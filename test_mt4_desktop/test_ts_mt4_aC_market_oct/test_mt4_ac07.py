@@ -2,6 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -47,10 +48,10 @@ class TC_MT4_aC07():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
+                input_symbol(driver=main_driver, server=Server.MT4)
 
             with allure.step("Enable OCT"):
                 toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")

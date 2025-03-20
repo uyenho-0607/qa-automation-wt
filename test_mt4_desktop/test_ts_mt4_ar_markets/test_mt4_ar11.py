@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -29,10 +30,13 @@ class TC_MT4_aR11():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        # Track if the test has failed
+        test_failed = False
+        
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Announcement"):
                 announcement_validation(driver=main_driver)

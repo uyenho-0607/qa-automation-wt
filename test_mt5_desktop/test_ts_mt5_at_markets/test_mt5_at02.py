@@ -1,11 +1,12 @@
 import allure
 import pytest
 
-from common.desktop.module_markets.trade_watchlist import handle_pre_selected_tab
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
+from common.desktop.module_markets.trade_watchlist import handle_pre_selected_tab
 
 
 @allure.parent_suite("MT5 Membersite - Desktop - Markets")
@@ -35,7 +36,7 @@ class TC_MT5_aT02():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Check the pre-selected tab is correct"):
                 handle_pre_selected_tab(driver=main_driver)

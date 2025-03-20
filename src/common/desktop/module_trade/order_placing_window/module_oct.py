@@ -2,7 +2,7 @@ import random
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, visibility_of_element_by_testid, find_element_by_xpath
+from constants.helper.element import click_element, find_visible_element_by_testid, find_element_by_xpath
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -13,7 +13,7 @@ from constants.helper.element import click_element, visibility_of_element_by_tes
 def get_radioStates():
     return {
         "OCT": {
-            "unchecked": "//*[@data-testid='toggle-oct-']",
+            "unchecked": "//*[@data-testid='toggle-oct']",
             "checked": "//*[@data-testid='toggle-oct-checked']"
         },
         "Margin_Call": {
@@ -96,7 +96,7 @@ def toggle_radioButton(driver, category: str, desired_state: str):
                 
                 # Only apply confirmation modal if category is 'OCT' and desired state is 'checked'
                 if category == "OCT" and desired_state == "checked":
-                    oct_confirm = visibility_of_element_by_testid(driver, data_testid="oct-modal-button-confirm")
+                    oct_confirm = find_visible_element_by_testid(driver, data_testid="oct-modal-button-confirm")
                     click_element(oct_confirm)
                     delay(0.5)  # Small delay for stability
                     return desired_state  # Return the final state

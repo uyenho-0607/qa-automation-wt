@@ -1,12 +1,9 @@
-import json
 import os
 import csv
-import traceback
+import json
 
-import pandas as pd
-
-from constants.helper.screenshot import attach_text
 from enums.main import Server, SymbolsList
+from constants.helper.screenshot import attach_text
 
 
 
@@ -16,9 +13,17 @@ from enums.main import Server, SymbolsList
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_URLs():
+def get_URLs(server: Server):
+    file_map = {
+        Server.MT4: "src/data_config/url/mt4_url.json",
+        Server.MT5: "src/data_config/url/mt5_url.json",
+    }
+    file_path = file_map.get(server)  # No default value
+
+    if not file_path:
+        raise ValueError(f"Invalid server type: {server}")
+    
     # Read URLs from the JSON file
-    file_path = os.path.join("src/data_config/urls.json")
     with open(file_path, "r") as json_file:
         data = json.load(json_file)
     return data
@@ -35,18 +40,13 @@ def get_URLs():
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_credentials(server: Server, read_from_file: bool = True):
+def get_credentials(server: Server):
+    file_map = {
+        Server.MT4: "src/data_config/credential/mt4_credential.json",
+        Server.MT5: "src/data_config/credential/mt5_credential.json",
+    }
+    file_path = file_map.get(server)  # No default value
     
-    if read_from_file:
-        file_map = {
-            "MT4": "src/data_config/credential/mt4_credential.json",
-            "MT5": "src/data_config/credential/mt5_credential.json",
-        }
-        file_path = file_map.get(server)  # No default value
-        
-    else:
-        file_path = os.path.join("src/data_config/credential/credential.json")
-
     if not file_path:
         raise ValueError(f"Invalid server type: {server}")
     
@@ -68,16 +68,13 @@ def get_credentials(server: Server, read_from_file: bool = True):
 """
 
 
-def read_symbol_file(server: Server, symbol_type: SymbolsList, read_from_file=True):
+def read_symbol_file(server: Server, symbol_type: SymbolsList):
     try:
-        if read_from_file:
-            file_map = {
-                "MT4": "src/data_config/symbol/mt4_symbols.json",
-                "MT5": "src/data_config/symbol/mt5_symbols.json",
-            }
-            file_path = file_map.get(server)
-        else:
-            file_path = "src/data_config/symbol/symbols.json"
+        file_map = {
+            Server.MT4: "src/data_config/symbol/mt4_symbols.json",
+            Server.MT5: "src/data_config/symbol/mt5_symbols.json",
+        }
+        file_path = file_map.get(server)
         
         with open(file_path, 'r') as file:
             data = json.load(file)

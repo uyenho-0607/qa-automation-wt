@@ -5,7 +5,7 @@ from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import get_label_of_element, javascript_click, spinner_element, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import get_label_of_element, javascript_click, spinner_element, find_visible_element_by_testid, find_visible_element_by_xpath, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid
 
 from common.desktop.module_subMenu.utils import menu_button
 
@@ -52,7 +52,7 @@ def market_watchlist(driver):
                 delay(0.5)
                 # msg_validate = is_element_present_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
                 if is_element_present_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST.value}']//*[@data-testid='empty-message']"):
-                    no_items_message = visibility_of_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST.value}']//*[@data-testid='empty-message']")
+                    no_items_message = find_visible_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST.value}']//*[@data-testid='empty-message']")
                     msg = get_label_of_element(element=no_items_message)
                     # Exclude the "Favourites" category and select a new category randomly
                     selected_option = [category for category in selected_option if category.text.strip() != "Favourites"]
@@ -78,7 +78,7 @@ def market_watchlist(driver):
         else:
             # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
             # no_items_message = visibility_of_element_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
-            no_items_message = visibility_of_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST.value}']//*[@data-testid='empty-message']")
+            no_items_message = find_visible_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST.value}']//*[@data-testid='empty-message']")
             msg = get_label_of_element(element=no_items_message)
             # Raise an error if no symbols were found
             raise AssertionError(f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab")
@@ -91,7 +91,7 @@ def market_watchlist(driver):
         assert chart_symbol_name, f"Chart symbol mismatch: expected '{label_symbol}', found '{chart_symbol_name}'"
     
         # tab = visibility_of_element_by_testid(driver, data_testid="tab-all")
-        tab = visibility_of_element_by_testid(driver, data_testid=DataTestID.TAB_ALL.value)
+        tab = find_visible_element_by_testid(driver, data_testid=DataTestID.TAB_ALL.value)
         if tab:  # Ensure the tab is visible
             tab_text = tab.text
             if "selected" in tab.get_attribute("class"):
@@ -126,14 +126,14 @@ def handle_alert_success(driver):
     """
     # Locate the error message notification element by its test ID.
     if is_element_present_by_testid(driver, data_testid=DataTestID.ALERT_SUCCESS.value):
-        success_message_notification = visibility_of_element_by_testid(driver, data_testid=DataTestID.ALERT_SUCCESS.value)
+        success_message_notification = find_visible_element_by_testid(driver, data_testid=DataTestID.ALERT_SUCCESS.value)
         # Extract the text (label) of the error message from the notification element.
         success_message = get_label_of_element(success_message_notification)
         # Attach the extracted error message to the logs for reporting purposes.
         attach_text(success_message, name="Success message found:")
         return success_message
     else:
-        error_message_notification = visibility_of_element_by_testid(driver, data_testid=DataTestID.ALERT_ERROR.value)
+        error_message_notification = find_visible_element_by_testid(driver, data_testid=DataTestID.ALERT_ERROR.value)
         # Extract the text (label) of the error message from the notification element.
         error_message = get_label_of_element(error_message_notification)
         # Attach the extracted error message to the logs for reporting purposes.
@@ -144,7 +144,7 @@ def handle_alert_success(driver):
 
 def scroll_and_retrieve_data(driver):
     # Locate the scrollable div
-    visibility_of_element_by_testid(driver ,data_testid=DataTestID.WATCHLIST_LIST_ITEM.value)
+    find_visible_element_by_testid(driver ,data_testid=DataTestID.WATCHLIST_LIST_ITEM.value)
     scrollable_div = find_element_by_xpath(driver, f"(//*[@data-testid='{DataTestID.WATCHLIST_LIST.value}']//div)[2]")
     
     # Store the current scroll height to detect when scrolling stops
@@ -181,7 +181,7 @@ def market_watchlist_filter(driver):
         menu_button(driver, menu="markets")
         
         # Locate all symbols in the selected category
-        filter = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_PREFERENCE.value)
+        filter = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_PREFERENCE.value)
         click_element(element=filter)  # Click on the selected symbol
         
         # Wait for the "Show/Hide Symbol" modal to appear
@@ -252,7 +252,7 @@ def market_watchlist_filter(driver):
         click_element(close)
         
         # Navigate to the selected category
-        watchlist_option = visibility_of_element_by_testid(driver, data_testid=f"tab-{selected_category_text}")
+        watchlist_option = find_visible_element_by_testid(driver, data_testid=f"tab-{selected_category_text}")
         click_element(element=watchlist_option)
         
         delay(0.5)
@@ -274,7 +274,7 @@ def market_watchlist_filter(driver):
                         assert False, f"Extra symbols in market watchlist not in filter_symbol_list: {', '.join(extra_symbols)}"
 
             else:
-                no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
+                no_items_message = find_visible_element_by_testid(driver, data_testid="empty-message")
                 msg = get_label_of_element(no_items_message)
                 if msg == "No items available.":
                     print(f"{msg} is displayed")

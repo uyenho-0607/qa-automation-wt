@@ -47,10 +47,10 @@ class TC_MT5_aF02():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT5, testcaseID="TC01")
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server=Server.MT5)
 
             with allure.step("Disable OCT"):
                 toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")

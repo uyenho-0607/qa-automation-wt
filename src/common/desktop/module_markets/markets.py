@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import javascript_click, get_label_of_element, spinner_element, click_element, visibility_of_element_by_testid, visibility_of_element_by_xpath, find_element_by_xpath, find_list_of_elements_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import javascript_click, get_label_of_element, spinner_element, click_element, find_visible_element_by_testid, find_visible_element_by_xpath, find_element_by_xpath, find_list_of_elements_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.desktop.module_subMenu.utils import menu_button
 
@@ -25,7 +25,7 @@ def myTrade_order(driver, symbol_name, order_type):
         spinner_element(driver)
         
         # Wait until the rows in 'My Trade' section are loaded
-        top_row = visibility_of_element_by_xpath(driver, "//div[@class='sc-1g7mcs0-0 iiKKcu'][1]")
+        top_row = find_visible_element_by_xpath(driver, "//div[@class='sc-1g7mcs0-0 iiKKcu'][1]")
         
         # Validate symbol name in the top row
         displayed_symbol = top_row.find_element(By.XPATH, "//div[@data-testid='portfolio-row-symbol']").text.strip()
@@ -130,7 +130,7 @@ def select_top_loser_dropdown(driver):
     Select the 'Top Loser' from the dropdown menu.
     """
     # Click to select the element dropdown
-    dropdown_arrow = visibility_of_element_by_testid(driver, data_testid="market-section-title-more")
+    dropdown_arrow = find_visible_element_by_testid(driver, data_testid="market-section-title-more")
     click_element(dropdown_arrow)
 
     # Click on the Top Loser button
@@ -172,8 +172,8 @@ def handle_signal_option(driver, option_name, option):
         for state in states:
             try:
                 # Check the visibility of the state element
-                visibility_of_element_by_xpath(driver, option[state["state"]])
-                symbols = visibility_of_element_by_testid(driver, data_testid=option["symbol_xpath"])
+                find_visible_element_by_xpath(driver, option[state["state"]])
+                symbols = find_visible_element_by_testid(driver, data_testid=option["symbol_xpath"])
                 attach_text(state["message"], name=state["description"])
                 return symbols
             except Exception:
@@ -205,7 +205,7 @@ def verify_selected_tab(driver, option):
     """
     for tab_xpath in option["tab_xpath"]:
         # tab = visibility_of_element_by_xpath(driver, tab_xpath)
-        tab = visibility_of_element_by_testid(driver, data_testid=tab_xpath)
+        tab = find_visible_element_by_testid(driver, data_testid=tab_xpath)
         if tab:  # Ensure the tab is visible
             tab_text = tab.text
             if "selected" in tab.get_attribute("class"):

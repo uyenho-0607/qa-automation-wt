@@ -1,11 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import configure_language_setting
+from common.desktop.module_setting.setting_linked_devices import linked_devices_modal
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
@@ -18,7 +19,7 @@ class TC_MT4_aT11():
 
     @allure.description(
         """
-        Change Language
+        Linked Devices - Validate system can terminate all/ individual session
         """
     )
     
@@ -34,10 +35,10 @@ class TC_MT4_aT11():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
-                
-            with allure.step("Successfully change language"):
-                configure_language_setting(driver=main_driver)
+               login_wt(driver=main_driver, server=Server.MT4)
+
+            with allure.step("Enable Linked Device OCT"):
+                linked_devices_modal(driver=main_driver, set_terminate=False)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

@@ -1,12 +1,10 @@
 import allure
-from enums.main import CredentialType, LoginResultState, Server
+from enums.main import Server, CredentialType, LoginResultState
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-
-
 
 
 @allure.parent_suite("Membersite - Android - Login")

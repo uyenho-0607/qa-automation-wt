@@ -2,7 +2,7 @@ from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, get_current_url
-from constants.helper.element import click_element, find_element_by_testid, spinner_element, visibility_of_element_by_testid, get_label_of_element, populate_element, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import click_element, find_element_by_testid, spinner_element, find_visible_element_by_testid, get_label_of_element, populate_element, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_announcement.utils import modal_announcement
@@ -116,7 +116,7 @@ def capture_alert(driver):
 
     for data_testid, alert_type in alert_types:
         try:
-            alert_message = visibility_of_element_by_testid(driver, data_testid=data_testid)
+            alert_message = find_visible_element_by_testid(driver, data_testid=data_testid)
             return alert_message, alert_type
         except Exception as e:
             # print(f"Error while capturing {alert_type} alert: {e}")

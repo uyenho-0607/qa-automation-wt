@@ -12,7 +12,7 @@ from constants.helper.error_handler import handle_exception
 from data_config.encrypt_decrypt import decrypt_and_print
 from constants.helper.driver import access_url, delay
 from constants.helper.screenshot import attach_text
-from constants.helper.element import clear_input_field, find_element_by_xpath, get_label_of_element, populate_element_with_wait, visibility_of_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import clear_input_field, find_element_by_xpath, get_label_of_element, populate_element_with_wait, find_visible_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
 from data_config.file_handler import get_credentials
 
 
@@ -102,7 +102,7 @@ def ra_user_login(driver, platform: str, testcaseID: str, expect_failure: bool =
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Fill in the username and password fields
-        userinput_name = visibility_of_element_by_xpath(driver, "(//input[contains(@class,'mantine-4eck0i')])[1]")
+        userinput_name = find_visible_element_by_xpath(driver, "(//input[contains(@class,'mantine-4eck0i')])[1]")
         populate_element_with_wait(driver, element=userinput_name, text=login_username)
 
         password_input = find_element_by_xpath(driver, "//input[@type='password']")
@@ -114,8 +114,6 @@ def ra_user_login(driver, platform: str, testcaseID: str, expect_failure: bool =
             
             match = wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[normalize-space(text())='Dashboard']", text="Dashboard")
             if match:
-            # success_url = get_success_urls(platform, env_type)
-            # if wait_for_url(driver, [success_url]):
                 # Check if we expected failure but logged in successfully
                 if expect_failure:
                     attach_text("Expected failure, but login succeeded without error. Test failed as expected failure condition not met.", name="Unexpected Success")
@@ -141,7 +139,7 @@ def ra_user_login(driver, platform: str, testcaseID: str, expect_failure: bool =
                 if attempt < max_retries - 1:
                     attach_text(error_message, name=f"Attempt {attempt + 1} failed: verification code invalid. Retrying...")
                     delay(0.5)
-                    captcha_input = visibility_of_element_by_xpath(driver, "(//div[@class='mantine-Input-wrapper mantine-12sbrde']/input)[3]")
+                    captcha_input = find_visible_element_by_xpath(driver, "(//div[@class='mantine-Input-wrapper mantine-12sbrde']/input)[3]")
                     clear_input_field(captcha_input)
                 else:
                     assert False, "Verification code invalid after maximum attempts. Test failed."
@@ -165,7 +163,7 @@ def read_captcha(driver):
 
 
     # Find the CAPTCHA image element
-    captcha_image_element = visibility_of_element_by_xpath(driver, "(//img)[2]")
+    captcha_image_element = find_visible_element_by_xpath(driver, "(//img)[2]")
     
     # Get the CAPTCHA image src (base64 string)
     captcha_image_src = captcha_image_element.get_attribute("src")
@@ -219,7 +217,7 @@ def read_captcha(driver):
 def handle_login_error(driver):
     try:
         # Handle the expected failure scenario
-        error_message_notification = visibility_of_element_by_xpath(driver, "//div[@class='mantine-Text-root mantine-Notification-description mantine-1y9keh2']")
+        error_message_notification = find_visible_element_by_xpath(driver, "//div[@class='mantine-Text-root mantine-Notification-description mantine-1y9keh2']")
         error_message = get_label_of_element(error_message_notification)
         attach_text(error_message, name="Expected login failure. Error message found: ")
         return error_message

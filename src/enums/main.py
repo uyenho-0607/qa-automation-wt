@@ -9,6 +9,18 @@ class BaseEnum(str, Enum):
 class Server(BaseEnum):
     MT4 = "MT4"
     MT5 = "MT5"
+
+
+class Platform(BaseEnum):
+    DESKTOP = "Desktop"
+    MOBILE = "Mobile"
+    BACKOFFICE = "Backoffice"
+    ROOTADMIN = "RootAdmin"
+    
+
+class ClientName(BaseEnum):
+    LIRUNEX = "Lirunex"
+    TRANSACTCLOUDMT5 = "Transactcloudmt5"
     
     
 class EnvironmentType(BaseEnum):

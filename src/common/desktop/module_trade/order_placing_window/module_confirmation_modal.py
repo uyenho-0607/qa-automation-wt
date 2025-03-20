@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, visibility_of_element_by_xpath, get_label_of_element
+from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, find_visible_element_by_xpath, get_label_of_element
 
 
 
@@ -39,7 +39,7 @@ def trade_ordersConfirmationDetails(driver, trade_type):
         result = []
         
         # Ensure the trade confirmation modal is visible before proceeding
-        visibility_of_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
+        find_visible_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
 
         # Retrieve all the headers from the trade confirmation modal
         trade_order_header_elements = find_list_of_elements_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-label')]")

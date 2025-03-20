@@ -2,7 +2,7 @@ from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.color_element import get_body_color
-from constants.helper.element import click_element, find_element_by_testid, javascript_click, visibility_of_element_by_xpath, visibility_of_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import click_element, find_element_by_testid, javascript_click, find_visible_element_by_xpath, find_visible_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 
 
 """
@@ -65,7 +65,7 @@ def button_setting(driver, setting_option: str):
             raise ValueError(f"Invalid button type: {setting_option}")
         
         # Click on the specified setting option
-        dropdown_option = visibility_of_element_by_testid(driver, data_testid=button_testid)
+        dropdown_option = find_visible_element_by_testid(driver, data_testid=button_testid)
         delay(0.5)
         click_element(dropdown_option)
 
@@ -126,7 +126,7 @@ def button_theme(driver, theme_option=None):
             click_element(setting)
             
             # Wait for and click the dropdown option for the current theme (Light, Dark, or System)
-            dropdown_option = visibility_of_element_by_xpath(driver, f"//div[@class='sc-13nyl38-4 eQA-dBj' and text()='{option}']")
+            dropdown_option = find_visible_element_by_xpath(driver, f"//div[@class='sc-13nyl38-4 eQA-dBj' and text()='{option}']")
             click_element(dropdown_option)
             
             # Verify the page color after selecting each theme option

@@ -4,7 +4,7 @@ from tabulate import tabulate
 from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, visibility_of_element_by_testid, spinner_element
+from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, spinner_element
 
 from common.desktop.module_notification.noti_general import notification_bell
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details
@@ -143,7 +143,7 @@ def get_noti_ordersDetails(driver):
     try:
         
         # Wait for the modal dialog to be present
-        visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL.value)
+        find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL.value)
         
         # Wait till the spinner icon no longer display
         spinner_element(driver)

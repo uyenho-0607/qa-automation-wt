@@ -1,11 +1,9 @@
 import allure
-import pytest
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import forgot_password
-from enums.main import AccountType
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -19,7 +17,7 @@ class TC_MT4_aA14():
 
     @allure.description(
         """
-        Forgot Password via CRM
+        Forgot Password via Live
         """
     )
     
@@ -34,7 +32,7 @@ class TC_MT4_aA14():
         try:
 
             with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
-                forgot_password(driver=main_driver, account_type=AccountType.CRM, email="test@test.com")
+                forgot_password(driver=main_driver, email="test@test.com", accountID="188183338")
                 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

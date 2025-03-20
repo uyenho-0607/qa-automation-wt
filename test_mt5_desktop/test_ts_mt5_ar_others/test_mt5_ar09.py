@@ -1,8 +1,8 @@
 import allure
 import pytest
-from datetime import datetime
 
-# from dateutil.parser import parse
+from enums.main import Server
+from datetime import datetime
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -38,10 +38,10 @@ class TC_MT4_aR09():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server=Server.MT5)
 
             with allure.step("Select the Order Panel: Order History"):
                 type_orderPanel(driver=main_driver, tab_order_type="history", sub_tab="positions-history", position=True)

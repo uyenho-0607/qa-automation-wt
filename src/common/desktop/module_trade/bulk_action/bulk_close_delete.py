@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import spinner_element, click_element, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
+from constants.helper.element import spinner_element, click_element, find_element_by_testid, find_visible_element_by_testid, find_visible_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
 
 from data_config.utils import append_orderIDs_to_csv
 from common.desktop.module_subMenu.sub_menu import menu_button
@@ -108,7 +108,7 @@ def bulk_action_close_delete(driver, bulk_type, options_dropdown=None):
                 
                 # If an optional dropdown option is provided, click the corresponding dropdown option
                 if options_dropdown:
-                    bulk_option = visibility_of_element_by_testid(driver, data_testid=f"dropdown-bulk-close-{options_dropdown}")
+                    bulk_option = find_visible_element_by_testid(driver, data_testid=f"dropdown-bulk-close-{options_dropdown}")
                     click_element(bulk_option)
                 return
             delay(0.5) # Check every 0.5 seconds
@@ -179,7 +179,7 @@ def bulk_close_trade_page(driver, bulk_type, options_dropdown, tab_order_type):
 
                     if not found:
                         # Check for pagination
-                        next_button = visibility_of_element_by_xpath(driver, "//div[@class='sc-erzke0-0 kStcxm']//div[2]")
+                        next_button = find_visible_element_by_xpath(driver, "//div[@class='sc-erzke0-0 kStcxm']//div[2]")
                         # if next_button and next_button[0].is_enabled():
                         if next_button.is_enabled():
                             next_button.click()
@@ -347,7 +347,7 @@ def button_bulk_operation(driver, bulk_type, filename, section_name, tab_order_t
         append_orderIDs_to_csv(table_order_ids, filename)
 
         # Locate the submit button and click it to finalize the operation
-        action_button = visibility_of_element_by_xpath(driver, ".//button[contains(@data-testid, 'button-submit')]")
+        action_button = find_visible_element_by_xpath(driver, ".//button[contains(@data-testid, 'button-submit')]")
         click_element(action_button)
         
         # Return the processed order data

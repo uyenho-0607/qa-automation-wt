@@ -1,10 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server, AccountType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
-from common.desktop.module_login.utils import forgot_password
+from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import open_demo_account_error_msg
 
 
 @allure.parent_suite("MT4 Membersite - Desktop - Login")
@@ -18,7 +20,7 @@ class TC_MT4_aA09():
 
     @allure.description(
         """
-        Forgot Password via Live
+        Error message checking for demo account creation
         """
     )
     
@@ -32,9 +34,12 @@ class TC_MT4_aA09():
         test_failed = False
         
         try:
+            
+            with allure.step("Login to Web Trader Membersite"):
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO, set_username=False)
 
-            with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
-                forgot_password(driver=main_driver, server="MT4", client_name="Lirunex", email="test@test.com", accountID="188183338")
+            with allure.step("Open demo account"):
+                open_demo_account_error_msg(driver=main_driver)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

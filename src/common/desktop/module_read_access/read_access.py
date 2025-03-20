@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, get_label_of_element, is_element_disabled_by_cursor, spinner_element, visibility_of_element_by_xpath, find_element_by_testid
+from constants.helper.element import click_element, get_label_of_element, is_element_disabled_by_cursor, spinner_element, find_visible_element_by_xpath, find_element_by_testid
 
 from common.desktop.module_subMenu.sub_menu import menu_button
 from common.desktop.module_trade.order_panel.op_general import get_table_body
@@ -53,7 +53,7 @@ def verify_read_only_access(driver, tab_order_type, bulk_test_id):
     spinner_element(driver)
     
     # Retrieve "This symbol is for view only" message
-    message = visibility_of_element_by_xpath(driver, "//div[@class='sc-xc0b2i-1 XQXKK']")
+    message = find_visible_element_by_xpath(driver, "//div[@class='sc-xc0b2i-1 XQXKK']")
     attach_text(get_label_of_element(element=message), name=f"Trade - {tab_order_type}")
 
     verify_bulk_button_disabled(driver, tab_order_type, bulk_test_id)

@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server, CredentialType, LoginResultState
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -36,7 +37,7 @@ class TC_MT5_aA05():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", testcaseID="TC02", expect_failure=True)
+                login_wt(driver=main_driver, server=Server.MT5, testcase_id="TC02", credential_type=CredentialType.INVALID_CREDENTIAL, expectation=LoginResultState.FAILURE)
                          
         except Exception as e:
             test_failed = True  # Mark test as failed

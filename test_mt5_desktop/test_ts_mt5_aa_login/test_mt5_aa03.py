@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server, AccountType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -35,8 +36,8 @@ class TC_MT5_aA03():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="demo")
-             
+                login_wt(driver=main_driver, server=Server.MT5, account_type=AccountType.DEMO)
+
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout")
 

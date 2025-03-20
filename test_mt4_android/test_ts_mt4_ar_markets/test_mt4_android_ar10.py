@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
@@ -36,7 +37,7 @@ class TC_MT4_aR10():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Market Watchlist"):
                 market_watchlist_filter(driver=main_driver)

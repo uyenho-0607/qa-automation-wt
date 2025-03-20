@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import spinner_element, get_label_of_element, visibility_of_element_by_xpath, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, click_element, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import spinner_element, get_label_of_element, find_visible_element_by_xpath, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, click_element, wait_for_text_to_be_present_in_element_by_testid
 
 
 """
@@ -59,7 +59,7 @@ def select_trade_symbol_from_watchlist(driver, excluded_tabs=None):
         else:
             # Check for "No items found" message
             # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
-            no_items_message = visibility_of_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
+            no_items_message = find_visible_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
             msg = get_label_of_element(element=no_items_message)
             print(f"Message displayed: {msg}")
             
@@ -217,7 +217,7 @@ def handle_pre_selected_tab(driver):
                 else:  
                     # Verify and capture the message displayed in the Favourites tab
                     # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
-                    no_items_message = visibility_of_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
+                    no_items_message = find_visible_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
                     msg = get_label_of_element(element=no_items_message)
                     print(f"Verified that the Favourites tab contains no symbols. Message displayed: {msg}")
         else:

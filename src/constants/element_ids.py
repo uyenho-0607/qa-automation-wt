@@ -1,7 +1,10 @@
 from enum import Enum
 
-class DataTestID(Enum):
+class DataTestID(str, Enum):
     
+    def __str__(self):
+        return self.value.strip()  # Overrides str() to return the value directly
+
     # IN-APP BROWSER
     IN_APP_BROWSER_URL_bar = '//android.widget.TextView[@resource-id="com.android.chrome:id/url_bar"]'
     IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
@@ -41,6 +44,16 @@ class DataTestID(Enum):
                                                     APP - LOGIN PAGE - FORGOT PASSWORD
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
+    # DESKTOP
+    FORGOT_PASSWORD = '//*[normalize-space(text())="Forgot Password?"]'
+    RESET_PASSWORD = '//*[normalize-space(text())="Reset Password"]'
+    RESET_PASSWORD_EMAIL_ADDRESS = '//input[@placeholder="user@gmail.com"]'
+    RESET_PASSWORD_ACCOUNT_ID = '//input[@placeholder="Enter your account ID"]'
+    RESET_PASSWORD_SUBMIT = '//*[normalize-space(text())="Submit"]'
+    HELP_IS_ON_THE_WAY = '//*[normalize-space(text())="Help is on the way!"]'
+    CONTACT_SUPPORT = '//*[normalize-space(text())="Contact Support"]'
+    FORGOT_PASSWORD_ERROR_MESSAGE = '//*[@class="sc-1t1bfxj-4 gYShWv"]'
+    
     
     # APP - FORGOT PASSWORD MODULE
     APP_FORGOT_PASSWORD = '//android.widget.TextView[@text="Forgot password?"]'
@@ -126,10 +139,8 @@ class DataTestID(Enum):
     # APP
     APP_SIDE_BAR_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
     APP_SIDE_BAR_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
-    # APP_SIDE_BAR_OPTION_TRADE = '//android.widget.TextView[@text="Trade"]'
     APP_SIDE_BAR_OPTION_TRADE = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[3]/android.widget.TextView[2]'
     APP_SIDE_BAR_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
-    # APP_SIDE_BAR_OPTION_ASSETS = '//android.widget.TextView[@text="Assets"]'
     APP_SIDE_BAR_OPTION_ASSETS = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[5]'
         
     """
@@ -293,12 +304,19 @@ class DataTestID(Enum):
     # SEARCH SYMBOL RELATED
     SYMBOL_SEARCH_SELECTOR = 'symbol-search-selector'
     SYMBOL_DROPDOWN_RESULT = 'symbol-dropdown-result'
+    
+    '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
+    
+    APP_SYMBOL_DROPDOWN_RESULT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup//android.widget.TextView[2]'
+    
+    
     SYMBOL_INPUT_SEARCH = 'symbol-input-search'
     SYMBOL_OVERVIEW_ID = 'symbol-overview-id'
     SYMBOL_INPUT_SEARCH_ITEMS = 'symbol-input-search-items'
     SYMBOL_INPUT_SEARCH_HISTORY_DELETE = 'symbol-input-search-history-delete'
     SYMBOL_INPUT_SEARCH_ITEMS_DELETE = 'symbol-input-search-items-delete'
     SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL = 'symbol-input-search-items-symbol'
+    SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME = '//*[@data-testid="symbol-input-search-items"]//div[1]/div[1]'
 
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -554,7 +572,6 @@ class DataTestID(Enum):
 
     SWITCH_THEME_BUTTON = 'switch-theme-button'
     SETTING_BUTTON = 'setting-button'
-    # APP_SETTING_BUTTON = ".//android.widget.TextView[matches(@text, '^\d+$')]/following-sibling::android.widget.TextView[2]"
     APP_SETTING_BUTTON = ".//android.widget.TextView[matches(@text, '^\\d+$')]/following-sibling::android.widget.TextView[2]"
     SETTING_OPTION_SWITCH_TO_DEMO = 'setting-option-switch-to-demo'
     SETTING_OPTION_SWITCH_TO_LIVE = 'setting-option-switch-to-live'
@@ -590,8 +607,7 @@ class DataTestID(Enum):
     SETTING_OPTION_HELP_SUPPORT = 'setting-option-help-support'
     SETTING_OPTION_ABOUT = 'setting-option-about'
     SETTING_OPTION_LOGOUT = 'setting-option-logout'
-    # APP_SETTING_OPTION_LOGOUT = '//android.view.ViewGroup[@content-desc="Logout"]'
-    APP_SETTING_OPTION_LOGOUT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[7]'
+    APP_SETTING_OPTION_LOGOUT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[6]'
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 

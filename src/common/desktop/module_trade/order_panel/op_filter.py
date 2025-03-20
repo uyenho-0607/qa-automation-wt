@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import find_element_by_testid, spinner_element, get_label_of_element, visibility_of_element_by_testid, click_element, click_element_with_wait, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import find_element_by_testid, spinner_element, get_label_of_element, find_visible_element_by_testid, click_element, click_element_with_wait, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, wait_for_text_to_be_present_in_element_by_testid
 
 from common.desktop.module_subMenu.sub_menu import menu_button
 from common.desktop.module_markets.markets_watchlist import handle_alert_success
@@ -33,7 +33,7 @@ def update_column_visibility(driver, tab_order_type: str, sub_tab: str = None, s
         before_table_header = get_table_headers(driver)
         print(f"Original table {current_tab}:", before_table_header)
         
-        sort_column = visibility_of_element_by_testid(driver, data_testid="column-preference")
+        sort_column = find_visible_element_by_testid(driver, data_testid="column-preference")
         click_element(element=sort_column)
         
         wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="order-column-preference-modal-title", text="Select the columns you would like to see")
@@ -166,7 +166,7 @@ def perform_sorting(driver, tab_order_type: str = None, random_choice: bool=Fals
             assert False, f"Table is empty. Message: '{empty_message}'"
 
         # Locate and click the sort button
-        btn_sort = visibility_of_element_by_testid(driver, data_testid="order-sort-selector")
+        btn_sort = find_visible_element_by_testid(driver, data_testid="order-sort-selector")
         click_element(element=btn_sort)
 
         # Get the list of sort options

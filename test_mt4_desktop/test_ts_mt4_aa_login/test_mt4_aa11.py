@@ -1,30 +1,30 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
-from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.setting_contact_information import contact_information
+from common.desktop.module_login.utils import forgot_password
 
 
-@allure.parent_suite("MT5 Membersite - Desktop - Setting")
+@allure.parent_suite("MT4 Membersite - Desktop - Login")
 
-@allure.epic("MT5 Desktop ts_av - Setting")
+@allure.epic("MT4 Desktop ts_aa - Login")
 
 # Member Portal
-class TC_MT5_aV14():
+class TC_MT4_aA11():
 
-    @allure.title("TC_MT5_aV14")
+    @allure.title("TC_MT4_aA11")
 
     @allure.description(
         """
-        Contact US
+        Forgot Password via Live
         """
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc14(self, chromeDriver, request):
+    def test_tc11(self, chromeDriver, request):
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -33,12 +33,9 @@ class TC_MT5_aV14():
         test_failed = False
         
         try:
-            
-            with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
-            
-            with allure.step("Verify Contact Information is displayed"):
-                contact_information(driver=main_driver)
+
+            with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
+                forgot_password(driver=main_driver, server=Server.MT4, email="test@test.com", accountID="188183338")
 
         except Exception as e:
             test_failed = True  # Mark test as failed

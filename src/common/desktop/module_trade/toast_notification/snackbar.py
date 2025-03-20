@@ -5,7 +5,7 @@ from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import bulk_spinner_element, get_label_of_element, trigger_click, visibility_of_element_by_testid, find_element_by_testid
+from constants.helper.element import bulk_spinner_element, get_label_of_element, trigger_click, find_visible_element_by_testid, find_element_by_testid
 
 
 """
@@ -40,10 +40,10 @@ def get_trade_snackbar_banner(driver):
         ]
 
         # Wait for the snackbar message to be visible
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        find_visible_element_by_testid(driver, data_testid="notification-box")
         
         # Wait for the message header to be visible and extract it
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-title")
+        message_header = find_visible_element_by_testid(driver, data_testid="notification-title")
         extracted_header = get_label_of_element(message_header)
 
         # Extract the message description
@@ -153,10 +153,10 @@ def get_neg_snackbar_banner(driver):
         description_messages = ["Invalid Stop loss or Take profit", "Invalid Price submitted"]
 
         # Wait for the snackbar message to be visible
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        find_visible_element_by_testid(driver, data_testid="notification-box")
         
         # Wait for the message header to be visible
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-title")
+        message_header = find_visible_element_by_testid(driver, data_testid="notification-title")
         extracted_header = get_label_of_element(message_header)
 
         # Check if the normalized header is in the list of valid headers
@@ -206,10 +206,10 @@ def get_bulk_snackbar_banner(driver):
         bulk_spinner_element(driver)
 
         # Wait for the snackbar message to be visible
-        visibility_of_element_by_testid(driver, data_testid="notification-box")
+        find_visible_element_by_testid(driver, data_testid="notification-box")
         
         # Wait for the message header to be visible
-        message_header = visibility_of_element_by_testid(driver, data_testid="notification-title")
+        message_header = find_visible_element_by_testid(driver, data_testid="notification-title")
         extracted_header = get_label_of_element(message_header)
 
         # Extract the message description

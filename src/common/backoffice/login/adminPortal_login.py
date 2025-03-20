@@ -8,7 +8,7 @@ from PIL import Image
 
 
 from constants.helper.driver import access_url, delay
-from constants.helper.element import clear_input_field, find_element_by_xpath, get_label_of_element, populate_element_with_wait, visibility_of_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import clear_input_field, find_element_by_xpath, get_label_of_element, populate_element_with_wait, find_visible_element_by_xpath, wait_for_text_to_be_present_in_element_by_xpath
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 
@@ -96,7 +96,7 @@ def bo_user_login(driver, platform: str, client_name: str, testcaseID: str, expe
         login_password = decrypt_and_print(login_password_encrypted)
 
         # Fill in the username and password fields
-        userinput_name = visibility_of_element_by_xpath(driver, "(//input[@type='text'])[1]")
+        userinput_name = find_visible_element_by_xpath(driver, "(//input[@type='text'])[1]")
         populate_element_with_wait(driver, element=userinput_name, text=login_username)
 
         password_input = find_element_by_xpath(driver, "//input[@type='password']")
@@ -108,8 +108,6 @@ def bo_user_login(driver, platform: str, client_name: str, testcaseID: str, expe
 
             match = wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[normalize-space(text())='Dashboard']", text="Dashboard")
             if match:
-            # success_url = get_success_urls(platform, env_type, client_name, device_type)
-            # if wait_for_url(driver, [success_url]):
                 # Check if we expected failure but logged in successfully
                 if expect_failure:
                     attach_text("Expected failure, but login succeeded without error. Test failed as expected failure condition not met.", name="Unexpected Success")
@@ -136,7 +134,7 @@ def bo_user_login(driver, platform: str, client_name: str, testcaseID: str, expe
                     attach_text(error_message, name=f"Attempt {attempt + 1} failed: verification code invalid. Retrying...")
                     delay(0.5)
                     # clear_input_field(visibility_of_element_by_xpath(driver, "//input[@placeholder='Verification code']"))
-                    captcha_input = visibility_of_element_by_xpath(driver, "//input[@placeholder='Verification code']")
+                    captcha_input = find_visible_element_by_xpath(driver, "//input[@placeholder='Verification code']")
                     clear_input_field(captcha_input)
                 else:
                     assert False, "Verification code invalid after maximum attempts. Test failed."
@@ -159,7 +157,7 @@ def read_captcha(driver):
 
 
     # Find the CAPTCHA image element
-    captcha_image_element = visibility_of_element_by_xpath(driver, "(//img)[2]")
+    captcha_image_element = find_visible_element_by_xpath(driver, "(//img)[2]")
     
     # Get the CAPTCHA image src (base64 string)
     captcha_image_src = captcha_image_element.get_attribute("src")
@@ -190,7 +188,7 @@ def read_captcha(driver):
     print(f"Captured CAPTCHA: {result}")
 
     # Find the input field for CAPTCHA entry
-    captcha_input = visibility_of_element_by_xpath(driver, "//input[@placeholder='Verification code']")
+    captcha_input = find_visible_element_by_xpath(driver, "//input[@placeholder='Verification code']")
     
     # Populate the CAPTCHA input field with the best extracted numeric text
     populate_element_with_wait(driver, element=captcha_input, text=result)
@@ -213,10 +211,10 @@ def handle_login_error(driver):
     try:
             
         # Handle the expected failure scenario
-        error_message_notification = visibility_of_element_by_xpath(driver, "//div[@class='sc-kpo2gs-0 dBaKoP']")
+        error_message_notification = find_visible_element_by_xpath(driver, "//div[@class='sc-kpo2gs-0 dBaKoP']")
         error_message = get_label_of_element(error_message_notification)
         attach_text(error_message, name="Expected login failure. Error message found: ")
-        return error_message    
+        return error_message
     except Exception as e:
         handle_exception(driver, e)
         

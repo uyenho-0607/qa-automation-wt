@@ -1,5 +1,5 @@
 import allure
-from enums.main import LoginResultState, Server
+from enums.main import Server, LoginResultState
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile

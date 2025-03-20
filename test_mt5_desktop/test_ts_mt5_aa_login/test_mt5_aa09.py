@@ -1,11 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server, AccountType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
-from common.desktop.module_login.utils import forgot_password, handle_alert_error
-from common.desktop.module_setting.utils import button_setting
+from common.desktop.module_login.utils import login_wt
+from common.desktop.module_setting.utils import open_demo_account_error_msg
 
 
 @allure.parent_suite("MT5 Membersite - Desktop - Login")
@@ -19,7 +20,7 @@ class TC_MT5_aA09():
 
     @allure.description(
         """
-        Forgot Password via Live
+        Error message checking for demo account creation
         """
     )
     
@@ -33,9 +34,12 @@ class TC_MT5_aA09():
         test_failed = False
         
         try:
+            
+            with allure.step("Login to Web Trader Membersite"):
+                login_wt(driver=main_driver, server=Server.MT5, account_type=AccountType.DEMO, set_username=False)
 
-            with allure.step("Launch Web Trader Membersite and click on Forgot Password button"):
-                forgot_password(driver=main_driver, server="MT5", client_name="Transactcloudmt5", email="test@test.com", accountID="18819973")
+            with allure.step("Open demo account"):
+                open_demo_account_error_msg(driver=main_driver)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

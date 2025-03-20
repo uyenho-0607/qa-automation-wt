@@ -1,5 +1,5 @@
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element_with_wait, visibility_of_element_by_testid
+from constants.helper.element import click_element_with_wait, find_visible_element_by_testid
 
 
 """
@@ -21,7 +21,7 @@ def menu_button(driver, menu: str):
     """
     try:
         # Locate the menu element using the provided menu name and data-testid attribute
-        menu_selection = visibility_of_element_by_testid(driver, data_testid=f"side-bar-option-{menu}")
+        menu_selection = find_visible_element_by_testid(driver, data_testid=f"side-bar-option-{menu}")
         # Click on the found menu element with an optional wait to ensure the action is completed
         click_element_with_wait(driver, element=menu_selection)
         

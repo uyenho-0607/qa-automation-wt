@@ -25,34 +25,9 @@ def decrypt_and_print(encrypted_data):
     return decrypted_data
 
 
-# Encrypting usernames and storing encrypted values
-print("\nEncrypting Usernames:")
-encrypted_usernames = []
-usernames = ["90931131"] # MetatraderID
-for username in usernames:
-    encrypted_username = encrypt_and_print(username)
-    encrypted_usernames.append(encrypted_username)
+# Encrypting credential and storing encrypted values
+print("\nEncrypting credential:")
+credentials = ["username"] # MetatraderID
+for credential in credentials:
+    encrypted_username = encrypt_and_print(credential)
     print(encrypted_username)
-
-
-# Encrypting passwords and storing encrypted values
-print("\nEncrypting Passwords:")
-encrypted_passwords = []
-passwords = ["Asd123"] # Password
-for password in passwords:
-    encrypted_password = encrypt_and_print(password)
-    encrypted_passwords.append(encrypted_password)
-    print(encrypted_password)
-
-
-
-# Decrypting usernames
-# print("\nDecrypting Usernames:")
-# for encrypted_username in encrypted_usernames:
-#     decrypt_and_print(encrypted_username)
-    
-    
-# # Decrypting passwords
-# print("\nDecrypting Passwords:")
-# for encrypted_password in encrypted_passwords:
-#     decrypt_and_print(encrypted_password)

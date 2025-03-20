@@ -128,9 +128,11 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
     # Load credentials from the JSON file
     data = get_credentials(server)
     
+    # Check if the server exists in the data
     if server not in data:
         raise ValueError(f"Server '{server}' not found in credentials data.")
 
+    # Retrieve the specific server data for the given client and "MemberSite"
     server_data = data[server]["MemberSite"]
 
     if expectation == LoginResultState.FAILURE:
