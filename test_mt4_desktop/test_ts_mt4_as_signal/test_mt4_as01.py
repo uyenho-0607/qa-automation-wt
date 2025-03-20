@@ -39,7 +39,7 @@ class TC_MT4_aS01():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, client_name="Lirunex", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT4, testcaseID="TC01")
             
             with allure.step("Signal - Search function"):
                 signal_search_feature(driver=main_driver)

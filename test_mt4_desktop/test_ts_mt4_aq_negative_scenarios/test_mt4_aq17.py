@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_stop_order, modify_stop_order, get_neg_snackbar_banner, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, modify_stop_order, get_neg_snackbar_banner, get_trade_snackbar_banner, extract_order_info
 
 
 @allure.parent_suite("MT4 Membersite - Desktop - Negative Scenarios")
@@ -46,7 +46,7 @@ class TC_MT4_aQ17():
                 input_symbol(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Place Stop Order"):
                 trade_stop_order(driver=main_driver, trade_type="trade", option="buy", expiryType="good-till-day", set_stopLoss=False, set_takeProfit=False)

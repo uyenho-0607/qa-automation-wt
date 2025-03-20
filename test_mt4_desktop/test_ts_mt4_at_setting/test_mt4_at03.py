@@ -35,7 +35,7 @@ class TC_MT4_aT03():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, client_name="Lirunex", account_type="demo") 
+                login_wt(driver=main_driver, server=Server.MT4, account_type="demo") 
                 
             with allure.step("Click on the 'Switch to Live Account' tab"):
                 switch_account_type(driver=main_driver, account_type="live")

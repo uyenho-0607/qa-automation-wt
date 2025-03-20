@@ -15,8 +15,8 @@ from constants.helper.screenshot import attach_text
 
 def get_URLs(server: Server):
     file_map = {
-        Server.MT4: "src/data_config/url/mt4_url.json",
-        Server.MT5: "src/data_config/url/mt5_url.json",
+        Server.MT4: "src/data_config/url/mt4.json",
+        Server.MT5: "src/data_config/url/mt5.json",
     }
     file_path = file_map.get(server)  # No default value
 
@@ -42,8 +42,8 @@ def get_URLs(server: Server):
 
 def get_credentials(server: Server):
     file_map = {
-        Server.MT4: "src/data_config/credential/mt4_credential.json",
-        Server.MT5: "src/data_config/credential/mt5_credential.json",
+        Server.MT4: "src/data_config/credential/mt4.json",
+        Server.MT5: "src/data_config/credential/mt5.json",
     }
     file_path = file_map.get(server)  # No default value
     
@@ -71,8 +71,8 @@ def get_credentials(server: Server):
 def read_symbol_file(server: Server, symbol_type: SymbolsList):
     try:
         file_map = {
-            Server.MT4: "src/data_config/symbol/mt4_symbols.json",
-            Server.MT5: "src/data_config/symbol/mt5_symbols.json",
+            Server.MT4: "src/data_config/symbol/mt4.json",
+            Server.MT5: "src/data_config/symbol/mt5.json",
         }
         file_path = file_map.get(server)
         

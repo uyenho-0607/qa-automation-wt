@@ -6,7 +6,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_trade.utils import toggle_radioButton, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_signal.utils import button_copyTrade, handle_order_type
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -41,7 +41,7 @@ class TC_MT5_aU05():
                 login_wt(driver=main_driver, server=Server.MT5)
                 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
             
             with allure.step("Copy To Trade Order"):
                 copyTrade_df, label_OrderStatus = button_copyTrade(driver=main_driver)

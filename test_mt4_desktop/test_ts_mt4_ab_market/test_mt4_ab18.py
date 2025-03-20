@@ -8,7 +8,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -52,7 +52,7 @@ class TC_MT4_aB18():
                 input_symbol(driver=main_driver, server=Server.MT4)
 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
 
             """ Place Market Order """
 

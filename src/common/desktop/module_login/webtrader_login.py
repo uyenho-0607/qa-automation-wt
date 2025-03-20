@@ -300,7 +300,7 @@ def handle_alert_error(driver, expectation: LoginResultState):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.SIT,
+def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.UAT,
              account_type: AccountType = AccountType.LIVE,
              testcase_id: str = None, set_language: bool = False, set_username: bool = True, 
              expectation: LoginResultState = LoginResultState.SUCCESS, 

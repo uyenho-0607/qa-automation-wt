@@ -303,9 +303,9 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         demo_account_details = {label: "N/A" for label in header_labels}
 
         # Retrieve account detail values from the page
-        demoAccount_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.DEMO_COMPLETION_VALUE)
+        demo_account_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.DEMO_COMPLETION_VALUE)
         # Iterate through account details and populate the dictionary
-        for idx, element in enumerate(demoAccount_elements):
+        for idx, element in enumerate(demo_account_elements ):
             label = get_label_of_element(element).strip()
 
             # Handle Leverage (e.g., "1 : 5" to "1:5")

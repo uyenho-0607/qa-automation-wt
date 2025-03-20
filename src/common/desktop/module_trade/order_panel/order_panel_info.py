@@ -13,7 +13,7 @@ from common.desktop.module_trade.order_panel.op_general import extract_order_dat
 from common.desktop.module_chart.chart import get_chart_symbol_name
 from common.desktop.module_assets.account_info import get_server_local_time
 from common.desktop.module_setting.setting_general import button_setting
-from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_sub_menu.sub_menu import menu_button
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 ASSET - SYMBOL NAME

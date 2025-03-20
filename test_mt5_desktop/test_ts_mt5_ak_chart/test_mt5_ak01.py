@@ -9,7 +9,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_chart.utils import chart_minMax, chart_trade_modal_close
-from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -51,7 +51,7 @@ class TC_MT5_aK01():
                 input_symbol(driver=main_driver, server=Server.MT5)
 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
 
             with allure.step("Place Market Order"):
                 trade_market_order(driver=main_driver, trade_type="trade", option="buy", set_Chart=True, chart_fullscreen="toggle", set_fillPolicy=True, sl_type="points", tp_type="price")

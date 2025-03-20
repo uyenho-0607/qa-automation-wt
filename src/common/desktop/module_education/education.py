@@ -6,7 +6,7 @@ from constants.helper.element import spinner_element, javascript_click, click_el
 from constants.helper.error_handler import handle_exception
 
 
-from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_sub_menu.sub_menu import menu_button
 
 
 """

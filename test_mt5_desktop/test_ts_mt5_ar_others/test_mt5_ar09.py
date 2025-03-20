@@ -7,7 +7,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 

@@ -8,7 +8,7 @@ from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import find_element_by_testid, spinner_element, get_label_of_element, find_visible_element_by_testid, click_element, click_element_with_wait, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, wait_for_text_to_be_present_in_element_by_testid
 
-from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_sub_menu.sub_menu import menu_button
 from common.desktop.module_markets.markets_watchlist import handle_alert_success
 from common.desktop.module_trade.order_panel.utils import get_table_headers, type_orderPanel
 from common.desktop.module_trade.order_panel.op_general import get_table_body

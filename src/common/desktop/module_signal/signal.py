@@ -11,7 +11,7 @@ from constants.helper.error_handler import handle_exception
 from constants.helper.element import clear_input_field, click_element, spinner_element, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_element_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, invisibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath, is_element_disabled_by_cursor, populate_element
 from constants.helper.screenshot import attach_text
 
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 from common.desktop.module_chart.utils import get_chart_symbol_name
 from common.desktop.module_trade.order_placing_window.utils import input_size_volume, button_trade_action
 

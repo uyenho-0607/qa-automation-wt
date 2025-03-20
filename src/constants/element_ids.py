@@ -304,11 +304,7 @@ class DataTestID(str, Enum):
     # SEARCH SYMBOL RELATED
     SYMBOL_SEARCH_SELECTOR = 'symbol-search-selector'
     SYMBOL_DROPDOWN_RESULT = 'symbol-dropdown-result'
-    
-    '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
-    
     APP_SYMBOL_DROPDOWN_RESULT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup//android.widget.TextView[2]'
-    
     
     SYMBOL_INPUT_SEARCH = 'symbol-input-search'
     SYMBOL_OVERVIEW_ID = 'symbol-overview-id'

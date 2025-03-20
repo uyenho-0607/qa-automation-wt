@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, modify_limit_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_limit_order, modify_limit_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data, append_orderIDs_to_csv
 
 @allure.parent_suite("MT4 Membersite - Desktop - Trade - Limit Order")
@@ -48,13 +48,13 @@ class TC_MT4_aD11():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, client_name="Lirunex", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT4, testcaseID="TC01")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server=Server.MT4)
 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
         
             """ Place Limit Order """
 

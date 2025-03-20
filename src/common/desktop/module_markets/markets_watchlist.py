@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import get_label_of_element, javascript_click, spinner_element, find_visible_element_by_testid, find_visible_element_by_xpath, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_testid, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid
 
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 
 
 """

@@ -8,7 +8,7 @@ from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import find_element_by_xpath, get_label_of_element
 
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 
 
 """

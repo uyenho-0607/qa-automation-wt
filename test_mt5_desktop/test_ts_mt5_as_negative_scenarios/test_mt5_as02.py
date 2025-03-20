@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, get_neg_snackbar_banner
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, get_neg_snackbar_banner
 
 @allure.parent_suite("MT5 Membersite - Desktop - Negative Scenarios")
 
@@ -45,7 +45,7 @@ class TC_MT5_aS02():
                 input_symbol(driver=main_driver, server=Server.MT5)
                 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Place Take Profit - Price"):
                 trade_market_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, takeProfit_flag=False, tp_type="price")

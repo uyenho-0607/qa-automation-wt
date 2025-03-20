@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import javascript_click, get_label_of_element, spinner_element, click_element, find_visible_element_by_testid, find_visible_element_by_xpath, find_element_by_xpath, find_list_of_elements_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 
 
 """
@@ -16,7 +16,7 @@ from common.desktop.module_subMenu.utils import menu_button
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def myTrade_order(driver, symbol_name, order_type):
+def inspect_my_trade_orders(driver, symbol_name, order_type):
     try:
         # Redirect to the Markets page
         menu_button(driver, menu="markets")

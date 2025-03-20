@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner, trade_ordersConfirmationDetails, button_trade_action
+from common.desktop.module_trade.utils import toggle_radio_button, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner, trade_ordersConfirmationDetails, button_trade_action
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
@@ -42,7 +42,7 @@ class TC_MT4_aP02():
                 input_symbol(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Enter Volume"):
                 swap_units_volume_conversion(driver=main_driver, module_Type="trade")

@@ -50,7 +50,7 @@ def handle_close_popup(driver, category):
         
         
     
-def toggle_radioButton(driver, category: str, desired_state: str):
+def toggle_radio_button(driver, category: str, desired_state: str):
     """
     Toggles a radio button within a specific category to the desired state ('checked' or 'unchecked').
 

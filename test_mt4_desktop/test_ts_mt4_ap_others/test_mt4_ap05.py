@@ -7,7 +7,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info, button_orderPanel_action, btn_min_max_stop_loss, btn_minMax_takeProfit
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info, button_orderPanel_action, btn_min_max_stop_loss, btn_minMax_takeProfit
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
@@ -41,10 +41,10 @@ class TC_MT4_aP05():
                 login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server=Server.MT4, client_name="Lirunex", symbol_type="Symbols_Price")
+                input_symbol(driver=main_driver, server=Server.MT4, symbol_type="Symbols_Price")
                 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
 
             """ Place Market Order """
 

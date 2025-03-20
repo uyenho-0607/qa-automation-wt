@@ -1,5 +1,5 @@
 
-from common.desktop.module_trade.order_placing_window.module_oct import toggle_radioButton
+from common.desktop.module_trade.order_placing_window.module_oct import toggle_radio_button
 from common.desktop.module_trade.order_placing_window.module_size_volume import swap_units_volume, swap_units_volume_conversion, input_size_volume, close_partialSize, verify_volume_minMax_buttons, verify_invalid_size_volume_input
 from common.desktop.module_trade.order_placing_window.module_fill_policy import fillPolicy_type
 from common.desktop.module_trade.order_placing_window.module_entry_price import handle_entryPrice, btn_minMax_price 
@@ -15,7 +15,7 @@ from common.desktop.module_trade.order_placing_window.opw_button_action import l
 __all__ = [
     
     # Toggle OCT
-    'toggle_radioButton',
+    'toggle_radio_button',
     
     # Size / Volume
     'swap_units_volume',

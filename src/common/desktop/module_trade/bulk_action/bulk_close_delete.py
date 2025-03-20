@@ -9,7 +9,7 @@ from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, click_element, find_element_by_testid, find_visible_element_by_testid, find_visible_element_by_xpath, is_element_disabled_by_cursor, find_list_of_elements_by_xpath
 
 from data_config.utils import append_orderIDs_to_csv
-from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_sub_menu.sub_menu import menu_button
 from common.desktop.module_chart.chart import get_chart_symbol_name
 from common.desktop.module_trade.order_panel.op_filter import perform_sorting
 from common.desktop.module_trade.order_panel.order_panel_info import type_orderPanel
