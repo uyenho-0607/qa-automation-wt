@@ -4,7 +4,7 @@ from enums.main import AccountType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import splash_screen, select_account_type, toggle_remember_me_checkbox, verify_login_fields
+from common.mobileapp.module_login.utils import click_splash_screen, select_account_type, toggle_remember_me_checkbox, verify_login_fields
 
 
 
@@ -35,7 +35,7 @@ class TC_MT4_aA10():
 
             with allure.step("Launch WT and Click on the 'Demo' Account tab"):
                 # Skip the splash screen
-                splash_screen(driver=main_driver)
+                click_splash_screen(driver=main_driver)
 
                 # Step 2: Select the desired account type (either CRM / Live or Demo) for login.
                 select_account_type(driver=main_driver, account_type=AccountType.DEMO)

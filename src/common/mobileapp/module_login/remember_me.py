@@ -13,7 +13,7 @@ from constants.helper.element_android_app import click_element, find_element_by_
 
 from data_config.generate_dummy_data import generate_random_credential
 from common.mobileapp.module_setting.utils import button_setting, change_password
-from common.mobileapp.module_login.utils import select_account_type, splash_screen, wt_user_login
+from common.mobileapp.module_login.utils import select_account_type, click_splash_screen, wt_user_login
 
 
 
@@ -50,7 +50,7 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None,
     
     try:
         # Skip the splash screen
-        splash_screen(driver)
+        click_splash_screen(driver)
         
         # Step 2: Select account type (CRM / Live)
         select_account_type(driver, account_type)

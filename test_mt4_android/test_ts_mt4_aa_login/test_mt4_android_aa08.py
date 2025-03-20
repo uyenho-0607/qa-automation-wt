@@ -4,7 +4,7 @@ from enums.main import Server, LoginResultState
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import select_account_type, splash_screen, login_wt, toggle_remember_me_checkbox, verify_login_fields
+from common.mobileapp.module_login.utils import select_account_type, click_splash_screen, login_wt, toggle_remember_me_checkbox, verify_login_fields
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -46,7 +46,7 @@ class TC_MT4_aA08():
                 
             with allure.step("Skip splash screen"):
                 # Skip the splash screen
-                splash_screen(driver=main_driver)
+                click_splash_screen(driver=main_driver)
 
             with allure.step("Click on the 'LIVE' Account tab"):
                 # Step 2: Select the desired account type (either CRM / Live or Demo) for login.

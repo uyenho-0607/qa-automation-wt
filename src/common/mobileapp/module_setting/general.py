@@ -2,9 +2,9 @@ from constants.element_ids import DataTestID
 
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import find_visible_element_by_xpath, find_element_by_xpath_with_wait, click_element, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import find_visible_element_by_xpath, find_element_by_xpath_with_wait, click_element
 
-from common.mobileapp.module_subMenu.sub_menu import menu_button
+from common.mobileapp.module_sub_menu.sub_menu import menu_button
 from enums.main import Menu, Setting
 
 """

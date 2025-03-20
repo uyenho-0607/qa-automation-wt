@@ -5,7 +5,7 @@ from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import click_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, is_element_present_by_xpath, find_presence_element_by_testid, spinner_element, find_visible_element_by_xpath, populate_element, find_element_by_xpath_with_wait, wait_for_text_to_be_present_in_element_by_xpath
 
-from common.mobileapp.module_login.login import authenticate_user, handle_login_result, select_account_type, splash_screen
+from common.mobileapp.module_login.login import authenticate_user, handle_login_result, select_account_type, click_splash_screen
 from data_config.generate_dummy_data import generate_random_name_and_email, generate_random_credential, generate_singapore_phone_number
 from enums.main import AccountType
 
@@ -19,7 +19,7 @@ def app_signup(driver, expect_failure: bool = True, selected_language: str = Non
     try:
         
         # Skip the splash screen
-        splash_screen(driver)
+        click_splash_screen(driver)
         
         # Step 2: Select account type (CRM)
         select_account_type(driver, account_type=AccountType.CRM)

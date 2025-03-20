@@ -1,5 +1,5 @@
-from common.mobileapp.module_setting.setting_general import button_setting
-from common.mobileapp.module_setting.setting_change_password import change_password
+from common.mobileapp.module_setting.general import button_setting
+from common.mobileapp.module_setting.change_password import change_password
 
 __all__ = [
     

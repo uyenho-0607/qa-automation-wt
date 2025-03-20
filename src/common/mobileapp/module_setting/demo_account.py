@@ -12,10 +12,10 @@ from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import clear_input_field, click_element, find_element_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, populate_element, find_presence_element_by_testid, spinner_element, find_visible_element_by_testid, find_visible_element_by_xpath, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, wait_for_text_to_be_present_in_element_by_xpath
 
-from common.mobileapp.module_subMenu.sub_menu import menu_button
+from common.mobileapp.module_sub_menu.sub_menu import menu_button
 from common.mobileapp.module_setting.utils import button_setting
 from common.mobileapp.module_announcement.announcement import modal_announcement
-from common.mobileweb.module_trade.order_panel.op_general import extract_order_data_details
+from common.mobileapp.module_trade.order_panel.op_general import extract_order_data_details
 from data_config.generate_dummy_data import generate_random_name_and_email, generate_singapore_phone_number, generate_random_credential
 
 
@@ -282,9 +282,9 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         demo_account_details = {label: "N/A" for label in header_labels}
 
         # Retrieve account detail values from the page
-        demoAccount_elements = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_VALUE)
+        demo_account_elements = find_list_of_elements_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_VALUE)
         # Iterate through account details and populate the dictionary
-        for idx, element in enumerate(demoAccount_elements):
+        for idx, element in enumerate(demo_account_elements ):
             label = get_label_of_element(element).strip()
 
             # Handle Leverage (e.g., "1 : 5" to "1:5")
@@ -474,7 +474,7 @@ def handle_changePassword(driver, demo_account_details):
         click_element(element=btn_ok)
         
         # Log the user out
-        button_setting(driver, setting_option="logout")
+        button_setting(driver, setting_option=Setting.LOGOUT)
         
     else:
         # If the success message doesn't match, handle it as an unexpected message

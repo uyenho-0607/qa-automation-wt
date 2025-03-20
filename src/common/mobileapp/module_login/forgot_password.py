@@ -5,7 +5,7 @@ from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import click_element, find_element_by_xpath, is_element_present_by_xpath, populate_element, find_visible_element_by_xpath, find_element_by_xpath_with_wait, wait_for_text_to_be_present_in_element_by_xpath
 
-from common.mobileapp.module_login.login import handle_alert_error, select_account_type, splash_screen
+from common.mobileapp.module_login.login import handle_alert_error, select_account_type, click_splash_screen
 
 
 """
@@ -63,7 +63,7 @@ def handle_reset_password_flow(driver, email, accountID, account_type):
 
 def forgot_password(driver, email: str, accountID: str = None, account_type: AccountType = AccountType.LIVE):
     try:
-        splash_screen(driver)
+        click_splash_screen(driver)
         select_account_type(driver, account_type)
 
         if not is_element_present_by_xpath(driver, DataTestID.APP_FORGOT_PASSWORD):

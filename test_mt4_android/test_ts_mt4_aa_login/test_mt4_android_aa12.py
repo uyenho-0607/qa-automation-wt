@@ -5,7 +5,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_setting.setting_demo_account import open_demo_account_error_msg
+from common.mobileapp.module_setting.demo_account import open_demo_account_error_msg
 
 
 

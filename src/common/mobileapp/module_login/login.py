@@ -20,7 +20,7 @@ from common.mobileapp.module_login.language import select_and_verify_language, s
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def splash_screen(driver):
+def click_splash_screen(driver):
     find_presence_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
     splash_screen = find_element_by_testid_with_wait(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
     click_element(splash_screen)
@@ -318,7 +318,7 @@ def login_wt(driver, server: Server, testcase_id: str = None,
     try:
         
         # Skip the splash screen
-        splash_screen(driver)
+        click_splash_screen(driver)
         
         # Check if user is already logged in by looking for an element that is only present in login screen
         if check_symbol_element_present(driver):
