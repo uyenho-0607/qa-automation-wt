@@ -64,7 +64,7 @@ def launch_RA(driver, platform: str, env_type: str) -> None:
 """
 
 
-def ra_user_login(driver, platform: str, testcaseID: str, expect_failure: bool = False, max_retries: int = 10) -> None:
+def ra_user_login(driver, platform: str, testcase_id: str, expect_failure: bool = False, max_retries: int = 10) -> None:
     try:
         
         # Load credentials from the JSON file
@@ -72,19 +72,19 @@ def ra_user_login(driver, platform: str, testcaseID: str, expect_failure: bool =
         
         # Check if the platform exists in the data
         if platform in data:
-            # If expect_failure is True, use Invalid_Credential and require testcaseID
+            # If expect_failure is True, use Invalid_Credential and require testcase_id
             if expect_failure:
-                if testcaseID is None:
-                    raise ValueError("testcaseID must be provided for Invalid_Credential.")
+                if testcase_id is None:
+                    raise ValueError("testcase_id must be provided for Invalid_Credential.")
                 
                 credential_type = "Invalid_Credential"
                 valid_testcases = [testcase for testcase in data[platform].get(credential_type, [])
-                                   if testcase["TestcaseID"] == testcaseID]
+                                   if testcase["testcase_id"] == testcase_id]
                 if not valid_testcases:
-                    raise ValueError(f"Testcase ID '{testcaseID}' not found in {credential_type} for platform '{platform}'")
+                    raise ValueError(f"Testcase ID '{testcase_id}' not found in {credential_type} for platform '{platform}'")
                 testcase = valid_testcases[0]
             else:
-                # If expect_failure is False, decide between CRM_Credential or Credential without testcaseID
+                # If expect_failure is False, decide between CRM_Credential or Credential without testcase_id
                 credential_type = "Credential"
                 
                 if not data[platform].get(credential_type):
@@ -237,12 +237,12 @@ def handle_login_error(driver):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_RA(driver, platform: str = "RootAdmin", testcaseID: str = None, env_type: str = "Release_SIT", expect_failure: bool = False, max_retries: int = 10) -> None:
+def login_RA(driver, platform: str = "RootAdmin", testcase_id: str = None, env_type: str = "Release_SIT", expect_failure: bool = False, max_retries: int = 10) -> None:
     try:
 
         launch_RA(driver, platform, env_type)
         
-        ra_user_login(driver, platform, testcaseID, expect_failure, max_retries)
+        ra_user_login(driver, platform, testcase_id, expect_failure, max_retries)
 
     except Exception as e:
         handle_exception(driver, e)

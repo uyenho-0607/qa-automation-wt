@@ -6,7 +6,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_markets.utils import market_watchlist_filter
+from common.mobileapp.module_markets.utils import navigate_and_select_watchlist_symbol
 
 
 @allure.parent_suite("MT4 Membersite - Android - Markets")
@@ -14,19 +14,18 @@ from common.mobileapp.module_markets.utils import market_watchlist_filter
 @allure.epic("MT4 Android ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR10():
+class TC_MT4_aR01():
 
-    @allure.title("TC_MT4_aR10")
+    @allure.title("TC_MT4_aR01")
 
     @allure.description(
         """
-        Members can filter the symbols to display or hide them
+        Member can select any symbol via the Trade - Watchlist page
         """
     )
     
-    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc10(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc01(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -40,8 +39,8 @@ class TC_MT4_aR10():
                 login_wt(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Market Watchlist"):
-                market_watchlist_filter(driver=main_driver)
-
+                navigate_and_select_watchlist_symbol(driver=main_driver)
+                
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

@@ -1,9 +1,8 @@
-from common.mobileapp.module_symbol.search_symbol import input_symbol, clear_search_history, perform_search, symbol_search_feature
+from common.mobileapp.module_symbol.search_symbol import input_symbol, clear_search_history, search_symbol_variations
 
 
 __all__ = [
     'input_symbol',
     'clear_search_history',
-    'perform_search',
-    'symbol_search_feature'
+    'search_symbol_variations'
 ]

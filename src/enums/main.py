@@ -57,6 +57,13 @@ class Menu(BaseEnum):
     ASSETS = "assets"
 
 
+class AnnouncementModal(BaseEnum):
+    GOT_IT = "got-it"
+    TRY_IT = "try-it"
+    MEDIA_LEFT = "media-left"
+    MEDIA_RIGHT = "media-right"
+
+
 class SymbolsList(BaseEnum):
     SYMBOLS = "Symbols"
     SYMBOLS_PRICE = "Symbols_Price"

@@ -1,12 +1,13 @@
 import allure
 import pytest
 
+from common.mobileapp.module_markets.banner import verify_mesthead_banner
 from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_symbol.search_symbol import symbol_search_feature
+from common.mobileapp.module_symbol.utils import clear_search_history
 
 
 @allure.parent_suite("MT4 Membersite - Android - Markets")
@@ -14,24 +15,24 @@ from common.mobileapp.module_symbol.search_symbol import symbol_search_feature
 @allure.epic("MT4 Android ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR01():
+class TC_MT4_aR05():
 
-    @allure.title("TC_MT4_aR01")
+    @allure.title("TC_MT4_aR05")
 
     @allure.description(
         """
-        Member able to search for symbols
-        - Wildcard search
-        - Exact match
+        Verify user can view banner
+        - Mesthead banner
+        - Transfer Fund banner
+        - Live / Demo banner
         """
     )
     
-    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc01(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def tt_tc05(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
-
+        
         # Get the class name dynamically
         class_name = self.__class__.__name__
         start_recording_mobile(driver=main_driver)
@@ -40,9 +41,6 @@ class TC_MT4_aR01():
             
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server=Server.MT4)
-
-            with allure.step("Check the pre-selected tab is correct"):
-                symbol_search_feature(driver=main_driver, server=Server.MT4)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

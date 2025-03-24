@@ -137,7 +137,7 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
 
     if expectation == LoginResultState.FAILURE:
         if not testcase_id:
-            raise ValueError("testcaseID must be provided for invalid_credential.")
+            raise ValueError("testcase_id must be provided for invalid_credential.")
         
         credential_type = CredentialType.INVALID_CREDENTIAL
 
@@ -204,7 +204,7 @@ def handle_login_result(driver, expectation: LoginResultState, selected_language
     verification_text = language_specific_text.get(selected_language, "Trade")
     
     # Check if the test is present
-    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_SIDE_BAR_OPTION_TRADE, text=verification_text):
+    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_MENU_OPTION_TRADE, text=verification_text):
         print("Successfully Logged In")
         
         # If login succeeded but failure was expected, log the unexpected success and fail the test

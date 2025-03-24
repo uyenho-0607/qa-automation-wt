@@ -6,7 +6,7 @@ from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_markets.utils import select_trade_symbol_from_watchlist
+from common.mobileapp.module_symbol.utils import clear_search_history
 
 
 @allure.parent_suite("MT4 Membersite - Android - Markets")
@@ -20,13 +20,12 @@ class TC_MT4_aR04():
 
     @allure.description(
         """
-        Member can select any symbol via the Trade - Watchlist page
+        Members can clear the search result history
         """
     )
     
-    @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc04(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc04(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -39,8 +38,8 @@ class TC_MT4_aR04():
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server=Server.MT4)
 
-            with allure.step("Search symbol on trade watchlist"):
-                select_trade_symbol_from_watchlist(driver=main_driver)
+            with allure.step("Clear Search History"):
+                clear_search_history(driver=main_driver)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

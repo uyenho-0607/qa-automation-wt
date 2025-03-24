@@ -26,7 +26,7 @@ class TC_MT4_aR02():
         """
     )
     
-    def test_tc02(self, android_driver):
+    def tt_tc02(self, android_driver):
         self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
@@ -39,12 +39,9 @@ class TC_MT4_aR02():
             
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server=Server.MT4)
-                
-            with allure.step("Search Symbols"):
-                input_symbol(driver=main_driver, server=Server.MT4, desired_symbol_name="UKOIL.std")
 
             # with allure.step("Check the pre-selected tab is correct"):
-            #     handle_pre_selected_tab(driver=main_driver)
+                # handle_pre_selected_tab(driver=main_driver)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

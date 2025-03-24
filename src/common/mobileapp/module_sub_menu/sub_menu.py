@@ -26,11 +26,11 @@ def menu_button(driver, menu: Menu):
         
         # Determine the data-testid based on the button type
         button_testids = {
-            Menu.HOME: DataTestID.APP_SIDE_BAR_OPTION_HOME.value,
-            Menu.MARKET: DataTestID.APP_SIDE_BAR_OPTION_MARKET.value,
-            Menu.TRADE: DataTestID.APP_SIDE_BAR_OPTION_TRADE.value,
-            Menu.INFO: DataTestID.APP_SIDE_BAR_OPTION_INFO.value,
-            Menu.ASSETS: DataTestID.APP_SIDE_BAR_OPTION_ASSETS.value
+            Menu.HOME: DataTestID.APP_MENU_OPTION_HOME.value,
+            Menu.MARKET: DataTestID.APP_MENU_OPTION_MARKET.value,
+            Menu.TRADE: DataTestID.APP_MENU_OPTION_TRADE.value,
+            Menu.INFO: DataTestID.APP_MENU_OPTION_INFO.value,
+            Menu.ASSETS: DataTestID.APP_MENU_OPTION_ASSETS.value
         }
         
         button_testid = button_testids.get(menu)
