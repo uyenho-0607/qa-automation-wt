@@ -128,7 +128,7 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
     Arguments:
     - driver: The Selenium WebDriver instance used for browser automation.
     - server: The server (e.g., "MT4", "MT5") for which the login is performed.
-    - testcaseID: The ID of the test case (if specific credentials are needed for invalid credentials).
+    - testcase_id: The ID of the test case (if specific credentials are needed for invalid credentials).
     - expect_failure: A boolean flag to indicate whether a failed login scenario is expected.
     - use_crm_cred: A boolean flag to decide whether to use CRM credentials or standard credentials.
 
@@ -136,7 +136,7 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
     - login_username: The decrypted username used for the login.
 
     Raises:
-    - ValueError: If invalid inputs or missing values are encountered (e.g., server not found, missing testcaseID).
+    - ValueError: If invalid inputs or missing values are encountered (e.g., server not found, missing testcase_id).
     """
 
     # Load credentials from the JSON file
@@ -150,10 +150,10 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
     # server_data = data[server].get(client_name, {}).get("MemberSite", {})
     server_data = data[server]["MemberSite"]
     
-    # If expect failure, use Invalid_Credential and require testcaseID
+    # If expect failure, use Invalid_Credential and require testcase_id
     if expectation == LoginResultState.FAILURE:
         if not testcase_id:
-            raise ValueError("testcaseID must be provided for invalid_credential.")
+            raise ValueError("testcase_id must be provided for invalid_credential.")
     
         credential_type = CredentialType.INVALID_CREDENTIAL
 
@@ -221,7 +221,7 @@ def handle_login_result(driver, expectation: LoginResultState, selected_language
     verification_text = language_specific_text.get(selected_language, "Trade")
 
     # Check if the test is present
-    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_SIDE_BAR_OPTION_TRADE, text=verification_text):
+    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_MENU_OPTION_TRADE, text=verification_text):
         print("Successfully Logged In")
         
         # If login succeeded but failure was expected, log the unexpected success and fail the test
@@ -313,7 +313,7 @@ def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, e
     Arguments:
     - account_type: The type of account to select (e.g., 'crm', 'live', 'demo').
     - server: The server to use for login (e.g., 'MT4', 'MT5').
-    - testcaseID: The test case ID to identify the specific credentials (if any).
+    - testcase_id: The test case ID to identify the specific credentials (if any).
     - device_type: The type of device (defaults to 'Desktop').
     - env_type: The environment type (defaults to 'Release_SIT').
     - expect_failure: Flag to indicate if login failure is expected.

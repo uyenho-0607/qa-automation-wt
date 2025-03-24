@@ -37,7 +37,7 @@ class TC_MT4_aS02():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT4, testcase_id="TC01")
             
             with allure.step("Validate the Closed Flat / Closed Loss / Closed Profit status"):
                 verify_copy_to_order_is_disabled(driver=main_driver)

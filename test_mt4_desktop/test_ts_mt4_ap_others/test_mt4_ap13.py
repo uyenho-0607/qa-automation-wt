@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, CredentialType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -36,7 +36,7 @@ class TC_MT4_aP13():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, use_read_only_access=True)
+                login_wt(driver=main_driver, server=Server.MT4, credential_type=CredentialType.READ_ONLY_ACCESS)
                 
             with allure.step("Trade page"):
                 read_only_access(driver=main_driver, set_menu=True)

@@ -48,7 +48,7 @@ class TC_MT5_aH13():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT5, testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT5, testcase_id="TC01")
 
             with allure.step("Search symbol"):
                 input_symbol(driver=main_driver, server=Server.MT5)

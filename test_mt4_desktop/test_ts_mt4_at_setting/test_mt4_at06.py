@@ -35,7 +35,7 @@ class TC_MT4_aT06():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, account_type="live", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT4, account_type="live", testcase_id="TC01")
 
             with allure.step("Switch account"):
                 switch_or_delete_account(driver=main_driver, option="switch")

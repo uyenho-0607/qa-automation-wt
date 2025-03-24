@@ -40,7 +40,7 @@ class TC_MT4_aT13():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                params_wt_url, login_username, _  = login_wt(driver=main_driver, server=Server.MT4, account_type="live", testcaseID="TC02")
+                params_wt_url, login_username, _  = login_wt(driver=main_driver, server=Server.MT4, account_type="live", testcase_id="TC02")
 
             with allure.step("Change Password - Invalid Current Password"):
                 change_password(driver=main_driver, old_password="Asd12333", new_password="Asdf!23456777666", confirm_password="Asdf!23456777666")

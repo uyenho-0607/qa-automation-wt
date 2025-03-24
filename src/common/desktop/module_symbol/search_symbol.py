@@ -92,51 +92,11 @@ def input_symbol(driver, server: Server, symbol_type: SymbolsList = SymbolsList.
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def perform_search(driver, input_search):
-        # Find the search input field for symbols
-        input_search = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH)
-        click_element(element=input_search)
-        
-        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE):
-            btn_bin = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE)
-            click_element_with_wait(driver, element=btn_bin)
-
-        clear_input_field(element=input_search)
-
-        # Enter the first few characters of the selected symbol into the search input
-        populate_element(element=input_search, text=input_search)
-        
-        spinner_element(driver)
-
-        delay(2.5)
-        
-        # Wait for search results
-        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS):
-            search_results = find_list_of_elements_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS)
-            print("Total row found", len(search_results))
-            matched_rows = []
-            for result in search_results:
-                text = result.text  # Remove parentheses
-                if input_search in text:
-                    matched_rows.append(text)
-
-            # Print results or raise an error if no match is found
-            if matched_rows:
-                # print(f"✅ Matching rows found for '{input_search}': {matched_rows}")
-                print(f"✅ Matching rows found for '{input_search}':\n" + "\n".join(matched_rows))
-            else:
-                raise AssertionError(f"No matching row found for symbol: {input_search}")
-        else:
-            no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'Type something to search')]")
-            msg = get_label_of_element(no_items_message)
-            raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
-
-
-def symbol_search_feature(driver, server: str, client_name: str, symbol_type: str = "Symbols", desired_symbol_name: str = None):
+def search_symbol_variations(driver, server: Server, symbol_type: SymbolsList = SymbolsList.SYMBOLS, desired_symbol_name: str = None):
     try:
-        # Load available symbols for the given platform, client, and symbol type
-        symbols = read_symbol_file(server, client_name, symbol_type)
-
+        # Load available symbols for the given server and symbol type
+        symbols = read_symbol_file(server, symbol_type)
+        
         # If no specific symbol is given, randomly select one
         if desired_symbol_name is None:
             desired_symbol_name = random.choice(symbols)
@@ -145,15 +105,41 @@ def symbol_search_feature(driver, server: str, client_name: str, symbol_type: st
             if desired_symbol_name not in symbols:
                 raise ValueError(f"The desired symbol '{desired_symbol_name}' is not in the list of available symbols.")
         
-        # Perform an exact match search (full symbol)
-        perform_search(driver, input_search=desired_symbol_name)
-        
-        # Perform a wildcard match search (first two letters)
-        perform_search(driver, input_search=desired_symbol_name[:2])
+        for input_search in [desired_symbol_name, desired_symbol_name[:2]]:
 
+            # Search for symbol
+            input_search_field = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH)
+            click_element(element=input_search_field)
+            
+            if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE):
+                btn_bin = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_HISTORY_DELETE)
+                click_element_with_wait(driver, element=btn_bin)
+
+            clear_input_field(element=input_search_field)
+            
+            # Enter search term
+            populate_element(element=input_search_field, text=input_search)
+            spinner_element(driver)
+            
+            # Wait for search results
+            if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS):
+                search_results = find_list_of_elements_by_testid(driver, data_testid=DataTestID.SYMBOL_INPUT_SEARCH_ITEMS)
+                print("Total row found", len(search_results))
+                matched_rows = [get_label_of_element(result) for result in search_results if input_search in get_label_of_element(result)]
+                
+                if matched_rows:
+                    print(f"✅ Matching rows found for '{input_search}':\n" + "\n".join(matched_rows))
+                else:
+                    raise AssertionError(f"No matching row found for symbol: {input_search}")
+            else:
+                no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'Type something to search')]")
+                msg = get_label_of_element(no_items_message)
+                raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+    
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
