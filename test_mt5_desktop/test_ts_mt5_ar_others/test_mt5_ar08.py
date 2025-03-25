@@ -1,11 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 from common.desktop.module_trade.utils import asset_symbolName
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
@@ -35,7 +36,7 @@ class TC_MT5_aR08():
         try:
     
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu="assets")

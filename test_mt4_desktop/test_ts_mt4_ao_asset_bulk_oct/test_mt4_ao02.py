@@ -2,12 +2,13 @@ import allure
 import pytest
 import pandas as pd
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_subMenu.utils import menu_button
-from common.desktop.module_trade.utils import toggle_radioButton, type_orderPanel, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
+from common.desktop.module_sub_menu.utils import menu_button
+from common.desktop.module_trade.utils import toggle_radio_button, type_orderPanel, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, read_orderIDs_from_csv
 
@@ -32,12 +33,15 @@ class TC_MT4_aO02():
         main_driver = self.driver
         session_id = main_driver.session_id
 
+        # Track if the test has failed
+        test_failed = False
+        
         try:
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu="assets")

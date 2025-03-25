@@ -8,10 +8,10 @@ from selenium.webdriver.common.by import By
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import clear_input_field, click_element, spinner_element, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, invisibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath, is_element_disabled_by_cursor, populate_element
+from constants.helper.element import clear_input_field, click_element, spinner_element, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_element_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, invisibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_xpath, is_element_disabled_by_cursor, populate_element
 from constants.helper.screenshot import attach_text
 
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 from common.desktop.module_chart.utils import get_chart_symbol_name
 from common.desktop.module_trade.order_placing_window.utils import input_size_volume, button_trade_action
 
@@ -31,7 +31,7 @@ def perform_search(driver, input_search):
     
     # Wait for search results
     if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value):
-        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
         rows = tbody.find_elements(By.XPATH, ".//tr")
         
         matched_rows = []  # Initialize an empty list to store matching rows
@@ -50,7 +50,7 @@ def perform_search(driver, input_search):
         else:
             raise AssertionError(f"No matching row found for symbol: {input_search}")
     else:
-        no_items_message = visibility_of_element_by_xpath(driver, "//*[contains(text(), 'No items available')]")
+        no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'No items available')]")
         msg = get_label_of_element(no_items_message)
         raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
 
@@ -64,14 +64,14 @@ def signal_search_feature(driver):
         spinner_element(driver)
 
         # Open the signal list
-        btn_signal_list = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_FILTER_ALL.value)
+        btn_signal_list = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_FILTER_ALL.value)
         click_element(element=btn_signal_list)
         
         delay(1)
 
         # Wait for the signal list table to load
         if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value):
-            tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+            tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
             
             # Get all rows in the table (limit to 10)
             rows = tbody.find_elements(By.XPATH, ".//tr")[:10]
@@ -138,8 +138,8 @@ def express_interest(driver, click_submit: bool = True):
             click_element(element=btn_submit)
             
             # Wait for snackbar message and extract header & description
-            visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
-            message_header = visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
+            find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
+            message_header = find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
             extracted_header = get_label_of_element(message_header)
         
             # Validate message header
@@ -184,7 +184,7 @@ def verify_copy_to_order_is_disabled(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
 
@@ -210,7 +210,7 @@ def verify_copy_to_order_is_disabled(driver):
     
         # Verify 'Copy to Order' buttons are disabled
         for i in range(1, 3):
-            btn_copy_trade = visibility_of_element_by_testid(driver, data_testid=f"copy-to-order-{i}")
+            btn_copy_trade = find_visible_element_by_testid(driver, data_testid=f"copy-to-order-{i}")
             is_disabled = is_element_disabled_by_cursor(driver, element=btn_copy_trade)
             print(f"\nCopy To Order Button {i} is Disabled: {is_disabled}")
             assert is_disabled, f"Expected 'Copy To Order {i}' button to be disabled"
@@ -251,7 +251,7 @@ def select_valid_signal_to_trade(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = visibility_of_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
 
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
@@ -352,7 +352,7 @@ def button_copyTrade(driver):
         selected_option = random.choice(options)
         
         # Find and click the 'Copy to order' button using the selected option
-        btn_copyTrade = visibility_of_element_by_testid(driver, data_testid=selected_option["button_xpath"])
+        btn_copyTrade = find_visible_element_by_testid(driver, data_testid=selected_option["button_xpath"])
         click_element(btn_copyTrade)
         
         # Extract the trade symbol and add to the report
@@ -361,7 +361,7 @@ def button_copyTrade(driver):
         copyTrade_headers.append("Symbol")
         
         # Extract the order status and determine which details to fetch
-        orderStatus = visibility_of_element_by_xpath(driver, "(//span[@data-testid='analysis-description-value'])[2]")
+        orderStatus = find_visible_element_by_xpath(driver, "(//span[@data-testid='analysis-description-value'])[2]")
         label_OrderStatus = get_label_of_element(orderStatus).upper()
 
         # Determine the XPath for orderDetails based on order status
@@ -373,7 +373,7 @@ def button_copyTrade(driver):
             orderDetails_xpath = "(//span[@data-testid='analysis-description-value'])[2]"
 
         # Extract order details based on the determined XPath
-        orderDetails = visibility_of_element_by_xpath(driver, orderDetails_xpath)
+        orderDetails = find_visible_element_by_xpath(driver, orderDetails_xpath)
         label_OrderStatus = get_label_of_element(orderDetails).upper()
 
         # Append the extracted value to the appropriate lists
@@ -381,19 +381,19 @@ def button_copyTrade(driver):
         copyTrade_headers.append("Type")
 
         # Extract and append Entry Price
-        entryPrice = visibility_of_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[2]")
+        entryPrice = find_visible_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[2]")
         label_entryPrice = get_label_of_element(entryPrice)
         copyTrade_elements.append(label_entryPrice)
         copyTrade_headers.append("Entry Price")
 
         # Extract and append Stop Loss
-        stopLoss = visibility_of_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[3]")
+        stopLoss = find_visible_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[3]")
         label_stopLoss = get_label_of_element(stopLoss)
         copyTrade_elements.append(label_stopLoss)
         copyTrade_headers.append("Stop Loss")
 
         # Extract the 'Take Profit' label using the take_profit_xpath of the selected option
-        takeProfit = visibility_of_element_by_xpath(driver, selected_option["take_profit_xpath"])
+        takeProfit = find_visible_element_by_xpath(driver, selected_option["take_profit_xpath"])
         label_takeProfit = get_label_of_element(takeProfit)
         copyTrade_elements.append(label_takeProfit)
         copyTrade_headers.append("Take Profit")
@@ -474,7 +474,7 @@ def handle_order_type(driver, order_type: str):
         for tab, order_list in order_tabs.items():
             if order_type in order_list:
                 # Click on the appropriate tab for the given order type
-                visibility_of_element_by_testid(driver, data_testid=f"tab-asset-order-type-{tab}")
+                find_visible_element_by_testid(driver, data_testid=f"tab-asset-order-type-{tab}")
                 print(f"Clicked on the {tab.replace('-', ' ').title()} tab for order type: {order_type}")
                 return tab, tab.replace('-', ' ').title()
 

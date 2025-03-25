@@ -1,11 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import open_demo_account_screen
+from common.desktop.module_setting.utils import configure_language_setting
 
 @allure.parent_suite("MT4 Membersite - Desktop - Setting")
 
@@ -18,7 +19,7 @@ class TC_MT4_aT09():
 
     @allure.description(
         """
-        Member able to open a demo account via setting
+        Change Language
         """
     )
     
@@ -34,14 +35,10 @@ class TC_MT4_aT09():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
-
-            with allure.step("Open demo account"):
-                # System click on the "X" button
-                open_demo_account_screen(driver=main_driver, setting=True,  set_close_modal=True)
+                login_wt(driver=main_driver, server=Server.MT4)
                 
-                # System click on the "Sign In" button
-                open_demo_account_screen(driver=main_driver, setting=True, new_password="Asdf!23456789", confirm_password="Asdf!23456789")
+            with allure.step("Successfully change language"):
+                configure_language_setting(driver=main_driver)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

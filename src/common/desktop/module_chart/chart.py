@@ -1,6 +1,6 @@
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
-from constants.helper.element import spinner_element, click_element, find_element_by_testid, is_element_present_by_testid, get_label_of_element, visibility_of_element_by_testid
+from constants.helper.element import spinner_element, click_element, find_element_by_testid, is_element_present_by_testid, get_label_of_element, find_visible_element_by_testid
 from constants.helper.error_handler import handle_exception
 
 
@@ -22,9 +22,9 @@ def get_chart_symbol_name(driver):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
-        # Find the elements that contain the symbol name        
+        # Find the elements that contain the symbol name    
         if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value):
-            chart_symbol_name = visibility_of_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value)
+            chart_symbol_name = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value)
             # # Extract the symbol name from the first element if it exists
             chart_symbolName = get_label_of_element(element=chart_symbol_name).split()[0]
             return chart_symbolName

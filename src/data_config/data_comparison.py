@@ -13,16 +13,6 @@ from constants.helper.error_handler import handle_exception
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# def normalize_value(value):
-#     """
-#     Normalize numeric values by stripping commas and trailing zeros.
-#     """
-#     if isinstance(value, str):
-#         # Remove commas and trailing zeros after the decimal point
-#         return value.replace(',', '').rstrip('0').rstrip('.') if '.' in value else value
-#     return str(value)  # Return the value as a string if it's not a string already
-
-
 def normalize_value(x):
     """Normalize numeric values by removing commas and trailing zeros."""
     """Normalize numeric values by removing commas, trailing zeros, and leading plus signs."""
@@ -66,18 +56,13 @@ def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = Tr
         if not isinstance(df2, pd.DataFrame):
             raise TypeError(f"df2 is not a DataFrame, it is a {type(df2)}")
 
-# Check if either of the dataframes is empty
+        # Check if either of the dataframes is empty
         if df1.empty or df2.empty:
             raise ValueError("One or both of the dataframes are empty.")
         
         # Find common columns for comparison
         common_columns = list(set(df1.columns) & set(df2.columns))
 
-        # # If 'Volume, Profit/Loss' should not be compared, exclude it from the common columns
-        # for column, condition in [("Volume", compare_volume), ("Profit/Loss", compare_profit_loss), ("Units", compare_units)]:
-        #     if not condition and column in common_columns:
-        #         common_columns.remove(column)
-        
         # Handle "Volume" or "Size" dynamically
         size_columns = ["Volume", "Size"]
         for column in size_columns:

@@ -1,13 +1,14 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_chart.utils import chart_minMax, chart_trade_modal_close
-from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_limit_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT4 Membersite - Desktop - Trade - Chart - Place Order")
@@ -44,13 +45,13 @@ class TC_MT4_aI04():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
+                input_symbol(driver=main_driver, server=Server.MT4)
 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Place Limit Order"):
                 trade_limit_order(driver=main_driver, trade_type="trade", option="sell", sl_type="points", tp_type="price", expiryType="good-till-cancelled", set_Chart=True, chart_fullscreen="toggle")

@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from constants.helper.driver import delay, shutdown
+from enums.main import Server
+from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
@@ -18,7 +19,7 @@ class TC_MT5_aV08():
 
     @allure.description(
         """
-        Member able to open a demo account via login screen
+        Member able to open a demo account via setting
         """
     )
     
@@ -33,17 +34,18 @@ class TC_MT5_aV08():
         
         try:
             
-            with allure.step("Launch Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", account_type="demo", set_username=False)
+            with allure.step("Login to Web Trader Membersite"):
+                login_wt(driver=main_driver, server=Server.MT5)
+                # sss
 
-            with allure.step("Open demo account by clicking the 'X' button"):
+            with allure.step("Open demo account"):
                 # System click on the "X" button
-                open_demo_account_screen(driver=main_driver, set_close_modal=True)
-            
-            with allure.step("Open demo account and login"):
-                # System click on the "Sign In" button
-                open_demo_account_screen(driver=main_driver, new_password="Asdf!23456789", confirm_password="Asdf!23456789")
+                open_demo_account_screen(driver=main_driver, setting=True,  set_close_modal=True)
                 
+                # System click on the "Sign In" button
+                open_demo_account_screen(driver=main_driver, setting=True, new_password="Asdf!23456789", confirm_password="Asdf!23456789")
+
+
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:

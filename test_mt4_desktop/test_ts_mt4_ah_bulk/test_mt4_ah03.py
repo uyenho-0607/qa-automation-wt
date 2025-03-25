@@ -2,11 +2,12 @@ import allure
 import pytest
 import pandas as pd
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_trade.utils import toggle_radioButton, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
+from common.desktop.module_trade.utils import toggle_radio_button, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, read_orderIDs_from_csv
 
@@ -37,10 +38,10 @@ class TC_MT4_aH03():
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
 
             with allure.step("Bulk Close Orders"):
                 clear_orderIDs_csv(filename="MT4_Bulk.csv")

@@ -1,4 +1,5 @@
 import allure
+from enums.main import AccountType, CredentialType, LoginResultState, Server
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
@@ -33,8 +34,8 @@ class TC_MT4_aA04():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", account_type="crm", testcase_id="TC01", expect_failure=True) 
-                
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, testcase_id="TC01", credential_type=CredentialType.INVALID_CREDENTIAL, expectation=LoginResultState.FAILURE)
+
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

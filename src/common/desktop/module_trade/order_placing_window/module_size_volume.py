@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, get_label_of_element, visibility_of_element_by_testid, clear_input_field, find_element_by_testid, populate_element_with_wait
+from constants.helper.element import click_element, get_label_of_element, find_visible_element_by_testid, clear_input_field, find_element_by_testid, populate_element_with_wait
 
 from common.desktop.module_trade.order_placing_window.module_fill_policy import fillPolicy_type
 from common.desktop.module_trade.order_placing_window.opw_button_action import button_tradeModule
@@ -52,7 +52,7 @@ def swap_units_volume(driver, target_state):
         for state, testid in swap_options.items():
             try:
                 # Check the visibility of the element and capture the current state
-                visibility_of_element_by_testid(driver, testid)
+                find_visible_element_by_testid(driver, testid)
                 current_state = state
                 attach_text(f"Current button state: Swap to {state.capitalize()}", name="Swap Current Status")
 
@@ -111,8 +111,8 @@ def swap_units_volume_conversion(driver, module_Type, target_state="volume"):
         print("Current State:", current_state)
 
         # Fetch label and displayed conversion value
-        visibility_of_element_by_testid(driver, data_testid="trade-volume-info-label")
-        displayed_conversion_value = visibility_of_element_by_testid(driver, data_testid="trade-volume-info-value")
+        find_visible_element_by_testid(driver, data_testid="trade-volume-info-label")
+        displayed_conversion_value = find_visible_element_by_testid(driver, data_testid="trade-volume-info-value")
         displayed_value = round(float(get_label_of_element(element=displayed_conversion_value)), 2)
         print("Displayed Value:", displayed_value)
 
@@ -164,7 +164,7 @@ def input_size_volume(driver, target_state="volume"):
                 
         # Determine state and value range based on 'swap' and 'desired_state'
         if state == "volume": # (swap to volume)
-            min_val, max_val = 1, 20 # MT5, else be 100
+            min_val, max_val = 1, 20
         else:  # If state is 'volume' (swap to units)
             min_val, max_val = 10, 200
 

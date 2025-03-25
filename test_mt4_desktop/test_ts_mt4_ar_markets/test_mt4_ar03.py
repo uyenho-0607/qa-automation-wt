@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -19,7 +20,7 @@ class TC_MT4_aR03():
 
     @allure.description(
         """
-        Member able to fav or unfav symbol for each of the section
+        Member able to fav or unfav symbol
         """
     )
     
@@ -35,7 +36,7 @@ class TC_MT4_aR03():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Toggle to Fav/Unfav the star"):
                 toggle_symbol_favorite_status(driver=main_driver)

@@ -1,9 +1,11 @@
 import allure
 
+from enums.main import Server, Setting
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
+from common.mobileapp.module_setting.utils import button_setting
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -21,7 +23,7 @@ class TC_MT4_aA07():
         """
     )
     
-    def tt_tc07(self, android_driver):
+    def test_tc07(self, android_driver):
         self.driver = android_driver
         main_driver = self.driver
 
@@ -30,8 +32,12 @@ class TC_MT4_aA07():
         start_recording_mobile(driver=main_driver)
         
         try:
+            
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", account_type="live", set_language=True)
+                login_wt(driver=main_driver, server=Server.MT4, set_language=True)
+                
+            with allure.step("Successfully Logout"):
+                button_setting(driver=main_driver, setting_option=Setting.LOGOUT)
                 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

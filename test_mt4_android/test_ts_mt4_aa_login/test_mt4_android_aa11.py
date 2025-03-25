@@ -1,9 +1,11 @@
 import allure
+from enums.main import Server, AccountType
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
-from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
+from common.mobileapp.module_login.utils import login_wt
+from common.mobileapp.module_setting.demo_account import open_demo_account_screen
 
 
 @allure.parent_suite("Membersite - Android - Login")
@@ -11,17 +13,17 @@ from common.mobileapp.module_login.utils import toggle_remember_me_checkbox
 @allure.epic("MT4 Android TS_aA - Login")
 
 # Member Portal
-class TC_MT4_aA08():
+class TC_MT4_aA11():
 
-    @allure.title("TC_MT4_aA08")
+    @allure.title("TC_MT4_aA11")
 
     @allure.description(
         """
-        Verify that the [Remember Me] feature does not apply to Demo tab
+        Member able to open a demo account via login screen
         """
     )
     
-    def test_tc08(self, android_driver):
+    def test_tc11(self, android_driver):
         self.driver = android_driver
         main_driver = self.driver
 
@@ -30,9 +32,15 @@ class TC_MT4_aA08():
         start_recording_mobile(driver=main_driver)
         
         try:
-            with allure.step("Login to Web Trader Membersite"):
-                toggle_remember_me_checkbox(driver=main_driver, server="MT4", testcase_id="TC01", kick_user=False)
+            
+            with allure.step("Launch Web Trader Membersite"):
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO, set_username=False)
 
+            with allure.step("Open demo account by clicking the 'X' button"):
+                # System click on the "X" button
+                open_demo_account_screen(driver=main_driver, set_close_modal=True)
+                # open_demo_account_screen(driver=main_driver)
+                
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

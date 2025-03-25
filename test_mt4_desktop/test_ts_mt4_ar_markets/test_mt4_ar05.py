@@ -1,13 +1,14 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_oct_market_order, get_trade_snackbar_banner
-from common.desktop.module_markets.utils import myTrade_order
+from common.desktop.module_trade.utils import toggle_radio_button, trade_oct_market_order, get_trade_snackbar_banner
+from common.desktop.module_markets.utils import inspect_my_trade_orders
 
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
@@ -37,13 +38,13 @@ class TC_MT4_aR05():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                symbolName = input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
+                symbolName = input_symbol(driver=main_driver, server=Server.MT4)
 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Market Order"):
                 direction = trade_oct_market_order(driver=main_driver, indicator_type="buy")
@@ -52,7 +53,7 @@ class TC_MT4_aR05():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Verify My Trade Order"):
-                myTrade_order(driver=main_driver, symbol_name=symbolName, order_type=direction)
+                inspect_my_trade_orders(driver=main_driver, symbol_name=symbolName, order_type=direction)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

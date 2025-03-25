@@ -1,11 +1,11 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_setting.utils import button_setting
 
 
 @allure.parent_suite("MT4 Membersite - Desktop - Login")
@@ -34,7 +34,7 @@ class TC_MT4_aA07():
         
         try:
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", set_language=True)
+                login_wt(driver=main_driver, server=Server.MT4, set_language=True)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

@@ -1,10 +1,8 @@
-import json
 import os
 import csv
-import traceback
+import json
 
-import pandas as pd
-
+from enums.main import Server, SymbolsList
 from constants.helper.screenshot import attach_text
 
 
@@ -15,9 +13,17 @@ from constants.helper.screenshot import attach_text
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_URLs():
+def get_URLs(server: Server):
+    file_map = {
+        Server.MT4: "src/data_config/url/mt4.json",
+        Server.MT5: "src/data_config/url/mt5.json",
+    }
+    file_path = file_map.get(server)  # No default value
+
+    if not file_path:
+        raise ValueError(f"Invalid server type: {server}")
+    
     # Read URLs from the JSON file
-    file_path = os.path.join("src/data_config/urls.json")
     with open(file_path, "r") as json_file:
         data = json.load(json_file)
     return data
@@ -34,36 +40,13 @@ def get_URLs():
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-# def get_credentials():
-#     file_path = os.path.join("src/data_config/credential.json")
-#     with open(file_path, "r") as json_file:
-#         data = json.load(json_file)
-#     return data
-
-
-
-def get_credentials(server, read_from_file: bool = True):
+def get_credentials(server: Server):
+    file_map = {
+        Server.MT4: "src/data_config/credential/mt4.json",
+        Server.MT5: "src/data_config/credential/mt5.json",
+    }
+    file_path = file_map.get(server)  # No default value
     
-    if read_from_file:
-        file_map = {
-            "MT4": "src/data_config/credential/mt4_credential.json",
-            "MT5": "src/data_config/credential/mt5_credential.json",
-        }
-        file_path = file_map.get(server)  # No default value
-        
-    else:
-        file_path = os.path.join("src/data_config/credential/credential.json")
-        # data = {
-        #     'MT4': {
-        #         'Membersite': {
-        #             'credential': {
-        #                 'username'
-        #                 'password'
-        #             }
-        #         }
-        #     }
-        # }
-     
     if not file_path:
         raise ValueError(f"Invalid server type: {server}")
     
@@ -71,61 +54,6 @@ def get_credentials(server, read_from_file: bool = True):
         data = json.load(json_file)
         
     return data
-
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                GET SUCCESS URLs
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-def get_success_urls(platform, env_type, client_name=None, device_type=None):
-    """
-    Return the success URL based on platform, device type, and environment.
-    platform = MT4 / MT5 / RootAdmin
-    client_name = Lirunex / Transactcloudmt5 (optional for RootAdmin)
-    device_type = Desktop / Mobile (optional for RootAdmin)
-    env_type = SIT / Release_SIT / UAT
-    """
-    try:
-        with open("src/data_config/success_urls.json", "r") as file:
-            data = json.load(file)
-            
-            # Check if platform is RootAdmin
-            if platform == "RootAdmin":
-                # Return the URL for RootAdmin based on env_type only
-                if env_type in data["RootAdmin"]:
-                    return data["RootAdmin"][env_type]
-                else:
-                    raise Exception(f"No URL found for RootAdmin with environment '{env_type}'")
-            
-            # Check for MT4 or MT5 platforms
-            if platform in data:
-                if client_name in data[platform]:
-                    if device_type in data[platform][client_name]:
-                        if env_type in data[platform][client_name][device_type]:
-                            # Return the URL for the given platform, device type, and environment
-                            return data[platform][client_name][device_type][env_type]
-                
-                # If no matching device_type and environment is found
-                raise Exception(f"No URL found for {platform} with client '{client_name}', device type '{device_type}', and environment '{env_type}'")
-            else:
-                raise Exception(f"Platform '{platform}' not found.")
-                
-    except FileNotFoundError:
-        raise Exception("success_urls.json file not found.")
-    except json.JSONDecodeError:
-        raise Exception("Failed to decode JSON file. Please check the file format.")
-    except KeyError as e:
-        raise Exception(f"Missing key in JSON configuration: {e}")
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -139,29 +67,23 @@ def get_success_urls(platform, env_type, client_name=None, device_type=None):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def read_symbol_file(platform, client_name, symbol_type="Symbols"):
-    file_path = os.path.join("src/data_config/symbols.json")
-    
-    with open(file_path, "r") as json_file:
-        data = json.load(json_file)
-    
-    # Check if the platform exists in the data
-    if platform not in data:
-        raise ValueError(f"Platform '{platform}' not found in the configuration.")
-    
-    platform_data = data[platform]
 
-    # Check if the client_name exists within the platform data
-    if client_name not in platform_data:
-        raise ValueError(f"Client '{client_name}' not found under platform '{platform}' in the configuration.")
-    
-    client_data = platform_data[client_name]
-
-    # Ensure symbol_type exists in client data
-    if symbol_type not in client_data:
-        raise ValueError(f"Symbol type '{symbol_type}' not found for client '{client_name}' under platform '{platform}'.")
-
-    return client_data[symbol_type]
+def read_symbol_file(server: Server, symbol_type: SymbolsList):
+    try:
+        file_map = {
+            Server.MT4: "src/data_config/symbol/mt4.json",
+            Server.MT5: "src/data_config/symbol/mt5.json",
+        }
+        file_path = file_map.get(server)
+        
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+        
+        # Extract symbols correctly
+        return data.get(server, {}).get(symbol_type, [])
+        
+    except Exception as e:
+        raise AssertionError(f"Error reading JSON file: {e}")
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -250,7 +172,7 @@ def clear_orderIDs_csv(filename):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def append_token_file(name: str, file_path: str = "src/data_config/bearer_token.txt") -> None:
+def append_token_file(name: str, file_path: str = "src/data_config/api/bearer_token.txt") -> None:
     try:
         # Open the file in write mode to clear existing data
         with open(file_path, "w") as file:
@@ -269,7 +191,7 @@ def append_token_file(name: str, file_path: str = "src/data_config/bearer_token.
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
             
-def read_token_file(file_path: str = "src/data_config/bearer_token.txt") -> None:
+def read_token_file(file_path: str = "src/data_config/api/bearer_token.txt") -> None:
     try:
         with open(file_path, "r") as file:
             new_merchantName = file.read().strip()

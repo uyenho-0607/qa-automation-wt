@@ -1,13 +1,14 @@
 import allure
 import pytest
 
+from enums.main import Server
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_stop_order, modify_stop_order, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, modify_stop_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT5 Membersite - Desktop - Trade - Stop Order")
@@ -48,13 +49,13 @@ class TC_MT5_aG11():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server=Server.MT5)
 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
         
             """ Place Stop Order """
 

@@ -1,7 +1,11 @@
 from enum import Enum
 
-class DataTestID(Enum):
+
+class DataTestID(str, Enum):
     
+    def __str__(self):
+        return self.value.strip()  # Overrides str() to return the value directly
+
     # IN-APP BROWSER
     IN_APP_BROWSER_URL_bar = '//android.widget.TextView[@resource-id="com.android.chrome:id/url_bar"]'
     IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
@@ -17,20 +21,21 @@ class DataTestID(Enum):
 
     ADS_SKIP_BUTTON = 'ads-skip-button' # SPLASH SCREEN SKIP
     
-    APP_LOGIN_LOGO = '//android.widget.ImageView'
     LOGIN_ACCOUNT_TYPE = 'login-account-type'
     LOGIN_PASSWORD = 'login-password'
-    APP_LOGIN_PASSWORD_UNMASKED = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[4]/android.view.ViewGroup'
     LOGIN_SUBMIT = 'login-submit'
     LOGIN_USER_ID = 'login-user-id'
     ALERT_ERROR = 'alert-error'
     ALERT_SUCCESS = 'alert-success'
     LOGIN_ACCOUNT_SIGNUP = 'login-account-signup' # open a demo account button
-    APP_OPEN_DEMO_ACCOUNT = '//android.widget.TextView[@text="Open a Demo Account"]'
     
+    APP_LOGIN_LOGO = '//android.widget.ImageView'
+    APP_LOGIN_PASSWORD_UNMASKED = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[4]/android.view.ViewGroup'
     APP_RMB_ME_CHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "Remember me")]/android.view.ViewGroup/android.widget.TextView'
     APP_RMB_ME_UNCHECKBOX = '//android.view.ViewGroup[contains(@content-desc, "Remember me")]/android.view.ViewGroup'
-    
+    APP_OPEN_DEMO_ACCOUNT = '//android.widget.TextView[@text="Open a Demo Account"]'
+
+
     # CRM LIVE ACCOUNT / LIVE ACCOUNT / DEMO ACCOUNT
     TAB_LOGIN_ACCOUNT_TYPE_CRM = 'tab-login-account-type-crm'
     TAB_LOGIN_ACCOUNT_TYPE_LIVE = 'tab-login-account-type-live'
@@ -38,9 +43,19 @@ class DataTestID(Enum):
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                    APP - LOGIN PAGE - FORGOT PASSWORD
+                                                    LOGIN PAGE - FORGOT PASSWORD
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
+    # DESKTOP
+    FORGOT_PASSWORD = '//*[normalize-space(text())="Forgot Password?"]'
+    RESET_PASSWORD = '//*[normalize-space(text())="Reset Password"]'
+    RESET_PASSWORD_EMAIL_ADDRESS = '//input[@placeholder="user@gmail.com"]'
+    RESET_PASSWORD_ACCOUNT_ID = '//input[@placeholder="Enter your account ID"]'
+    RESET_PASSWORD_SUBMIT = '//*[normalize-space(text())="Submit"]'
+    HELP_IS_ON_THE_WAY = '//*[normalize-space(text())="Help is on the way!"]'
+    CONTACT_SUPPORT = '//*[normalize-space(text())="Contact Support"]'
+    FORGOT_PASSWORD_ERROR_MESSAGE = '//*[@class="sc-1t1bfxj-4 gYShWv"]'
+    
     
     # APP - FORGOT PASSWORD MODULE
     APP_FORGOT_PASSWORD = '//android.widget.TextView[@text="Forgot password?"]'
@@ -86,7 +101,7 @@ class DataTestID(Enum):
     LANGUAGE_DROPDOWN = 'language-dropdown'
     LANGUAGE_OPTION = 'language-option'
     
-    APP_LANGUAGE_OPTION = '//android.widget.ScrollView//android.view.ViewGroup'
+    APP_LANGUAGE_OPTION = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
     LANGUAGE_ENGLISH = '//android.view.ViewGroup[@content-desc="English"]'
     LANGUAGE_SIMPLIFIED_CHINESE = '//android.view.ViewGroup[@content-desc="简体中文"]'
     LANGUAGE_TRADICTIONAL_CHINESE = '//android.view.ViewGroup[@content-desc="繁体中文"]'
@@ -108,6 +123,10 @@ class DataTestID(Enum):
     FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON = 'feature-announcement-modal-try-it-now-button'
     FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON = 'feature-announcement-modal-media-left-button'
     FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON = 'feature-announcement-modal-media-right-button'
+    
+    
+    
+    HOME_ANNOUNCEMENT = '(//android.view.ViewGroup/android.widget.HorizontalScrollView)[1]//android.widget.TextView'
 
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -124,11 +143,47 @@ class DataTestID(Enum):
     SPIN_LOADER = 'spin-loader'
     
     # APP
-    APP_SIDE_BAR_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
-    APP_SIDE_BAR_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
-    APP_SIDE_BAR_OPTION_TRADE = '//android.widget.TextView[@text="Trade"]'
-    APP_SIDE_BAR_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
-    APP_SIDE_BAR_OPTION_ASSETS = '//android.widget.TextView[@text="Assets"]'
+    APP_MENU_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
+    APP_MENU_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
+    APP_MENU_OPTION_TRADE = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[3]/android.widget.TextView[2]'
+    APP_MENU_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
+    APP_MENU_OPTION_ASSETS = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[5]'
+    
+    # APP - SIDE MENU NAVIGATION BAR
+    APP_SIDE_BAR_OPTIONS = '//android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[10]/android.view.ViewGroup'
+    
+    
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    SEARCH
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
+    
+    # SEARCH SYMBOL RELATED
+    SYMBOL_SEARCH_SELECTOR = 'symbol-search-selector'
+    SYMBOL_DROPDOWN_RESULT = 'symbol-dropdown-result'
+    APP_SYMBOL_NAME_DROPDOWN_RESULT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup//android.widget.TextView[2]'
+    
+    SYMBOL_INPUT_SEARCH = 'symbol-input-search'
+    SYMBOL_OVERVIEW_ID = 'symbol-overview-id'
+    SYMBOL_INPUT_SEARCH_ITEMS = 'symbol-input-search-items'
+    SYMBOL_INPUT_SEARCH_HISTORY_DELETE = 'symbol-input-search-history-delete'
+    SYMBOL_INPUT_SEARCH_ITEMS_DELETE = 'symbol-input-search-items-delete'
+    APP_SYMBOL_INPUT_SEARCH_HISTORY_DELETE = '//android.widget.TextView[@text="Search History"]/following-sibling::android.widget.TextView'
+    APP_SEARCH_HISTORY_LABEL = '//android.widget.TextView[@text="Search History"]'
+    SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL = 'symbol-input-search-items-symbol'
+    SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME = '//*[@data-testid="symbol-input-search-items"]//div[1]/div[1]'
+       
+
+
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    BANNER
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
+    
+    MESTHEAD_BANNER = '//android.view.ViewGroup[@resource-id="__CAROUSEL_ITEM_0_READY__"]/android.view.ViewGroup/android.widget.ImageView'
+    TRANSFER_FUND_BANNER = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[8]/android.widget.ImageView'
         
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -140,6 +195,16 @@ class DataTestID(Enum):
     WATCHLIST_LIST = 'watchlist-list'
     WATCHLIST_LIST_ITEM = 'watchlist-list-item'
     WATCHLIST_SYMBOL = 'watchlist-symbol'
+    
+    # Watchlist tabs name
+    TAB_ALL = 'tab-all'
+    TAB_FAVOURITES = 'tab-favourites'
+    TAB_FOREX = 'tab-forex'
+    TAB_COMMS = 'tab-comms'
+    TAB_INDEX = 'tab-index'
+    TAB_CRYPTO = 'tab-crypto'
+    
+    # Watchlist Filter
     SYMBOL_PREFERENCE = 'symbol-preference'
     SYMBOL_PREFERENCE_LABEL = 'symbol-preference-label'
     SYMBOL_PREFERENCE_TABS = 'symbol-preference-tabs'
@@ -147,12 +212,30 @@ class DataTestID(Enum):
     SYMBOL_PREFERENCE_OPTION_CHECKED = 'symbol-preference-option-checked'
     SYMBOL_PREFERENCE_SAVE = 'symbol-preference-save'
     SYMBOL_PREFERENCE_CLOSE = 'symbol-preference-close'
-    TAB_ALL = 'tab-all'
-    TAB_FAVOURITES = 'tab-favourites'
-    TAB_FOREX = 'tab-forex'
-    TAB_COMMS = 'tab-comms'
-    TAB_INDEX = 'tab-index'
-    TAB_CRYPTO = 'tab-crypto'
+    
+    # APP
+    APP_WATCHLIST_TABS = '//android.widget.HorizontalScrollView//android.view.ViewGroup[@content-desc]'
+    APP_WATCHLIST_LIST_ITEM = '(//android.widget.ScrollView//android.view.ViewGroup[android.view.ViewGroup])[position() > 1]'
+    APP_WATCHLIST_SYMBOL = '//android.widget.ScrollView//android.view.ViewGroup[contains(@content-desc, ",")]/android.widget.TextView[2]'
+    APP_MSG_NO_ITEMS_AVAILABLE = '//android.widget.TextView[@text="No items available"]'
+    
+    # APP WATCHLIST TAB NAME
+    APP_TAB_TOP_ALL = '//android.widget.TextView[@text="All"]'
+    APP_TAB_TOP_FAVOURITES = '//android.view.ViewGroup[@content-desc="Favourites"]'
+    APP_TAB_TOP_PICK = '//android.view.ViewGroup[@content-desc="Top Pick"]'
+    APP_TAB_TOP_GAINER = '//android.view.ViewGroup[@content-desc="Top Gainer"]'
+    APP_TAB_TOP_LOSER = '//android.widget.TextView[@text="Top Loser"]'
+    
+    # MARKET FILTER
+    APP_SYMBOL_PREFERENCE = '//android.view.ViewGroup[5]/android.view.ViewGroup'
+    APP_SYMBOL_PREFERENCE_LABEL = '//android.widget.TextView[@text="Show/Hide Symbol"]'
+    APP_SYMBOL_PREFERENCE_TABS = '//android.widget.HorizontalScrollView//android.view.ViewGroup/android.view.ViewGroup'
+    APP_SYMBOL_PREFERENCE_SAVE = '//android.widget.TextView[@text="Save Changes"]'
+    APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]'
+    APP_SYMBOL_PREFERENCE_OPTION_CHECKED = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]'
+    
+    APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]/parent::*'
+    APP_SYMBOL_PREFERENCE_OPTION_CHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]/parent::*'
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -287,16 +370,6 @@ class DataTestID(Enum):
     DROPDOWN_CHART_SETTING_SHOW_ASK_PRICE_ON_Y_AXIS = 'dropdown-chart-setting-show-ask-price-on-y-axis'
     DROPDOWN_CHART_SETTING_CLEAR_ALL_TRACK_DETAILS = 'dropdown-chart-setting-clear-all-track-details'
     DROPDOWN_CHART_SETTING_RESET_CHART = 'dropdown-chart-setting-reset-chart'
-
-    # SEARCH SYMBOL RELATED
-    SYMBOL_SEARCH_SELECTOR = 'symbol-search-selector'
-    SYMBOL_DROPDOWN_RESULT = 'symbol-dropdown-result'
-    SYMBOL_INPUT_SEARCH = 'symbol-input-search'
-    SYMBOL_OVERVIEW_ID = 'symbol-overview-id'
-    SYMBOL_INPUT_SEARCH_ITEMS = 'symbol-input-search-items'
-    SYMBOL_INPUT_SEARCH_HISTORY_DELETE = 'symbol-input-search-history-delete'
-    SYMBOL_INPUT_SEARCH_ITEMS_DELETE = 'symbol-input-search-items-delete'
-    SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL = 'symbol-input-search-items-symbol'
 
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -552,7 +625,6 @@ class DataTestID(Enum):
 
     SWITCH_THEME_BUTTON = 'switch-theme-button'
     SETTING_BUTTON = 'setting-button'
-    # APP_SETTING_BUTTON = ".//android.widget.TextView[matches(@text, '^\d+$')]/following-sibling::android.widget.TextView[2]"
     APP_SETTING_BUTTON = ".//android.widget.TextView[matches(@text, '^\\d+$')]/following-sibling::android.widget.TextView[2]"
     SETTING_OPTION_SWITCH_TO_DEMO = 'setting-option-switch-to-demo'
     SETTING_OPTION_SWITCH_TO_LIVE = 'setting-option-switch-to-live'
@@ -588,7 +660,7 @@ class DataTestID(Enum):
     SETTING_OPTION_HELP_SUPPORT = 'setting-option-help-support'
     SETTING_OPTION_ABOUT = 'setting-option-about'
     SETTING_OPTION_LOGOUT = 'setting-option-logout'
-    APP_SETTING_OPTION_LOGOUT = '//android.view.ViewGroup[@content-desc="Logout"]'
+    APP_SETTING_OPTION_LOGOUT = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup[6]'
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -643,7 +715,6 @@ class DataTestID(Enum):
     ACCOUNT_TYPE_TAG = 'account-type-tag'
     APP_ACCOUNT_TYPE_TAG = '//android.widget.TextView[@text="DEMO"]'
     ACCOUNT_NAME = 'account-name'
-    # APP_ACCOUNT_NAME = '(//android.view.ViewGroup/android.widget.TextView)[3]'
     APP_ACCOUNT_NAME = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.widget.TextView[1]'
     ACCOUNT_ID = 'account-id'
     APP_ACCOUNT_ID = '(//android.view.ViewGroup/android.widget.TextView)[4]'

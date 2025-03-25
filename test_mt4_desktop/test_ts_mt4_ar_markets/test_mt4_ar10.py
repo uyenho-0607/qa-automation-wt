@@ -1,11 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_markets.utils import news_section
+from common.desktop.module_markets.utils import market_watchlist_filter
 
 
 @allure.parent_suite("MT4 Membersite - Desktop - Markets")
@@ -19,7 +20,7 @@ class TC_MT4_aR10():
 
     @allure.description(
         """
-        Member able to redirect to the News page upon clicking on News content
+        Members can filter the symbols to display or hide them
         """
     )
     
@@ -28,15 +29,17 @@ class TC_MT4_aR10():
         self.driver = chromeDriver
         main_driver = self.driver
         session_id = main_driver.session_id
-
+        
+        # Track if the test has failed
+        test_failed = False
         
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
                 
-            with allure.step("News"):
-                news_section(driver=main_driver)
+            with allure.step("Market Watchlist"):
+                market_watchlist_filter(driver=main_driver)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

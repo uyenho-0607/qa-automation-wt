@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -37,7 +38,7 @@ class TC_review_pending_order_expiry():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT4, testcase_id="TC01")
 
             with allure.step("Read orderIDs from CSV"):
                 # get_server_local_time(driver=main_driver)

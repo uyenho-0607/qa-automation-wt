@@ -5,7 +5,7 @@ from datetime import datetime
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import find_list_of_elements_by_xpath, spinner_element, click_element, click_element_with_wait, find_list_of_elements_by_testid, find_element_by_testid, visibility_of_element_by_testid, visibility_of_element_by_xpath, get_label_of_element
+from constants.helper.element import find_list_of_elements_by_xpath, spinner_element, click_element, click_element_with_wait, find_list_of_elements_by_testid, find_element_by_testid, find_visible_element_by_testid, find_visible_element_by_xpath, get_label_of_element
 
 from common.desktop.module_trade.order_panel.op_general import get_table_body, get_table_headers
 
@@ -35,15 +35,15 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
         spinner_element(driver)
         
         # Open the calendar by clicking on the calendar button
-        calendar_button = visibility_of_element_by_testid(driver, data_testid="calender-button-assets")
+        calendar_button = find_visible_element_by_testid(driver, data_testid="calender-button-assets")
         click_element_with_wait(driver, element=calendar_button)
 
         # Find the next, previous, and year-month navigation buttons
-        btn_next = visibility_of_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__next-button')]")
+        btn_next = find_visible_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__next-button')]")
 
-        btn_prev = visibility_of_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__prev-button')]")
+        btn_prev = find_visible_element_by_xpath(driver, "//button[contains(@class, 'react-calendar__navigation__prev-button')]")
 
-        year_month = visibility_of_element_by_xpath(driver, "//button[@class='react-calendar__navigation__label']")
+        year_month = find_visible_element_by_xpath(driver, "//button[@class='react-calendar__navigation__label']")
         
         # Navigate to the target start month
         while True:
@@ -56,7 +56,7 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
                 btn_prev.click()  # Move to the previous month
         
         # Select the start date from the calendar
-        startDate_picker = visibility_of_element_by_xpath(driver, f"//div[starts-with(@class, 'react-calendar__month-view__days')]//button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{startDate}']")
+        startDate_picker = find_visible_element_by_xpath(driver, f"//div[starts-with(@class, 'react-calendar__month-view__days')]//button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{startDate}']")
         click_element(startDate_picker)
         
         # Navigate to the target end month
@@ -70,7 +70,7 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
                 btn_prev.click()  # Move to the previous month
         
         # Select the end date from the calendar
-        endDate_picker = visibility_of_element_by_xpath(driver, f"//div[starts-with(@class, 'react-calendar__month-view__days')]//button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{endDate}']")
+        endDate_picker = find_visible_element_by_xpath(driver, f"//div[starts-with(@class, 'react-calendar__month-view__days')]//button[not(contains(@class, 'neighboringMonth'))]/abbr[.='{endDate}']")
         click_element(endDate_picker)
 
     except Exception as e:

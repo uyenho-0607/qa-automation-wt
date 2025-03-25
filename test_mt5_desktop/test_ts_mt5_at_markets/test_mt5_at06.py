@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -38,7 +39,7 @@ class TC_MT5_aT06():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("My Trade - Click on [>] and redirect to Asset screen"):
                 market_redirect_arrow(driver=main_driver, option_name="My Trade")

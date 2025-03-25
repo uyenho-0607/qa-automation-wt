@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -35,8 +36,8 @@ class TC_MT4_aA02():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
-                
+                login_wt(driver=main_driver, server=Server.MT4)
+
             with allure.step("Successfully Logout"):
                 button_setting(driver=main_driver, setting_option="logout") 
 

@@ -7,13 +7,13 @@ from selenium.webdriver.common.by import By
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import is_element_present_by_xpath, spinner_element, javascript_click, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, is_element_present_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
+from constants.helper.element import is_element_present_by_xpath, spinner_element, javascript_click, click_element, click_element_with_wait, find_element_by_testid, find_element_by_xpath, find_element_by_xpath_with_wait, is_element_present_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, get_label_of_element
 
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details, process_individual_orders, get_table_body, get_table_headers
 from common.desktop.module_chart.chart import get_chart_symbol_name
 from common.desktop.module_assets.account_info import get_server_local_time
 from common.desktop.module_setting.setting_general import button_setting
-from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_sub_menu.sub_menu import menu_button
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 ASSET - SYMBOL NAME
@@ -146,7 +146,7 @@ def type_orderPanel(driver, tab_order_type, sub_tab=None, position: bool = False
         delay(1)
         
         # Locate and click on the main order panel type tab
-        orderPanel_type = visibility_of_element_by_testid(driver, data_testid=f"tab-asset-order-type-{tab_order_type}")
+        orderPanel_type = find_visible_element_by_testid(driver, data_testid=f"tab-asset-order-type-{tab_order_type}")
         label_count = get_label_of_element(orderPanel_type)
         javascript_click(driver, element=orderPanel_type)
         
@@ -206,7 +206,7 @@ def button_orderPanel_action(driver, order_action, row_number):
         # Handle order-specific confirmation modals based on the order_action
         match = is_element_present_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
         if match:
-            visibility_of_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
+            find_visible_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
         
         
         # If delete_button is True, click the delete order button (For OCT)
@@ -329,15 +329,6 @@ def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab
             # Extract row data
             cells = table_row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
             row_data = [re.sub(r'\s*/\s*', ' / ', cell.text.strip()) for cell in cells]
-            
-            # row_data = []
-            # for cell in cells:
-            #     wait_for_element_visibility(driver, cell)
-            #     # row_data.append(cell.text.strip())
-            #     text = cell.text.strip()
-            #     # Ensure spaces around '/'
-            #     normalized_text = re.sub(r'\s*/\s*', ' / ', text)
-            #     row_data.append(normalized_text)
             
             # Append symbol if present
             if chart_symbol_name:

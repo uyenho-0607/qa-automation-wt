@@ -1,6 +1,7 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -37,7 +38,7 @@ class TC_review_pending_order_expiry():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT5, testcase_id="TC01")
 
             with allure.step("Read orderIDs from CSV"):
                 orderIDs = read_orderIDs_from_csv(filename="MT5_Desktop_Pending_Order.csv")

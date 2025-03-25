@@ -2,7 +2,7 @@ import re
 import random
 
 from constants.helper.driver import delay
-from constants.helper.element import find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, visibility_of_element_by_xpath, visibility_of_element_by_testid, get_label_of_element
+from constants.helper.element import find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, get_label_of_element
 from constants.helper.error_handler import handle_exception
 
 
@@ -28,7 +28,7 @@ def label_onePointEqual(driver, trade_type):
     """
     try:
         # Locate the element that contains the "one point equal" value
-        onePointsEqual = visibility_of_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
+        onePointsEqual = find_visible_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
         
         # Get the label text from the located element
         label_onePointsEqual = get_label_of_element(onePointsEqual)
@@ -80,7 +80,7 @@ def button_tradeModule(driver, module_Type: str):
         delay(0.5)
 
         # Locate the module tab based on the provided module type
-        moduleOption = visibility_of_element_by_testid(driver, data_testid=f"tab-{module_Type}")
+        moduleOption = find_visible_element_by_testid(driver, data_testid=f"tab-{module_Type}")
 
         # Click the module tab with wait to ensure it's properly loaded before proceeding
         click_element_with_wait(driver, element=moduleOption)
@@ -136,7 +136,7 @@ def button_buy_sell_type(driver, indicator_type=None):
             print(f"Randomly selected indicator_type: {indicator_type}")
 
         # Locate the order execution button based on the provided indicator_type (buy/sell)
-        order_execution = visibility_of_element_by_xpath(driver, f"//div[contains(@data-testid, 'order-{indicator_type}')]")
+        order_execution = find_visible_element_by_xpath(driver, f"//div[contains(@data-testid, 'order-{indicator_type}')]")
 
         # Click the button with a wait to ensure the element is interactable before clicking
         click_element_with_wait(driver, element=order_execution)
@@ -183,7 +183,7 @@ def dropdown_orderType(driver, partial_text=None):
         javascript_click(driver, element=type_dropdown)
         
         # Locate the option with a test ID based on the partial_text value
-        orderType_options = visibility_of_element_by_testid(driver, data_testid=f"trade-dropdown-order-type-{partial_text}")
+        orderType_options = find_visible_element_by_testid(driver, data_testid=f"trade-dropdown-order-type-{partial_text}")
         # Click on the dropdown to reveal the options
         javascript_click(driver, element=orderType_options)
 

@@ -1,12 +1,13 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner
+from common.desktop.module_trade.utils import toggle_radio_button, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
 
@@ -35,13 +36,13 @@ class TC_MT5_aR01():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                input_symbol(driver=main_driver, server=Server.MT5)
                 
             with allure.step("Enable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="checked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Enter Units"):
                 swap_units_volume_conversion(driver=main_driver, module_Type="one-click-trading", target_state="units")

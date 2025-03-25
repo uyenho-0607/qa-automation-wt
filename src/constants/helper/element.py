@@ -88,7 +88,7 @@ def is_element_present_by_testid(driver, data_testid: str) -> bool:
         return True
     except Exception:
         # If element is not found, return False
-        return False    
+        return False
     
 
 def is_element_present_by_xpath(driver, xpath: str) -> bool:
@@ -103,17 +103,17 @@ def is_element_present_by_xpath(driver, xpath: str) -> bool:
 
 
 # Ensures the element is both present in the DOM and visible.
-def wait_for_element_visibility(driver, locator, duration: int | None = None) -> WebElement:
+def wait_for_element_visibility(driver, locator, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.visibility_of(locator)) is not None
 
 
-def visibility_of_element_by_xpath(driver, xpath_string, duration: int | None = None) -> WebElement:
+def find_visible_element_by_xpath(driver, xpath_string, duration: int | None = None) -> WebElement:
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((By.XPATH, xpath_string)))
 
 
-def visibility_of_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
+def find_visible_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((By.XPATH, data_test_id_string)))
@@ -143,12 +143,12 @@ def invisibility_of_element_by_testid(driver, data_testid, duration: int | None 
 """
 
 # Ensures the element exists in the DOM and does not guarantee the element is visible.
-def presence_of_element_located_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
+def find_presence_element_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((By.XPATH, xpath)))
 
 
-def presence_of_element_located_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
+def find_presence_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((By.XPATH, data_test_id_string)))
@@ -252,7 +252,7 @@ def get_label_of_element(element: WebElement) -> str:
     tag_name = element.tag_name
 
     # Check the tag name
-    if tag_name in ["div", "span", "td"]:
+    if tag_name in ["div", "span", "button", "td", "li"]:
         label = element.text
         
     elif tag_name in ["input", "button"]:
@@ -279,13 +279,11 @@ def get_label_of_element(element: WebElement) -> str:
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-
 def javascript_scroll(driver, element):
     try:
         driver.execute_script("arguments[0].scrollIntoView();", element)
     except Exception as e:
         assert False, f"{str(e)}\n{traceback.format_exc()}"
-
 
 
 # Javascript click
@@ -313,12 +311,6 @@ def trigger_click(driver, element):
 #  To check if a specific element on a web page has a cursor style of "not-allowed". 
 def is_element_disabled_by_cursor(driver, element):
     return driver.execute_script("return window.getComputedStyle(arguments[0]).cursor == 'not-allowed';", element)
-
-
-# def is_element_disabled(driver, element):
-#     is_disabled_attr = element.get_attribute("disabled") is not None
-#     is_disabled_cursor = driver.execute_script("return window.getComputedStyle(arguments[0]).cursor == 'not-allowed';", element)
-#     return is_disabled_attr or is_disabled_cursor
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

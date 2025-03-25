@@ -55,7 +55,7 @@ def launch_cpuat(self, platform: str = None, env_type: str = None, sub_type: str
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def cpuat_user_login(self, platform: str, testcaseID: str) -> None:
+def cpuat_user_login(self, platform: str, testcase_id: str) -> None:
     try:
         
         file_path = os.path.join("src/data_config/credential.json")
@@ -63,15 +63,15 @@ def cpuat_user_login(self, platform: str, testcaseID: str) -> None:
         with open(file_path, "r") as json_file:
             data = json.load(json_file)
         
-        # Retrieve username and password from JSON data based on testcaseID
+        # Retrieve username and password from JSON data based on testcase_id
         if platform in data:
             for testcase in data[platform]:
-                if testcase["TestcaseID"] == testcaseID:
+                if testcase["testcase_id"] == testcase_id:
                     login_username_encrypted = testcase["Username"]
                     login_password_encrypted = testcase["Password"]
                     break
             else:
-                raise ValueError(f"Testcase ID '{testcaseID}' not found for platform '{platform}'")
+                raise ValueError(f"Testcase ID '{testcase_id}' not found for platform '{platform}'")
         else:
             raise ValueError(f"Platform '{platform}' not found in credential data")
         
@@ -142,16 +142,16 @@ def btn_webTrader(self):
 """
 
 # Login to CPUAT Website
-def login_cpuat(self, platform: str, testcaseID: str, env_type: str = None, sub_type: str = None) -> None:
+def login_cpuat(self, platform: str, testcase_id: str, env_type: str = None, sub_type: str = None) -> None:
     try:
             
         launch_cpuat(self, platform, env_type, sub_type)
 
-        cpuat_user_login(self, platform, testcaseID)
+        cpuat_user_login(self, platform, testcase_id)
 
         btn_webTrader(self)
         
-        # login_cpuat(self, platform="CPUAT", testcaseID="TC01")
+        # login_cpuat(self, platform="CPUAT", testcase_id="TC01")
         
     except Exception as e:
         # Attach a screenshot in case of an exception

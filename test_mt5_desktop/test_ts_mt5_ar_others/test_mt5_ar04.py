@@ -1,12 +1,13 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, button_tradeModule, dropdown_orderType, button_buy_sell_type, verify_volume_minMax_buttons, btn_min_max_stop_loss, btn_minMax_takeProfit
+from common.desktop.module_trade.utils import toggle_radio_button, button_tradeModule, dropdown_orderType, button_buy_sell_type, verify_volume_minMax_buttons, btn_min_max_stop_loss, btn_minMax_takeProfit
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
 
@@ -37,13 +38,13 @@ class TC_MT5_aR04():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT5", client_name="Transactcloudmt5", symbol_type="Symbols_Price")
+                input_symbol(driver=main_driver, server=Server.MT5, symbol_type="Symbols_Price")
                 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Specification OCT"):
                 _, _, vol_step = button_tradeModule(driver=main_driver, module_Type="specification")

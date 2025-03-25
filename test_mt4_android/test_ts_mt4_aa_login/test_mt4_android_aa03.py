@@ -1,4 +1,6 @@
 import allure
+
+from enums.main import Server, AccountType, Setting
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
@@ -32,10 +34,10 @@ class TC_MT4_aA03():
         try:
             
             with allure.step("Login with parameter userID & password"):
-                login_wt(driver=main_driver, server="MT4", account_type="demo")
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO)
 
             with allure.step("Successfully Logout"):
-                button_setting(driver=main_driver, setting_option="logout")
+                button_setting(driver=main_driver, setting_option=Setting.LOGOUT)
                 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

@@ -2,7 +2,7 @@
 from common.desktop.module_login.utils import login_cpuat
 
 # Sub-Menu
-from common.desktop.module_subMenu.utils import menu_button
+from common.desktop.module_sub_menu.utils import menu_button
 
 # Symbol
 from common.desktop.module_symbol.utils import input_symbol

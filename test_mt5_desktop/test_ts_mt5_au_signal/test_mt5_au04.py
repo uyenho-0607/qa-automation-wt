@@ -1,11 +1,12 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_trade.utils import toggle_radioButton, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_signal.utils import button_copyTrade, handle_order_type
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -37,10 +38,10 @@ class TC_MT5_aU04():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT5", client_name="Transactcloudmt5")
+                login_wt(driver=main_driver, server=Server.MT5)
                 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
             
             with allure.step("Copy To Trade Order"):
                 copyTrade_df, label_OrderStatus = button_copyTrade(driver=main_driver)

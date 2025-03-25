@@ -1,12 +1,13 @@
 import allure
 import pytest
 
+from enums.main import Server
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radioButton, trade_limit_order, get_neg_snackbar_banner, trade_ordersConfirmationDetails
+from common.desktop.module_trade.utils import toggle_radio_button, trade_limit_order, get_neg_snackbar_banner, trade_ordersConfirmationDetails
 
 @allure.parent_suite("MT4 Membersite - Desktop - Negative Scenarios")
 
@@ -38,13 +39,13 @@ class TC_MT4_aQ05():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server="MT4", client_name="Lirunex")
+                input_symbol(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Disable OCT"):
-                toggle_radioButton(driver=main_driver, category="OCT", desired_state="unchecked")
+                toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
 
             with allure.step("Place Limit Order"):
                 trade_limit_order(driver=main_driver, trade_type="trade", option="buy", entryPrice_flag=False, set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")

@@ -4,7 +4,7 @@ from tabulate import tabulate
 from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, visibility_of_element_by_testid, spinner_element
+from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, spinner_element
 
 from common.desktop.module_notification.noti_general import notification_bell
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details
@@ -44,7 +44,7 @@ def get_orderNotification_msg(driver, order_id: str):
         spinner_element(driver)
         
         # Find all notification messages
-        noti_messages = find_list_of_elements_by_testid(driver, data_testid=DataTestID.NOTIFICATION_LIST_RESULT_ITEM.value)
+        noti_messages = find_list_of_elements_by_testid(driver, data_testid=DataTestID.NOTIFICATION_LIST_RESULT_ITEM)
 
         # Initialize a list to store the parsed order data
         order_data = []
@@ -143,7 +143,7 @@ def get_noti_ordersDetails(driver):
     try:
         
         # Wait for the modal dialog to be present
-        visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL.value)
+        find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL)
         
         # Wait till the spinner icon no longer display
         spinner_element(driver)
@@ -153,7 +153,7 @@ def get_noti_ordersDetails(driver):
         # if response.status_code == 200:
         
         # Retrieve the list of the data
-        header_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_LABEL.value)
+        header_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_LABEL)
         if not header_elements:
             raise Exception("No notification order headers found.")
 
@@ -167,7 +167,7 @@ def get_noti_ordersDetails(driver):
             result.append(element.text)
 
         # Extract the Buy or Sell text 
-        order_type = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL_ORDDER_TYPE.value)
+        order_type = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL_ORDDER_TYPE)
         result.append(order_type.text)
 
         # Create a DataFrame using the data
@@ -178,7 +178,7 @@ def get_noti_ordersDetails(driver):
         attach_text(overall, name="Notification Order Details")
         
         # Close the modal dialog
-        modal_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL_CLOSE.value)
+        modal_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL_CLOSE)
         click_element(modal_close)
 
         # Return the DataFrame containing the order notification details

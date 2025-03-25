@@ -36,7 +36,7 @@ class TC_MT4_aP11():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server="MT4", client_name="Lirunex", account_type="live", testcaseID="TC01")
+                login_wt(driver=main_driver, server=Server.MT4, account_type="live", testcase_id="TC01")
 
             with allure.step("Validate Column Visibility from Trade to Asset"):
                 update_column_visibility(driver=main_driver, tab_order_type="open-positions")

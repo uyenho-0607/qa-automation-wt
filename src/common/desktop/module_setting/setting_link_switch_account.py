@@ -7,7 +7,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, delay, get_current_url
-from constants.helper.element import spinner_element, is_element_present_by_testid, click_element, populate_element, find_element_by_testid, find_list_of_elements_by_testid, trigger_click, visibility_of_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_testid
+from constants.helper.element import spinner_element, is_element_present_by_testid, click_element, populate_element, find_element_by_testid, find_list_of_elements_by_testid, trigger_click, find_visible_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_testid
 
 from common.desktop.module_login.utils import handle_alert_error
 from common.desktop.module_setting.utils import button_setting
@@ -28,10 +28,10 @@ def get_account_banner(driver):
         valid_message_headers = ["Account Switched"]
 
         # Wait for the snackbar message to be visible
-        visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
+        find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
         
         # Wait for the message header to be visible and extract it
-        message_header = visibility_of_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
+        message_header = find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
         extracted_header = get_label_of_element(message_header)
 
         # Extract the message description
@@ -98,7 +98,7 @@ def switch_account_type(driver, account_type):
         button_setting(driver, setting_option=setting_option)
         
         # Wait for the account selector element to be visible and obtain it
-        account_selector = visibility_of_element_by_testid(driver, data_testid=testid)
+        account_selector = find_visible_element_by_testid(driver, data_testid=testid)
         
         # Extract the label or text of the currently selected account option
         selected_option = get_label_of_element(account_selector)

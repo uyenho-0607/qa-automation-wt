@@ -1,0 +1,7 @@
+{
+    "RootAdmin": {
+        "SIT":              "https://root.webtrader-sit.s20ip12.com/root/login",
+        "Release_SIT":      "https://root.webtrader-release-sit.s20ip12.com/root/login",
+        "UAT":              "https://root.webtrader-uat.s20ip12.com/root/login"
+    }
+}

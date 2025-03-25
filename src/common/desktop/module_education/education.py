@@ -2,11 +2,11 @@
 import random
 
 from constants.helper.driver import delay, get_current_url, switch_to_new_window
-from constants.helper.element import spinner_element, javascript_click, click_element, find_list_of_elements_by_xpath, visibility_of_element_by_xpath, is_element_present_by_xpath
+from constants.helper.element import spinner_element, javascript_click, click_element, find_list_of_elements_by_xpath, find_visible_element_by_xpath, is_element_present_by_xpath
 from constants.helper.error_handler import handle_exception
 
 
-from common.desktop.module_subMenu.sub_menu import menu_button
+from common.desktop.module_sub_menu.sub_menu import menu_button
 
 
 """
@@ -41,11 +41,11 @@ def education_video(driver):
         
         if is_element_present_by_xpath(driver, "//iframe[@id='widget2']"):
             # Switch to iframe - video
-            iframe = visibility_of_element_by_xpath(driver, "//iframe[@id='widget2']")
+            iframe = find_visible_element_by_xpath(driver, "//iframe[@id='widget2']")
             driver.switch_to.frame(iframe)
             
             # Click on the play button
-            btn_video_play = visibility_of_element_by_xpath(driver, "//button[@class='ytp-large-play-button ytp-button ytp-large-play-button-red-bg']")
+            btn_video_play = find_visible_element_by_xpath(driver, "//button[@class='ytp-large-play-button ytp-button ytp-large-play-button-red-bg']")
             javascript_click(driver, element=btn_video_play)
             
             # Check if the video is playing
@@ -99,11 +99,11 @@ def video_redirection(driver):
         
         if is_element_present_by_xpath(driver, "//iframe[@id='widget2']"):
             # Switch to iframe - video
-            iframe = visibility_of_element_by_xpath(driver, "//iframe[@id='widget2']")
+            iframe = find_visible_element_by_xpath(driver, "//iframe[@id='widget2']")
             driver.switch_to.frame(iframe)
             
             # Click on the play button
-            btn_video_redirection = visibility_of_element_by_xpath(driver, "//a[@class='ytp-impression-link']")
+            btn_video_redirection = find_visible_element_by_xpath(driver, "//a[@class='ytp-impression-link']")
             javascript_click(driver, element=btn_video_redirection)
             
             switch_to_new_window(driver)
