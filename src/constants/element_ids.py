@@ -214,7 +214,7 @@ class DataTestID(str, Enum):
     SYMBOL_PREFERENCE_CLOSE = 'symbol-preference-close'
     
     # APP
-    APP_WATCHLIST_TABS = '(//android.widget.HorizontalScrollView)[2]/android.view.ViewGroup/android.view.ViewGroup'
+    APP_WATCHLIST_TABS = '//android.widget.HorizontalScrollView//android.view.ViewGroup[@content-desc]'
     APP_WATCHLIST_LIST_ITEM = '(//android.widget.ScrollView//android.view.ViewGroup[android.view.ViewGroup])[position() > 1]'
     APP_WATCHLIST_SYMBOL = '//android.widget.ScrollView//android.view.ViewGroup[contains(@content-desc, ",")]/android.widget.TextView[2]'
     APP_MSG_NO_ITEMS_AVAILABLE = '//android.widget.TextView[@text="No items available"]'
@@ -236,8 +236,6 @@ class DataTestID(str, Enum):
     
     APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]/parent::*'
     APP_SYMBOL_PREFERENCE_OPTION_CHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]/parent::*'
-
-    # '//android.widget.ScrollView//android.view.ViewGroup[@content-desc][//android.widget.TextView]'
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -717,7 +715,6 @@ class DataTestID(str, Enum):
     ACCOUNT_TYPE_TAG = 'account-type-tag'
     APP_ACCOUNT_TYPE_TAG = '//android.widget.TextView[@text="DEMO"]'
     ACCOUNT_NAME = 'account-name'
-    # APP_ACCOUNT_NAME = '(//android.view.ViewGroup/android.widget.TextView)[3]'
     APP_ACCOUNT_NAME = '//android.widget.FrameLayout[@resource-id="android:id/content"]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.widget.TextView[1]'
     ACCOUNT_ID = 'account-id'
     APP_ACCOUNT_ID = '(//android.view.ViewGroup/android.widget.TextView)[4]'

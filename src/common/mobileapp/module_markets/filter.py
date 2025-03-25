@@ -5,7 +5,7 @@ from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import find_element_by_xpath_with_wait, find_presence_element_by_testid, get_label_of_element, spinner_element, find_visible_element_by_testid, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import find_element_by_testid, find_element_by_xpath_with_wait, find_presence_element_by_testid, find_visible_element_by_xpath, get_label_of_element, spinner_element, find_visible_element_by_testid, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.mobileapp.module_sub_menu.utils import menu_button
 from enums.main import Menu
@@ -99,13 +99,21 @@ def handle_alert_success(driver):
     spinner_element(driver)
     
     # Retrieve the error message notification
-    error_message_notification = find_presence_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION)
+    message_notification = find_presence_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_DESCRIPTION)
     
     # Extract the text (label) of the error message from the notification element.
-    error_message = get_label_of_element(element=error_message_notification)
+    label_message = get_label_of_element(element=message_notification)
     
     # Attach the extracted error message to the logs for reporting purposes.
-    attach_text(error_message, name="Message:")
+    attach_text(label_message, name="Message:")
+    
+    btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE)
+    click_element(element=btn_close)
+    
+    return label_message
+    
+    
+    
     
     
 
@@ -147,7 +155,7 @@ def market_watchlist_filter(driver):
         # Redirect to the Markets page
         menu_button(driver, menu=Menu.MARKET)
         
-        delay(2)
+        delay(0.5)
         
         # Click on the filter icon
         filter = find_element_by_xpath_with_wait(driver, DataTestID.APP_SYMBOL_PREFERENCE)
@@ -184,6 +192,10 @@ def market_watchlist_filter(driver):
         # # Choose a random checkbox from the combined list
         random_checkbox = random.choice(all_checkboxes)
         
+        # Get the correct parent using XPath position
+        symbol_name = find_element_by_xpath(driver, f"({DataTestID.APP_SYMBOL_PREFERENCE_OPTION_CHECKED} | {DataTestID.APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED})[{all_checkboxes.index(random_checkbox) + 1}]/..")
+        filter_symbol_name = get_label_of_element(element=symbol_name)  # Extract and clean up the text
+        
         # The code checks whether the randomly selected checkbox is part of the unchecked list:
         if random_checkbox in unchecked_checkboxes: # If the checkbox is originally unchecked
             # Check the checkbox
@@ -195,37 +207,27 @@ def market_watchlist_filter(driver):
             action = "unchecked"
             expected_symbol_visibility = False  # If unchecked, the symbol should not be visible
 
-
-        # Get the correct parent using XPath position
-        symbol_name = find_element_by_xpath(driver, f"({DataTestID.APP_SYMBOL_PREFERENCE_OPTION_CHECKED} | {DataTestID.APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED})[{all_checkboxes.index(random_checkbox) + 1}]/..")
-        filter_symbol_name = get_label_of_element(element=symbol_name)  # Extract and clean up the text
-
         # Print the action taken and symbol name
         print(f"Checkbox for symbol '{filter_symbol_name}' {action}.")
-
-        # If the filter symbol is 'Show all', get the full list of symbols
-        # if filter_symbol_name == 'Show all':
-        #     filter_symbols = find_list_of_elements_by_xpath(driver, "//div[contains(@data-testid, 'symbol-preference-option-')]")
-        #     print(len(filter_symbols))
-        #     filter_symbol_list = [get_label_of_element(element=symbol) for symbol in filter_symbols]
-        #     print(f"Full list of symbols: {filter_symbol_list} {action}")
-        # else:
-        #     # Remain as current, no change to symbol
-        #     filter_symbol_list = [filter_symbol_name]
 
         # Save changes
         save_button = find_element_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_SAVE)
         click_element(element=save_button)
 
         alert_msg = handle_alert_success(driver)
-        # if alert_msg != "All changes are saved.":
-        #     raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+        if alert_msg != "All changes are saved.":
+            raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+        
+
         
         # Navigate to the selected category
-        # watchlist_option = find_visible_element_by_testid(driver, data_testid=f"tab-{selected_category_text}")
-        # click_element(element=watchlist_option)
-        
-        # delay(0.5)
+        watchlist_option = find_list_of_elements_by_xpath(driver, DataTestID.APP_WATCHLIST_TABS)
+        for option in watchlist_option:
+            label_watchlist = get_label_of_element(element=option)
+            print(label_watchlist)
+            if label_watchlist == selected_category_text:
+                click_element(element=watchlist_option)
+                break
         
         # if filter_symbol_name == "Show all":
         #     if random_checkbox in unchecked_checkboxes:
