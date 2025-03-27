@@ -13,7 +13,7 @@ from constants.helper.element import click_element, find_element_by_testid, java
 
 def accountInformation(driver):
     # To open the account linkage profile
-    accountInfo = find_element_by_testid(driver, data_testid=DataTestID.ACCOUNT_SELECTOR.value)
+    accountInfo = find_element_by_testid(driver, data_testid=DataTestID.ACCOUNT_SELECTOR)
     javascript_click(driver, element=accountInfo)
     
     delay(2)
@@ -45,19 +45,19 @@ def button_setting(driver, setting_option: str):
     """
     try:
         # Click on the settings button to open the dropdown
-        btn_setting = find_element_by_testid(driver, data_testid=DataTestID.SETTING_BUTTON.value)
+        btn_setting = find_element_by_testid(driver, data_testid=DataTestID.SETTING_BUTTON)
         click_element(element=btn_setting)
         
         button_testids = {
-            "switch-to-live": DataTestID.SETTING_OPTION_SWITCH_TO_LIVE.value,
-            "switch-to-demo": DataTestID.SETTING_OPTION_SWITCH_TO_DEMO.value,
-            "open-demo-account": DataTestID.SETTING_OPTION_OPEN_DEMO_ACCOUNT.value,
-            "notification-setting": DataTestID.SETTING_OPTION_NOTIFICATION_SETTING.value,
-            "language": DataTestID.SETTING_OPTION_LANGUGAGE.value,
-            "change-password": DataTestID.SETTING_OPTION_CHANGE_PASSWORD.value,
-            "linked-device": DataTestID.SETTING_OPTION_LINKED_DEVICE.value,
-            "contact-information": DataTestID.SETTING_OPTION_CONTACT_INFORMATION.value,
-            "logout": DataTestID.SETTING_OPTION_LOGOUT.value
+            "switch-to-live": DataTestID.SETTING_OPTION_SWITCH_TO_LIVE,
+            "switch-to-demo": DataTestID.SETTING_OPTION_SWITCH_TO_DEMO,
+            "open-demo-account": DataTestID.SETTING_OPTION_OPEN_DEMO_ACCOUNT,
+            "notification-setting": DataTestID.SETTING_OPTION_NOTIFICATION_SETTING,
+            "language": DataTestID.SETTING_OPTION_LANGUGAGE,
+            "change-password": DataTestID.SETTING_OPTION_CHANGE_PASSWORD,
+            "linked-device": DataTestID.SETTING_OPTION_LINKED_DEVICE,
+            "contact-information": DataTestID.SETTING_OPTION_CONTACT_INFORMATION,
+            "logout": DataTestID.SETTING_OPTION_LOGOUT
         }
         
         button_testid = button_testids.get(setting_option)
@@ -122,7 +122,7 @@ def button_theme(driver, theme_option=None):
             
             # Click on the theme switch button to open the theme dropdown
             # setting = find_element_by_testid(driver, data_testid="switch-theme-button")
-            setting = find_element_by_testid(driver, data_testid=DataTestID.SWITCH_THEME_BUTTON.value)
+            setting = find_element_by_testid(driver, data_testid=DataTestID.SWITCH_THEME_BUTTON)
             click_element(setting)
             
             # Wait for and click the dropdown option for the current theme (Light, Dark, or System)

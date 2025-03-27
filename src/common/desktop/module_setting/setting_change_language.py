@@ -22,7 +22,7 @@ def configure_language_setting(driver):
             button_setting(driver, setting_option="language")
 
             # Step 2: Find the list of available languages
-            languages_options = find_list_of_elements_by_xpath(driver, f"//*[@data-testid='{DataTestID.SETTING_OPTION_LANGUGAGE.value}']//li")
+            languages_options = find_list_of_elements_by_xpath(driver, f"//*[@data-testid='{DataTestID.SETTING_OPTION_LANGUGAGE}']//li")
 
             # Step 3: Randomly select a language
             random_language = random.choice(languages_options)
@@ -49,7 +49,7 @@ def configure_language_setting(driver):
             expected_text = language_map.get(selected_language)
 
             # Step 5: Verify if the change is reflected
-            submit_button = find_element_by_testid(driver, data_testid=DataTestID.SIDE_BAR_OPTION_TRADE.value)
+            submit_button = find_element_by_testid(driver, data_testid=DataTestID.SIDE_BAR_OPTION_TRADE)
             button_text = submit_button.text.strip()
 
             # Compare the button text with the expected text

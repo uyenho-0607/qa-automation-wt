@@ -23,8 +23,8 @@ def get_chart_symbol_name(driver):
     """
     try:
         # Find the elements that contain the symbol name    
-        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value):
-            chart_symbol_name = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID.value)
+        if is_element_present_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID):
+            chart_symbol_name = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID)
             # # Extract the symbol name from the first element if it exists
             chart_symbolName = get_label_of_element(element=chart_symbol_name).split()[0]
             return chart_symbolName
@@ -65,8 +65,8 @@ def chart_minMax(driver, chart_fullscreen: str):
         
         # Determine the data-testid based on the button type
         button_testids = {
-            "toggle": DataTestID.CHART_TOGGLE_FULLSCREEN.value,
-            "exit": DataTestID.CHART_EXIT_FULLSCREEN.value
+            "toggle": DataTestID.CHART_TOGGLE_FULLSCREEN,
+            "exit": DataTestID.CHART_EXIT_FULLSCREEN
         }
         
         button_testid = button_testids.get(chart_fullscreen)
@@ -104,7 +104,7 @@ def chart_trade_modal_close(driver):
     """
     try:
         # Find all elements matching the attribute selector
-        button_trade = find_element_by_testid(driver, data_testid=DataTestID.CHART_TRADE_BUTTON_CLOSE.value)
+        button_trade = find_element_by_testid(driver, data_testid=DataTestID.CHART_TRADE_BUTTON_CLOSE)
         click_element(element=button_trade)
 
     except Exception as e:

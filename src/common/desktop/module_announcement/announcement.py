@@ -52,7 +52,7 @@ def modal_announcement(driver, button: str = "got-it"):
         spinner_element(driver)
 
         # Wait for the feature announcement modal to be visible
-        find_visible_element_by_testid(driver, data_testid=DataTestID.FEATURE_ANNOUNCEMENT_MODAL.value)
+        find_visible_element_by_testid(driver, data_testid=DataTestID.FEATURE_ANNOUNCEMENT_MODAL)
 
         # If the modal is visible, interact with it (click "Got it")
         handle_modal_announcement(driver, button)
@@ -94,10 +94,10 @@ def handle_modal_announcement(driver, button_type: str):
     try:
         # Determine the data-testid based on the button type
         button_testids = {
-            "got-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_GOT_IT_BUTTON.value,
-            "try-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON.value,
-            "media-left": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON.value,
-            "media-right": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON.value
+            "got-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_GOT_IT_BUTTON,
+            "try-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON,
+            "media-left": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON,
+            "media-right": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON
         }
         
 

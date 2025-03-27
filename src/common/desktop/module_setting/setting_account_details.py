@@ -23,7 +23,7 @@ def sum_by_currency(driver):
         currency_totals = defaultdict(lambda: Decimal('0'))
         
         # Get the each account balance details
-        amounts = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_OPTION_BALANCE.value)
+        amounts = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_OPTION_BALANCE)
         
         for amount in amounts:
             text = amount.text.strip()
@@ -35,7 +35,7 @@ def sum_by_currency(driver):
                 currency_totals[currency] += value
         
         # Get the total account balance details
-        total_balance_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_TOTAL_BALANCE.value)
+        total_balance_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.ACCOUNT_TOTAL_BALANCE)
         for total_balance_element in total_balance_elements:
             label_total_balance = get_label_of_element(element=total_balance_element)
 
