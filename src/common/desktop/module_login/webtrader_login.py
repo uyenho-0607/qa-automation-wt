@@ -195,49 +195,6 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_login_result333(driver, button: AnnouncementModal, expectation: AlertType, selected_language: str = None):
-    """
-    Handles the login result by verifying the presence of the expected text based on the selected language.
-    """
-
-    # Language-specific verification map
-    language_specific_text = {
-        "English": "Trade",
-        "简体中文": "交易",
-        "繁体中文": "交易",
-        "ภาษาไทย": "เทรด",
-        "Tiếng Việt": "Giao dịch",
-        "Melayu": "Perdagangan",
-        "Bahasa Indonesia": "Berdagang",
-        "Japanese": "取引",
-        "Korean": "거래"
-    }
-    
-    # Wait till the spinner icon no longer display
-    spinner_element(driver)
-    
-    # Determine the text to wait for based on the selected language
-    verification_text = language_specific_text.get(selected_language, "Trade")
-
-    # Check if the test is present
-    if wait_for_text_to_be_present_in_element_by_testid(driver, DataTestID.SIDE_BAR_OPTION_TRADE, text=verification_text):
-        print("Successfully Logged In")
-        
-        # If login succeeded but failure was expected, log the unexpected success and fail the test
-        if expectation == AlertType.FAILURE:
-            attach_text("Expected failure, but login succeeded. Test failed.", name="Unexpected Success")
-            assert False, "Expected failure, but login succeeded."
-        
-        # If login is successful and no failure was expected, process the modal announcement (if applicable)
-        modal_announcement(driver, button)
-        return
-    
-    else:
-        # If account balance was not found, the login failed. Handle the error scenario.
-        handle_alert_error(driver, expectation)
-
-
-
 def handle_login_result(driver, button: AnnouncementModal, expectation: AlertType, selected_language: str = None):
     """
     Handles the login result by verifying the presence of the expected text based on the selected language.
