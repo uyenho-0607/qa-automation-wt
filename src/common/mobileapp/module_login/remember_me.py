@@ -2,18 +2,17 @@
 
 
 
-from common.mobileapp.module_login.language import select_english_language
 from constants.element_ids import DataTestID
-from enums.main import AccountType, CredentialType, LoginResultState
+from enums.main import AccountType, CredentialType, AlertType, Setting
 
-from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element, find_element_by_xpath, find_list_of_elements_by_xpath, get_label_of_element, find_presence_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, is_element_present_by_xpath
+from constants.helper.element_android_app import click_element, find_element_by_xpath, get_label_of_element, find_presence_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, is_element_present_by_xpath
 
 from data_config.generate_dummy_data import generate_random_credential
 from common.mobileapp.module_setting.utils import button_setting, change_password
 from common.mobileapp.module_login.utils import select_account_type, click_splash_screen, wt_user_login
+from common.mobileapp.module_login.language import select_english_language
 
 
 
@@ -44,7 +43,7 @@ def verify_login_fields(driver, expected_username, expected_password):
 
 def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None, 
                                 account_type: AccountType = AccountType.LIVE, 
-                                expectation: LoginResultState = LoginResultState.SUCCESS,
+                                expectation: AlertType = AlertType.SUCCESS,
                                 credential_type: CredentialType = CredentialType.TOGGLE_REMEMBER_ME,
                                 kick_user: bool = True):
     
@@ -78,13 +77,13 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None,
         # Log the user out
         if kick_user:
             # Click on the logout button
-            button_setting(driver, setting_option="logout")
+            button_setting(driver, setting_option=Setting.LOGOUT)
             
             verify_login_fields(driver, expected_username=username, expected_password=password)
         
         else:
             # Click on change password button
-            button_setting(driver, setting_option="change-password")
+            button_setting(driver, setting_option=Setting.CHANGE_PASSWORD)
             
             credential = generate_random_credential(length=12)
             
@@ -106,7 +105,7 @@ def toggle_remember_me_checkbox(driver, server: str, testcase_id: str = None,
                 click_element(element=btn_ok)
                 
                 # Log the user out
-                button_setting(driver, setting_option="logout", menu=False)
+                button_setting(driver, setting_option=Setting.LOGOUT, menu=False)
                 
                 verify_login_fields(driver, expected_username=username, expected_password=credential)
                 

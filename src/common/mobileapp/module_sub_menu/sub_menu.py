@@ -1,8 +1,8 @@
+from enums.main import Menu
 from constants.element_ids import DataTestID
+
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import click_element, find_element_by_xpath_with_wait
-from enums.main import Menu
-
 
 
 """
@@ -26,11 +26,11 @@ def menu_button(driver, menu: Menu):
         
         # Determine the data-testid based on the button type
         button_testids = {
-            Menu.HOME: DataTestID.APP_MENU_OPTION_HOME.value,
-            Menu.MARKET: DataTestID.APP_MENU_OPTION_MARKET.value,
-            Menu.TRADE: DataTestID.APP_MENU_OPTION_TRADE.value,
-            Menu.INFO: DataTestID.APP_MENU_OPTION_INFO.value,
-            Menu.ASSETS: DataTestID.APP_MENU_OPTION_ASSETS.value
+            Menu.HOME: DataTestID.APP_MENU_OPTION_HOME,
+            Menu.MARKET: DataTestID.APP_MENU_OPTION_MARKET,
+            Menu.TRADE: DataTestID.APP_MENU_OPTION_TRADE,
+            Menu.INFO: DataTestID.APP_MENU_OPTION_INFO,
+            Menu.ASSETS: DataTestID.APP_MENU_OPTION_ASSETS
         }
         
         button_testid = button_testids.get(menu)

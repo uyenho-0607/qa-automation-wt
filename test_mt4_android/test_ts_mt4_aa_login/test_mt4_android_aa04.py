@@ -1,5 +1,5 @@
 import allure
-from enums.main import AccountType, CredentialType, LoginResultState, Server
+from enums.main import AccountType, CredentialType, AlertType, Server
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
@@ -23,8 +23,8 @@ class TC_MT4_aA04():
         """
     )
     
-    def test_tc04(self, android_driver):
-        self.driver = android_driver
+    def test_tc04(self, androidDriver):
+        self.driver = androidDriver
         main_driver = self.driver
         
         # Get the class name dynamically
@@ -34,7 +34,7 @@ class TC_MT4_aA04():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, testcase_id="TC01", credential_type=CredentialType.INVALID_CREDENTIAL, expectation=LoginResultState.FAILURE)
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, testcase_id="TC01", credential_type=CredentialType.INVALID_CREDENTIAL, expectation=AlertType.FAILURE)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

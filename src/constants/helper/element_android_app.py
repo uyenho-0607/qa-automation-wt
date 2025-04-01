@@ -45,11 +45,6 @@ def find_element_by_testid_with_wait(driver, data_testid, duration: int | None =
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.element_to_be_clickable((AppiumBy.XPATH, data_test_id_string)))
 
-
-# Use WebDriver to find for element to according to specified css_selector string
-def find_element_by_css(driver, css_selector) -> WebElement:
-    return driver.find_element(AppiumBy.CSS_SELECTOR, css_selector)
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 FIND LIST OF ELEMENT BY XPATH / TESTID
@@ -64,10 +59,6 @@ def find_list_of_elements_by_xpath(driver, xpath_string) -> list[WebElement]:
 def find_list_of_elements_by_testid(driver, data_testid):
     data_test_id_string = data_test_id_pattern.format(data_testid)
     return driver.find_elements(AppiumBy.XPATH, data_test_id_string)
-
-# Use WebDriver to find for list of elements to according to specified css_selector string
-def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
-    return driver.find_elements(AppiumBy.CSS_SELECTOR, css_selector)
 
 
 """
@@ -152,7 +143,6 @@ def find_presence_element_by_testid(driver, data_testid, duration: int | None = 
     # Wait for the spinner to appear
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, data_test_id_string)))
 
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 POPULATE ELEMENT
@@ -185,7 +175,7 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
         
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                TO AUTO SCROLL INTO VIEW
+                                                TO CLEAR INPUT FIELD
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
@@ -263,7 +253,6 @@ def get_label_of_element(element) -> str:
     else:
         element.text
     
-    # return label if label else ""
     return label
 
 """
@@ -275,7 +264,7 @@ def get_label_of_element(element) -> str:
 # Checking the loading spinner
 def spinner_element(driver):
     try:
-        invisibility_of_element_by_testid(driver, data_testid=DataTestID.SPIN_LOADER.value)
+        invisibility_of_element_by_testid(driver, data_testid=DataTestID.SPIN_LOADER)
     except Exception as e:
         # Attach a screenshot with the function name in the filename
         take_screenshot(driver, f"Exception_Screenshot")
@@ -291,3 +280,46 @@ def bulk_spinner_element(driver, timeout=10):
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
         raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow")
+    
+    
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                               SCROLLABLE
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+# Scroll Horizontal (Right)
+def scroll_horizontally_right_scrollview(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollForward()')
+
+# Scroll Horizontal (Left)
+def scroll_horizontally_left(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollBackward()')
+
+# Scrolls down
+def scroll_vertically_down(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.ScrollView")).scrollForward()')
+
+# Scrolls up
+def scroll_vertically_up(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.ScrollView")).scrollBackward()')
+    
+    
+def scroll_horizontally_right_scrollview(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true)className("android.widget.ScrollView")).setAsHorizontalList().scrollForward()')
+
+
+def swipe_left(driver, element, percent=0.75):
+    """
+    Perform a left swipe on the given element.
+    
+    :param driver: Appium WebDriver instance
+    :param element: WebElement to swipe on
+    :param percent: Percentage of the element's width to swipe (default is 75%)
+    """
+    driver.execute_script("mobile: swipeGesture", {
+        "elementId": element.id,
+        "direction": "left",
+        "percent": percent
+    })

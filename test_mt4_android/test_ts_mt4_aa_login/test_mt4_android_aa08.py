@@ -1,5 +1,5 @@
 import allure
-from enums.main import Server, LoginResultState
+from enums.main import Server, AlertType
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
@@ -22,8 +22,8 @@ class TC_MT4_aA08():
         """
     )
     
-    def test_tc08(self, android_driver):
-        self.driver = android_driver
+    def test_tc08(self, androidDriver):
+        self.driver = androidDriver
         main_driver = self.driver
 
         # Get the class name dynamically
@@ -35,7 +35,7 @@ class TC_MT4_aA08():
                 username, password = toggle_remember_me_checkbox(driver=main_driver, server=Server.MT4)
                 
             with allure.step("Input incorrect credential"):
-                login_wt(driver=main_driver, server=Server.MT4, testcase_id="TC02", expectation=LoginResultState.FAILURE) 
+                login_wt(driver=main_driver, server=Server.MT4, testcase_id="TC02", expectation=AlertType.FAILURE) 
 
             with allure.step("Terminate and relaunch the current active app package"):
                 current_app_package = main_driver.current_package  # Get the active app package

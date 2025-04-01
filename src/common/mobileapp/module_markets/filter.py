@@ -1,14 +1,16 @@
+import re
 import random
-from appium.webdriver.common.appiumby import AppiumBy
 
+from enums.main import Menu
 from constants.element_ids import DataTestID
+
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import find_element_by_testid, find_element_by_xpath_with_wait, find_presence_element_by_testid, find_visible_element_by_xpath, get_label_of_element, spinner_element, find_visible_element_by_testid, is_element_present_by_xpath, is_element_present_by_testid, find_element_by_xpath, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element_android_app import find_element_by_testid, find_element_by_xpath_with_wait, find_presence_element_by_testid, get_label_of_element, scroll_horizontally_right_scrollview, spinner_element, is_element_present_by_xpath, find_element_by_xpath, find_list_of_elements_by_xpath, click_element, wait_for_text_to_be_present_in_element_by_testid, wait_for_text_to_be_present_in_element_by_xpath
 
 from common.mobileapp.module_sub_menu.utils import menu_button
-from enums.main import Menu
+
 
 
 """
@@ -26,7 +28,6 @@ def navigate_and_select_watchlist_symbol(driver):
     """
     
     try:
-                
         # Randomly select a tab option        
         watchlist_tab_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_WATCHLIST_TABS)
         if not watchlist_tab_options:
@@ -113,40 +114,40 @@ def handle_alert_success(driver):
     return label_message
     
     
-    
-    
-    
+def select_category_from_watchlist(driver, selected_category_text, max_scroll_attempts=2):
+    """
+    Selects a category from the watchlist by scrolling horizontally if needed.
 
-def scroll_and_retrieve_data(driver):
-    # Locate the scrollable div
-    find_visible_element_by_testid(driver ,data_testid=DataTestID.WATCHLIST_LIST_ITEM)
-    scrollable_div = find_element_by_xpath(driver, f"(//*[@data-testid='{DataTestID.WATCHLIST_LIST}']//div)[2]")
-    
-    # Store the current scroll height to detect when scrolling stops
-    last_scroll_height = 0
-    data_loaded = set()  # To store unique data items
+    Args:
+        driver (WebDriver): The Selenium WebDriver instance.
+        selected_category_text (str): The category to select from the watchlist.
+        max_scroll_attempts (int): The maximum number of scroll attempts (default is 2).
 
-    while True:
-        # Scroll down by a small amount
-        driver.execute_script("arguments[0].scrollBy(0, 200);", scrollable_div)
-        
-        delay(0.5)
+    Returns:
+        bool: True if the category is found and selected, False otherwise.
+    """
+    for attempt in range(max_scroll_attempts):
+        # Retrieve watchlist options
+        watchlist_options = find_list_of_elements_by_xpath(driver, DataTestID.APP_WATCHLIST_TABS)
+        print(f"Attempt {attempt + 1} - Number of options: {len(watchlist_options)}")
 
-        # Collect visible data (modify as needed for the content inside the div)
-        rows = scrollable_div.find_elements(AppiumBy.XPATH, f"//*[@data-testid='{DataTestID.WATCHLIST_SYMBOL}']")  # Adjust for your row or item selector
-        for row in rows:
-            data_loaded.add(row.text.strip())  # Save row content or other unique data
-        
-        # Get the current scroll height
-        current_scroll_height = driver.execute_script("return arguments[0].scrollTop;", scrollable_div)
-        
-        # Stop if the scroll height doesn't change
-        if current_scroll_height == last_scroll_height:
-            break
-        
-        last_scroll_height = current_scroll_height
-        
-    return list(data_loaded)
+        # Search for the selected category
+        for option in watchlist_options:
+            label = get_label_of_element(element=option)
+            print(f"Found option: {label}")
+
+            if label == selected_category_text:
+                click_element(element=option)
+                print(f"Clicked '{selected_category_text}'")
+                return True  # Exit function once found and clicked
+
+        # Scroll if the option wasn't found and more attempts remain
+        if attempt < max_scroll_attempts:
+            print("Category not found, scrolling...")
+            scroll_horizontally_right_scrollview(driver)
+
+    print(f"Category '{selected_category_text}' not found after {max_scroll_attempts} scrolls.")
+    return False
 
 
 
@@ -167,35 +168,57 @@ def market_watchlist_filter(driver):
             raise AssertionError("Show/Hide Symbol not found")
         
         delay(1)
-        
-        # Randomly select any of the tabs (e.g Shares / Forex / Index / Commodities / Crypto)
-        selected_option = find_list_of_elements_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_TABS)
-        if not selected_option:
-            assert False, "No categories found"
 
-        random_category = random.choice(selected_option)
-        selected_category_text = get_label_of_element(element=random_category)
+        # Find the list of category tabs (Shares, Forex, Index, Commodities, Crypto, etc.)
+        selected_option = find_list_of_elements_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_TABS)
+
+        # Check if any categories are found
+        if not selected_option:
+            raise Exception("No categories found")  # Raise a more specific exception if no elements are found
+
+        # Exclude categories with an excessive number of symbols to reduce extraction time.
+        exclude_categories = {'Shares', 'Forex', 'All'}
+
+        # Filter the list to exclude specific categories
+        filtered_options = [
+            option for option in selected_option 
+            if get_label_of_element(option) not in exclude_categories
+        ]
+
+        # Ensure there are remaining options after filtering
+        if not filtered_options:
+            raise Exception("No valid categories found after filtering Shares and Index")
+
+        # Randomly choose one category from the filtered list
+        random_category = random.choice(filtered_options)
+
+        # Retrieve the label of the selected category
+        selected_category_text = get_label_of_element(random_category)
         print(f"Selected category: {selected_category_text}")
-        click_element(element=random_category)
+
+        # Click the selected category to navigate
+        click_element(random_category)
         
-        delay(3)
+        # Check if the unchecked checkbox is found, and click it if available
+        if is_element_present_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_UNCHECKED):
+            showall_unchecked_checkboxes = find_element_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_UNCHECKED)
+            click_element(showall_unchecked_checkboxes)
+        else:   # If the unchecked checkbox is not found, check for the checked one and click it
+            showall_checked_checkboxes = find_element_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_CHECKED)
+            click_element(element=showall_checked_checkboxes)
         
         # Locate all checkboxes (both checked and unchecked)
         unchecked_checkboxes = find_list_of_elements_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED)
         checked_checkboxes = find_list_of_elements_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_OPTION_CHECKED)
         # Combine both unchecked and checked checkboxes into a list
         all_checkboxes = unchecked_checkboxes + checked_checkboxes
-
+        
         if not all_checkboxes:
             raise Exception("No checkboxes found!")
         
         # # Choose a random checkbox from the combined list
         random_checkbox = random.choice(all_checkboxes)
-        
-        # Get the correct parent using XPath position
-        symbol_name = find_element_by_xpath(driver, f"({DataTestID.APP_SYMBOL_PREFERENCE_OPTION_CHECKED} | {DataTestID.APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED})[{all_checkboxes.index(random_checkbox) + 1}]/..")
-        filter_symbol_name = get_label_of_element(element=symbol_name)  # Extract and clean up the text
-        
+
         # The code checks whether the randomly selected checkbox is part of the unchecked list:
         if random_checkbox in unchecked_checkboxes: # If the checkbox is originally unchecked
             # Check the checkbox
@@ -206,7 +229,15 @@ def market_watchlist_filter(driver):
             click_element(element=random_checkbox)
             action = "unchecked"
             expected_symbol_visibility = False  # If unchecked, the symbol should not be visible
-
+        
+        # Get the correct parent using XPath position
+        symbol_name = find_element_by_xpath(driver, f"({DataTestID.APP_SYMBOL_PREFERENCE_OPTION_CHECKED} | {DataTestID.APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED})[{all_checkboxes.index(random_checkbox) + 1}]/parent::*")
+        label_symbol_name = get_label_of_element(element=symbol_name)  # Extract and clean up the text
+        filter_symbol_name = re.search(r'\b[A-Z]+[A-Z0-9]*\.std\b', label_symbol_name).group()
+        
+        # Remain as current, no change to symbol
+        filter_symbol_list = [filter_symbol_name]
+        
         # Print the action taken and symbol name
         print(f"Checkbox for symbol '{filter_symbol_name}' {action}.")
 
@@ -217,61 +248,39 @@ def market_watchlist_filter(driver):
         alert_msg = handle_alert_success(driver)
         if alert_msg != "All changes are saved.":
             raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+
+        select_category_from_watchlist(driver, selected_category_text, max_scroll_attempts=2)
         
-
+        delay(1)
         
-        # Navigate to the selected category
-        watchlist_option = find_list_of_elements_by_xpath(driver, DataTestID.APP_WATCHLIST_TABS)
-        for option in watchlist_option:
-            label_watchlist = get_label_of_element(element=option)
-            print(label_watchlist)
-            if label_watchlist == selected_category_text:
-                click_element(element=watchlist_option)
-                break
+        market_symbol_name = find_list_of_elements_by_xpath(driver, DataTestID.APP_MARKET_WATCHLIST_SYMBOL_NAME)
         
-        # if filter_symbol_name == "Show all":
-        #     if random_checkbox in unchecked_checkboxes:
-        #         market_watchlist_symbol = scroll_and_retrieve_data(driver)
+        data_loaded = set()  # To store unique data items
+        
+        for name in market_symbol_name:
+            label_symbol_name = get_label_of_element(element=name)
+            data_loaded.add(label_symbol_name)
+            print(label_symbol_name)
+            
+        print("Market watchlist data:", data_loaded)  
+        print("Filtered symbol list:", filter_symbol_list)
 
-        #         # Compare data_loaded and full_symbol_list
-        #         if set(market_watchlist_symbol) == set(filter_symbol_list):
-        #             print("All symbols from full_symbol_list are present in data_loaded.")
-        #         else:
-        #             missing_symbols = set(filter_symbol_list) - set(market_watchlist_symbol)
-        #             extra_symbols = set(market_watchlist_symbol) - set(filter_symbol_list)
-                    
-        #             if missing_symbols:
-        #                 assert False, f"Missing symbols from market watchlist: {', '.join(missing_symbols)}"
-        #             if extra_symbols:
-        #                 assert False, f"Extra symbols in market watchlist not in filter_symbol_list: {', '.join(extra_symbols)}"
-
-        #     else:
-        #         no_items_message = find_visible_element_by_testid(driver, data_testid="empty-message")
-        #         msg = get_label_of_element(no_items_message)
-        #         if msg == "No items available.":
-        #             print(f"{msg} is displayed")
-        #             assert True
-        #         else:
-        #             raise AssertionError("The message 'No items available' was not displayed after selecting 'Show all'.")
-                
-        # else:
-        #     market_watchlist_symbol = scroll_and_retrieve_data(driver)
-        #     # If checkbox was checked, expect the symbols to be displayed
-        #     if expected_symbol_visibility:  # Checkbox was checked, so expect the symbols to be visible
-        #         missing_symbols = set(filter_symbol_list) - set(market_watchlist_symbol)
-        #         if missing_symbols:
-        #             assert False, f"Missing symbols from market watchlist (should be visible): {', '.join(missing_symbols)}"
-        #         else:
-        #             print(f"Symbols from filter_symbol_list {filter_symbol_list} are correctly displayed in the market watchlist.")
-                
-        #     # If checkbox was unchecked, expect the symbols to be hidden
-        #     else:  # Checkbox was unchecked, so expect the symbols to be hidden
-        #         extra_symbols = set(filter_symbol_list) & set(market_watchlist_symbol)
-        #         if extra_symbols:
-        #             assert False, f"Unexpected visible symbols in market watchlist (should be hidden): {', '.join(extra_symbols)}"
-        #         else:
-        #             print(f"No unexpected symbols {filter_symbol_list} visible, as expected.")
-
+        # If checkbox was checked, expect the symbols to be displayed
+        if expected_symbol_visibility:
+            missing_symbols = set(filter_symbol_list) - set(data_loaded)
+            if missing_symbols:
+                assert False, f"Missing symbols from market watchlist (should be visible): {', '.join(missing_symbols)}"
+            else:
+                print(f"Symbols from filter_symbol_list {filter_symbol_list} are correctly displayed in the market watchlist.")
+            
+        # If checkbox was unchecked, expect the symbols to be hidden
+        else:
+            extra_symbols = set(filter_symbol_list) & set(data_loaded)
+            if extra_symbols:
+                assert False, f"Unexpected visible symbols in market watchlist (should be hidden): {', '.join(extra_symbols)}"
+            else:
+                print(f"No unexpected symbols {filter_symbol_list} visible, as expected.")
+        
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

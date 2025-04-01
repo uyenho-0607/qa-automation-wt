@@ -49,7 +49,7 @@ def inspect_my_trade_orders(driver, symbol_name, order_type):
 def verify_no_orders_in_my_trades(driver):
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer displays
         spinner_element(driver)

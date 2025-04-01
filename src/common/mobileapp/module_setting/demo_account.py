@@ -5,7 +5,7 @@ import re
 from tabulate import tabulate
 from difflib import get_close_matches
 
-from enums.main import Setting
+from enums.main import Menu, Setting
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
@@ -407,7 +407,7 @@ def validate_account_details(driver, demo_account_details):
     assert balance_value == demo_account_details["Deposit"], "Account balance mismatch"
     
     # Redirect to asset page
-    menu_button(driver, menu="assets")
+    menu_button(driver, menu=Menu.ASSETS)
 
     # Validate the Account Name displayed matches the expected value from demo_account_details
     account_name = get_label_of_element(find_visible_element_by_xpath(driver, DataTestID.APP_ACCOUNT_NAME))

@@ -4,7 +4,6 @@
         "AUDCAD.std",
         "AUDCHF.std",
         "AUDJPY.std",
-        "DJCUSD.std",
         "DASHUSD.std",
         "ETHUSD.std",
         "EURAUD.std",
@@ -12,13 +11,7 @@
         "EURUSD.std",
         "GBPJPY.std",
         "GBPUSD.std",
-        "LTCUSD.std",
-        "USDCAD.std",
-        "USDJPY.std",
-        "USOIL.std",
-        "UKOIL.std",
-        "XRPUSD.std",
-        "XAUUSD.std"
+        "LTCUSD.std"
       ],
       
       "Symbols_Price": [

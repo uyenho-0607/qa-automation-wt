@@ -72,7 +72,6 @@ def select_and_verify_language(driver):
             # Step 5: Verify if the change is reflected
             submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT)
             button_text = get_label_of_element(submit_button).strip()
-            # button_text = submit_button.text.strip()
 
             # Get the expected value from the language map
             expected_text = language_map.get(selected_language)

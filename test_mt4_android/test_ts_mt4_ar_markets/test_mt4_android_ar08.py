@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, AccountType, CredentialType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
@@ -24,8 +24,8 @@ class TC_MT4_aR08():
         """
     )
     
-    def test_tc08(self, android_driver):
-        self.driver = android_driver
+    def test_tc08(self, androidDriver):
+        self.driver = androidDriver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -36,8 +36,9 @@ class TC_MT4_aR08():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4)
-                
+                # login_wt(driver=main_driver, server=Server.MT4)
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
+
             with allure.step("Market Watchlist"):
                 market_watchlist_filter(driver=main_driver)
 

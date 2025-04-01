@@ -63,6 +63,7 @@ class DataTestID(str, Enum):
     APP_RESET_PASSWORD_EMAIL_ADDRESS = '//android.widget.EditText[@text="Enter your email address"]'
     APP_RESET_PASSWORD_ACCOUNT_ID = '//android.widget.EditText[@text="Enter your account ID"]'
     APP_RESET_PASSWORD_SUBMIT = '//android.view.ViewGroup[@content-desc="Submit"]'
+    
     APP_HELP_IS_ON_THE_WAY = '//android.widget.TextView[@text="Help is on the way!"]'
     APP_CONTACT_SUPPORT = '//android.widget.TextView[@text="Contact Support"]'
     APP_BACK_TO_LOGIN_SCREEN = '//android.widget.TextView[@text="Back to login screen"]'
@@ -123,9 +124,7 @@ class DataTestID(str, Enum):
     FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON = 'feature-announcement-modal-try-it-now-button'
     FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON = 'feature-announcement-modal-media-left-button'
     FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON = 'feature-announcement-modal-media-right-button'
-    
-    
-    
+
     HOME_ANNOUNCEMENT = '(//android.view.ViewGroup/android.widget.HorizontalScrollView)[1]//android.widget.TextView'
 
     """
@@ -140,11 +139,14 @@ class DataTestID(str, Enum):
     SIDE_BAR_OPTION_ASSETS = 'side-bar-option-assets'
     SIDE_BAR_OPTION_SIGNAL = 'side-bar-option-signal'
     SIDE_BAR_OPTION_NEWS = 'side-bar-option-news'
+    SIDE_BAR_OPTION_DEALER = 'side-bar-option-dealer'
+    SIDE_BAR_OPTION_EDUCATION = 'side-bar-option-education'
+    
     SPIN_LOADER = 'spin-loader'
     
     # APP
-    APP_MENU_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
-    APP_MENU_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
+    APP_MENU_OPTION_HOME = '//android.view.ViewGroup[contains(@content-desc, "Home")]'
+    APP_MENU_OPTION_MARKET = '//android.view.ViewGroup[contains(@content-desc, "Markets")]'
     APP_MENU_OPTION_TRADE = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[3]/android.widget.TextView[2]'
     APP_MENU_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
     APP_MENU_OPTION_ASSETS = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[5]'
@@ -173,8 +175,6 @@ class DataTestID(str, Enum):
     APP_SEARCH_HISTORY_LABEL = '//android.widget.TextView[@text="Search History"]'
     SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL = 'symbol-input-search-items-symbol'
     SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME = '//*[@data-testid="symbol-input-search-items"]//div[1]/div[1]'
-       
-
 
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -220,6 +220,10 @@ class DataTestID(str, Enum):
     APP_MSG_NO_ITEMS_AVAILABLE = '//android.widget.TextView[@text="No items available"]'
     
     # APP WATCHLIST TAB NAME
+    APP_MARKET_SYMBOL_ROW_REMOVE = '//android.widget.TextView[@text="Remove"]'
+    APP_MARKET_SYMBOL_ROW_ITEMS = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
+    APP_MARKET_WATCHLIST_SYMBOL_NAME = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup//android.widget.TextView[2]'
+    APP_MARKET_WATCHLIST_FAV_SYMBOL_NAME = '//android.widget.TextView[3]'
     APP_TAB_TOP_ALL = '//android.widget.TextView[@text="All"]'
     APP_TAB_TOP_FAVOURITES = '//android.view.ViewGroup[@content-desc="Favourites"]'
     APP_TAB_TOP_PICK = '//android.view.ViewGroup[@content-desc="Top Pick"]'
@@ -233,10 +237,9 @@ class DataTestID(str, Enum):
     APP_SYMBOL_PREFERENCE_SAVE = '//android.widget.TextView[@text="Save Changes"]'
     APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]'
     APP_SYMBOL_PREFERENCE_OPTION_CHECKED = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]'
-    
-    APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]/parent::*'
-    APP_SYMBOL_PREFERENCE_OPTION_CHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]/parent::*'
-    
+    APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_UNCHECKED = '//android.view.ViewGroup[@content-desc="Show all"]/android.view.ViewGroup'
+    APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_CHECKED = '//android.view.ViewGroup[contains(@content-desc, "Show all")]/android.view.ViewGroup[android.widget.TextView]'
+
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     SIGNAL
@@ -258,6 +261,15 @@ class DataTestID(str, Enum):
                                                     ORDER PANEL TABLE
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
+    
+    # Show / Hide columns
+    COLUMN_PREFERENCE = 'column-preference'
+    ORDER_COLUMN_PREFERENCE_MODAL_TITLE = 'order-column-preference-modal-title'
+    ORDER_COLUMN_PREFERENCE_MODAL_SAVE = 'order-column-preference-modal-save'
+    ORDER_COLUMN_PREFERENCE_MODAL_CLOSE = 'order-column-preference-modal-close'
+    
+    
+    
     # ORDER PANEL TABLE
     ASSET_ORDER_TYPE = 'asset-order-type'
     TAB_ASSET_ORDER_TYPE_OPEN_POSITIONS = 'tab-asset-order-type-open-positions'
@@ -341,7 +353,11 @@ class DataTestID(str, Enum):
                                                     CHART
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
-    CHART_STAR_SYMBOL = 'chart-star-symbol'
+    APP_CHART_STAR_SYMBOL = 'chart-star-symbol'
+    CHART_STAR_SYMBOL_UNWATCH = 'chart-star-symbol-unwatch'
+    CHART_STAR_SYMBOL_WATCH = 'chart-star-symbol-watch'
+    WATCHLIST_STAR_UNWATCH = 'watchlist-star-unwatch'
+    WATCHLIST_STAR_WATCH = 'watchlist-star-watch'
     CHART_TRADE_BUTTON_CLOSE = 'chart-trade-button-close'
     CHART_TOGGLE_FULLSCREEN = 'chart-toggle-fullscreen'
     CHART_EXIT_FULLSCREEN ='chart-exit-fullscreen'
@@ -633,6 +649,7 @@ class DataTestID(str, Enum):
     SETTING_OPTION_OCT = 'setting-option-oct'
     SETTING_OPTION_NOTIFICATION_SETTING = 'setting-option-notification-setting'
     SETTING_OPTION_LANGUGAGE = 'setting-option-language'
+    SETTING_OPTION_LANGUGAGE_ITEMS = '//*[@data-testid="setting-option-language"]//li'
     SETTING_OPTION_APPEARANCE = 'setting-option-appearance'
     
     # Change Password
@@ -651,7 +668,7 @@ class DataTestID(str, Enum):
     APP_CHANGE_PASSWORD_MODAL_CONFIRM = '//android.view.ViewGroup[@content-desc="Submit"]'
     
     
-    # END OF CHANGE PASSWORD
+    # SETTING
     
     SETTING_OPTION_LINKED_DEVICE = 'setting-option-linked-device'
     SETTING_OPTION_BIOMETRICS_SETTING = 'setting-option-biometrics-settings'

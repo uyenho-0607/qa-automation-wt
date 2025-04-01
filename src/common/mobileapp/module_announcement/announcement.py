@@ -1,9 +1,9 @@
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+from enums.main import AnnouncementModal
 from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import click_element, spinner_element, find_element_by_xpath, find_visible_element_by_testid, find_element_by_testid, get_label_of_element
-from enums.main import AnnouncementModal
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -37,7 +37,7 @@ def announcement_validation(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def modal_announcement(driver, button: AnnouncementModal.GOT_IT):
+def modal_announcement(driver, button: AnnouncementModal = AnnouncementModal.GOT_IT):
     """
     This function waits for the feature announcement modal to be visible and interacts with it.
     If the modal is not visible, the function skips any further actions.

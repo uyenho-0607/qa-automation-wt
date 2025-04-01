@@ -1,12 +1,10 @@
 import random
-from selenium.webdriver.common.by import By
 
 from enums.main import Server, SymbolsList
 from constants.element_ids import DataTestID
 
-from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath, find_element_by_xpath_with_wait, find_list_of_elements_by_xpath, is_element_present_by_testid, is_element_present_by_xpath, populate_element, find_list_of_elements_by_testid, spinner_element, find_visible_element_by_xpath, find_visible_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
+from constants.helper.element_android_app import clear_input_field, click_element, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, find_list_of_elements_by_xpath, is_element_present_by_xpath, populate_element, spinner_element, find_visible_element_by_xpath, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
 
 from data_config.file_handler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
