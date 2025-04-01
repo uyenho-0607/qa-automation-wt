@@ -2,7 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server
+from enums.main import Server, Menu, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -44,14 +44,14 @@ class TC_MT4_aO02():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
 
             with allure.step("Select the Order Panel: Open Position"):
-                type_orderPanel(driver=main_driver, tab_order_type="open-positions")
-                
+                type_orderPanel(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS)
+
             with allure.step("Bulk Close Orders"):
                 clear_orderIDs_csv(filename="MT4_Bulk.csv")
-                open_position_df = button_bulk_operation(driver=main_driver, filename="MT4_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name="Open Position", tab_order_type="open-positions", symbol_name_element=True, set_trade=False)
+                open_position_df = button_bulk_operation(driver=main_driver, filename="MT4_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name="Open Position", tab_order_type=OrderPanel.OPEN_POSITIONS, symbol_name_element=True, set_trade=False)
 
             with allure.step("Retrieve snackbar message"):
                 get_bulk_snackbar_banner(driver=main_driver)
@@ -61,7 +61,7 @@ class TC_MT4_aO02():
         
             with allure.step("Ensure the OrderID is display in order panel: Order History table"):
                 # Check order IDs in Order History table
-                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type="history", section_name="Order History")
+                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type=OrderPanel.HISTORY, section_name="Order History")
                 
             with allure.step("Comparison on Order History and Open Position table"):
                 compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=open_position_df, name2="Open Position")

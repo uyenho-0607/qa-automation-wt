@@ -2,7 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server
+from enums.main import Server, Menu, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -65,15 +65,15 @@ class TC_MT5_aM03():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, _ = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Trade Open Position", row_number=[1])
+                original_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Trade Open Position", row_number=[1])
 
             """ End of Place Order """
             
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
                 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, asset_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Asset Open Position", row_number=[1])
+                asset_orderID, asset_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Asset Open Position", row_number=[1])
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -88,7 +88,7 @@ class TC_MT5_aM03():
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
             
             with allure.step("Retrieve the Order History data and compare against Open Position data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name="Order History", row_number=[1])
 
                 compare_dataframes(driver=main_driver, df1=asset_order_df, name1="Asset Open Position", df2=order_history_df, name2="Order History")
 

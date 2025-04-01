@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, SymbolsList, ModuleType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -41,16 +41,16 @@ class TC_MT5_aR04():
                 login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server=Server.MT5, symbol_type="Symbols_Price")
+                input_symbol(driver=main_driver, server=Server.MT5, symbol_type=SymbolsList.SYMBOLS_PRICE)
                 
             with allure.step("Disable OCT"):
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Specification OCT"):
-                _, _, vol_step = button_tradeModule(driver=main_driver, module_Type="specification")
-                
+                _, _, vol_step = button_tradeModule(driver=main_driver, module_type=ModuleType.SPECIFICATION)
+
             with allure.step("Click on Trade tab"):
-                button_tradeModule(driver=main_driver, module_Type="trade")
+                button_tradeModule(driver=main_driver, module_type=ModuleType.TRADE)
                 
             with allure.step("Select the orderType option: Market"):
                 dropdown_orderType(driver=main_driver, partial_text="market")

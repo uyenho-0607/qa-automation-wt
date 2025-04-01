@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -57,7 +57,7 @@ class TC_MT5_aS04():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Open Position", row_number=[1])
 
             with allure.step("Modify order"):
                 modify_market_order(driver=main_driver, trade_type="edit", row_number=[1], set_stopLoss=False, takeProfit_flag=False, tp_type="price")

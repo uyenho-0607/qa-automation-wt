@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -39,9 +39,9 @@ class TC_MT5_aR10():
                 login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Disable OCT"):
-                toggle_order_panel_sort(driver=main_driver, tab_order_type="open-positions")
-                toggle_order_panel_sort(driver=main_driver, tab_order_type="pending-orders")
-                toggle_order_panel_sort(driver=main_driver, tab_order_type="history")
+                toggle_order_panel_sort(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS)
+                toggle_order_panel_sort(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS)
+                toggle_order_panel_sort(driver=main_driver, tab_order_type=OrderPanel.HISTORY)
                                         
         except Exception as e:
             test_failed = True  # Mark test as failed

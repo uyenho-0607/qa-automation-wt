@@ -8,6 +8,7 @@ from constants.helper.element import click_element, get_label_of_element, find_v
 
 from common.desktop.module_trade.order_placing_window.module_fill_policy import fillPolicy_type
 from common.desktop.module_trade.order_placing_window.opw_button_action import button_tradeModule
+from enums.main import ModuleType
 
 
 """
@@ -36,12 +37,7 @@ def swap_units_volume(driver, target_state):
             "volume": "trade-swap-to-units",
             "units": "trade-swap-to-volume"
         }
-
-        # Randomly select a target state if none is provided
-        # if target_state is None:
-        #     target_state = random.choice(list(swap_options.keys()))
-        #     print(f"Randomly selected target_state: {target_state}")
-
+        
         # Verify if the desired state is valid
         if target_state not in swap_options:
             raise ValueError(f"Invalid desired state: '{target_state}'. Must be either 'units' or 'volume'.")
@@ -91,17 +87,17 @@ def swap_units_volume(driver, target_state):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def swap_units_volume_conversion(driver, module_Type, target_state="volume"):
+def swap_units_volume_conversion(driver, module_type: ModuleType, target_state="volume"):
     try:
         delay(0.5)
 
         # Retrieve contract size and navigate to the trade module
-        contract_size, _, _ = button_tradeModule(driver, module_Type="specification")
+        contract_size, _, _ = button_tradeModule(driver, module_type=ModuleType.SPECIFICATION)
         if not contract_size or contract_size <= 0:
             raise ValueError("Invalid contract size fetched")
         print("Contract Size:", contract_size)
 
-        button_tradeModule(driver, module_Type)
+        button_tradeModule(driver, module_type)
         
         delay(0.5)
 

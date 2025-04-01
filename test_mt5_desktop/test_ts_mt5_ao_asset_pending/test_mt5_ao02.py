@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, Menu, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -71,7 +71,7 @@ class TC_MT5_aO02():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_tradeConfirmation_df, trade_snackbar_banner_df)
@@ -79,10 +79,10 @@ class TC_MT5_aO02():
             """ End of Place Limit Order """
 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Asset Pending Order", row_number=[1])
+                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Asset Pending Order", row_number=[1])
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -103,7 +103,7 @@ class TC_MT5_aO02():
                 compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1="Trade Confirmation Details", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
 
             with allure.step("Retrieve the Updated Order Panel data"):
-                _, updated_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Updated Pending Order", row_number=[1])
+                _, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Updated Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message", compare_volume=False)

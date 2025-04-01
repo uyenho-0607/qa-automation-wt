@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, Menu, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -65,7 +65,7 @@ class TC_MT4_aM06():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_tradeConfirmation_df, trade_snackbar_banner_df)
@@ -73,10 +73,10 @@ class TC_MT4_aM06():
             """ End of Place Order """
 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Asset Pending Order", row_number=[1])
+                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Asset Pending Order", row_number=[1])
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -91,7 +91,7 @@ class TC_MT4_aM06():
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name="Order History", row_number=[1])
 
                 compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Asset Pending Order", df2=order_history_df, name2="Order History")
 

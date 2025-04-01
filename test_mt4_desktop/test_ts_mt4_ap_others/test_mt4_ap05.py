@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, SymbolsList, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -41,7 +41,7 @@ class TC_MT4_aP05():
                 login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server=Server.MT4, symbol_type="Symbols_Price")
+                input_symbol(driver=main_driver, server=Server.MT4, symbol_type=SymbolsList.SYMBOLS_PRICE)
                 
             with allure.step("Disable OCT"):
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
@@ -58,7 +58,7 @@ class TC_MT4_aP05():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Open Position", row_number=[1])
 
             """ End of Place Order """
             

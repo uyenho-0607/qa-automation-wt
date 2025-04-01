@@ -1,6 +1,7 @@
+from enums.main import Setting
 
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import wait_for_text_to_be_present_in_element_by_xpath, find_element_by_xpath, click_element, invisibility_of_element_by_xpath
+from constants.helper.element import find_element_by_xpath, click_element, invisibility_of_element_by_xpath
 
 from common.desktop.module_setting.setting_general import button_setting
 
@@ -14,7 +15,7 @@ from common.desktop.module_setting.setting_general import button_setting
 def contact_information(driver):
     try:
         
-        button_setting(driver, setting_option="contact-information")
+        button_setting(driver, setting_option=Setting.CONTACT_INFORMATION)
         
         # Close the modal dialog
         btn_close = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']//*[name()='svg']")

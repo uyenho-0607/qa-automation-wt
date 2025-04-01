@@ -147,15 +147,11 @@ def get_noti_ordersDetails(driver):
         
         # Wait till the spinner icon no longer display
         spinner_element(driver)
-        
-        # response = api_get_noti_details(driver)
-        
-        # if response.status_code == 200:
-        
+                
         # Retrieve the list of the data
         header_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_LABEL)
         if not header_elements:
-            raise Exception("No notification order headers found.")
+            assert False, "No notification order headers found."
 
         header_labels = [header_mapping.get(element.text, element.text) for element in header_elements]
         header_labels.append("Type") # Append Currency label for deposit handling
@@ -183,9 +179,6 @@ def get_noti_ordersDetails(driver):
 
         # Return the DataFrame containing the order notification details
         return noti_order_details
-
-        # else:
-        #     assert False, f"Failed to fetch data. Status code: {response.status_code}"
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

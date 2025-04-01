@@ -1,12 +1,12 @@
 import random
 
 from constants.element_ids import DataTestID
-from enums.main import Server, Platform, ClientName, AccountType, CredentialType, EnvironmentType, LoginResultState
+from enums.main import AnnouncementModal, Server, Platform, AccountType, CredentialType, EnvironmentType, AlertType, SettingLanguageMap
 
 from constants.helper.driver import access_url
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, is_element_present_by_testid, find_element_by_testid, get_label_of_element, javascript_click, populate_element, find_visible_element_by_testid, spinner_element, wait_for_text_to_be_present_in_element_by_xpath
+from constants.helper.element import click_element, is_element_present_by_testid, find_element_by_testid, get_label_of_element, javascript_click, populate_element, find_visible_element_by_testid, spinner_element, wait_for_text_to_be_present_in_element_by_testid
 
 from data_config.encrypt_decrypt import decrypt_and_print
 from data_config.file_handler import get_URLs, get_credentials
@@ -54,7 +54,6 @@ def launch_wt(driver, server: Server, device_type: Platform, env_type: Environme
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
 
 def authenticate_user(driver, login_username, login_password):
     
@@ -119,7 +118,8 @@ def select_account_type(driver, account_type: AccountType = AccountType.LIVE):
 
 
 def wt_user_login(driver, server: Server, testcase_id: str = None, selected_language: str = None, 
-                  expectation: LoginResultState = LoginResultState.SUCCESS, 
+                  button: AnnouncementModal = AnnouncementModal.GOT_IT,
+                  expectation: AlertType = AlertType.SUCCESS, 
                   credential_type: CredentialType = CredentialType.DEFAULT) -> None:
     """
     This function automates the login process for a web trader platform (WT) using credentials from a JSON file.
@@ -147,11 +147,10 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
         raise ValueError(f"Server '{server}' not found in credentials data.")
 
     # Retrieve the specific server data for the given client and "MemberSite"
-    # server_data = data[server].get(client_name, {}).get("MemberSite", {})
     server_data = data[server]["MemberSite"]
     
     # If expect failure, use Invalid_Credential and require testcase_id
-    if expectation == LoginResultState.FAILURE:
+    if expectation == AlertType.FAILURE:
         if not testcase_id:
             raise ValueError("testcase_id must be provided for invalid_credential.")
     
@@ -179,7 +178,7 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
     authenticate_user(driver, login_username, login_password)
     
     # Handle the result of the login (success or failure)
-    handle_login_result(driver, expectation, selected_language)
+    handle_login_result(driver, button, expectation, selected_language)
 
     # Return the decrypted username used for login
     return login_username, login_password
@@ -196,7 +195,7 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_login_result(driver, expectation: LoginResultState, selected_language: str = None):
+def handle_login_result333(driver, button: AnnouncementModal, expectation: AlertType, selected_language: str = None):
     """
     Handles the login result by verifying the presence of the expected text based on the selected language.
     """
@@ -216,26 +215,59 @@ def handle_login_result(driver, expectation: LoginResultState, selected_language
     
     # Wait till the spinner icon no longer display
     spinner_element(driver)
-
+    
     # Determine the text to wait for based on the selected language
     verification_text = language_specific_text.get(selected_language, "Trade")
 
     # Check if the test is present
-    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_MENU_OPTION_TRADE, text=verification_text):
+    if wait_for_text_to_be_present_in_element_by_testid(driver, DataTestID.SIDE_BAR_OPTION_TRADE, text=verification_text):
         print("Successfully Logged In")
         
         # If login succeeded but failure was expected, log the unexpected success and fail the test
-        if expectation == LoginResultState.FAILURE:
+        if expectation == AlertType.FAILURE:
             attach_text("Expected failure, but login succeeded. Test failed.", name="Unexpected Success")
             assert False, "Expected failure, but login succeeded."
         
         # If login is successful and no failure was expected, process the modal announcement (if applicable)
-        modal_announcement(driver)
+        modal_announcement(driver, button)
         return
     
     else:
         # If account balance was not found, the login failed. Handle the error scenario.
         handle_alert_error(driver, expectation)
+
+
+
+def handle_login_result(driver, button: AnnouncementModal, expectation: AlertType, selected_language: str = None):
+    """
+    Handles the login result by verifying the presence of the expected text based on the selected language.
+    """
+
+    # Wait till the spinner icon no longer displays
+    spinner_element(driver)
+
+    # Determine the expected text based on the selected language
+    verification_text = SettingLanguageMap.get_expected_text(selected_language) or "Trade"
+
+    # Check if the text is present
+    if wait_for_text_to_be_present_in_element_by_testid(driver, DataTestID.SIDE_BAR_OPTION_TRADE, text=verification_text):
+        print("Successfully Logged In")
+        
+        # If login succeeded but failure was expected, log the unexpected success and fail the test
+        if expectation == AlertType.FAILURE:
+            attach_text("Expected failure, but login succeeded. Test failed.", name="Unexpected Success")
+            assert False, "Expected failure, but login succeeded."
+        
+        # If login is successful and no failure was expected, process the modal announcement (if applicable)
+        modal_announcement(driver, button)
+        return
+    
+    else:
+        # If account balance was not found, the login failed. Handle the error scenario.
+        handle_alert_error(driver, expectation)
+
+
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -249,7 +281,7 @@ def handle_login_result(driver, expectation: LoginResultState, selected_language
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_alert_error(driver, expectation: LoginResultState):
+def handle_alert_error(driver, expectation: AlertType):
     """
     This function handles the expected login error scenario by checking for the error notification 
     and extracting the error message. It then attaches the error message for logging or reporting purposes.
@@ -273,7 +305,7 @@ def handle_alert_error(driver, expectation: LoginResultState):
             "Account already linked", "FXCRM Invalid Login"
         ]
 
-        if expectation == LoginResultState.FAILURE:
+        if expectation == AlertType.FAILURE:
             if error_message in expected_errors:
                 attach_text("Expected failure condition met.", name="Expected Failure")
                 assert True
@@ -303,7 +335,8 @@ def handle_alert_error(driver, expectation: LoginResultState):
 def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.UAT,
              account_type: AccountType = AccountType.LIVE,
              testcase_id: str = None, set_language: bool = False, set_username: bool = True, 
-             expectation: LoginResultState = LoginResultState.SUCCESS, 
+             button: AnnouncementModal = AnnouncementModal.GOT_IT,
+             expectation: AlertType = AlertType.SUCCESS, 
              credential_type: CredentialType = CredentialType.DEFAULT) -> tuple[str, str] | None:
     """
     This function performs the complete login process to the WebTrader platform (WT).
@@ -345,7 +378,7 @@ def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, e
         # Step 3: Perform the login action using the `wt_user_login` function. 
         # This handles credential retrieval, entry into the login form, and the actual login process.
         if set_username:
-            username, password = wt_user_login(driver, server, testcase_id, selected_language, expectation, credential_type)
+            username, password = wt_user_login(driver, server, testcase_id, selected_language, button, expectation, credential_type)
             return params_wt_url, username, password
     
     except Exception as e:

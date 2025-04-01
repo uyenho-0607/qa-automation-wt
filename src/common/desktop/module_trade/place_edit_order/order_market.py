@@ -6,6 +6,7 @@ from common.desktop.module_trade.order_panel.order_panel_info import button_orde
 from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, pointsDistance
 from common.desktop.module_trade.order_placing_window.utils import verify_volume_minMax_buttons, button_buy_sell_type, button_tradeModule, label_onePointEqual, input_size_volume, fillPolicy_type, handle_stop_loss, handle_takeProfit, button_trade_action, handle_stop_loss, handle_takeProfit, close_partialSize
 from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
+from enums.main import ModuleType
 
 
 
@@ -113,7 +114,7 @@ def trade_oct_market_order(driver, indicator_type, chart_fullscreen=None, set_Ch
             chart_minMax(driver, chart_fullscreen)
 
         if set_OCT:
-            button_tradeModule(driver, module_Type="one-click-trading")
+            button_tradeModule(driver, module_type=ModuleType.ONE_CLICK_TRADING)
         
         # Input the size/volume
         input_size_volume(driver)
@@ -146,11 +147,11 @@ def trade_market_order(driver, trade_type, option, chart_fullscreen=None, sl_typ
         if set_Chart:
             chart_minMax(driver, chart_fullscreen)
         
-        button_tradeModule(driver, module_Type="trade")
+        button_tradeModule(driver, module_type=ModuleType.TRADE)
 
         # Retrieve the One Point Equal label data
-        label_onePointsEqual = label_onePointEqual(driver, trade_type="trade")
-        
+        label_onePointsEqual = label_onePointEqual(driver, trade_type=ModuleType.TRADE)
+
         # Retrieve the current price based on order type and option
         current_price = get_current_price(driver, trade_type, option, partial_text="market")
 
@@ -197,8 +198,8 @@ def modify_market_order(driver, trade_type, row_number, sl_type=None, tp_type=No
         current_price = get_current_price(driver, trade_type)
         
         # Retrieve the label indicating points equal
-        label_onePointsEqual = label_onePointEqual(driver, trade_type="edit")
-        
+        label_onePointsEqual = label_onePointEqual(driver, trade_type=ModuleType.EDIT)
+
         # Get the edit order type label
         option = get_edit_order_label(driver)
 
@@ -236,7 +237,7 @@ def close_delete_order(driver, row_number, order_action, actions: list = None, t
         spinner_element(driver)
         
         if trade_type == "close-order":
-            _, lot_size, vol_step = button_tradeModule(driver, module_Type="specification")
+            _, lot_size, vol_step = button_tradeModule(driver, module_type=ModuleType.SPECIFICATION)
 
         # Clicking on the action (Edit / Close / Delete)
         button_orderPanel_action(driver, order_action, row_number)

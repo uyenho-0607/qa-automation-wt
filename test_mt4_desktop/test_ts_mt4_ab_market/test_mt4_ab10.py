@@ -2,7 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -68,7 +68,7 @@ class TC_MT4_aB10():
                 compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Trade Open Position", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Trade Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
@@ -110,7 +110,7 @@ class TC_MT4_aB10():
                 compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1="Trade Confirmation Details", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
 
             with allure.step("Retrieve the Order Panel data"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Updated Open Position", row_number=[1])
+                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Updated Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Open Position", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")

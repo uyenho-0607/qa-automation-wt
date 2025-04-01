@@ -1,4 +1,6 @@
+from enums.main import Setting
 from constants.element_ids import DataTestID
+
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.color_element import get_body_color
@@ -24,14 +26,13 @@ def accountInformation(driver):
 """
 
 
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 SETTING DROPDOWN OPTION
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_setting(driver, setting_option: str):
+def button_setting(driver, setting_option: Setting):
     """
     Navigates to a specific setting option and performs actions based on the selected setting.
 
@@ -47,17 +48,21 @@ def button_setting(driver, setting_option: str):
         # Click on the settings button to open the dropdown
         btn_setting = find_element_by_testid(driver, data_testid=DataTestID.SETTING_BUTTON)
         click_element(element=btn_setting)
-        
         button_testids = {
-            "switch-to-live": DataTestID.SETTING_OPTION_SWITCH_TO_LIVE,
-            "switch-to-demo": DataTestID.SETTING_OPTION_SWITCH_TO_DEMO,
-            "open-demo-account": DataTestID.SETTING_OPTION_OPEN_DEMO_ACCOUNT,
-            "notification-setting": DataTestID.SETTING_OPTION_NOTIFICATION_SETTING,
-            "language": DataTestID.SETTING_OPTION_LANGUGAGE,
-            "change-password": DataTestID.SETTING_OPTION_CHANGE_PASSWORD,
-            "linked-device": DataTestID.SETTING_OPTION_LINKED_DEVICE,
-            "contact-information": DataTestID.SETTING_OPTION_CONTACT_INFORMATION,
-            "logout": DataTestID.SETTING_OPTION_LOGOUT
+            Setting.SWITCH_TO_LIVE: DataTestID.SETTING_OPTION_SWITCH_TO_LIVE,
+            Setting.SWITCH_TO_DEMO: DataTestID.SETTING_OPTION_SWITCH_TO_DEMO,
+            Setting.OPEN_DEMO_ACCOUNT: DataTestID.SETTING_OPTION_OPEN_DEMO_ACCOUNT,
+            Setting.PAYMENT_METHOD: DataTestID.SETTING_OPTION_PAYMENT_METHOD,
+            Setting.ONE_CLICK_TRADING: DataTestID.SETTING_OPTION_OCT,
+            Setting.LANGUAGE: DataTestID.SETTING_OPTION_LANGUGAGE,
+            Setting.APPEARANCE: DataTestID.SETTING_OPTION_APPEARANCE,
+            Setting.NOTIFICATION_SETTING: DataTestID.SETTING_OPTION_NOTIFICATION_SETTING,
+            Setting.CHANGE_PASSWORD: DataTestID.SETTING_OPTION_CHANGE_PASSWORD,
+            Setting.LINKED_DEVICE: DataTestID.SETTING_OPTION_LINKED_DEVICE,
+            Setting.BIOMETRICS_SETTING: DataTestID.SETTING_OPTION_BIOMETRICS_SETTING,
+            Setting.REQUEST_CANCEL_ACCOUNT: DataTestID.SETTING_OPTION_REQUEST_CANCEL_ACCOUNT,
+            Setting.CONTACT_INFORMATION: DataTestID.SETTING_OPTION_CONTACT_INFORMATION,
+            Setting.LOGOUT: DataTestID.SETTING_OPTION_LOGOUT
         }
         
         button_testid = button_testids.get(setting_option)
@@ -71,11 +76,11 @@ def button_setting(driver, setting_option: str):
 
         # Mapping setting options to expected text
         expected_text_map = {
-            "change-password": "Change Password",
-            "open-demo-account": "Open a Demo Account",
-            "notification-setting": "Notification Settings",
-            "linked-device": "Linked Devices",
-            "contact-information": "Contact Information"
+            Setting.CHANGE_PASSWORD: "Change Password",
+            Setting.OPEN_DEMO_ACCOUNT: "Open a Demo Account",
+            Setting.NOTIFICATION_SETTING: "Notification Settings",
+            Setting.LINKED_DEVICE: "Linked Devices",
+            Setting.CONTACT_INFORMATION: "Contact Information"
         }
         
         delay(1)
@@ -88,8 +93,6 @@ def button_setting(driver, setting_option: str):
 
     except Exception as e:
         handle_exception(driver, e)
-
-        
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -121,7 +124,6 @@ def button_theme(driver, theme_option=None):
         for option in themes:
             
             # Click on the theme switch button to open the theme dropdown
-            # setting = find_element_by_testid(driver, data_testid="switch-theme-button")
             setting = find_element_by_testid(driver, data_testid=DataTestID.SWITCH_THEME_BUTTON)
             click_element(setting)
             

@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -42,7 +42,7 @@ class TC_MT4_aH04():
                 
             with allure.step("Bulk Delete Orders"):
                 clear_orderIDs_csv(filename="MT4_Bulk.csv")
-                pending_order_df = button_bulk_operation(driver=main_driver, filename="MT4_Bulk.csv", bulk_type="delete", section_name="Pending Order", tab_order_type="pending-orders")
+                pending_order_df = button_bulk_operation(driver=main_driver, filename="MT4_Bulk.csv", bulk_type="delete", section_name="Pending Order", tab_order_type=OrderPanel.PENDING_ORDERS)
 
             with allure.step("Retrieve snackbar message"):
                 get_bulk_snackbar_banner(driver=main_driver)
@@ -52,7 +52,7 @@ class TC_MT4_aH04():
                 
             with allure.step("Ensure the OrderID is display in order panel: Order History table"):
                 # Check order IDs in Order History table
-                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type="history", section_name="Order History")
+                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type=OrderPanel.HISTORY, section_name="Order History")
             
             with allure.step("Comparison on Order History and Pending Order table"):
                 compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=pending_order_df, name2="Pending Order")

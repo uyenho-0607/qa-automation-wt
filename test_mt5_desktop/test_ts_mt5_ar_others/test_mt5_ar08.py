@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, Menu
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -39,7 +39,7 @@ class TC_MT5_aR08():
                 login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
                 
             with allure.step("Click on the symbol name to redirect to Trade page"):
                 asset_symbolName(driver=main_driver, row_number=1)

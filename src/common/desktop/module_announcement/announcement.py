@@ -1,5 +1,7 @@
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+from constants.helper.driver import delay
+from enums.main import AnnouncementModal
 from constants.element_ids import DataTestID
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, spinner_element, find_element_by_xpath, find_visible_element_by_testid, find_element_by_testid, get_label_of_element
@@ -14,9 +16,9 @@ def announcement_validation(driver):
     try:
         spinner_element(driver)
         
-        announcement = find_element_by_xpath(driver, "//span[@class='sc-e1w4ks-4 gmeSyq']")
+        announcement = find_element_by_xpath(driver, "//*[@class='sc-e1w4ks-3 hSUbZO']/span")
         label_announcement = get_label_of_element(element=announcement)
-        
+        print(label_announcement)
         if label_announcement == "#" or label_announcement == " ":
             raise AssertionError("System should not reflect #")
         
@@ -36,7 +38,7 @@ def announcement_validation(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def modal_announcement(driver, button: str = "got-it"):
+def modal_announcement(driver, button: AnnouncementModal = AnnouncementModal.GOT_IT):
     """
     This function waits for the feature announcement modal to be visible and interacts with it.
     If the modal is not visible, the function skips any further actions.
@@ -48,6 +50,7 @@ def modal_announcement(driver, button: str = "got-it"):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
+        
         # Wait for the login process to complete (spinner disappears)
         spinner_element(driver)
 
@@ -78,7 +81,7 @@ def modal_announcement(driver, button: str = "got-it"):
 """
 
 
-def handle_modal_announcement(driver, button_type: str):
+def handle_modal_announcement(driver, button_type: AnnouncementModal):
     """
     This function handles modal announcements by clicking either the "Got It", "Try It Now", or "Media-Arrow" buttons.
     If the "got-it" button is selected, it clicks all "Got It" buttons until none are found.
@@ -92,15 +95,15 @@ def handle_modal_announcement(driver, button_type: str):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
+        
         # Determine the data-testid based on the button type
         button_testids = {
-            "got-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_GOT_IT_BUTTON,
-            "try-it": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON,
-            "media-left": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON,
-            "media-right": DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON
+            AnnouncementModal.GOT_IT: DataTestID.FEATURE_ANNOUNCEMENT_MODAL_GOT_IT_BUTTON,
+            AnnouncementModal.TRY_IT: DataTestID.FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON,
+            AnnouncementModal.MEDIA_LEFT: DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON,
+            AnnouncementModal.MEDIA_RIGHT: DataTestID.FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON
         }
         
-
         button_testid = button_testids.get(button_type)
         if not button_testid:
             raise ValueError(f"Invalid button type: {button_type}")
@@ -108,7 +111,7 @@ def handle_modal_announcement(driver, button_type: str):
         # Attempt to locate the button
         modal_button = find_element_by_testid(driver, data_testid=button_testid)
         
-        if button_type == "got-it":
+        if button_type == AnnouncementModal.GOT_IT:
             # Continuously click the "Got It" button until it's no longer found
             while modal_button:
                 click_element(element=modal_button)

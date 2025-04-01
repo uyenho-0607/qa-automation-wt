@@ -2,7 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -66,7 +66,7 @@ class TC_MT4_aB19():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Trade Open Position", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Trade Open Position", row_number=[1])
 
             """ End of Place Order """
             
@@ -79,7 +79,7 @@ class TC_MT4_aB19():
             """Comparison on Open Position and newly created Order """
             
             with allure.step("Retrieve the New Open Position data"):
-                orderIDs_new_openPosition, new_open_position_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="New Open Position", row_number=[1])
+                orderIDs_new_openPosition, new_open_position_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="New Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare New Open Position and Notification Order Message"):
                 # Call the method to get the lists of dataframes
@@ -103,7 +103,7 @@ class TC_MT4_aB19():
             """ Comparison on Order History and newly closed Order """
 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name="Order History", row_number=[1])
             
                 compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position", df2=order_history_df, name2="Order History", compare_volume=False, compare_units=False)
 

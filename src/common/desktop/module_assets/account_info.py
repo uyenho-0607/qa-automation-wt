@@ -3,6 +3,7 @@ import pandas as pd
 
 from tabulate import tabulate
 
+from enums.main import Menu
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -28,7 +29,7 @@ def asset_account_balance_details(driver):
     try:
         
         # Redirect to Asset page
-        menu_button(driver, menu="assets")
+        menu_button(driver, menu=Menu.ASSETS)
         
         # Wait for the page to load
         delay(1)
@@ -150,7 +151,7 @@ def asset_account_currency(driver):
     try:
         
         # Redirect to Asset page
-        menu_button(driver, menu="assets")
+        menu_button(driver, menu=Menu.ASSETS)
         
         # Wait for the page to load
         delay(1)
@@ -194,7 +195,7 @@ def asset_account_currency(driver):
 def get_server_local_time(driver):
     try:
         # Find the time label element by XPath
-        time_label_element = find_element_by_xpath(driver, "//div[@class='sc-kzsad3-0 eJBKdL']")
+        time_label_element = find_element_by_xpath(driver, "(//*[@class='sc-uy5dq0-1 kMgMGQ']//div)[5]")
         
         # Extract the full text (e.g., "Server Time : 2025-02-06 08:56:23") and Split the string on the time part (after the colon and space)
         date_time_text = get_label_of_element(element=time_label_element).split(" : ")[1]

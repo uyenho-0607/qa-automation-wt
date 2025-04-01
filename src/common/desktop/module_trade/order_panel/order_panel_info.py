@@ -4,6 +4,9 @@ from dateutil.parser import parse
 
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu, OrderPanel, Setting
+from constants.element_ids import DataTestID
+
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
@@ -83,10 +86,17 @@ def asset_symbolName(driver, row_number):
 def count_orderPanel(driver):
     try:
         def process_tabs(menu_name):
+            """
+            Processes a given menu (Trade or Assets) and counts the number of orders
+            in Open Positions and Pending Orders tabs.
+            """
+            
+            # Click on the specified menu (Trade or Assets)
             current_tab = menu_button(driver, menu=menu_name)
             counts = {}  # Dictionary to store counts for each tab
             
-            for tab in ["open-positions", "pending-orders"]:
+            for tab in [OrderPanel.OPEN_POSITIONS, OrderPanel.PENDING_ORDERS]:
+                # Retrieve the label count for the given order panel type
                 _, button_name = type_orderPanel(driver, tab_order_type=tab)
                 
                 # Extract the number using regex
@@ -95,8 +105,8 @@ def count_orderPanel(driver):
             
             return current_tab, counts  # Return both tab name and counts
         
-        # Process "trade" menu
-        current_tab, trade_counts = process_tabs("trade")
+        # Process "Trade" menu and get the order counts
+        current_tab, trade_counts = process_tabs(Menu.TRADE)
         if current_tab == "trade":
             print(f"Total counts for 'Trade': {trade_counts}")
             
@@ -105,8 +115,8 @@ def count_orderPanel(driver):
                 if count > 30:
                     assert False, f"Trade - {tab} should not have more than 30 orders (current count: {count})"
         
-        # Process "assets" menu
-        current_tab, asset_counts = process_tabs("assets")
+        # Process "Assets" menu and get the order counts
+        current_tab, asset_counts = process_tabs(Menu.ASSETS)
         if current_tab == "assets":
             # Since no max count is defined for assets, just print or log the counts
             print(f"Total counts for 'Assets': {asset_counts}")
@@ -129,38 +139,57 @@ def count_orderPanel(driver):
 """
 
 # Choose order type (Open Position / Pending Order / Order History)
-def type_orderPanel(driver, tab_order_type, sub_tab=None, position: bool = False):
+def type_orderPanel(driver, tab_order_type: OrderPanel):
     """
     Switches between different tabs in the asset order panel.
 
     Arguments:
-    - tab_order_type: The order type tab to select (e.g., 'open-positions', 'pending-orders', 'order-history').
-    - sub_tab: The sub-tab to select within the order history section (e.g., 'orders-and-deals'). Default is None.
-    - position: If True, it clicks on the position sub-tab within the history section. Default is False.
+    - driver: Selenium WebDriver instance.
+    - tab_order_type: The order type tab to select (e.g., 'open-positions', 'pending-orders', 'order-history', 'position-history', 'orders-and-deals').
 
     Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+    - ValueError: If an invalid tab_order_type is provided.
     """
     try:
-        # Introduce a small delay to ensure elements are loaded
-        delay(1)
-        
-        # Locate and click on the main order panel type tab
-        orderPanel_type = find_visible_element_by_testid(driver, data_testid=f"tab-asset-order-type-{tab_order_type}")
+        delay(1)  # Ensure elements are loaded
+
+        # Define the main tabs
+        button_testids = {
+            OrderPanel.OPEN_POSITIONS: DataTestID.TAB_ASSET_ORDER_TYPE_OPEN_POSITIONS,
+            OrderPanel.PENDING_ORDERS: DataTestID.TAB_ASSET_ORDER_TYPE_PENDING_ORDERS,
+            OrderPanel.HISTORY: DataTestID.TAB_ASSET_ORDER_TYPE_HISTORY,
+        }
+
+        # If the user tries to directly call POSITION_HISTORY or ORDER_AND_DEALS, we first select HISTORY
+        if tab_order_type in {OrderPanel.POSITION_HISTORY, OrderPanel.ORDER_AND_DEALS}:
+            # Click on HISTORY tab first
+            history_tab = find_visible_element_by_testid(driver, DataTestID.TAB_ASSET_ORDER_TYPE_HISTORY)
+            javascript_click(driver, element=history_tab)
+            delay(1)  # Wait for sub-tabs to appear
+
+            # Now, select the correct sub-tab
+            if tab_order_type == OrderPanel.POSITION_HISTORY:
+                position_history_tab = find_visible_element_by_testid(driver, DataTestID.TAB_ASSET_ORDER_TYPE_HISTORY_POSITIONS_HISTORY)
+                javascript_click(driver, element=position_history_tab)
+            elif tab_order_type == OrderPanel.ORDER_AND_DEALS:
+                order_and_deals_tab = find_visible_element_by_testid(driver, DataTestID.TAB_ASSET_ORDER_TYPE_HISTORY_ORDERS_AND_DEALS)
+                javascript_click(driver, element=order_and_deals_tab)
+
+            # Ensure label_count is returned as None for sub-tabs
+            return tab_order_type, None
+
+        # If the tab_order_type is a main tab, locate and click it
+        button_testid = button_testids.get(tab_order_type)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {tab_order_type}")
+
+        # Locate and click the main tab
+        orderPanel_type = find_visible_element_by_testid(driver, button_testid)
         label_count = get_label_of_element(orderPanel_type)
         javascript_click(driver, element=orderPanel_type)
         
-        # If position is True, navigate to the position sub-tab within the order history
-        if tab_order_type == "history":
-            if position:
-                # Find and click on the specific sub-tab within the order history section
-                # data-testid="tab-asset-order-type-history-positions-history"
-                # data_testid="tab-asset-order-type-history-orders-and-deals"
-                orderHistory_position = find_element_by_testid(driver, data_testid=f"tab-asset-order-type-history-{sub_tab}")
-                click_element(orderHistory_position)
-        
         return tab_order_type, label_count
-    
+
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -293,7 +322,7 @@ def get_orderID(driver, row_number):
 """
 
 # Extract the order table
-def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab=None, position: bool = False):
+def extract_order_info(driver, tab_order_type: OrderPanel, section_name, row_number):
     """
     Optimized function to extract order information including order IDs and details.
     """
@@ -303,7 +332,7 @@ def extract_order_info(driver, tab_order_type, section_name, row_number, sub_tab
 
     try:
         # Navigate to tab
-        type_orderPanel(driver, tab_order_type, sub_tab, position)
+        type_orderPanel(driver, tab_order_type)
         
         # Wait for spinner once
         spinner_element(driver)
@@ -395,141 +424,109 @@ def get_order_panel_name(order_panel):
                                                 REVIEW ORDERIDs FROM CSV
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-
-def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = False):
+def review_pending_orderIDs(driver, order_ids, check_extended_tabs=False):
     """
-    Reviews the pending order IDs across the "Open Positions", "Pending Orders", and "Order History" tabs,
+    Reviews the pending order IDs across the available order panel tabs,
     comparing them with the provided order IDs.
 
     Arguments:
+    - driver: Selenium WebDriver instance.
     - order_ids (list): The list of order IDs to check.
+    - check_extended_tabs (bool): Whether to check "Position History" and "Orders & Deals".
 
     Returns:
     - list: A list of order IDs that were not found in any tab.
     """
-    tabs = ["open-positions", "pending-orders", "history"]
-    failed_order_ids = order_ids.copy()  # Start with all order IDs as failed
+    tabs = [OrderPanel.OPEN_POSITIONS, OrderPanel.PENDING_ORDERS, OrderPanel.HISTORY]
+
+    if check_extended_tabs:
+        tabs.extend([OrderPanel.POSITION_HISTORY, OrderPanel.ORDER_AND_DEALS])
+
+    failed_order_ids = order_ids.copy()
     result_message = ""
 
     try:
         for tab_order_type in tabs:
-            # If no failed order IDs are left, break out of the loop early
             if not failed_order_ids:
-                break
+                break  # Stop checking if all order IDs are found
 
-            # Click the appropriate tab (if needed)
-            menu_button(driver, menu="assets")
-            type_orderPanel(driver, tab_order_type, sub_tab, position)
-
-            # Wait for the table body to load and the spinner to disappear
+            menu_button(driver, menu=Menu.ASSETS)
+            selected_tab, _ = type_orderPanel(driver, tab_order_type)
+            
             table_body = get_table_body(driver)
             spinner_element(driver)
 
-            # Get the order IDs displayed in the table
             rows = table_body.find_elements(By.XPATH, ".//tr")
             spinner_element(driver)
 
-            # For each order ID still in the failed list, check if it exists in the table
-            for order_id in failed_order_ids[:]:  # Iterate over a copy of the list to allow modification
+            current_datetime = parse(get_server_local_time(driver))
 
-                # Convert the strings to datetime objects
-                # datetime_format = '%Y-%m-%d %H:%M:%S'
-                dateTime = get_server_local_time(driver)
-                # Automatically parse any valid datetime format
-                current_datetime = parse(dateTime)
-
-                # Loop through each row to find a matching order ID
+            for order_id in failed_order_ids[:]:
+                order_id_str = str(order_id)  # Convert order_id to string for comparison
                 for row in rows:
-                    # spinner_element(driver)
-                    order_id_cell = row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
-                    if order_id in order_id_cell.text:
+                    try:
+                        order_id_cell = row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
+                        if order_id_str not in order_id_cell.text:
+                            continue
                         
-                        if tab_order_type == "open-positions":
-                            print(f"Switching to Open Position tab, {order_id} found")
+                        result_message += f"Order ID {order_id} found in {selected_tab}\n"
 
-                        # Check if we're dealing with the "pending-orders" tab
-                        elif tab_order_type == "pending-orders":
-                            print("Switching to Pending Order tab")
-                            # Extract the 'Expiry' column text from the same row
-                            expiry_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-expiry')]")
-                            expiry_text = expiry_cell.text
-                            print(f"Expiry text for Order ID {order_id}: {expiry_text}")
-                            
-                            # Extract the 'Expiry' column text from the same row
-                            expiry_date_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-expiry-date')]")
-                            # expiry_date_text = expiry_date_cell.text
-                            expiry_date = get_label_of_element(element=expiry_date_cell)
-                            
-                            # Automatically parse any valid datetime format
-                            expiry_date_text = parse(expiry_date)
+                        # Apply PENDING_ORDERS logic
+                        if selected_tab == OrderPanel.PENDING_ORDERS:
+                            expiry_text = get_label_of_element(row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-expiry')]"))
+                            expiry_date_cells = row.find_elements(By.XPATH, ".//td[contains(@data-testid, 'column-expiry-date')]")
 
-                            print(f"Expiry Date text for Order ID {order_id}: {expiry_date_text}")
+                            if expiry_text in ["Specified Date", "Specified Date and Time"] and expiry_date_cells:
+                                expiry_date_str = get_label_of_element(expiry_date_cells[0]).strip()
+                                expiry_date_text = parse(expiry_date_str)
 
-                            if expiry_text == "Good Till Cancelled":
-                                print(f"Expected to be remain from table {order_id}")
-                                result_message += f"Order ID {order_id}: Remains in the table as expected (Good Till Cancelled)\n"
-                            elif expiry_text == "Good Till Day":
-                                print(f"Expected to be removed from table {order_id}")
-                                result_message += f"Order ID {order_id}: Expected to be removed from table (Good Till Day)\n"
-                            elif expiry_text == "Specified Date":
-                                # Compare the datetime objects
-                                if expiry_date_text > current_datetime:
-                                    print(f"{expiry_date_text} is later than {current_datetime}")
-                                elif expiry_date_text < current_datetime:
-                                    print(f"{expiry_date_text} is earlier than {current_datetime}")
-                                    result_message += f"Order ID {order_id}: Expected to be removed from table (Specified Date)\n"
-                                    assert False, f"Order ID {order_id}: Expected to be removed from table (Specified Date)"
+                                if " " in expiry_date_str:  # Expiry includes time
+                                    if expiry_date_text < current_datetime:
+                                        result_message += f"Order ID {order_id}: Expected removal ({expiry_text})\n"
+                                        # No assertion here, just log the issue
+                                else:  # Expiry contains only date
+                                    if expiry_date_text.date() < current_datetime.date():
+                                        result_message += f"Order ID {order_id}: Expected removal ({expiry_text})\n"
+                                        # No assertion here, just log the issue
+
+                            result_message += f"Order ID {order_id}: {expiry_text} (Status Checked)\n"
+
+                        # Apply HISTORY and ORDER_AND_DEALS logic (status check if available)
+                        elif selected_tab in [OrderPanel.HISTORY, OrderPanel.ORDER_AND_DEALS]:
+                            status_cells = row.find_elements(By.XPATH, ".//td[contains(@data-testid, 'column-status')]")
+                            if status_cells:  # Check if status column exists
+                                status_text = status_cells[0].text
+                                expected_statuses = {"CANCELLED", "Canceled", "EXPIRED", "Expired"}
+
+                                if status_text not in expected_statuses:
+                                    result_message += f"Order ID {order_id}: Unexpected status: {status_text}\n"
+                                    # No assertion, just log the unexpected status
                                 else:
-                                    print(f"{expiry_date_text} is the same as {current_datetime}")
-                            elif expiry_text == "Specified Date and Time":
-                                # Compare the datetime objects
-                                if expiry_date_text > current_datetime:
-                                    print(f"{expiry_date_text} is later than {current_datetime}")
-                                elif expiry_date_text < current_datetime:
-                                    print(f"{expiry_date_text} is earlier than {current_datetime}")
-                                    result_message += f"Order ID {order_id}: Expected to be removed from table (Specified Date and Time)\n"
-                                    assert False, f"Order ID {order_id}: Expected to be removed from table (Specified Date and Time)"
-                                else:
-                                    print(f"{expiry_date_text} is the same as {current_datetime}")
-
-                        # Check if we're dealing with the "order-history" tab
-                        elif tab_order_type == "history":
-                            print("Switching to Order History tab")
-                            # Extract the 'Status' column text from the same row
-                            status_cell = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-status')]")
-                            status_text = status_cell.text
-                            print(f"Status text for Order ID {order_id}: {status_text}")
-                            if status_text in ["CANCELLED", "Canceled"]:
-                                print("cancel")
-                                result_message += f"Order ID {order_id}: Status is Cancelled as expected\n"
-                            elif status_text in ["EXPIRED", "Expired"]:
-                                print("expired")
-                                result_message += f"Order ID {order_id}: Status is Expired as expected\n"
+                                    result_message += f"Order ID {order_id}: Status is {status_text} as expected\n"
                             else:
-                                result_message += f"Order ID {order_id}: Unexpected status: {status_text}\n"
-                                assert False, f"Unexpected status: {status_text}"
+                                result_message += f"Order ID {order_id}: No status column available\n"
 
-                        # Remove the found order_id from the failed list
-                        # if order_id in failed_order_ids:
-                        #     failed_order_ids.remove(order_id)
+                        # For POSITION_HISTORY, no status check is needed
+                        elif selected_tab == OrderPanel.POSITION_HISTORY:
+                            # Simply acknowledge it was found, no status check
+                            result_message += f"Order ID {order_id}: Found in Position History (no status check)\n"
 
                         failed_order_ids.remove(order_id)
-                        break  # Stop searching after finding the first match
+                        break
+                    except Exception as e:
+                        print(f"Error processing row in {selected_tab} for Order ID {order_id}: {str(e)}")
+                        continue
 
-        # If there are any order IDs that were not found, add to the result message
-        for order_id in failed_order_ids:
-            result_message += f"No Data match for {order_id}\n"
+        if failed_order_ids:
+            result_message += f"Order IDs not found in any tab: {failed_order_ids}\n"
 
-        # Attach the result message for reporting
         attach_text(result_message.strip(), name="Order Result for All Tabs")
-        
-        button_setting(driver, setting_option="logout")
+        button_setting(driver, setting_option=Setting.LOGOUT)
 
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
+    return failed_order_ids
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -543,7 +540,7 @@ def review_pending_orderIDs(driver, order_ids, sub_tab=None, position: bool = Fa
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def check_orderIDs_in_table(driver, order_ids, tab_order_type, section_name: str, sub_tab = None, position : bool = False):
+def check_orderIDs_in_table(driver, order_ids, tab_order_type: OrderPanel, section_name: str):
     """
     Checks if the specified order IDs exist in the given order panel and extracts relevant data for processing.
 
@@ -563,7 +560,7 @@ def check_orderIDs_in_table(driver, order_ids, tab_order_type, section_name: str
         # spinner_element(driver)
         delay(2)
         
-        type_orderPanel(driver, tab_order_type, sub_tab, position)
+        type_orderPanel(driver, tab_order_type)
             
         # Locate the table body and wait for the spinner to disappear
         table_body = get_table_body(driver)

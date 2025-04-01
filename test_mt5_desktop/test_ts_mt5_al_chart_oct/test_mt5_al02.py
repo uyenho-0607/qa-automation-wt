@@ -2,7 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -62,7 +62,7 @@ class TC_MT5_aL02():
                 chart_minMax(driver=main_driver, chart_fullscreen="exit")
 
             with allure.step("Retrieve the Open Position data"):
-                orderIDs_openPosition, open_position_df = extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
+                orderIDs_openPosition, open_position_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Open Position", row_number=[1])
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=open_position_df, name1="Open Position",

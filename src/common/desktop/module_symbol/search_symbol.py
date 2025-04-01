@@ -56,12 +56,12 @@ def input_symbol(driver, server: Server, symbol_type: SymbolsList = SymbolsList.
         populate_element(element=input_search, text=desired_symbol_name)
         
         # Wait for element to be invisible
-        spinner_element(driver)
+        # spinner_element(driver)
+        wait_for_text_to_be_present_in_element_by_testid(driver, DataTestID.SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME, text=desired_symbol_name)
         
         # Find and click the dropdown option that matches the desired symbol            
         dropdown_options = find_list_of_elements_by_xpath(driver, DataTestID.SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME)
         for option in dropdown_options:
-            print(get_label_of_element(option).split()[0])
             if (get_label_of_element(option).split()[0]) == desired_symbol_name:
                 click_element(option)
                 break

@@ -3,6 +3,9 @@
 import random
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu, OrderPanel
+from constants.element_ids import DataTestID
+
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -19,24 +22,24 @@ from common.desktop.module_trade.order_panel.op_general import get_table_body
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def update_column_visibility(driver, tab_order_type: str, sub_tab: str = None, set_menu: bool = False, position: bool = False):
+def update_column_visibility(driver, tab_order_type: OrderPanel, set_menu: bool = False):
     try:
         if set_menu:
-            current_tab = menu_button(driver, menu="assets")
+            current_tab = menu_button(driver, menu=Menu.ASSETS)
         else:
-            current_tab = menu_button(driver, menu="trade")
+            current_tab = menu_button(driver, menu=Menu.TRADE)
             
-        type_orderPanel(driver, tab_order_type, sub_tab, position)
+        type_orderPanel(driver, tab_order_type)
         
         spinner_element(driver)
         
         before_table_header = get_table_headers(driver)
         print(f"Original table {current_tab}:", before_table_header)
         
-        sort_column = find_visible_element_by_testid(driver, data_testid="column-preference")
+        sort_column = find_visible_element_by_testid(driver, data_testid=DataTestID.COLUMN_PREFERENCE)
         click_element(element=sort_column)
         
-        wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="order-column-preference-modal-title", text="Select the columns you would like to see")
+        wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.ORDER_COLUMN_PREFERENCE_MODAL_TITLE, text="Select the columns you would like to see")
         
         delay(1)
 
@@ -72,7 +75,7 @@ def update_column_visibility(driver, tab_order_type: str, sub_tab: str = None, s
         delay(0.5)
         
         # Click on the Save button
-        save_button = find_element_by_testid(driver, data_testid="order-column-preference-modal-save")
+        save_button = find_element_by_testid(driver, data_testid=DataTestID.ORDER_COLUMN_PREFERENCE_MODAL_SAVE)
         click_element(element=save_button)
 
         alert_msg = handle_alert_success(driver)
@@ -82,7 +85,7 @@ def update_column_visibility(driver, tab_order_type: str, sub_tab: str = None, s
         delay(0.5)
         
         # Click on the 'X' button
-        btn_close = find_element_by_testid(driver, data_testid="order-column-preference-modal-close")
+        btn_close = find_element_by_testid(driver, data_testid=DataTestID.ORDER_COLUMN_PREFERENCE_MODAL_CLOSE)
         click_element(btn_close)
         
         after_table_header = get_table_headers(driver)
@@ -99,7 +102,7 @@ def update_column_visibility(driver, tab_order_type: str, sub_tab: str = None, s
         new_tab = "assets" if current_tab == "trade" else "trade"
         menu_button(driver, menu=new_tab)
 
-        type_orderPanel(driver, tab_order_type, sub_tab, position)
+        type_orderPanel(driver, tab_order_type)
         
         spinner_element(driver)
 
@@ -122,13 +125,13 @@ def update_column_visibility(driver, tab_order_type: str, sub_tab: str = None, s
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def toggle_order_panel_sort(driver, tab_order_type, set_menu: bool = False):
+def toggle_order_panel_sort(driver, tab_order_type: OrderPanel, set_menu: bool = False):
     try:
         
         if set_menu:
-            menu_button(driver, menu="assets")
+            menu_button(driver, menu=Menu.ASSETS)
         else:
-            menu_button(driver, menu="assets")
+            menu_button(driver, menu=Menu.ASSETS)
             tab_order_type_result, _ = type_orderPanel(driver, tab_order_type)
             spinner_element(driver)
             
@@ -136,8 +139,7 @@ def toggle_order_panel_sort(driver, tab_order_type, set_menu: bool = False):
 
             for row in table_body.find_elements(By.TAG_NAME, "tr"):
                 symbol_name = row.find_element(By.XPATH, ".//td[contains(@data-testid, 'column-symbol')]/span")
-                label_symbolName = symbol_name.text
-                symbol_name.click()
+                click_element(element=symbol_name)
                 spinner_element(driver)
                 break
 
@@ -240,7 +242,7 @@ def verify_sort_column(driver, tab_order_type, column_type):
         value = value.strip()  # Remove leading/trailing spaces
         
         # Handle case where the value is just "-" or an empty string (representing invalid or missing data)
-        if value == "-":
+        if value == "--":
             return 0.0  # Or return None if you prefer
 
         # If value has a valid number format (e.g., +5,566.65 or -3,356.56), remove commas and convert to float

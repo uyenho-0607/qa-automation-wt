@@ -2,6 +2,7 @@ import random
 
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -19,7 +20,7 @@ from common.desktop.module_sub_menu.utils import menu_button
 def inspect_my_trade_orders(driver, symbol_name, order_type):
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer displays
         spinner_element(driver)
@@ -51,7 +52,7 @@ def inspect_my_trade_orders(driver, symbol_name, order_type):
 def verify_no_orders_in_my_trades(driver):
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer displays
         spinner_element(driver)
@@ -271,7 +272,7 @@ def market_select_symbols(driver, option_name):
 
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer display
         spinner_element(driver)
@@ -343,7 +344,7 @@ def market_redirect_arrow(driver, option_name):
         
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Handle specific market options (e.g., 'Top Loser')
         if option_name == "Top Loser":
@@ -400,7 +401,7 @@ def news_section(driver):
     """
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         spinner_element(driver)
         

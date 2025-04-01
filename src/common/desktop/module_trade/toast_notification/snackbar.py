@@ -53,7 +53,7 @@ def get_trade_snackbar_banner(driver):
 
         # Check if the header is valid
         if extracted_header not in valid_message_headers:
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message description: {label_message}"
         
         # Initialize a list to hold parts of the snackbar message
         snackbar_msg = []
@@ -219,7 +219,7 @@ def get_bulk_snackbar_banner(driver):
 
         # Check if the header is valid
         if extracted_header not in valid_message_headers:
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message description: {label_message}"
     
         btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
         trigger_click(driver, element=btn_close)

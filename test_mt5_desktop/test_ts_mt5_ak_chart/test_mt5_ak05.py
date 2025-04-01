@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
@@ -71,7 +71,7 @@ class TC_MT5_aK03():
                 chart_minMax(driver=main_driver, chart_fullscreen="exit")
                 
             with allure.step("Retrieve the Pending Order data"):
-                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Pending Order", row_number=[1])
+                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Pending Order", row_number=[1])
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=snackbar_banner_df, name2="Snackbar Banner Message", compare_volume=False)

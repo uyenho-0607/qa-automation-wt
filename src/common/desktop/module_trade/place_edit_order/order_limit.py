@@ -1,3 +1,4 @@
+from enums.main import ModuleType
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, populate_element
 
@@ -155,10 +156,10 @@ def trade_limit_order(driver, trade_type, option, expiryType, expiryDate=None, t
         if set_Chart:
             chart_minMax(driver, chart_fullscreen)
 
-        button_tradeModule(driver, module_Type="trade")
+        button_tradeModule(driver, module_type=ModuleType.TRADE)
         
         # Retrieve the One Point Equal label data
-        label_onePointsEqual = label_onePointEqual(driver, trade_type="trade")
+        label_onePointsEqual = label_onePointEqual(driver, trade_type=ModuleType.TRADE)
         
         # Retrieve the current price based on order type and option
         current_price = get_current_price(driver, trade_type, option, partial_text="limit")
@@ -201,7 +202,7 @@ def modify_limit_order(driver, trade_type, row_number, expiryType, expiryDate=No
 
         current_price = get_current_price(driver, trade_type)
 
-        label_onePointsEqual = label_onePointEqual(driver, trade_type="edit")
+        label_onePointsEqual = label_onePointEqual(driver, trade_type=ModuleType.EDIT)
 
         option = get_edit_order_label(driver)
 

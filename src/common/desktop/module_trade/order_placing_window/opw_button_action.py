@@ -1,6 +1,8 @@
 import re
 import random
 
+from enums.main import ModuleType
+from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.element import find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, get_label_of_element
 from constants.helper.error_handler import handle_exception
@@ -12,7 +14,7 @@ from constants.helper.error_handler import handle_exception
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def label_onePointEqual(driver, trade_type):
+def label_onePointEqual(driver, trade_type: ModuleType):
     """
     Retrieves the value of "one point equal" for a given trade type from the web page.
     The value is extracted from a label element that displays the value in the format "equals: <value>".
@@ -27,8 +29,26 @@ def label_onePointEqual(driver, trade_type):
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
+        
+        
+        # Determine the data-testid based on the button type
+        button_testids = {
+            ModuleType.TRADE: DataTestID.TRADE_ONE_POINT_EQUAL_LABEL,
+            ModuleType.EDIT: DataTestID.EDIT_ONE_POINT_EQUAL_LABEL,
+        }
+        
+        button_testid = button_testids.get(trade_type)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {trade_type}")
+        
+        # Locate the menu element using the provided menu name and data-testid attribute
+        onePointsEqual = find_visible_element_by_testid(driver, button_testid)
+        
+        # Click on the found menu element with an optional wait to ensure the action is completed
+        # click_element(element=menu_selection)
+        
         # Locate the element that contains the "one point equal" value
-        onePointsEqual = find_visible_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
+        # onePointsEqual = find_visible_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
         
         # Get the label text from the located element
         label_onePointsEqual = get_label_of_element(onePointsEqual)
@@ -42,8 +62,6 @@ def label_onePointEqual(driver, trade_type):
             return float(onePointsEqual_value)
         else:
             raise ValueError(f"Could not find a valid value in the label: {label_onePointsEqual}")
-        
-        # return float(onePointsEqual_value)
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -61,13 +79,13 @@ def label_onePointEqual(driver, trade_type):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_tradeModule(driver, module_Type: str):
+def button_tradeModule(driver, module_type: ModuleType):
     """
     Interacts with the trade module based on the provided module type.
     It locates the corresponding tab for the module type and clicks it.
 
     Arguments:
-    - module_Type: The type of trade module to click, such as "oct", "trade", "specification", etc.
+    - module_type: The type of trade module to click, such as "oct", "trade", "specification", etc.
 
     Returns:
     - None: The function doesn't return any value. It performs actions on the page.
@@ -78,14 +96,25 @@ def button_tradeModule(driver, module_Type: str):
     try:
         # Introducing a slight delay to handle any page load or rendering delays
         delay(0.5)
-
-        # Locate the module tab based on the provided module type
-        moduleOption = find_visible_element_by_testid(driver, data_testid=f"tab-{module_Type}")
-
-        # Click the module tab with wait to ensure it's properly loaded before proceeding
-        click_element_with_wait(driver, element=moduleOption)
-                
-        if module_Type == "specification":
+        
+        # Determine the data-testid based on the button type
+        button_testids = {
+            ModuleType.ONE_CLICK_TRADING: DataTestID.TAB_ONE_CLICK_TRADING,
+            ModuleType.TRADE: DataTestID.TAB_TRADE,
+            ModuleType.SPECIFICATION: DataTestID.TAB_SPECIFICATION,
+        }
+        
+        button_testid = button_testids.get(module_type)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {module_type}")
+        
+        # Locate the menu element using the provided menu name and data-testid attribute
+        module_option = find_visible_element_by_testid(driver, button_testid)
+        
+        # Click on the found menu element with an optional wait to ensure the action is completed
+        click_element_with_wait(driver, element=module_option)
+        
+        if module_type == ModuleType.SPECIFICATION:
             contractSize = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-contract-size']/div[2]")
             label_contractSize = float(get_label_of_element(contractSize))
             

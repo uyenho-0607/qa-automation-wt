@@ -17,26 +17,19 @@ def get_radioStates():
             "checked": "//*[@data-testid='toggle-oct-checked']"
         },
         "Margin_Call": {
-            "unchecked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[1]//div[@data-testid='toggle-oct']",
-            # "checked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[1]//div[@data-testid='toggle-oct-checked']"
+            "unchecked": "(//*[@data-testid='notification-settings-toggle'])[1]",
             "checked": "(//*[@data-testid='notification-settings-toggle-checked'])[1]"
         },
         "Margin_Stop": {
-            # "unchecked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[2]//div[@data-testid='toggle-oct']",
-            # "checked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[2]//div[@data-testid='toggle-oct-checked']"
-            "unchecked": "//div[@data-testid='notification-settings-toggle-']",
+            "unchecked": "(//*[@data-testid='notification-settings-toggle'])[2]",
             "checked": "(//*[@data-testid='notification-settings-toggle-checked'])[2]"
         },
         "Signal": {
-            # "unchecked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[3]//div[@data-testid='toggle-oct']",
-            # "checked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[3]//div[@data-testid='toggle-oct-checked']"
-            "unchecked": "//div[@data-testid='notification-settings-toggle-']",
+            "unchecked": "(//*[@data-testid='notification-settings-toggle'])[3]",
             "checked": "(//*[@data-testid='notification-settings-toggle-checked'])[3]"
         },
         "Linked_Devices": {
-            # "unchecked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[4]//div[@data-testid='toggle-oct']",
-            # "checked": "(//div[@class='sc-sdaxep-3 fKaFfa'])[4]//div[@data-testid='toggle-oct-checked']"
-            "unchecked": "//div[@data-testid='notification-settings-toggle-']",
+            "unchecked": "(//*[@data-testid='notification-settings-toggle'])[3]",
             "checked": "(//*[@data-testid='notification-settings-toggle-checked'])[1]"
         }
     }

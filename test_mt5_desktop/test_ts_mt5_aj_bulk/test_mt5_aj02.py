@@ -2,7 +2,7 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -45,7 +45,7 @@ class TC_MT5_aJ02():
 
             with allure.step("Bulk Close Orders"):
                 clear_orderIDs_csv(filename="MT5_Bulk.csv")
-                open_position_df = button_bulk_operation(driver=main_driver, filename="MT5_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name="Open Position", tab_order_type="open-positions")
+                open_position_df = button_bulk_operation(driver=main_driver, filename="MT5_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name="Open Position", tab_order_type=OrderPanel.OPEN_POSITIONS)
 
             with allure.step("Retrieve snackbar message"):
                 get_bulk_snackbar_banner(driver=main_driver)
@@ -55,7 +55,7 @@ class TC_MT5_aJ02():
         
             with allure.step("Ensure the OrderID is display in order panel: Order History table"):
                 # Check order IDs in Order History table
-                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type="history", section_name="Order History")
+                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type=OrderPanel.HISTORY, section_name="Order History")
 
             with allure.step("Comparison on Order History and Open Position table"):
                 compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=open_position_df, name2="Open Position", compare_volume=False, compare_units=False)

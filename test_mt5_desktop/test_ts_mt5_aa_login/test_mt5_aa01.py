@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, AccountType, CredentialType
+from enums.main import Server, AccountType, CredentialType, Setting
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -38,7 +38,7 @@ class TC_MT5_aA01():
                 login_wt(driver=main_driver, server=Server.MT5, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
 
             with allure.step("Successfully Logout"):
-                button_setting(driver=main_driver, setting_option="logout")
+                button_setting(driver=main_driver, setting_option=Setting.LOGOUT)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

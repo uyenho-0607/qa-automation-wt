@@ -1,11 +1,12 @@
 import random
 
+from enums.main import Setting
+
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, find_element_by_xpath, find_list_of_elements_by_xpath
 
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_markets.markets_watchlist import handle_alert_success
-
 
 
 """
@@ -18,7 +19,7 @@ def linked_devices_modal(driver, set_terminate: bool = True):
     try:
         
         # Open the "Linked Devices" modal dialog
-        button_setting(driver, setting_option="linked-device")
+        button_setting(driver, setting_option=Setting.LINKED_DEVICE)
         
         if set_terminate:
             # Click on the terminate button

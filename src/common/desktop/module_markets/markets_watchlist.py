@@ -1,6 +1,7 @@
 import random
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
@@ -33,15 +34,11 @@ def market_watchlist(driver):
     
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
-        
-        # Ensure the tabs are visible
-        # visibility_of_element_by_xpath(driver, "//div[@data-testid='watchlist-tabs']/div")
+        menu_button(driver, menu=Menu.MARKET)
         
         delay(1)
 
         # Randomly select a tab
-        # selected_option = find_list_of_elements_by_xpath(driver, "//div[@data-testid='watchlist-tabs']/div")
         selected_option = find_list_of_elements_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_TABS}']/div")
         if selected_option:
             random_category = random.choice(selected_option)
@@ -50,7 +47,6 @@ def market_watchlist(driver):
             click_element(element=random_category)
             if selected_category_text.strip() == "Favourites":
                 delay(0.5)
-                # msg_validate = is_element_present_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
                 if is_element_present_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST}']//*[@data-testid='empty-message']"):
                     no_items_message = find_visible_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST}']//*[@data-testid='empty-message']")
                     msg = get_label_of_element(element=no_items_message)
@@ -68,7 +64,6 @@ def market_watchlist(driver):
         spinner_element(driver)
         
         # Locate all symbols in the selected category
-        # symbols = find_list_of_elements_by_testid(driver, data_testid="watchlist-symbol")
         symbols = find_list_of_elements_by_testid(driver, data_testid=DataTestID.WATCHLIST_SYMBOL)
         if symbols:
             random_symbol = random.choice(symbols) # Randomly choose one symbol from the list
@@ -76,15 +71,12 @@ def market_watchlist(driver):
             attach_text("Selected Symbol is: " + label_symbol, name="Market Watchlist Section")
             click_element(random_symbol)  # Click on the selected symbol
         else:
-            # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
-            # no_items_message = visibility_of_element_by_xpath(driver, "//div[@data-testid='watchlist-list']//div[@data-testid='empty-message']")
             no_items_message = find_visible_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST}']//*[@data-testid='empty-message']")
             msg = get_label_of_element(element=no_items_message)
             # Raise an error if no symbols were found
             raise AssertionError(f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab")
 
         # Verify if the correct symbol is displayed in the chart (ensuring the click was successful)
-        # chart_symbol_name = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="symbol-overview-id", text=label_symbol)
         chart_symbol_name = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID, text=label_symbol)
         
         # Assert that the symbol in the chart matches the selected symbol
@@ -125,21 +117,12 @@ def handle_alert_success(driver):
     - success_message: The error message text extracted from the login failure notification.
     """
     # Locate the error message notification element by its test ID.
-    if is_element_present_by_testid(driver, data_testid=DataTestID.ALERT_SUCCESS):
-        success_message_notification = find_visible_element_by_testid(driver, data_testid=DataTestID.ALERT_SUCCESS)
-        # Extract the text (label) of the error message from the notification element.
-        success_message = get_label_of_element(success_message_notification)
-        # Attach the extracted error message to the logs for reporting purposes.
-        attach_text(success_message, name="Success message found:")
-        return success_message
-    else:
-        error_message_notification = find_visible_element_by_testid(driver, data_testid=DataTestID.ALERT_ERROR)
-        # Extract the text (label) of the error message from the notification element.
-        error_message = get_label_of_element(error_message_notification)
-        # Attach the extracted error message to the logs for reporting purposes.
-        attach_text(error_message, name="Error message found:")
-        assert False, f"Error message prompted, {error_message}"
-
+    success_message_notification = find_visible_element_by_testid(driver, data_testid=DataTestID.ALERT_SUCCESS)
+    # Extract the text (label) of the error message from the notification element.
+    success_message = get_label_of_element(success_message_notification)
+    # Attach the extracted error message to the logs for reporting purposes.
+    attach_text(success_message, name="Success message found:")
+    return success_message
 
 
 def scroll_and_retrieve_data(driver):
@@ -178,7 +161,7 @@ def scroll_and_retrieve_data(driver):
 def market_watchlist_filter(driver):
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Locate all symbols in the selected category
         filter = find_visible_element_by_testid(driver, data_testid=DataTestID.SYMBOL_PREFERENCE)

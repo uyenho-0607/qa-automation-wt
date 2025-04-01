@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, AccountType
+from enums.main import Server, AccountType, Setting
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -39,7 +39,7 @@ class TC_MT4_aA03():
                 login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO)
 
             with allure.step("Successfully Logout"):
-                button_setting(driver=main_driver, setting_option="logout")
+                button_setting(driver=main_driver, setting_option=Setting.LOGOUT)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

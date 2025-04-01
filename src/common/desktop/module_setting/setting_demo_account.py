@@ -5,6 +5,7 @@ import pyperclip
 from tabulate import tabulate
 from difflib import get_close_matches
  
+from enums.main import AlertType, Setting
 from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.driver import delay, get_current_url
@@ -28,7 +29,7 @@ def open_demo_account_error_msg(driver, setting: bool = False):
     try:
         # Open the demo account settings if the setting flag is True
         if setting:
-            button_setting(driver, setting_option="open-demo-account")
+            button_setting(driver, setting_option=Setting.OPEN_DEMO_ACCOUNT)
         else:
             demo_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_ACCOUNT_SIGNUP)
             click_element(element=demo_button)
@@ -96,7 +97,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
 
         # If the setting flag is True, open the demo account settings via the settings button
         if setting:
-            button_setting(driver, setting_option="open-demo-account")
+            button_setting(driver, setting_option=Setting.OPEN_DEMO_ACCOUNT)
         else:
             demo_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_ACCOUNT_SIGNUP)
             click_element(element=demo_button)
@@ -109,10 +110,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         clear_input_field(element=input_name) # Clear any pre-filled value
         populate_element(element=input_name, text=first_name)  # Populate the input field with the random name
 
-        """ Email field """
-        # Use the provided email or generate a random one
-        # email_to_use = user_email if user_email else generate_random_name_and_email()[3]
-        
+        """ Email field """        
         # Fill in the Email field        
         input_email = find_element_by_testid(driver, data_testid=DataTestID.DEMO_ACCOUNT_CREATION_MODAL_EMAIL)
         populate_element(element=input_email, text=email)  # Populate the input field with the email
@@ -120,7 +118,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         """ Phone Number field """
         # Handle the Phone Number field
         dial_code = find_element_by_xpath(driver, "//div[@class='sc-1ks0xwr-0 fSgSbd']")
-        # dialCode = find_element_by_testid(driver, data_testid=DataTestID.COUNTRY_DIAL_CODE)
+        # dial_code = find_element_by_testid(driver, data_testid=DataTestID.COUNTRY_DIAL_CODE)
         click_element(element=dial_code) # Open the dial code dropdown
         
         # Wait for the dial code modal to appear
@@ -336,7 +334,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
             # get_copied_banner(driver)
 
             # if text == demo_account_info
-            modal_close = find_element_by_xpath(driver, "//div[@class='sc-1dvc755-6 hyBcLN']//*[name()='svg']")
+            modal_close = find_element_by_xpath(driver, "//div[@class='sc-1dvc755-6 eNWBtu']//*[name()='svg']")
             click_element(modal_close)
             
             # Verify the URL after closing the modal
@@ -452,7 +450,7 @@ def validate_account_details(driver, demo_account_details):
     assert match.group(2) == demo_account_details["Leverage"], f"Leverage mismatch. Expected {demo_account_details["Leverage"]} but found {match.group(2)}"
 
     # Validate the Account Balance displayed matches the expected value from demo_account_details
-    account_balance = get_label_of_element(find_element_by_xpath(driver, "(//div[@class='sc-11khvbe-3 jKLIbO'])[1]//div[@class='sc-11khvbe-5 doTcw']"))
+    account_balance = get_label_of_element(find_element_by_xpath(driver, "(//div[@class='sc-11khvbe-2 cGzlIk']//div)[1]//div[2]"))
     # Extract the numerical value of the account balance from the displayed text using regex
     balance_value = re.search(r'\$(\d{1,3}(?:,\d{3})*)', account_balance).group(1)
     assert balance_value == demo_account_details["Deposit"], "Account balance mismatch"
@@ -472,7 +470,7 @@ def validate_account_details(driver, demo_account_details):
 def handle_changePassword(driver, demo_account_details, new_password, confirm_password):
 
     # Step 1: Navigate to the Change Password section
-    button_setting(driver, setting_option="change-password")
+    button_setting(driver, setting_option=Setting.CHANGE_PASSWORD)
     
     # Locate and populate the old password input field
     old_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_OLD_PASSWORD)
@@ -489,23 +487,19 @@ def handle_changePassword(driver, demo_account_details, new_password, confirm_pa
     # Find the submit button and click it
     submit_button = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM)
     click_element(element=submit_button)
-
-    alert_message, actual_alert_type = capture_alert(driver)
-
-    # Handle different types of alerts
-    if actual_alert_type == "success":
-        # Extract the label/message from the alert
-        label_message = get_label_of_element(alert_message)
     
-        # If the success message indicates a password change, process it
+    alert_message, actual_alert_type = capture_alert(driver)
+    label_message = get_label_of_element(alert_message)
+
+    if actual_alert_type == AlertType.SUCCESS:
         if "Account password has been updated successfully" in label_message:
             attach_text(label_message, name="Success message found:")
-            # Log the user out
-            button_setting(driver, setting_option="logout")
-            
+            button_setting(driver, setting_option=Setting.LOGOUT)  # Log the user out
         else:
-            # If the success message doesn't match, handle it as an unexpected message
             assert False, f"Unexpected success message: {label_message}"
+    else:
+        raise AssertionError(f"{label_message} prompted")
+    
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

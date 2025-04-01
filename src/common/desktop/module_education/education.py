@@ -1,10 +1,10 @@
 
 import random
 
+from enums.main import Menu
 from constants.helper.driver import delay, get_current_url, switch_to_new_window
 from constants.helper.element import spinner_element, javascript_click, click_element, find_list_of_elements_by_xpath, find_visible_element_by_xpath, is_element_present_by_xpath
 from constants.helper.error_handler import handle_exception
-
 
 from common.desktop.module_sub_menu.sub_menu import menu_button
 
@@ -19,7 +19,7 @@ def education_video(driver):
     try:
         
         # Redirect to the Markets page
-        menu_button(driver, menu="education")
+        menu_button(driver, menu=Menu.EDUCATION)
 
         spinner_element(driver)
         
@@ -77,7 +77,7 @@ def video_redirection(driver):
     try:
         
         # Redirect to the Markets page
-        menu_button(driver, menu="education")
+        menu_button(driver, menu=Menu.EDUCATION)
 
         spinner_element(driver)
         

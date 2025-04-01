@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from datetime import datetime
+from enums.main import Server, Menu, OrderPanel
+from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -43,24 +44,24 @@ class TC_MT4_aP09():
                 input_symbol(driver=main_driver, server=Server.MT4)
 
             with allure.step("Select the Order Panel: Order History"):
-                type_orderPanel(driver=main_driver, tab_order_type="history")
+                type_orderPanel(driver=main_driver, tab_order_type=OrderPanel.HISTORY)
 
             with allure.step("Retrieve the Order Panel data"):
-                OH_closeDate(driver=main_driver, startDate="3", endDate="4",
-                                    target_startMonth=datetime.strptime("October 2024", "%B %Y"),
-                                    target_endMonth=datetime.strptime("October 2024", "%B %Y"))
+                OH_closeDate(driver=main_driver, startDate="20", endDate="28",
+                             target_startMonth=parse("March 2025"), 
+                             target_endMonth=parse("March 2025"))
 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
                 
             with allure.step("Select the Order Panel: Order History"):
-                type_orderPanel(driver=main_driver, tab_order_type="history")
+                type_orderPanel(driver=main_driver, tab_order_type=OrderPanel.HISTORY)
 
             with allure.step("Retrieve the Order Panel data"):
-                OH_closeDate(driver=main_driver, startDate="3", endDate="4",
-                                    target_startMonth=datetime.strptime("October 2024", "%B %Y"),
-                                    target_endMonth=datetime.strptime("October 2024", "%B %Y"))
-            
+                OH_closeDate(driver=main_driver, startDate="20", endDate="28",
+                             target_startMonth=parse("March 2025"), 
+                             target_endMonth=parse("March 2025"))
+                
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:

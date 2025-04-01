@@ -1,5 +1,5 @@
 from constants.element_ids import DataTestID
-from enums.main import Server, Platform, ClientName, AccountType, EnvironmentType
+from enums.main import Server, Platform, AccountType, EnvironmentType
 
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import get_current_url, switch_to_new_window
@@ -43,7 +43,7 @@ def handle_reset_password_flow(driver, email, accountID, account_type):
     btn_submit = find_element_by_xpath(driver, DataTestID.RESET_PASSWORD_SUBMIT)
     click_element(element=btn_submit)
     
-    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_HELP_IS_ON_THE_WAY, "Help is on the way!"):
+    if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.HELP_IS_ON_THE_WAY, "Help is on the way!"):
         handle_help_is_on_the_way(driver)
         return
     

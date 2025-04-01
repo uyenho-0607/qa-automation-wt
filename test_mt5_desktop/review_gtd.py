@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -45,7 +45,7 @@ class TC_review_pending_order_expiry():
                 
             with allure.step("Ensure the OrderID is display in order panel table"):
                 # # Check order IDs in Order History table
-                review_pending_orderIDs(driver=main_driver, order_ids=orderIDs, sub_tab="orders-and-deals", position=True)
+                review_pending_orderIDs(driver=main_driver, order_ids=orderIDs, check_extended_tabs=True)
                 
         except Exception as e:
             test_failed = True  # Mark test as failed

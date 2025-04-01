@@ -5,6 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
@@ -58,7 +59,7 @@ def perform_search(driver, input_search):
 def signal_search_feature(driver):
     try:
         # Navigate to the 'Signal' menu
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
 
         # Wait for any spinner to disappear
         spinner_element(driver)
@@ -118,7 +119,7 @@ def express_interest(driver, click_submit: bool = True):
     try:
 
         # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
         
         # Wait for any spinner element to disappear
         spinner_element(driver)
@@ -176,7 +177,7 @@ def express_interest(driver, click_submit: bool = True):
 def verify_copy_to_order_is_disabled(driver):
     try:
         # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
         
         # Wait for any spinner element to disappear
         spinner_element(driver)
@@ -243,7 +244,7 @@ def select_valid_signal_to_trade(driver):
     """
     try:
         # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
         
         # Wait for any spinner element to disappear
         spinner_element(driver)
@@ -462,7 +463,7 @@ def handle_order_type(driver, order_type: str):
         open_positions_types = ["BUY", "SELL"]
 
         # Navigate to assets menu
-        menu_button(driver, menu="assets")
+        menu_button(driver, menu=Menu.ASSETS)
 
         # Determine tab based on order type
         order_tabs = {

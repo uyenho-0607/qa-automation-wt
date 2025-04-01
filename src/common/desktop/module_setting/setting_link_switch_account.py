@@ -4,7 +4,9 @@ import random
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 
+from enums.main import Setting
 from constants.element_ids import DataTestID
+
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, delay, get_current_url
 from constants.helper.element import spinner_element, is_element_present_by_testid, click_element, populate_element, find_element_by_testid, find_list_of_elements_by_testid, trigger_click, find_visible_element_by_testid, get_label_of_element, wait_for_text_to_be_present_in_element_by_testid
@@ -13,6 +15,7 @@ from common.desktop.module_login.utils import handle_alert_error
 from common.desktop.module_setting.utils import button_setting
 from common.desktop.module_setting.setting_change_pwd import perform_login
 from common.desktop.module_setting.setting_general import accountInformation
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -40,7 +43,7 @@ def get_account_banner(driver):
 
         # Check if the header is valid
         if extracted_header not in valid_message_headers:
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message description: {label_message}"
         
         accountID = re.search(r'Account ID:\s*(\d+)', label_message).group(1)
         print("accountID", accountID)
@@ -83,11 +86,11 @@ def switch_account_type(driver, account_type):
     try:
         # Determine the setting option based on the provided account type ('demo' or 'live')
         if account_type == "demo":
-            setting_option = "switch-to-demo" # Button to switch to the demo account
+            setting_option = Setting.SWITCH_TO_DEMO # Button to switch to the demo account
             expected_label = "Demo Account" # Expected label for demo account
             testid = DataTestID.TAB_LOGIN_ACCOUNT_TYPE_DEMO # Test ID for the demo account tab
         elif account_type == "live":
-            setting_option = "switch-to-live" # Button to switch to the live account
+            setting_option = Setting.SWITCH_TO_LIVE # Button to switch to the demo account
             expected_label = "Live Account" # Expected label for live account
             testid = DataTestID.TAB_LOGIN_ACCOUNT_TYPE_LIVE # Test ID for the live account tab
         else:
@@ -242,12 +245,12 @@ def switch_or_delete_account(driver, option: str, login_password=None, params_wt
         # Define action properties for switch and delete
         actions = {
             "switch": {
-                "button_xpath": ".//div[@class='sc-3lrinj-0 iCMNHY hover-buttons']/img[1]",
+                "button_selector": "[data-testid='account-option-switch']",
                 "action_text": "Switch Account?",
                 "action_type": "Switch"
             },
             "delete": {
-                "button_xpath": ".//div[@class='sc-3lrinj-0 iCMNHY hover-buttons']/img[2]",
+                "button_selector": "[data-testid='account-option-delete']",
                 "action_text": "Remove Account?",
                 "action_type": "Delete"
             }
@@ -258,7 +261,7 @@ def switch_or_delete_account(driver, option: str, login_password=None, params_wt
             action = actions[option]
             
             # Locate and click the corresponding action button (Switch/Delete)
-            button = selected_account.find_element(By.XPATH, action["button_xpath"])
+            button = selected_account.find_element(By.CSS_SELECTOR, action["button_selector"])
             click_element(element=button)
             
             # Wait for the confirmation message to appear
