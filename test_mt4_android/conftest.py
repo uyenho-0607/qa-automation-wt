@@ -17,15 +17,17 @@ def androidDriver(appium_server_url="http://localhost:4723"):
     # options.app_activity = "com.aquariux.wt.release.lirunex.MainActivity"
     
     # SIT 
-    options.app_package = "com.aquariux.wt.sit.lirunex"
-    options.app_activity = "com.aquariux.wt.sit.lirunex.MainActivity"
+    # options.app_package = "com.aquariux.wt.sit.lirunex"
+    # options.app_activity = "com.aquariux.wt.sit.lirunex.MainActivity"
     
     # UAT
-    # options.app_package = "com.aquariux.lirunex.uat"
-    # options.app_activity = "com.aquariux.lirunex.uat.MainActivity"
+    options.app_package = "com.aquariux.lirunex.uat"
+    options.app_activity = "com.aquariux.lirunex.uat.MainActivity"
     
     options.no_reset = True  # Do not reset app state
+    options.full_reset = False
     options.new_command_timeout = 300  # Timeout for app initialization
+    
     options.set_capability("unicodeKeyboard", True)
     options.set_capability("resetKeyboard", True)
     options.set_capability("appium:clearSystemFiles", True) # Add clearSystemFiles

@@ -5,7 +5,7 @@ from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import click_element, find_element_by_testid, find_list_of_elements_by_xpath, get_label_of_element, find_element_by_testid_with_wait
-from enums.main import SettingLanguageMap
+from enums.main import LoginLanguageMap
 
 
 """
@@ -59,7 +59,7 @@ def select_and_verify_language(driver):
             button_text = get_label_of_element(submit_button).strip()
         
             # Determine the expected text based on the selected language
-            expected_text = SettingLanguageMap.get_expected_text(selected_language)
+            expected_text = LoginLanguageMap.get_expected_text(selected_language)
 
             # Compare the button text with the expected text
             if button_text == expected_text:

@@ -130,11 +130,11 @@ def search_symbol_variations(driver, server: Server, symbol_type: SymbolsList = 
                 if matched_rows:
                     print(f"✅ Matching rows found for '{input_search}':\n" + "\n".join(matched_rows))
                 else:
-                    raise AssertionError(f"No matching row found for symbol: {input_search}")
+                    assert False, f"No matching row found for symbol: {input_search}"
             else:
                 no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'Type something to search')]")
                 msg = get_label_of_element(no_items_message)
-                raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+                assert False, f"No matching row found for symbol: {input_search} with message: {msg}"
     
     except Exception as e:
         handle_exception(driver, e)
@@ -166,8 +166,8 @@ def clear_search_history(driver):
         
         # Verify search history is cleared
         if not is_element_present_by_xpath(driver, DataTestID.APP_SEARCH_HISTORY_LABEL):
-            raise AssertionError("Expected Search History to be hidden")
-        
+            assert False, "Expected Search History to be hidden"
+            
         print("Element not present")
 
     except Exception as e:

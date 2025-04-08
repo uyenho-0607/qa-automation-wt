@@ -8,14 +8,14 @@ from common.mobileapp.module_login.utils import login_wt
 from common.mobileapp.module_markets.watchlist_favorites import remove_favorite_symbol, toggle_symbol_favorite_status
 
 
-@allure.parent_suite("MT4 Membersite - Android - Markets")
+@allure.parent_suite("MT5 Membersite - Android - Markets")
 
-@allure.epic("MT4 Android ts_ar - Markets")
+@allure.epic("MT5 Android ts_ar - Markets")
 
 # Member Portal
-class TC_MT4_aR09():
+class TC_aR09():
 
-    @allure.title("TC_MT4_aR09")
+    @allure.title("TC_aR09")
 
     @allure.description(
         """
@@ -35,13 +35,10 @@ class TC_MT4_aR09():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                # login_wt(driver=main_driver, server=Server.MT4)
-                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
+                login_wt(driver=main_driver, server=Server.MT5, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
 
             with allure.step("Toggle to Fav/Unfav the star"):
-                # toggle_symbol_favorite_status(driver=main_driver)
-                remove_favorite_symbol(driver=main_driver, server=Server.MT4)
-                # remove_favorite_symbol(driver=main_driver)
+                remove_favorite_symbol(driver=main_driver, server=Server.MT5)
 
         finally:
             video_data = stop_recording_mobile(driver=main_driver)

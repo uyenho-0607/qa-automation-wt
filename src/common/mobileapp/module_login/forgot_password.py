@@ -67,7 +67,7 @@ def forgot_password(driver, email: str, accountID: str = None, account_type: Acc
         select_account_type(driver, account_type)
 
         if not is_element_present_by_xpath(driver, DataTestID.APP_FORGOT_PASSWORD):
-            raise AssertionError("Forgot Password button not found")
+            assert False, "Forgot Password button not found"
         
         click_element(find_element_by_xpath_with_wait(driver, DataTestID.APP_FORGOT_PASSWORD))
 

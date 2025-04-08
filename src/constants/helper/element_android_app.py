@@ -71,7 +71,7 @@ def is_element_present_by_testid(driver, data_testid: str) -> bool:
     try:
         # Try to find the element
         # find_element_by_testid(driver, data_testid)
-        find_element_by_xpath_with_wait(driver, data_testid)
+        find_element_by_testid_with_wait(driver, data_testid)
         # Use WebDriver to find for element to according to specified xpath string
         return True
     except Exception:
@@ -92,9 +92,28 @@ def is_element_present_by_xpath(driver, xpath: str) -> bool:
     
 
 # Ensures the element is both present in the DOM and visible.
-def wait_for_element_visibility(driver, locator, duration: int | None = None) -> bool:
+def wait_for_element_visibility_by_xpath(driver, xpath_string, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
-    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(locator)) is not None
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(AppiumBy.XPATH, xpath_string)) is not None
+
+
+def wait_for_element_visibility_by_testid(driver, data_testid, duration: int | None = None) -> bool:
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(AppiumBy.XPATH, data_test_id_string)) is not None
+
+
+def wait_for_list_of_element_visibility_by_xpath(driver, xpath_string, duration: int | None = None) -> bool:
+    wait_duration = derive_wait_duration(duration)
+    elements = WebDriverWait(driver, wait_duration).until(EC.visibility_of_all_elements_located((AppiumBy.XPATH, xpath_string)))
+    return bool(elements)  # Returns True if at least one element is visible
+
+
+def wait_for_list_of_element_visibility_by_testid(driver, data_testid, duration: int | None = None) -> bool:
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    wait_duration = derive_wait_duration(duration)
+    elements = WebDriverWait(driver, wait_duration).until(EC.visibility_of_all_elements_located((AppiumBy.XPATH, data_test_id_string)))
+    return bool(elements)  # Returns True if at least one element is visible
 
 
 def find_visible_element_by_xpath(driver, xpath_string, duration: int | None = None) -> WebElement:
@@ -105,11 +124,10 @@ def find_visible_element_by_xpath(driver, xpath_string, duration: int | None = N
 def find_visible_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
-    visibility_of_element = WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-    return visibility_of_element
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
 
 
-def invisibility_of_element_by_xpath(driver, xpath, duration: int | None = None) -> bool:
+def invisibility_of_element_by_testid(driver, xpath, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
     try:
         return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, xpath)))
@@ -158,6 +176,8 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
 
     # Use WebDriverWait to wait for the element to be clickable
     element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element(element))
+    
+    # click_element(element=element_on_focus)
 
     # Input value within element
     populate_element(element_on_focus, text)

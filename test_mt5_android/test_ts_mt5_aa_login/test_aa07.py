@@ -1,34 +1,32 @@
 import allure
-import pytest
 
-from enums.main import Server, AccountType, CredentialType
+from enums.main import Server, Setting
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import start_recording_mobile, stop_recording_mobile, attach_video_to_allure_mobile
 
 from common.mobileapp.module_login.utils import login_wt
-from common.mobileapp.module_markets.utils import market_watchlist_filter
+from common.mobileapp.module_setting.utils import button_setting
 
 
-@allure.parent_suite("MT4 Membersite - Android - Markets")
+@allure.parent_suite("Membersite - Android - Login")
 
-@allure.epic("MT4 Android ts_ar - Markets")
+@allure.epic("MT5 Android TS_aA - Login")
 
 # Member Portal
-class TC_MT4_aR08():
+class TC_MT5_aA07():
 
-    @allure.title("TC_MT4_aR08")
+    @allure.title("TC_MT5_aA07")
 
     @allure.description(
         """
-        Members can filter the symbols to display or hide them
+        Members can select a language from the login page, and the selected language is applied upon login.
         """
     )
     
-    def test_tc08(self, androidDriver):
+    def test_tc07(self, androidDriver):
         self.driver = androidDriver
         main_driver = self.driver
-        session_id = main_driver.session_id
-        
+
         # Get the class name dynamically
         class_name = self.__class__.__name__
         start_recording_mobile(driver=main_driver)
@@ -36,12 +34,11 @@ class TC_MT4_aR08():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                # login_wt(driver=main_driver, server=Server.MT4)
-                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
-
-            with allure.step("Market Watchlist"):
-                market_watchlist_filter(driver=main_driver)
-
+                login_wt(driver=main_driver, server=Server.MT5, set_language=True)
+                
+            with allure.step("Successfully Logout"):
+                button_setting(driver=main_driver, setting_option=Setting.LOGOUT)
+                
         finally:
             video_data = stop_recording_mobile(driver=main_driver)
             

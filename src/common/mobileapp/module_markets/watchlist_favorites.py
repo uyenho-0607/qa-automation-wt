@@ -67,7 +67,7 @@ def remove_favorite_symbol(driver, server=None):
         if not rows:
             msg = find_element_by_xpath_with_wait(driver, DataTestID.APP_MSG_NO_ITEMS_AVAILABLE)
             label_msg = get_label_of_element(element=msg)
-            raise AssertionError(f"Retrieved: {label_msg}")
+            assert False, f"Retrieved: {label_msg}"
         
         # Randomly select one row from the list
         row = random.choice(rows)

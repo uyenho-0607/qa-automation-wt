@@ -26,7 +26,7 @@ def app_signup(driver, expect_failure: bool = True, selected_language: str = Non
         
         # Step 3: Verify and click the 'Forgot Password' button
         if not is_element_present_by_xpath(driver, DataTestID.APP_SIGN_UP):
-            raise AssertionError("Sign Up button not found")
+            assert False, "Sign Up button not found"
         
         # Locate the forgot Password button
         btn_sign_up = find_element_by_xpath_with_wait(driver, DataTestID.APP_SIGN_UP)
@@ -139,14 +139,14 @@ def get_signup_banner(driver):
         label_message = get_label_of_element(label_message_description)
         
         if label_message != "You have successfully registered your new account. Please check your email for your account details.":
-            raise AssertionError(f"Invalid message description: {label_message}")
+            assert False, f"Invalid message description: {label_message}"
             
         # Wait for the message header to be visible
         message_title = find_presence_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_TITLE)
         extracted_title = get_label_of_element(message_title)
         
         if extracted_title != "Success":
-            raise AssertionError(f"Invalid message title: {extracted_title}")
+            assert False, f"Invalid message title: {extracted_title}"
 
         btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE)
         click_element(btn_close)

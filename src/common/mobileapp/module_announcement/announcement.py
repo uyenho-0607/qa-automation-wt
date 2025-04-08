@@ -19,7 +19,7 @@ def announcement_validation(driver):
         label_announcement = get_label_of_element(element=announcement)
         print(label_announcement)
         if label_announcement == "#" or label_announcement == " ":
-            raise AssertionError("System should not reflect # or blank")
+            assert False, "System should not reflect # or blank"
         
     except Exception as e:
         # Handle any exceptions that occur during the execution

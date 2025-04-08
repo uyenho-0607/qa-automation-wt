@@ -221,7 +221,7 @@ def get_copied_banner(driver):
         if re.search(pattern, clipboard_text, re.MULTILINE):
             attach_text(clipboard_text, name="✅ Copied account creation details")
         else:
-            raise AssertionError("❌ Copy function failed or incorrect format.")
+            assert False, "❌ Copy function failed or incorrect format."
                 
     except Exception as e:
         handle_exception(driver, e)
@@ -269,7 +269,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         # Verify the presence of the "Your Demo Account is Ready!" message
         match = wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_TITLE, text="Your demo account has been opened successfully.")
         if not match:
-            raise AssertionError("Expected to redirect to 'Your Demo Account is Ready!' modal")
+            assert False, "Expected to redirect to 'Your Demo Account is Ready!' modal"
         
         delay(2)
         

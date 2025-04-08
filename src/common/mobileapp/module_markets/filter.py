@@ -165,7 +165,7 @@ def market_watchlist_filter(driver):
         # Wait for the "Show/Hide Symbol" modal to appear
         result = wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_SYMBOL_PREFERENCE_LABEL, text="Show/Hide Symbol")
         if not result:
-            raise AssertionError("Show/Hide Symbol not found")
+            assert False, "Show/Hide Symbol not found"
         
         delay(1)
 
@@ -247,7 +247,7 @@ def market_watchlist_filter(driver):
 
         alert_msg = handle_alert_success(driver)
         if alert_msg != "All changes are saved.":
-            raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+            assert False, f"Receive {alert_msg} instead of the expected message"
 
         select_category_from_watchlist(driver, selected_category_text, max_scroll_attempts=2)
         
