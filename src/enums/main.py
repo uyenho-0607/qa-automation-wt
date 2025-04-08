@@ -1,5 +1,7 @@
-from enum import Enum
+from enum import Enum, Flag, auto
 
+from dataclasses import dataclass
+from typing import Optional
 
 class BaseEnum(str, Enum):
     def __str__(self):
@@ -15,7 +17,8 @@ class BaseEnum(str, Enum):
 class API_Environment(BaseEnum):
     MT4_SIT = "https://lirunex-mb.webtrader-sit.s20ip12.com/api/trade/v2/market"
     MT4_UAT = "https://lirunex-mb.webtrader-uat.s20ip12.com/api/trade/v2/market"
-    
+
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -48,6 +51,22 @@ class Platform(BaseEnum):
 class ClientName(BaseEnum):
     LIRUNEX = "Lirunex"
     TRANSACTCLOUDMT5 = "Transactcloudmt5"
+
+class SectionName(BaseEnum):
+    SNACKBAR_BANNER_MESSAGE = "Snackbar Banner Message"
+    TRADE_CONFIRMATION_DETAILS = "Trade Confirmation Details"
+    TRADE_OPEN_POSITION = "Trade Open Position"
+    UPDATED_OPEN_POSITION = "Updated Open Position"
+    ASSET_OPEN_POSITION = "Asset Open Position"
+    TRADE_PENDING_ORDER = "Trade Pending Order"
+    UPDATED_PENDING_ORDER = "Updated Pending Order"
+    ASSET_PENDING_ORDER = "Asset Pending Order"
+    ORDER_HISTORY = "Order History"
+    NOTIFICATION_ORDER_MESSAGE = "Notification Order Message"
+    NOTIFICATION_ORDER_DETAIL = "Notification Order Details"
+    COPY_TRADE_DETAIL = "Copy Trade Details"
+
+    
     
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -71,6 +90,8 @@ class AlertType(BaseEnum):
     FAILURE = "failure"
     ERROR = "error"
     NO_ALERT = "no_alert"
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
     
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -193,29 +214,73 @@ class SymbolsList(BaseEnum):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-class ModuleType(BaseEnum):
+class ModuleOCT(BaseEnum):
+    CHECKED = "checked"
+    UNCHECKED = "unchecked"
+
+
+class ButtonModuleType(BaseEnum):
     TRADE = "trade"
     EDIT = "edit"
+    TRACK = "track"
     CLOSE = "close"
     DELETE = "delete"
     ONE_CLICK_TRADING = "oct"
     SPECIFICATION = "specification"
 
-class TradeType(BaseEnum):
-    BUY = "buy"
-    SELL = "sell"
 
-class TradeOption(BaseEnum):
+class SwapOptions(BaseEnum):
+    UNITS = "units"
+    VOLUME = "volume"
+
+class OrderExecutionType(BaseEnum):
     MARKET = "market"
     LIMIT = "limit"
     STOP = "stop"
     STOP_LIMIT = "stop-limit"
     
     
-class SLTPType(BaseEnum):
+class TradeDirectionOption(BaseEnum):
+    BUY = "buy"
+    BUY_LIMIT = "buy limit"
+    BUY_STOP = "buy stop"
+    BUY_STOP_LIMIT = "buy stop limit"
+    SELL = "sell"
+    SELL_LIMIT = "sell limit"
+    SELL_STOP = "sell stop"
+    SELL_STOP_LIMIT = "sell stop limit"
+    
+    
+    
+class TradeConstants(Flag):
+    NONE = 0
+    SET_OCT = auto()
+    SET_CHART = auto()
+    PRE_TRADE = auto()
+    SET_FILL_POLICY = auto()
+    SET_STOP_LOSS = auto()
+    SET_TAKE_PROFIT = auto()
+    CLEAR_FIELD = auto()
+    SET_CLOSE_MARKET_SIZE = auto()
+    SET_NEG_MARKET = auto()
+    DELETE_BUTTON = auto()
+    COMPARE_VOLUME = auto()
+    COMPARE_UNITS = auto()
+    COMPARE_PROFIT_LOSS = auto()
+    
+    
+class SLTPOption(BaseEnum):
     POINTS = "points"
     PRICE = "price"
+    STOP_LOSS_PRICE = "stop-loss-price"
+    STOP_LOSS_POINTS = "stop-loss-point"
+    TAKE_PROFIT_PRICE = "take-profit-pprice"
+    TAKE_PROFIT_POINTS = "take-profit-point"
 
+
+class TimeOptionType(BaseEnum):
+    HOUR = "hour"
+    MINUTE = "minute"
 
 class ExpiryType(BaseEnum):
     GOOD_TILL_CANCELLED = "good-till-cancelled"
@@ -245,6 +310,17 @@ class BulkActionType(BaseEnum):
     ALL = "all"
     PROFIT = "profit"
     LOSS = "loss"
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                ORDER PANEL
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+class NotificationTitle(BaseEnum):
+    ORDER = "order"
+    SYSTEM = "system"
+    INFORMATION = "information"
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

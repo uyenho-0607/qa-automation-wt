@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import configure_language_setting
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV09():
+class TC_aV09():
 
-    @allure.title("TC_MT5_aV09")
+    @allure.title("TC_aV09")
 
     @allure.description(
         """

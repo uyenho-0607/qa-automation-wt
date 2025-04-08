@@ -80,7 +80,7 @@ def update_column_visibility(driver, tab_order_type: OrderPanel, set_menu: bool 
 
         alert_msg = handle_alert_success(driver)
         if alert_msg != "All changes are saved.":
-            raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+            assert False, f"Receive {alert_msg} instead of the expected message"
         
         delay(0.5)
         

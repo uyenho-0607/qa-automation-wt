@@ -208,7 +208,7 @@ def get_copied_banner(driver):
         
         # Validate message header
         if extracted_header != "Success":
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message: {label_message}"
         
         # Close the notification
         btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_CLOSE_BUTTON)
@@ -230,7 +230,7 @@ def get_copied_banner(driver):
         if re.search(pattern, clipboard_text, re.MULTILINE):
             attach_text(clipboard_text, name="✅ Copied account creation details")
         else:
-            raise AssertionError("❌ Copy function failed or incorrect format.")
+            assert False, "❌ Copy function failed or incorrect format."
         
         # Retrieve the account details label
         demo_account_details = find_list_of_elements_by_xpath(driver, "//div[@class='sc-zee84o-4 hXfwHX']")
@@ -242,7 +242,7 @@ def get_copied_banner(driver):
             final_result = "\n".join(formatted_text)  # Join all elements into a single string
             
         if clipboard_text != final_result:
-            raise AssertionError("❌ Copy function failed or incorrect format.")
+            assert False, "❌ Copy function failed or incorrect format."
                 
     except Exception as e:
         handle_exception(driver, e)
@@ -290,7 +290,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         # Verify the presence of the "Your Demo Account is Ready!" message
         match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.DEMO_ACCOUNT_COMPLETION_MODAL_TITLE, text="Your Demo Account is Ready!")
         if not match:
-            raise AssertionError("Expected to redirect to 'Your Demo Account is Ready!' modal")
+            assert False, "Expected to redirect to 'Your Demo Account is Ready!' modal"
 
         # Retrieve header labels and map them
         header_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.DEMO_COMPLETION_LABEL)
@@ -341,7 +341,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
             final_url = get_current_url(driver)
 
             if initial_url != final_url:
-                raise AssertionError("Page URL changed unexpectedly after closing the modal.")
+                assert False, "Page URL changed unexpectedly after closing the modal."
         else:
             handle_sign_in(driver, demo_account_details, new_password, confirm_password)
 
@@ -382,7 +382,7 @@ def handle_sign_in(driver, demo_account_details, new_password, confirm_password)
 
         # Ensure that the URL contains 'web/login' (indicating that we are on the login page)
         if "web/login" not in current_url:
-            raise AssertionError(f"Redirected to {current_url}, expected to be on the login page.")
+            assert False, f"Redirected to {current_url}, expected to be on the login page."
 
         # Validate the login username by checking if it matches the demo account username
         userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID)
@@ -498,7 +498,7 @@ def handle_changePassword(driver, demo_account_details, new_password, confirm_pa
         else:
             assert False, f"Unexpected success message: {label_message}"
     else:
-        raise AssertionError(f"{label_message} prompted")
+        assert False, f"{label_message} prompted"
     
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

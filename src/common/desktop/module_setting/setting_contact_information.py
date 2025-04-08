@@ -1,7 +1,7 @@
 from enums.main import Setting
 
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import find_element_by_xpath, click_element, invisibility_of_element_by_xpath
+from constants.helper.element import find_element_by_xpath, click_element, invisibility_of_element_by_testid
 
 from common.desktop.module_setting.setting_general import button_setting
 
@@ -21,7 +21,7 @@ def contact_information(driver):
         btn_close = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']//*[name()='svg']")
         click_element(element=btn_close)
         
-        invisibility_of_element_by_xpath(driver, "//div[normalize-space(text())='Contact Information']")
+        invisibility_of_element_by_testid(driver, "//div[normalize-space(text())='Contact Information']")
 
     except Exception as e:
         # Handle any exceptions that occur during the execution

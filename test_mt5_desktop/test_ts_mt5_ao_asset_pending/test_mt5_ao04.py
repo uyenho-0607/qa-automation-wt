@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server, Menu, OrderPanel
+from enums.main import Server, Menu, ButtonModuleType, TradeConstants, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
+
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
@@ -9,7 +10,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_sub_menu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, modify_stop_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, modify_stop_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT5 Membersite - Desktop - Asset - Modify / Delete Pending Order")
@@ -17,9 +18,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ao - Asset - Modify / Delete Pending Order")
 
 # Member Portal
-class TC_MT5_aO04():
+class TC_aO04():
  
-    @allure.title("TC_MT5_aO04")
+    @allure.title("TC_aO04")
 
     @allure.description(
         """
@@ -63,19 +64,19 @@ class TC_MT5_aO04():
             """ Place Stop Order """
 
             with allure.step("Place Stop Order"):
-                trade_stop_order(driver=main_driver, trade_type="trade", option="buy", sl_type="points", tp_type="price", expiryType="specified-date", expiryDate="19", targetMonth=parse("April 2025"), specifiedDate=True)
+                trade_stop_order(driver=main_driver, option=TradeDirectionOption.BUY, sl_type=SLTPOption.POINTS, tp_type=SLTPOption.PRICE, expiry_type=ExpiryType.SPECIFIED_DATE, expiry_date="19", target_month=parse("April 2025"))
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_confirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Print Final Result"):
-                process_and_print_data(trade_order_df, trade_tradeConfirmation_df, trade_snackbar_banner_df)
+                process_and_print_data(trade_order_df, trade_confirmation_df, trade_snackbar_banner_df)
                 
             """ End of Place Stop Order """
 
@@ -83,7 +84,7 @@ class TC_MT5_aO04():
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Asset Pending Order", row_number=[1])
+                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.ASSET_PENDING_ORDER)
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -92,22 +93,22 @@ class TC_MT5_aO04():
             """ Start of modifying Pending Order """
 
             with allure.step("Modify Stop Order"):
-                modify_stop_order(driver=main_driver, trade_type="edit", row_number=[1], sl_type="price", tp_type="points", expiryType="good-till-cancelled")
+                modify_stop_order(driver=main_driver, sl_type=SLTPOption.PRICE, tp_type=SLTPOption.POINTS, expiry_type=ExpiryType.GOOD_TILL_CANCELLED)
 
             with allure.step("Click on the Trade Confirmation button to update the order"):
-                edit_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="edit")
+                edit_tradeConfirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)
 
             with allure.step("Retrieve the modified snackbar message"):
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1="Trade Confirmation Details", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Retrieve the Updated Order Panel data"):
-                _, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Updated Pending Order", row_number=[1])
+                _, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.UPDATED_PENDING_ORDER)
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message", compare_volume=False)
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_PENDING_ORDER, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_tradeConfirmation_df, edit_snackbar_banner_df, updated_order_df)

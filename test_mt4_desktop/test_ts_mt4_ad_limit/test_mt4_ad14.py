@@ -1,13 +1,13 @@
 import allure
 import pytest
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, ButtonModuleType, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_limit_order, modify_limit_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_limit_order, modify_limit_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT4 Membersite - Desktop - Trade - Limit Order")
@@ -59,47 +59,47 @@ class TC_MT4_aD14():
             """ Place Limit Order """
 
             with allure.step("Place Limit Order"):
-                trade_limit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, tp_type="price", expiryType="good-till-cancelled")
+                trade_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, tp_type=SLTPOption.PRICE, expiry_type=ExpiryType.GOOD_TILL_CANCELLED)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_confirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=trade_confirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Pending Order", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1=SectionName.TRADE_PENDING_ORDER, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Print Final Result"):
-                process_and_print_data(trade_order_df, trade_tradeConfirmation_df, trade_snackbar_banner_df)
+                process_and_print_data(trade_order_df, trade_confirmation_df, trade_snackbar_banner_df)
                 
             """ End of Place Limit Order """
                 
             """ Start of modifying Pending Order """
                 
             with allure.step("Modify Limit Order"):
-                modify_limit_order(driver=main_driver, trade_type="edit", row_number=[1], set_stopLoss=False, tp_type="price", expiryType="good-till-day")
+                modify_limit_order(driver=main_driver, tp_type=SLTPOption.PRICE, expiry_type=ExpiryType.GOOD_TILL_DAY)
 
             with allure.step("Click on the Trade Confirmation button to update the order"):
-                edit_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="edit")
+                edit_tradeConfirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)
 
             with allure.step("Retrieve the modified snackbar message"):
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1="Trade Confirmation Details", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
             
             with allure.step("Retrieve the Updated Order Panel data"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Updated Pending Order", row_number=[1])
+                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.UPDATED_PENDING_ORDER)
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_PENDING_ORDER, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_tradeConfirmation_df, edit_snackbar_banner_df, updated_order_df)

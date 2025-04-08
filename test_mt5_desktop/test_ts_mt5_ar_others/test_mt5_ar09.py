@@ -18,7 +18,7 @@ from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 # Member Portal
 class TC_MT4_aR09():
 
-    @allure.title("TC_MT5_aR09")
+    @allure.title("TC_aR09")
 
     @allure.description(
         """

@@ -5,7 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 from selenium.webdriver.common.by import By
 
-from enums.main import Menu
+from enums.main import Menu, SectionName
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
@@ -49,11 +49,11 @@ def perform_search(driver, input_search):
         if matched_rows:
             print(f"✅ Matching rows found for '{input_search}': {matched_rows}")
         else:
-            raise AssertionError(f"No matching row found for symbol: {input_search}")
+            assert False, f"No matching row found for symbol: {input_search}"
     else:
         no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'No items available')]")
         msg = get_label_of_element(no_items_message)
-        raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+        assert False, f"No matching row found for symbol: {input_search} with message: {msg}"
 
 
 def signal_search_feature(driver):
@@ -85,7 +85,7 @@ def signal_search_feature(driver):
                 symbol_list.append(symbol_text)
 
             if not symbol_list:
-                raise AssertionError("No symbols found in the signal list")
+                assert False, "No symbols found in the signal list"
             
             # Randomly pick a symbol from the list
             selected_symbol = random.choice(symbol_list)
@@ -98,7 +98,7 @@ def signal_search_feature(driver):
             perform_search(driver, input_search=selected_symbol[:2])
 
         else:
-            raise AssertionError("Signal list table not found")
+            assert False, "Signal list table not found"
 
     except Exception as e:
         # Handle exceptions with a dedicated function
@@ -132,7 +132,7 @@ def express_interest(driver, click_submit: bool = True):
         wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[@class='sc-1mpscps-2 iUoyTa']", text="Express Your Interest")
         content = get_label_of_element(element=find_element_by_xpath(driver, "(//div[@data-testid='confirmation-modal']//div)[4]")).strip()
         if content != "Let us know if you're interested in more trade analysis and plans. Your input helps us prioritise features that matter to you!":
-            raise AssertionError("Content does not match the expected result")
+            assert False, "Content does not match the expected result"
         
         if click_submit:
             btn_submit = find_element_by_xpath(driver, "//button[normalize-space(text())='Submit']")
@@ -145,18 +145,18 @@ def express_interest(driver, click_submit: bool = True):
         
             # Validate message header
             if extracted_header != "Your interest has been submitted":
-                raise AssertionError(f"Invalid message header: {extracted_header}")
+                assert False, f"Invalid message header: {extracted_header}"
             
             result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL)
             if not result:
-                raise AssertionError("Confirmation dialog should not be visible")
+                assert False, "Confirmation dialog should not be visible"
         else:
             btn_cancel = find_element_by_xpath(driver, "//button[normalize-space(text())='Cancel']")
             click_element(element=btn_cancel)
             
             result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL)
             if not result:
-                raise AssertionError("Confirmation dialog should not be visible")
+                assert False, "Confirmation dialog should not be visible"
             
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -382,9 +382,9 @@ def button_copyTrade(driver):
         copyTrade_headers.append("Type")
 
         # Extract and append Entry Price
-        entryPrice = find_visible_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[2]")
-        label_entryPrice = get_label_of_element(entryPrice)
-        copyTrade_elements.append(label_entryPrice)
+        entry_price = find_visible_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[2]")
+        label_entry_price = get_label_of_element(entry_price)
+        copyTrade_elements.append(label_entry_price)
         copyTrade_headers.append("Entry Price")
 
         # Extract and append Stop Loss
@@ -401,12 +401,12 @@ def button_copyTrade(driver):
 
         # Create a DataFrame with the extracted copy trade details
         copyTrade_details = pd.DataFrame([copyTrade_elements], columns=copyTrade_headers)
-        copyTrade_details['Section'] = "Copy Trade Details"
+        copyTrade_details['Section'] = SectionName.COPY_TRADE_DETAIL
 
         # Transpose the DataFrame for better readability and format it using tabulate
         overall = tabulate(copyTrade_details.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
         # Attach the formatted table to the report for documentation purposes
-        attach_text(overall, name="Copy Trade Details")
+        attach_text(overall, name=SectionName.COPY_TRADE_DETAIL)
         
         # Perform the trade action (e.g., 'trade')
         button_trade_action(driver, trade_type="trade")

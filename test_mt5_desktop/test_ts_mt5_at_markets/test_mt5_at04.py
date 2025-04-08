@@ -13,9 +13,9 @@ from common.desktop.module_markets.utils import select_trade_symbol_from_watchli
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT04():
+class TC_aT04():
 
-    @allure.title("TC_MT5_aT04")
+    @allure.title("TC_aT04")
 
     @allure.description(
         """

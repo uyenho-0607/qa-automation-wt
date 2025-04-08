@@ -1,22 +1,23 @@
 import allure
 import pytest
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, ButtonModuleType, TradeDirectionOption, ExpiryType, OrderPanel, SectionName, AlertType
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stopLimit_order, modify_stopLimit_order, get_neg_snackbar_banner, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_limit_order, modify_stop_limit_order, get_neg_snackbar_banner, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 
 @allure.parent_suite("MT5 Membersite - Desktop - Negative Scenarios")
 
 @allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS31():
+class TC_aS31():
 
-    @allure.title("TC_MT5_aS31")
+    @allure.title("TC_aS31")
 
     @allure.description(
         """
@@ -48,24 +49,24 @@ class TC_MT5_aS31():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Place Stop Limit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, set_takeProfit=False, expiryType="good-till-day")
+                trade_stop_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, expiry_type=ExpiryType.GOOD_TILL_DAY)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Pending Order", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             """ Start of modifying Pending Order """
             
             with allure.step("Modify on Stop Limit Order"):
-                modify_stopLimit_order(driver=main_driver, trade_type="edit", row_number=[1], stopLimitPrice_flag=False, set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")
+                modify_stop_limit_order(driver=main_driver, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, stopLimitPrice_flag=AlertType.NEGATIVE)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="edit")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

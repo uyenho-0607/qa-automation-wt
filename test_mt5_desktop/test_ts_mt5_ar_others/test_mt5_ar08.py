@@ -14,9 +14,9 @@ from common.desktop.module_trade.utils import asset_symbolName
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR08():
+class TC_aR08():
   
-    @allure.title("TC_MT5_aR08")
+    @allure.title("TC_aR08")
 
     @allure.description(
         """

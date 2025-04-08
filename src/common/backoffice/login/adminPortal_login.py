@@ -133,7 +133,6 @@ def bo_user_login(driver, platform: str, client_name: str, testcaseID: str, expe
                 if attempt < max_retries - 1:
                     attach_text(error_message, name=f"Attempt {attempt + 1} failed: verification code invalid. Retrying...")
                     delay(0.5)
-                    # clear_input_field(visibility_of_element_by_xpath(driver, "//input[@placeholder='Verification code']"))
                     captcha_input = find_visible_element_by_xpath(driver, "//input[@placeholder='Verification code']")
                     clear_input_field(captcha_input)
                 else:

@@ -1,6 +1,3 @@
-import traceback
-
-# from datetime import datetime
 from dateutil.parser import parse
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
@@ -88,7 +85,6 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
                                                 ORDER HISTORY - RETRIEVE THE DATE COLUMN
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
 
 
 # Function to check if a table date is within the datepicker range

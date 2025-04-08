@@ -13,9 +13,9 @@ from common.desktop.module_setting.setting_linked_devices import linked_devices_
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV11():
+class TC_aV11():
 
-    @allure.title("TC_MT5_aV11")
+    @allure.title("TC_aV11")
 
     @allure.description(
         """

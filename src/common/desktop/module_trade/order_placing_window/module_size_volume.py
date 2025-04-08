@@ -1,14 +1,17 @@
 import random
 from selenium.webdriver.common.by import By
 
+from enums.main import ButtonModuleType, SwapOptions, TradeConstants
+from constants.element_ids import DataTestID
+
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, get_label_of_element, find_visible_element_by_testid, clear_input_field, find_element_by_testid, populate_element_with_wait
 
-from common.desktop.module_trade.order_placing_window.module_fill_policy import fillPolicy_type
-from common.desktop.module_trade.order_placing_window.opw_button_action import button_tradeModule
-from enums.main import ModuleType
+from common.desktop.module_trade.order_placing_window.module_fill_policy import fill_policy_type
+from common.desktop.module_trade.order_placing_window.opw_button_action import button_trade_module
+from enums.main import ButtonModuleType
 
 
 """
@@ -17,7 +20,7 @@ from enums.main import ModuleType
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def swap_units_volume(driver, target_state):
+def swap_units_volume(driver, desired_state: SwapOptions):
     """
     This function toggles between two radio button states: 'units' and 'volume'.
     It checks the current state and performs the toggle only if the desired state is different from the current one.
@@ -34,14 +37,10 @@ def swap_units_volume(driver, target_state):
     try:
         # Define both possible 'data-testid' values for the radio button states
         swap_options = {
-            "volume": "trade-swap-to-units",
-            "units": "trade-swap-to-volume"
+            SwapOptions.UNITS: DataTestID.TRADE_SWAP_TO_UNITS,
+            SwapOptions.VOLUME:  DataTestID.TRADE_SWAP_TO_VOLUME
         }
         
-        # Verify if the desired state is valid
-        if target_state not in swap_options:
-            raise ValueError(f"Invalid desired state: '{target_state}'. Must be either 'units' or 'volume'.")
-
         # Identify the current state of the radio button (checked/unchecked)
         current_state = None
         
@@ -53,15 +52,15 @@ def swap_units_volume(driver, target_state):
                 attach_text(f"Current button state: Swap to {state.capitalize()}", name="Swap Current Status")
 
                 # If the current state matches the desired state, no action is needed
-                if state == target_state:
-                    attach_text(f"Desired state is '{target_state}' no action needed.", name="Toggle Button Status")
-                    return target_state  # Return after swapping
+                if state == desired_state:
+                    attach_text(f"Desired state is '{desired_state}' no action needed.", name="Toggle Button Status")
+                    return desired_state  # Return after swapping
                 else:
                     # Log the action of swapping and perform the toggle
-                    attach_text(f"Swapping to '{target_state.capitalize()}' as desired.", name="Updated Status")
+                    attach_text(f"Swapping to '{desired_state.capitalize()}' as desired.", name="Updated Status")
                     swap_button = find_element_by_testid(driver, testid) # Perform the swap
                     click_element(swap_button)
-                    return target_state  # Return after swapping
+                    return desired_state  # Return after swapping
 
             except Exception:
                 # If the element is not found, continue checking the other state
@@ -87,22 +86,22 @@ def swap_units_volume(driver, target_state):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def swap_units_volume_conversion(driver, module_type: ModuleType, target_state="volume"):
+def swap_units_volume_conversion(driver, module_type: ButtonModuleType, desired_state="volume"):
     try:
         delay(0.5)
 
         # Retrieve contract size and navigate to the trade module
-        contract_size, _, _ = button_tradeModule(driver, module_type=ModuleType.SPECIFICATION)
+        contract_size, _, _ = button_trade_module(driver, trade_type=ButtonModuleType.SPECIFICATION)
         if not contract_size or contract_size <= 0:
             raise ValueError("Invalid contract size fetched")
         print("Contract Size:", contract_size)
 
-        button_tradeModule(driver, module_type)
+        button_trade_module(driver, module_type)
         
         delay(0.5)
 
         # Get the current input state and the entered value
-        current_state, input_value = input_size_volume(driver, target_state)
+        current_state, input_value = input_size_volume(driver, desired_state)
         print("Input Value:", input_value)
         print("Current State:", current_state)
 
@@ -137,7 +136,7 @@ def swap_units_volume_conversion(driver, module_type: ModuleType, target_state="
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def input_size_volume(driver, target_state="volume"):
+def input_size_volume(driver, desired_state: SwapOptions = SwapOptions.UNITS):
     """
     This function inputs a random value into the 'size' or 'volume' input field based on the current state.
     The state toggles between 'units' and 'volume', and random values are generated accordingly.
@@ -150,16 +149,16 @@ def input_size_volume(driver, target_state="volume"):
     """
     try:
         # Ensure the state is set correctly (either 'units' or 'volume')
-        state = swap_units_volume(driver, target_state)
+        state = swap_units_volume(driver, desired_state)
         print("state", state)
         
         delay(0.5)
     
         # Locate the input field for 'size' or 'volume'
-        size_input = find_element_by_testid(driver, data_testid="trade-input-volume")
+        size_input = find_element_by_testid(driver, data_testid=DataTestID.TRADE_INPUT_VOLUME)
                 
         # Determine state and value range based on 'swap' and 'desired_state'
-        if state == "volume": # (swap to volume)
+        if state == SwapOptions.UNITS: # (swap to volume)
             min_val, max_val = 1, 20
         else:  # If state is 'volume' (swap to units)
             min_val, max_val = 10, 200
@@ -195,7 +194,7 @@ def input_size_volume(driver, target_state="volume"):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = False):
+def close_partial_size(driver, close_options: TradeConstants = TradeConstants.NONE):
     """
     This function handles the partial close of an order by generating a random value between 0 and the maximum allowed
     value and submitting the close order request.
@@ -210,7 +209,7 @@ def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = F
     try:
         
         # Locate the element containing the maximum value (e.g., "Max: 100.0")
-        max_value_element = find_element_by_testid(driver, data_testid="close-order-input-volume-max-value")
+        max_value_element = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_INPUT_VOLUME_MAX_VALUE)
 
         # Extract the max value text and convert it to a float
         max_value_text = max_value_element.text.split()[1]  # Assuming the text is like "Max: 100.0"
@@ -235,20 +234,20 @@ def close_partialSize(driver, set_fillPolicy: bool = False, clearField: bool = F
 
         print("random value for partial close", random_value)
             
-        partialClose_input = find_element_by_testid(driver, data_testid="close-order-input-volume")
+        partialClose_input = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_INPUT_VOLUME)
         
         # If clearField is True, clear the input field before entering the new value
-        if clearField:
+        if TradeConstants.CLEAR_FIELD in close_options:
             # Select all text and delete the selected text
             clear_input_field(partialClose_input)
             populate_element_with_wait(driver, element=partialClose_input, text=str(random_value))
 
         # If set_fillPolicy is True, set the fill policy before submitting the order
-        if set_fillPolicy:
-            fillPolicy_type(driver, trade_type="close-order")
+        if TradeConstants.SET_FILL_POLICY in close_options:
+            fill_policy_type(driver, trade_type=ButtonModuleType.CLOSE)
 
         # Find the submit button and click it to submit the partial close order
-        action_button = find_element_by_testid(driver, data_testid="close-order-button-submit")
+        action_button = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_BUTTON_SUBMIT)
         click_element(element=action_button)
 
     except Exception as e:
@@ -287,7 +286,7 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
     try:
         if trade_type == "trade":
             # Step 1: Set the units to 'volume'
-            swap_units_volume(driver, target_state="volume")
+            swap_units_volume(driver, desired_state="volume")
         
         # Step 2: Short delay to ensure element visibility (if required)
         delay(0.5)
@@ -314,11 +313,11 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
 
         # Step 6: Loop over the actions and perform clicks for each one
         for minMax, number_of_clicks in actions:
-            button_minMax = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume-{minMax}")
+            button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume-{minMax}")
             initial_value_before_action = initial_value  # Save initial value before this action
 
             for i in range(number_of_clicks):
-                click_element(button_minMax)
+                click_element(button_min_max)
                 
                 # Get the updated value after the click
                 updated_value_str = input_field.get_attribute("value")

@@ -184,9 +184,9 @@ def type_orderPanel(driver, tab_order_type: OrderPanel):
             raise ValueError(f"Invalid button type: {tab_order_type}")
 
         # Locate and click the main tab
-        orderPanel_type = find_visible_element_by_testid(driver, button_testid)
-        label_count = get_label_of_element(orderPanel_type)
-        javascript_click(driver, element=orderPanel_type)
+        order_panel_type = find_visible_element_by_testid(driver, button_testid)
+        label_count = get_label_of_element(order_panel_type)
+        javascript_click(driver, element=order_panel_type)
         
         return tab_order_type, label_count
 
@@ -207,7 +207,7 @@ def type_orderPanel(driver, tab_order_type: OrderPanel):
 """
 
 # order panel - Track / Close (Delete) / Edit button
-def button_orderPanel_action(driver, order_action, row_number):
+def handle_track_close_edit(driver, trade_type):
     """
     Performs actions (edit, close, delete) on specified rows in the order panel.
 
@@ -220,21 +220,15 @@ def button_orderPanel_action(driver, order_action, row_number):
     """
     try:
         
-        # Ensure row_number is a list, even if a single row number is passed
-        # if isinstance(row_number, int):
-        #     row_number = [row_number]
-                
         # Loop through the provided row numbers to click the action button for each row
-        for row in row_number:
-            # Find the action button (e.g., edit, close) for the specified row
-            action_button = find_element_by_xpath(driver, f"(//div[contains(@data-testid, 'button-{order_action}')])[{row}]")
-            click_element(action_button)
+        # Find the action button (e.g., edit, close) for the specified row
+        action_button = find_element_by_xpath(driver, f"(//div[contains(@data-testid, 'button-{trade_type}')])[1]")
+        click_element(action_button)
         
         delay(0.2)
         
         # Handle order-specific confirmation modals based on the order_action
-        match = is_element_present_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
-        if match:
+        if is_element_present_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]"):
             find_visible_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
         
         
@@ -278,10 +272,6 @@ def get_orderID(driver, row_number):
     # Initialize an empty list to hold the data
     order_ids = []
     try:
-        
-        # Ensure row_number is a list, even if a single row number is passed
-        # if isinstance(row_number, int):
-        #     row_number = [row_number]
             
         # Locate the table body
         table_body = get_table_body(driver)
@@ -322,18 +312,17 @@ def get_orderID(driver, row_number):
 """
 
 # Extract the order table
-def extract_order_info(driver, tab_order_type: OrderPanel, section_name, row_number):
+def extract_order_info(driver, tab_order_type: OrderPanel, section_name):
     """
-    Optimized function to extract order information including order IDs and details.
+    Extracts order info from the first row of the order panel table.
     """
-    
     order_ids = []
     table_row_contents = []
 
     try:
         # Navigate to tab
         type_orderPanel(driver, tab_order_type)
-        
+
         # Wait for spinner once
         spinner_element(driver)
 
@@ -346,10 +335,9 @@ def extract_order_info(driver, tab_order_type: OrderPanel, section_name, row_num
         if chart_symbol_name:
             thead_data.append("Symbol")
 
-        # Extract rows efficiently
-        for row in row_number:
-            table_row = table_body.find_element(By.XPATH, f".//tr[{row}]")
-            
+        # Extract only the first row
+        all_rows = table_body.find_elements(By.XPATH, ".//tr[1]")
+        for table_row in all_rows:
             # Extract Order ID
             order_id_element = table_row.find_element(By.XPATH, ".//*[contains(@data-testid, 'order-id')]")
             order_id_text = order_id_element.text.strip()
@@ -358,7 +346,7 @@ def extract_order_info(driver, tab_order_type: OrderPanel, section_name, row_num
             # Extract row data
             cells = table_row.find_elements(By.XPATH, ".//th[1] | .//th[2] | .//td")
             row_data = [re.sub(r'\s*/\s*', ' / ', cell.text.strip()) for cell in cells]
-            
+
             # Append symbol if present
             if chart_symbol_name:
                 row_data.append(chart_symbol_name)
@@ -377,6 +365,7 @@ def extract_order_info(driver, tab_order_type: OrderPanel, section_name, row_num
 
     except Exception as e:
         handle_exception(driver, e)
+
 
 
 """

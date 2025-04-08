@@ -83,7 +83,7 @@ def read_symbol_file(server: Server, symbol_type: SymbolsList):
         return data.get(server, {}).get(symbol_type, [])
         
     except Exception as e:
-        raise AssertionError(f"Error reading JSON file: {e}")
+        assert False, f"Error reading JSON file: {e}"
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

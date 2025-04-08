@@ -3,10 +3,12 @@ import pandas as pd
 
 from tabulate import tabulate
 
+from enums.main import ButtonModuleType, SectionName
+from constants.element_ids import DataTestID
+
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_xpath, find_list_of_elements_by_testid, find_element_by_xpath, find_visible_element_by_xpath, get_label_of_element
-
+from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, get_label_of_element
 
 
 """
@@ -15,7 +17,7 @@ from constants.helper.element import click_element, find_element_by_testid, find
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def trade_ordersConfirmationDetails(driver, trade_type):
+def trade_orders_confirmation_details(driver, trade_type: ButtonModuleType):
     """
     This function handles the extraction of trade confirmation details, processes headers and values
     from the confirmation modal, and creates a DataFrame with the extracted data.
@@ -31,74 +33,96 @@ def trade_ordersConfirmationDetails(driver, trade_type):
     """
     try:
         
-        # Validate trade_type input
-        if trade_type not in ["trade", "edit"]:
-            raise ValueError(f"Invalid trade_type '{trade_type}' provided. Expected 'trade' or 'edit'.")
-        
         # Initialize an empty list to store extracted values
         result = []
         
-        # Ensure the trade confirmation modal is visible before proceeding
-        find_visible_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-modal')]")
-
-        # Retrieve all the headers from the trade confirmation modal
-        trade_order_header_elements = find_list_of_elements_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-label')]")
-        trade_confirmation_headers = [header.text for header in trade_order_header_elements]
+        # Determine the data-testid based on the button type
+        button_testids = {
+            ButtonModuleType.TRADE: DataTestID.TRADE_CONFIRMATION_MODAL,
+            ButtonModuleType.EDIT: DataTestID.EDIT_CONFIRMATION_MODAL,
+        }
         
-        # Handle different headers to ensure consistency in naming (e.g., changing "Price" to "Entry Price")
-        for i, header in enumerate(trade_confirmation_headers):
-            if header in ("Price"): # Update the header if found
-                trade_confirmation_headers[i] = "Entry Price"
-                break
-            
-        # Retrieve order type and symbol name, then append to headers
-        order_type_element = find_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-order-type')]")
+        button_testid = button_testids.get(trade_type)
+        
+        # Ensure the trade confirmation modal is visible before proceeding
+        find_visible_element_by_testid(driver, data_testid=button_testid)
+
+        # Define trade type mappings
+        trade_type_mappings = {
+            "header_label": {
+                ButtonModuleType.TRADE: DataTestID.TRADE_CONFIRMATION_LABEL,
+                ButtonModuleType.EDIT: DataTestID.EDIT_CONFIRMATION_LABEL,
+            },
+            "confirmation_type": {
+                ButtonModuleType.TRADE: DataTestID.TRADE_CONFIRMATION_ORDER_TYPE,
+                ButtonModuleType.EDIT: DataTestID.EDIT_CONFIRMATION_ORDER_TYPE,
+            },
+            "symbol_name": {
+                ButtonModuleType.TRADE: DataTestID.TRADE_CONFIRMATION_SYMBOL,
+                ButtonModuleType.EDIT: DataTestID.EDIT_CONFIRMATION_SYMBOL,
+            },
+            "confirmation_value": {
+                ButtonModuleType.TRADE: DataTestID.TRADE_CONFIRMATION_VALUE,
+                ButtonModuleType.EDIT: DataTestID.EDIT_CONFIRMATION_VALUE,
+            },
+            "confirm_button":{
+                ButtonModuleType.TRADE: DataTestID.TRADE_CONFIRMATION_BUTTON_CONFIRM,
+                ButtonModuleType.EDIT: DataTestID.EDIT_CONFIRMATION_BUTTON_CONFIRM,
+            }
+        }
+        
+        header_title = trade_type_mappings["header_label"][trade_type]
+        button_confirmation = trade_type_mappings["confirmation_type"][trade_type]
+        symbol_name_label = trade_type_mappings["symbol_name"][trade_type]
+        confirmation_value_data = trade_type_mappings["confirmation_value"][trade_type]
+        btn_confirm = trade_type_mappings["confirm_button"][trade_type]
+        
+        # Retrieve headers for trade confirmation
+        trade_order_header_elements = find_list_of_elements_by_testid(driver, header_title)
+        trade_confirmation_headers = [get_label_of_element(header) if get_label_of_element(header) != "Price" else "Entry Price" for header in trade_order_header_elements]
+        
+        # Retrieve and append order type
+        order_type_element = find_element_by_testid(driver, button_confirmation)
         trade_confirmation_headers.append("Type")
 
-        # Retrieve symbol name
-        symbol_name_element = find_element_by_xpath(driver, "//div[contains(@data-testid, 'confirmation-symbol')]")
-        trade_confirmation_headers.append("Symbol")
+        # Retrieve and append symbol name
+        symbol_name_element = find_element_by_testid(driver, symbol_name_label)
+        trade_confirmation_headers.append("Symbol")        
         
-        # Retrieve the list of elements containing trade values based on the trade type (e.g., "edit" or "create")
-        elements = find_list_of_elements_by_testid(driver, data_testid=f"{trade_type}-confirmation-value")
-
-        # Extract text from each element and append to the result list
-        for element in elements:
-            result.append(get_label_of_element(element))
+        # Retrieve confirmation values
+        elements = find_list_of_elements_by_testid(driver, confirmation_value_data)
+        result.extend(get_label_of_element(element) for element in elements)
 
         # Extract and append the order type and symbol name to the result
-        label_order_type = get_label_of_element(order_type_element)
-        result.append(label_order_type)
-
-        label_symbol_name = get_label_of_element(symbol_name_element)
-        result.append(label_symbol_name)
+        result.append(get_label_of_element(order_type_element))  # Order Type
+        result.append(get_label_of_element(symbol_name_element))  # Symbol Name
+        
         
         # If the trade type is "edit", attempt to extract the order number from the confirmation modal
-        if trade_type == "edit":
-
+        if trade_type == ButtonModuleType.EDIT:
             # Locate the order number element and extract its value if available
-            order_number_elements = find_element_by_testid(driver, data_testid=f"edit-confirmation-order-id")
+            order_number_elements = find_element_by_testid(driver, data_testid=DataTestID.EDIT_CONFIRMATION_ORDER_ID)
             extracted_orderID = get_label_of_element(order_number_elements)
 
             # If the order number element exists, process it
-            if order_number_elements:
-                order_number = re.search(r'\d+', extracted_orderID).group() # Extract numerical order ID
-                result.append(order_number) # Append the order number to the result list
-                
-                # Add "Order No." header to trade_confirmation_headers if order number exists
-                trade_confirmation_headers.append("Order No.")
+            extracted_order_id = re.search(r'\d+', extracted_orderID).group() # Extract numerical order ID
+            
+            # Append the order number to the result list
+            result.append(extracted_order_id)
+            
+            # Add "Order No." header to trade_confirmation_headers if order number exists
+            trade_confirmation_headers.append("Order No.")
 
         # Create a DataFrame with the extracted trade details
         trade_order_details = pd.DataFrame([result], columns=trade_confirmation_headers)
-        trade_order_details['Section'] = "Trade Confirmation Details"  # Add section label for clarity
+        trade_order_details['Section'] = SectionName.TRADE_CONFIRMATION_DETAILS  # Add section label for clarity
         
         # Transpose the DataFrame for better readability and fill missing values with "-"
         overall = tabulate(trade_order_details.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
-        attach_text(overall, name="Trade Confirmation Details") # Attach the formatted grid as text in the report
-
-        # Locate and click the confirmation button to finalize the trade confirmation
-        button_confirmation = find_element_by_testid(driver, data_testid=f"{trade_type}-confirmation-button-confirm")
-        click_element(button_confirmation)
+        attach_text(overall, name=SectionName.TRADE_CONFIRMATION_DETAILS) # Attach the formatted grid as text in the report
+        
+        confirm_button = find_element_by_testid(driver, data_testid=btn_confirm)
+        click_element(element=confirm_button)
 
         # Return the DataFrame containing the trade order details
         return trade_order_details

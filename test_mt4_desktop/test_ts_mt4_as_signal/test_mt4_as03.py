@@ -1,12 +1,12 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, ButtonModuleType, SectionName
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_trade.utils import toggle_radio_button, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_signal.utils import button_copyTrade, handle_order_type
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -48,28 +48,28 @@ class TC_MT4_aS03():
                 copyTrade_df, label_OrderStatus = button_copyTrade(driver=main_driver)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_confirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
 
             with allure.step("Compare against the Copy Trade Details and Trade Confirmation Details"):
-                compare_dataframes(driver=main_driver, df1=copyTrade_df, name1="Copy Trade Details", df2=trade_tradeConfirmation_df, name2="Trade Confirmation Details")
+                compare_dataframes(driver=main_driver, df1=copyTrade_df, name1=SectionName.COPY_TRADE_DETAIL, df2=trade_confirmation_df, name2=SectionName.TRADE_CONFIRMATION_DETAILS)
                 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=trade_confirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Redirect to Asset Page"):
-                orderPanel_type, orderPanel_name = handle_order_type(driver=main_driver, order_type=label_OrderStatus)
+                order_panel_type, orderPanel_name = handle_order_type(driver=main_driver, order_type=label_OrderStatus)
 
             with allure.step("Retrieve the Newly Created Order"):
-                _, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=orderPanel_type, section_name=orderPanel_name, row_number=[1])
+                _, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=order_panel_type, section_name=orderPanel_name)
             
             with allure.step("Compare against the Snackbar message and Order Panel details"):
-                compare_dataframes(driver=main_driver, df1=trade_snackbar_banner_df, name1="Snackbar Banner Message", df2=trade_order_df, name2=orderPanel_name)
+                compare_dataframes(driver=main_driver, df1=trade_snackbar_banner_df, name1=SectionName.SNACKBAR_BANNER_MESSAGE, df2=trade_order_df, name2=orderPanel_name)
             
             with allure.step("Print the Order Table Result"):
-                process_and_print_data(copyTrade_df, trade_tradeConfirmation_df, trade_snackbar_banner_df, trade_order_df)
+                process_and_print_data(copyTrade_df, trade_confirmation_df, trade_snackbar_banner_df, trade_order_df)
                 
         except Exception as e:
             test_failed = True  # Mark test as failed

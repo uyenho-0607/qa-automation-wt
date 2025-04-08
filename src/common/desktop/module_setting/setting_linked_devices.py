@@ -28,7 +28,7 @@ def linked_devices_modal(driver, set_terminate: bool = True):
             
             alert_msg = handle_alert_success(driver)
             if alert_msg != "Session terminated successfully":
-                raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+                assert False, f"Receive {alert_msg} instead of the expected message"
         else:
             terminate_single = find_list_of_elements_by_xpath(driver, "(//div[@class='sc-6to9kt-4 dNMFZG'])[2]/div")
             initial_count = len(terminate_single)  # Store the initial count
@@ -41,12 +41,12 @@ def linked_devices_modal(driver, set_terminate: bool = True):
                     
                 alert_msg = handle_alert_success(driver)
                 if alert_msg != "Session terminated successfully":
-                    raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+                    assert False, f"Receive {alert_msg} instead of the expected message"
                 
                 # Get the updated count and verify
                 updated_count = len(find_list_of_elements_by_xpath(driver, "(//div[@class='sc-6to9kt-4 dNMFZG'])[2]/div"))
                 if updated_count != initial_count - 1:
-                    raise AssertionError(f"Expected {initial_count - 1} active sessions, but found {updated_count}")
+                    assert False, f"Expected {initial_count - 1} active sessions, but found {updated_count}"
 
         # Click on the 'X' button
         btn_close = find_element_by_xpath(driver, "//div[@class='sc-ur24yu-4 jgnDww']//*[name()='svg']")

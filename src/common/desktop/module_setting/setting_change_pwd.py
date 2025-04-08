@@ -139,7 +139,7 @@ def capture_alert(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_success(driver, label_message, login_username, login_password, params_wt_url=None,):
+def handle_success(driver, label_message, login_username, login_password, params_wt_url=None):
     """
     Handles the success alert after an action such as a password change and performs subsequent actions.
 

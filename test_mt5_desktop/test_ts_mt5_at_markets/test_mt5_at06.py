@@ -13,9 +13,9 @@ from common.desktop.module_markets.utils import market_redirect_arrow
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT06():
+class TC_aT06():
 
-    @allure.title("TC_MT5_aT06")
+    @allure.title("TC_aT06")
 
     @allure.description(
         """

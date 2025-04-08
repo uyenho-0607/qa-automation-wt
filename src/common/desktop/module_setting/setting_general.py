@@ -89,7 +89,7 @@ def button_setting(driver, setting_option: Setting):
             expected_text = expected_text_map[setting_option]
             match = wait_for_text_to_be_present_in_element_by_xpath(driver, f"//div[contains(normalize-space(text()), '{expected_text}')]", text=expected_text),
             if not match:
-                raise AssertionError(f"Expected to display '{expected_text}' modal")
+                assert False, f"Expected to display '{expected_text}' modal"
 
     except Exception as e:
         handle_exception(driver, e)

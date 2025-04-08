@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, ButtonModuleType, TradeConstants, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
@@ -9,7 +9,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
 from common.desktop.module_chart.utils import chart_minMax, chart_trade_modal_close
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT5 Membersite - Desktop - Trade - Chart - Place Order")
@@ -17,9 +17,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ak - Chart - Order Placing Window")
 
 # Member Portal
-class TC_MT5_aK03():
+class TC_aK03():
 
-    @allure.title("TC_MT5_aK05")
+    @allure.title("TC_aK05")
         
     @allure.description(
         """
@@ -53,16 +53,16 @@ class TC_MT5_aK03():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Place Stop Order"):
-                trade_stop_order(driver=main_driver, trade_type="trade", option="buy", sl_type="price", tp_type="points", expiryType="specified-date-and-time", expiryDate="19", targetMonth=parse("April 2025"), hour_option="11", min_option="35", specifiedDate=True, set_Chart=True, chart_fullscreen="toggle")
+                trade_stop_order(driver=main_driver, option=TradeDirectionOption.BUY, sl_type=SLTPOption.PRICE, tp_type=SLTPOption.POINTS, expiry_type=ExpiryType.SPECIFIED_DATE_AND_TIME, expiry_date="19", target_month=parse("April 2025"), hour_option="11", min_option="35", chart_fullscreen="toggle")
 
             with allure.step("Click on the Trade Confirmation button to update the order"):
-                trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_confirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
 
             with allure.step("Retrieve the updated order snackbar message "):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=trade_tradeConfirmation_df, name1="Trade Confirmation Details", df2=snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=trade_confirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
             
             with allure.step("Close the Trade Modal"):
                 chart_trade_modal_close(driver=main_driver)
@@ -71,15 +71,14 @@ class TC_MT5_aK03():
                 chart_minMax(driver=main_driver, chart_fullscreen="exit")
                 
             with allure.step("Retrieve the Pending Order data"):
-                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Pending Order", row_number=[1])
+                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=snackbar_banner_df, name2="Snackbar Banner Message", compare_volume=False)
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1=SectionName.TRADE_PENDING_ORDER, df2=snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME)
                 
             with allure.step("Print Final Result"):
-                process_and_print_data(pending_order_df, trade_tradeConfirmation_df, snackbar_banner_df)
+                process_and_print_data(pending_order_df, trade_confirmation_df, snackbar_banner_df)
                     
-
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:

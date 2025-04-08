@@ -1,13 +1,14 @@
 import allure
 import pytest
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, TradeConstants, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stopLimit_order, modify_stopLimit_order, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_limit_order, modify_stop_limit_order, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT5 Membersite - Desktop - Trade - Stop Limit Order")
@@ -15,9 +16,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ai - Stop Limit OCT")
 
 # Member Portal
-class TC_MT5_aI01():
+class TC_aI01():
 
-    @allure.title("TC_MT5_aI01")
+    @allure.title("TC_aI01")
 
     @allure.description(
         """
@@ -58,16 +59,16 @@ class TC_MT5_aI01():
             """Place StopLimit Order """
 
             with allure.step("Place StopLimit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="buy", set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")
+                trade_stop_limit_order(driver=main_driver, option=TradeDirectionOption.BUY, expiry_type=ExpiryType.GOOD_TILL_CANCELLED)
 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Pending Order", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message", compare_volume=False)
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1=SectionName.TRADE_PENDING_ORDER, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_snackbar_banner_df)
@@ -77,16 +78,16 @@ class TC_MT5_aI01():
             """ Start of modifying Pending Order """
 
             with allure.step("Modify StopLimit Order"):
-                modify_stopLimit_order(driver=main_driver, trade_type="edit", row_number=[1], sl_type="price", set_takeProfit=False, expiryType="good-till-cancelled")
+                modify_stop_limit_order(driver=main_driver, sl_type=SLTPOption.PRICE, expiry_type=ExpiryType.GOOD_TILL_CANCELLED)
 
             with allure.step("Retrieve the modified snackbar message"):
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Updated Order Panel data"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Updated Pending Order", row_number=[1])
+                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.UPDATED_PENDING_ORDER)
                 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Pending Order", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message", compare_volume=False)
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_PENDING_ORDER, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)

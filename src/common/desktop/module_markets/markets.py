@@ -32,13 +32,13 @@ def inspect_my_trade_orders(driver, symbol_name, order_type):
         displayed_symbol = top_row.find_element(By.XPATH, "//div[@data-testid='portfolio-row-symbol']").text.strip()
         
         if displayed_symbol != symbol_name:
-            raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")
+            assert False, f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'"
         
         # Validate order type (BUY/SELL)
         displayed_order_type = top_row.find_element(By.XPATH, "//span[@data-testid='portfolio-row-order-type']").text.strip()
         
         if displayed_order_type.upper() != order_type.upper():
-            raise AssertionError(f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'")
+            assert False, f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'"
         
         print(f"Order for symbol '{symbol_name}' with order type '{order_type}' is correctly displayed in the top row.")
         assert True
@@ -146,7 +146,7 @@ def wait_for_menu_button(driver, option):
     """
     result = wait_for_text_to_be_present_in_element_by_xpath(driver, option["button_xpath"], text=option.get("menu_name", ""))
     if not result:
-        raise AssertionError(f"'{option.get('menu_name', '')}' button not found.")
+        assert False, f"'{option.get('menu_name', '')}' button not found."
 
 
 
@@ -205,7 +205,7 @@ def verify_selected_tab(driver, option):
     matching tab text, and validating the presence of specific keys like 'fav_xpath'.
     """
     for tab_xpath in option["tab_xpath"]:
-        # tab = visibility_of_element_by_xpath(driver, tab_xpath)
+        # tab = find_visible_element_by_testid(driver, tab_xpath)
         tab = find_visible_element_by_testid(driver, data_testid=tab_xpath)
         if tab:  # Ensure the tab is visible
             tab_text = tab.text

@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, ModuleType
+from enums.main import Server, ButtonModuleType, TradeDirectionOption
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -14,9 +14,9 @@ from common.desktop.module_trade.utils import toggle_radio_button, swap_units_vo
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR01():
+class TC_aR01():
 
-    @allure.title("TC_MT5_aR01")
+    @allure.title("TC_aR01")
 
     @allure.description(
         """
@@ -45,10 +45,10 @@ class TC_MT5_aR01():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Enter Units"):
-                swap_units_volume_conversion(driver=main_driver, module_type=ModuleType.ONE_CLICK_TRADING, target_state="units")
+                swap_units_volume_conversion(driver=main_driver, module_type=ButtonModuleType.ONE_CLICK_TRADING, desired_state="units")
                 
             with allure.step("Click on Buy button"):
-                button_buy_sell_type(driver=main_driver, indicator_type="buy")
+                button_buy_sell_type(driver=main_driver, option=TradeDirectionOption.BUY)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)

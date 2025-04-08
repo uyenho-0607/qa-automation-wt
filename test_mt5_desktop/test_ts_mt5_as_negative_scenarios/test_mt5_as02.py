@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption, SLTPOption, AlertType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -14,9 +14,9 @@ from common.desktop.module_trade.utils import toggle_radio_button, trade_market_
 @allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS02():
+class TC_aS02():
 
-    @allure.title("TC_MT5_aS02")
+    @allure.title("TC_aS02")
 
     @allure.description(
         """
@@ -48,7 +48,7 @@ class TC_MT5_aS02():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Place Take Profit - Price"):
-                trade_market_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, takeProfit_flag=False, tp_type="price")
+                trade_market_order(driver=main_driver, option=TradeDirectionOption.SELL, tp_type=SLTPOption.PRICE, take_profit_flag=AlertType.NEGATIVE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

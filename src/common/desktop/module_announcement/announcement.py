@@ -20,7 +20,7 @@ def announcement_validation(driver):
         label_announcement = get_label_of_element(element=announcement)
         print(label_announcement)
         if label_announcement == "#" or label_announcement == " ":
-            raise AssertionError("System should not reflect #")
+            assert False, "System should not reflect #"
         
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -61,7 +61,7 @@ def modal_announcement(driver, button: AnnouncementModal = AnnouncementModal.GOT
         handle_modal_announcement(driver, button)
     
     except (TimeoutException, Exception) as e:
-        # Skip if modal is not visible (TimeoutException from visibility_of_element_by_testid)
+        # Skip if modal is not visible (TimeoutException from find_visible_element_by_testid)
         if isinstance(e, TimeoutException):
             pass  # Skip the modal interaction if TimeoutException occurs
         else:

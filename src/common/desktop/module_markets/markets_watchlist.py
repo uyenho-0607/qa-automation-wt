@@ -74,7 +74,7 @@ def market_watchlist(driver):
             no_items_message = find_visible_element_by_xpath(driver, f"//*[@data-testid='{DataTestID.WATCHLIST_LIST}']//*[@data-testid='empty-message']")
             msg = get_label_of_element(element=no_items_message)
             # Raise an error if no symbols were found
-            raise AssertionError(f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab")
+            assert False, f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab"
 
         # Verify if the correct symbol is displayed in the chart (ensuring the click was successful)
         chart_symbol_name = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.SYMBOL_OVERVIEW_ID, text=label_symbol)
@@ -82,7 +82,7 @@ def market_watchlist(driver):
         # Assert that the symbol in the chart matches the selected symbol
         assert chart_symbol_name, f"Chart symbol mismatch: expected '{label_symbol}', found '{chart_symbol_name}'"
     
-        # tab = visibility_of_element_by_testid(driver, data_testid="tab-all")
+        # tab = find_visible_element_by_testid(driver, data_testid="tab-all")
         tab = find_visible_element_by_testid(driver, data_testid=DataTestID.TAB_ALL)
         if tab:  # Ensure the tab is visible
             tab_text = tab.text
@@ -170,7 +170,7 @@ def market_watchlist_filter(driver):
         # Wait for the "Show/Hide Symbol" modal to appear
         result = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.SYMBOL_PREFERENCE_LABEL, text="Show/Hide Symbol")
         if not result:
-            raise AssertionError("Show/Hide Symbol not found")
+            assert False, "Show/Hide Symbol not found"
         
         delay(1)
         
@@ -228,7 +228,7 @@ def market_watchlist_filter(driver):
 
         alert_msg = handle_alert_success(driver)
         if alert_msg != "All changes are saved.":
-            raise AssertionError(f"Receive {alert_msg} instead of the expected message")
+            assert False, f"Receive {alert_msg} instead of the expected message"
 
         # Locate 'X' button
         close = find_element_by_testid(driver, data_testid=DataTestID.SYMBOL_PREFERENCE_CLOSE)
@@ -263,7 +263,7 @@ def market_watchlist_filter(driver):
                     print(f"{msg} is displayed")
                     assert True
                 else:
-                    raise AssertionError("The message 'No items available' was not displayed after selecting 'Show all'.")
+                    assert False, "The message 'No items available' was not displayed after selecting 'Show all'."
                 
         else:
             market_watchlist_symbol = scroll_and_retrieve_data(driver)

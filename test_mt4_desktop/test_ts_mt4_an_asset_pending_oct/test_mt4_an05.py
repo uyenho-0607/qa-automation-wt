@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, Menu, OrderPanel
+from enums.main import Server, Menu, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -58,13 +58,13 @@ class TC_MT4_aN05():
             """ Place Stop Order """
 
             with allure.step("Place Stop Order"):
-                trade_limit_order(driver=main_driver, trade_type="trade", option="buy", expiryType="good-till-cancelled", sl_type="price", set_takeProfit=False)
+                trade_limit_order(driver=main_driver, option=TradeDirectionOption.BUY, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, sl_type=SLTPOption.PRICE)
 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_snackbar_banner_df)
@@ -75,7 +75,7 @@ class TC_MT4_aN05():
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
                 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Pending Order", row_number=[1])
+                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.ASSET_OPEN_POSITION)
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -84,15 +84,15 @@ class TC_MT4_aN05():
             """ Delete Pending Order """
             
             with allure.step("Order Panel: Pending Order - Click on Delete button"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close")
+                close_delete_order(driver=main_driver)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
 
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1=SectionName.ASSET_OPEN_POSITION, df2=order_history_df, name2=SectionName.ORDER_HISTORY)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, snackbar_banner_df, order_history_df)

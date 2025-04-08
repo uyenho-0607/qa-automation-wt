@@ -1,10 +1,10 @@
 import re
 import random
 
-from enums.main import ModuleType
+from enums.main import ButtonModuleType, TradeDirectionOption
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
-from constants.helper.element import find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, get_label_of_element
+from constants.helper.element import click_element, find_element_by_xpath_with_wait, javascript_click, click_element_with_wait, find_element_by_testid, find_visible_element_by_xpath, find_visible_element_by_testid, get_label_of_element
 from constants.helper.error_handler import handle_exception
 
 
@@ -14,7 +14,7 @@ from constants.helper.error_handler import handle_exception
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def label_onePointEqual(driver, trade_type: ModuleType):
+def get_label_one_point_equal(driver, trade_type: ButtonModuleType):
     """
     Retrieves the value of "one point equal" for a given trade type from the web page.
     The value is extracted from a label element that displays the value in the format "equals: <value>".
@@ -33,8 +33,8 @@ def label_onePointEqual(driver, trade_type: ModuleType):
         
         # Determine the data-testid based on the button type
         button_testids = {
-            ModuleType.TRADE: DataTestID.TRADE_ONE_POINT_EQUAL_LABEL,
-            ModuleType.EDIT: DataTestID.EDIT_ONE_POINT_EQUAL_LABEL,
+            ButtonModuleType.TRADE: DataTestID.TRADE_ONE_POINT_EQUAL_LABEL,
+            ButtonModuleType.EDIT: DataTestID.EDIT_ONE_POINT_EQUAL_LABEL,
         }
         
         button_testid = button_testids.get(trade_type)
@@ -43,25 +43,19 @@ def label_onePointEqual(driver, trade_type: ModuleType):
         
         # Locate the menu element using the provided menu name and data-testid attribute
         onePointsEqual = find_visible_element_by_testid(driver, button_testid)
-        
-        # Click on the found menu element with an optional wait to ensure the action is completed
-        # click_element(element=menu_selection)
-        
-        # Locate the element that contains the "one point equal" value
-        # onePointsEqual = find_visible_element_by_testid(driver, data_testid=f"{trade_type}-one-point-equal-label")
-        
+
         # Get the label text from the located element
-        label_onePointsEqual = get_label_of_element(onePointsEqual)
+        label_one_points_equal = get_label_of_element(onePointsEqual)
 
         # Regular expression to find the number after "equals:"
-        onePointsEqual_value = re.search(r"[\d.]+", label_onePointsEqual).group()
+        onePointsEqual_value = re.search(r"[\d.]+", label_one_points_equal).group()
         
         # Ensure that a value was found, otherwise raise an exception
         if onePointsEqual_value:
             # Return the numeric value as a float
             return float(onePointsEqual_value)
         else:
-            raise ValueError(f"Could not find a valid value in the label: {label_onePointsEqual}")
+            raise ValueError(f"Could not find a valid value in the label: {label_one_points_equal}")
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -79,7 +73,7 @@ def label_onePointEqual(driver, trade_type: ModuleType):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_tradeModule(driver, module_type: ModuleType):
+def button_trade_module(driver, trade_type: ButtonModuleType):
     """
     Interacts with the trade module based on the provided module type.
     It locates the corresponding tab for the module type and clicks it.
@@ -99,14 +93,14 @@ def button_tradeModule(driver, module_type: ModuleType):
         
         # Determine the data-testid based on the button type
         button_testids = {
-            ModuleType.ONE_CLICK_TRADING: DataTestID.TAB_ONE_CLICK_TRADING,
-            ModuleType.TRADE: DataTestID.TAB_TRADE,
-            ModuleType.SPECIFICATION: DataTestID.TAB_SPECIFICATION,
+            ButtonModuleType.ONE_CLICK_TRADING: DataTestID.TAB_ONE_CLICK_TRADING,
+            ButtonModuleType.TRADE: DataTestID.TAB_TRADE,
+            ButtonModuleType.SPECIFICATION: DataTestID.TAB_SPECIFICATION,
         }
         
-        button_testid = button_testids.get(module_type)
+        button_testid = button_testids.get(trade_type)
         if not button_testid:
-            raise ValueError(f"Invalid button type: {module_type}")
+            raise ValueError(f"Invalid button type: {trade_type}")
         
         # Locate the menu element using the provided menu name and data-testid attribute
         module_option = find_visible_element_by_testid(driver, button_testid)
@@ -114,7 +108,7 @@ def button_tradeModule(driver, module_type: ModuleType):
         # Click on the found menu element with an optional wait to ensure the action is completed
         click_element_with_wait(driver, element=module_option)
         
-        if module_type == ModuleType.SPECIFICATION:
+        if trade_type == ButtonModuleType.SPECIFICATION:
             contractSize = find_element_by_xpath_with_wait(driver, "//div[@data-testid='specification-contract-size']/div[2]")
             label_contractSize = float(get_label_of_element(contractSize))
             
@@ -139,17 +133,51 @@ def button_tradeModule(driver, module_type: ModuleType):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                TRADE OCT - BUY / SELL BUTTON INDICATOR
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+def oct_buy_sell_type(driver, option: TradeDirectionOption):
+    try:
+        
+        # Define both possible 'data-testid' values for the radio button states
+        pre_trade = {
+            TradeDirectionOption.BUY: DataTestID.TRADE_BUTTON_OCT_ORDER_BUY,
+            TradeDirectionOption.SELL: DataTestID.TRADE_BUTTON_OCT_ORDER_SELL
+        }
+        
+        button_testid = pre_trade.get(option)
+        if not button_testid:
+            raise ValueError(f"Invalid button type: {option}")
+        
+        order_execution = find_element_by_testid(driver, data_testid=button_testid)
+        click_element(element=order_execution)
+        
+        return option
+
+    except Exception as e:
+        # Handle any exceptions that occur during the execution
+        handle_exception(driver, e)
+   
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 TRADE - BUY / SELL BUTTON INDICATOR
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def button_buy_sell_type(driver, indicator_type=None):
+def button_buy_sell_type(driver, option=None):
     """
     Clicks on the trade button (Buy/Sell) based on the given indicator type.
-    The button is identified by its `data-testid` attribute, which is dynamically constructed using the `indicator_type`.
+    The button is identified by its `data-testid` attribute, which is dynamically constructed using the `option`.
 
     Arguments:
-    - indicator_type: A string representing the type of trade action, such as "buy" or "sell".
+    - option: A string representing the type of trade action, such as "buy" or "sell".
                       If None, a random choice will be made between "buy" and "sell".
     
     Returns:
@@ -160,17 +188,17 @@ def button_buy_sell_type(driver, indicator_type=None):
     """
     try:
         # Select a random indicator type if not provided
-        if indicator_type is None:
-            indicator_type = random.choice(["buy", "sell"])
-            print(f"Randomly selected indicator_type: {indicator_type}")
+        if option is None:
+            option = random.choice(["buy", "sell"])
+            print(f"Randomly selected option: {option}")
 
-        # Locate the order execution button based on the provided indicator_type (buy/sell)
-        order_execution = find_visible_element_by_xpath(driver, f"//div[contains(@data-testid, 'order-{indicator_type}')]")
+        # Locate the order execution button based on the provided option (buy/sell)
+        order_execution = find_visible_element_by_xpath(driver, f"//div[contains(@data-testid, 'order-{option}')]")
 
         # Click the button with a wait to ensure the element is interactable before clicking
         click_element_with_wait(driver, element=order_execution)
         
-        return indicator_type
+        return option
         
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -188,7 +216,7 @@ def button_buy_sell_type(driver, indicator_type=None):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def dropdown_orderType(driver, partial_text=None):
+def dropdown_order_type(driver, partial_text=None):
     """
     Selects an order type from the dropdown based on the provided partial_text.
     The dropdown options are dynamically located by the `data-testid` attributes.

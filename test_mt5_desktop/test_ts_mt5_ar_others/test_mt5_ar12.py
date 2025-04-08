@@ -14,9 +14,9 @@ from common.desktop.module_trade.order_panel.order_panel_info import count_order
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR12():
+class TC_aR12():
 
-    @allure.title("TC_MT5_aR12")
+    @allure.title("TC_aR12")
 
     @allure.description(
         """

@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import link_account
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV05():
+class TC_aV05():
 
-    @allure.title("TC_MT5_aV05")
+    @allure.title("TC_aV05")
 
     @allure.description(
         """

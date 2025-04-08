@@ -2,7 +2,8 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server, Menu, OrderPanel
+from enums.main import Server, Menu, TradeDirectionOption, TradeConstants, SLTPOption, ButtonModuleType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -18,10 +19,10 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_an - Asset OCT - Modify / Close Market Order")
 
 # Member Portal
-class TC_MT5_aN03():
+class TC_aN03():
 
         
-    @allure.title("TC_MT5_aN03")
+    @allure.title("TC_aN03")
 
     @allure.description(
         """
@@ -55,13 +56,13 @@ class TC_MT5_aN03():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Market Order"):
-                trade_oct_market_order(driver=main_driver, indicator_type="buy")
+                trade_oct_market_order(driver=main_driver, option=TradeDirectionOption.BUY)
 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Trade Open Position", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_snackbar_banner_df)
@@ -72,7 +73,7 @@ class TC_MT5_aN03():
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, asset_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Asset Open Position", row_number=[1])
+                asset_orderID, asset_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.ASSET_OPEN_POSITION)
                 
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
@@ -82,15 +83,15 @@ class TC_MT5_aN03():
             """Start of Full Close Order """
                 
             with allure.step("Order Panel: Open Position - Click on Close button"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close")
+                close_delete_order(driver=main_driver)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
             
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
 
-                compare_dataframes(driver=main_driver, df1=asset_order_df, name1="Asset Open Position", df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=asset_order_df, name1=SectionName.ASSET_OPEN_POSITION, df2=order_history_df, name2=SectionName.ORDER_HISTORY)
                 
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
@@ -100,7 +101,7 @@ class TC_MT5_aN03():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_msg_df, name2="Notification Order Message")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=noti_msg_df, name2=SectionName.NOTIFICATION_ORDER_MESSAGE)
 
                 # Concatenate all dataframes in the order_details_list into a single dataframe
                 noti_order_df = pd.concat(noti_order_details, ignore_index=True)
@@ -109,7 +110,7 @@ class TC_MT5_aN03():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_order_df, name2="Notification Order Details")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=noti_order_df, name2=SectionName.NOTIFICATION_ORDER_DETAIL)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(asset_order_df, snackbar_banner_df, noti_msg_df, noti_order_df, order_history_df)

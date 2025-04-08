@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import button_theme
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV04():
+class TC_aV04():
 
-    @allure.title("TC_MT5_aV04")
+    @allure.title("TC_aV04")
 
     @allure.description(
         """

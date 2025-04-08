@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -47,7 +47,7 @@ class TC_MT4_aR05():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Market Order"):
-                direction = trade_oct_market_order(driver=main_driver, indicator_type="buy")
+                direction = trade_oct_market_order(driver=main_driver, option=TradeDirectionOption.BUY)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)

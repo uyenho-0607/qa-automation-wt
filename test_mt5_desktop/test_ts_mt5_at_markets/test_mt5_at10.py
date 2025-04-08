@@ -14,9 +14,9 @@ from common.desktop.module_announcement.utils import announcement_validation
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT10():
+class TC_aT10():
 
-    @allure.title("TC_MT5_aT10")
+    @allure.title("TC_aT10")
 
     @allure.description(
         """

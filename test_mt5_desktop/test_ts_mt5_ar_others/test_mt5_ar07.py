@@ -1,22 +1,23 @@
 import allure
 import pytest
 
-from enums.main import Server, OrderPanel, SymbolsList
+from enums.main import Server, SymbolsList, TradeDirectionOption, ExpiryType, SectionName, OrderPanel
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stopLimit_order, btn_minMax_price, btn_minMax_stopLimitPrice, btn_min_max_stop_loss, btn_minMax_takeProfit, button_orderPanel_action, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_limit_order, btn_min_max_price, btn_min_max_stop_limit_price, btn_min_max_stop_loss, btn_minMax_takeProfit, handle_track_close_edit, get_trade_snackbar_banner, extract_order_info
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
 
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR07():
+class TC_aR07():
 
-    @allure.title("TC_MT5_aR07")
+    @allure.title("TC_aR07")
     
     @allure.description(
         """
@@ -49,28 +50,28 @@ class TC_MT5_aR07():
             """ Place Limit Order """
 
             with allure.step("Place Limit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")
+                trade_stop_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, expiry_type=ExpiryType.GOOD_TILL_CANCELLED)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Pending Order", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.UPDATED_PENDING_ORDER)
 
             """ End of Place Limit Order """
 
             """ Start of modifying Pending Order """
                 
             with allure.step("Modify order"):
-                button_orderPanel_action(driver=main_driver, order_action="edit", row_number=[1])
+                handle_track_close_edit(driver=main_driver, trade_type="edit")
                 
             with allure.step("Increase / Decrease Entry Price"):
-                btn_minMax_price(driver=main_driver, trade_type="edit", minMax="increase", number_of_clicks=5)
-                btn_minMax_price(driver=main_driver, trade_type="edit", minMax="decrease", number_of_clicks=3)
+                btn_min_max_price(driver=main_driver, trade_type="edit", minMax="increase", number_of_clicks=5)
+                btn_min_max_price(driver=main_driver, trade_type="edit", minMax="decrease", number_of_clicks=3)
 
             with allure.step("Increase / Decrease Stop Limit Price"):
-                btn_minMax_stopLimitPrice(driver=main_driver, trade_type="edit", minMax="increase", number_of_clicks=5)
-                btn_minMax_stopLimitPrice(driver=main_driver, trade_type="edit", minMax="decrease", number_of_clicks=3)
+                btn_min_max_stop_limit_price(driver=main_driver, trade_type="edit", minMax="increase", number_of_clicks=5)
+                btn_min_max_stop_limit_price(driver=main_driver, trade_type="edit", minMax="decrease", number_of_clicks=3)
                 
             with allure.step("Increase / Decrease Stop Loss"):
                 btn_min_max_stop_loss(driver=main_driver, trade_type="edit", type="price", min_max="increase", number_of_clicks=5)

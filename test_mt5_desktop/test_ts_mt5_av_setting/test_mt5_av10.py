@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import notification_settings_modal
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV10():
+class TC_aV10():
 
-    @allure.title("TC_MT5_aV10")
+    @allure.title("TC_aV10")
 
     @allure.description(
         """

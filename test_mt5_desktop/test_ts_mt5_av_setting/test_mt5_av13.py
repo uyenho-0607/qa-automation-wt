@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import change_password
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV13():
+class TC_aV13():
 
-    @allure.title("TC_MT5_aV13")
+    @allure.title("TC_aV13")
 
     @allure.description(
         """

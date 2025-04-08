@@ -14,9 +14,9 @@ from common.desktop.module_setting.setting_contact_information import contact_in
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV12():
+class TC_aV12():
 
-    @allure.title("TC_MT5_aV12")
+    @allure.title("TC_aV12")
 
     @allure.description(
         """

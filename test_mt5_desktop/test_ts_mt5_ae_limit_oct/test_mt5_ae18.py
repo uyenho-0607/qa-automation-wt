@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -15,10 +16,10 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ae - Limit OCT")
 
 # Member Portal
-class TC_MT5_aE18():
+class TC_aE18():
 
         
-    @allure.title("TC_MT5_aE18")
+    @allure.title("TC_aE18")
 
     @allure.description(
         """
@@ -58,26 +59,26 @@ class TC_MT5_aE18():
             """ Place Market Order """
 
             with allure.step("Place Limit Order"):
-                trade_limit_order(driver=main_driver, trade_type="trade", option="sell", expiryType="good-till-day", set_stopLoss=False, tp_type="price")
+                trade_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, expiry_type=ExpiryType.GOOD_TILL_DAY, tp_type=SLTPOption.PRICE)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Pending Order", row_number=[1])
+                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             """ End of Place Order """
                 
             with allure.step("Order Panel: Pending Order - Click on Delete button"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close")
+                close_delete_order(driver=main_driver)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.ORDER_AND_DEALS, section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.ORDER_AND_DEALS, section_name=SectionName.ORDER_HISTORY)
 
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1=SectionName.TRADE_PENDING_ORDER, df2=order_history_df, name2=SectionName.ORDER_HISTORY)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, snackbar_banner_df, order_history_df)

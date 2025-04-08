@@ -14,9 +14,9 @@ from common.desktop.module_education.education import education_video
 @allure.epic("MT5 Desktop ts_aw - Education Video")
 
 # Member Portal
-class TC_MT5_aW01():
+class TC_aW01():
 
-    @allure.title("TC_MT5_aW01")
+    @allure.title("TC_aW01")
 
     @allure.description(
         """

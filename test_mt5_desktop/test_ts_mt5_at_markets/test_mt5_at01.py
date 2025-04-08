@@ -14,9 +14,9 @@ from common.desktop.module_symbol.search_symbol import search_symbol_variations
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT01():
+class TC_aT01():
 
-    @allure.title("TC_MT5_aT01")
+    @allure.title("TC_aT01")
 
     @allure.description(
         """

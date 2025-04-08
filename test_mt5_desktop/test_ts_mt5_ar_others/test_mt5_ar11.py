@@ -2,6 +2,7 @@ import allure
 import pytest
 
 from enums.main import Server, OrderPanel
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -14,9 +15,9 @@ from common.desktop.module_trade.order_panel.utils import update_column_visibili
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR11():
+class TC_aR11():
 
-    @allure.title("TC_MT5_aR11")
+    @allure.title("TC_aR11")
 
     @allure.description(
         """

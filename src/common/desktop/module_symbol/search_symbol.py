@@ -56,7 +56,7 @@ def input_symbol(driver, server: Server, symbol_type: SymbolsList = SymbolsList.
         populate_element(element=input_search, text=desired_symbol_name)
         
         # Wait for element to be invisible
-        # spinner_element(driver)
+        spinner_element(driver)
         wait_for_text_to_be_present_in_element_by_testid(driver, DataTestID.SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME, text=desired_symbol_name)
         
         # Find and click the dropdown option that matches the desired symbol            
@@ -130,11 +130,11 @@ def search_symbol_variations(driver, server: Server, symbol_type: SymbolsList = 
                 if matched_rows:
                     print(f"✅ Matching rows found for '{input_search}':\n" + "\n".join(matched_rows))
                 else:
-                    raise AssertionError(f"No matching row found for symbol: {input_search}")
+                    assert False, f"No matching row found for symbol: {input_search}"
             else:
                 no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'Type something to search')]")
                 msg = get_label_of_element(no_items_message)
-                raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+                assert False, f"No matching row found for symbol: {input_search} with message: {msg}"
     
     except Exception as e:
         handle_exception(driver, e)
@@ -180,7 +180,7 @@ def clear_search_history(driver):
 
         updated_count = len(get_delete_buttons())
         if updated_count != initial_count - 1:
-            raise AssertionError(f"Items remaining: {updated_count} (Expected {initial_count - 1})")
+            assert False, f"Items remaining: {updated_count} (Expected {initial_count - 1})"
     try:
         spinner_element(driver)
         
@@ -192,7 +192,7 @@ def clear_search_history(driver):
         initial_buttons = get_delete_buttons()
         initial_count = len(initial_buttons)
         if initial_count == 0:
-            raise AssertionError("No search history items found")
+            assert False, "No search history items found"
 
         # Delete single random item
         print(f"\nInitial count: {initial_count}")
@@ -209,7 +209,7 @@ def clear_search_history(driver):
         # Final verification
         final_count = len(get_delete_buttons())
         if final_count != 0:
-            raise AssertionError(f"Clear all failed - Remaining items: {final_count}")
+            assert False, f"Clear all failed - Remaining items: {final_count}"
 
     except Exception as e:
         handle_exception(driver, e)

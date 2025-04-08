@@ -120,7 +120,7 @@ def find_visible_element_by_testid(driver, data_testid, duration: int | None = N
 
 
 # Waits for the element to either: Not be in the DOM, or be in the DOM but not visible.
-def invisibility_of_element_by_xpath(driver, xpath, duration: int | None = None) -> bool:
+def invisibility_of_element_by_testid(driver, xpath, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
     try:
         return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((By.XPATH, xpath)))
@@ -337,7 +337,6 @@ def spinner_element(driver):
 
 def bulk_spinner_element(driver, timeout=10):
     try:
-        # invisibility_of_element_by_testid(driver, data_testid="spin-loader")
         # Wait for the spinner to disappear
         WebDriverWait(driver, timeout).until(EC.invisibility_of_element((By.CSS_SELECTOR, "[data-testid='spin-loader']")))
     except Exception as e:

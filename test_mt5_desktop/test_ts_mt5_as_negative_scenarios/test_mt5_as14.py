@@ -1,22 +1,22 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, ButtonModuleType, TradeDirectionOption, SLTPOption, ExpiryType, AlertType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, get_neg_snackbar_banner, trade_ordersConfirmationDetails
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, get_neg_snackbar_banner, trade_orders_confirmation_details
 
 @allure.parent_suite("MT5 Membersite - Desktop - Negative Scenarios")
 
 @allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS14():
+class TC_aS14():
 
-    @allure.title("TC_MT5_aS14")
+    @allure.title("TC_aS14")
 
     @allure.description(
         """
@@ -48,10 +48,10 @@ class TC_MT5_aS14():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Place Stop Order"):
-                trade_stop_order(driver=main_driver, trade_type="trade", option="buy", stopLoss_flag=False, sl_type="price", set_takeProfit=False, expiryType="good-till-day")
+                trade_stop_order(driver=main_driver, option=TradeDirectionOption.BUY, sl_type=SLTPOption.PRICE, expiry_type=ExpiryType.GOOD_TILL_DAY, stop_loss_flag=AlertType.NEGATIVE)
                 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

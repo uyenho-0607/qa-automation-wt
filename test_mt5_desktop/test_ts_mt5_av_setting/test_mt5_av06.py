@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import switch_or_delete_account
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV06():
+class TC_aV06():
 
-    @allure.title("TC_MT5_aV06")
+    @allure.title("TC_aV06")
 
     @allure.description(
         """

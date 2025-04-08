@@ -14,9 +14,9 @@ from common.desktop.module_signal.signal import express_interest
 @allure.epic("MT5 Desktop ts_au - Signal")
 
 # Member Portal
-class TC_MT5_aU03():
+class TC_aU03():
 
-    @allure.title("TC_MT5_aU03")
+    @allure.title("TC_aU03")
 
     @allure.description(
         """

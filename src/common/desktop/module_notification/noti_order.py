@@ -1,10 +1,11 @@
 import re
 from tabulate import tabulate
 
+from enums.main import SectionName
 from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import click_element, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, spinner_element
+from constants.helper.element import click_element, click_element_with_wait, get_label_of_element, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, spinner_element
 
 from common.desktop.module_notification.noti_general import notification_bell
 from common.desktop.module_trade.order_panel.op_general import extract_order_data_details
@@ -35,10 +36,6 @@ def get_orderNotification_msg(driver, order_id: str):
         
         # Click on the notification bell to open the notification area
         notification_bell(driver)
-
-        # response = api_get_noti_message(driver)
-        
-        # if response.status_code == 200:
         
         # Wait until the spinner icon is no longer displayed
         spinner_element(driver)
@@ -49,21 +46,23 @@ def get_orderNotification_msg(driver, order_id: str):
         # Initialize a list to store the parsed order data
         order_data = []
         
-        for message in noti_messages:
+        for msg in noti_messages:
+            message = get_label_of_element(element=msg)
+            print(message)
             # Check if the order ID is present in the notification message
-            if order_id in message.text:
+            if order_id in message:
                 # Attach the message text to the report for documentation purposes
-                attach_text(message.text, name="Order Notification Message")
+                attach_text(message, name="Order Notification Message")
 
                 # Extract Order No. using regular expressions
-                order_data.append(re.search(r"#(\d+)", message.text).group(1))
+                order_data.append(re.search(r"#(\d+)", message).group(1))
 
                 # Extract Symbol using regex (e.g., "BTCUSD")
-                symbol_match = re.search(r"\b[A-Z]+\d*(?:\.[A-Za-z]+)?\b", message.text)
+                symbol_match = re.search(r"\b[A-Z]+\d*(?:\.[A-Za-z]+)?\b", message)
                 order_data.append(symbol_match.group())
                 
                 # Extract Size/Volume using regex
-                size_or_volume_match = re.search(r"(Size|Volume) (\d+(\.\d+)?)", message.text)
+                size_or_volume_match = re.search(r"(Size|Volume) (\d+(\.\d+)?)", message)
                 if size_or_volume_match:
                     size_or_volume_label = size_or_volume_match.group(1) # label
                     
@@ -72,33 +71,32 @@ def get_orderNotification_msg(driver, order_id: str):
                     order_data.append(size_or_volume_value)
                     
                 # Extract Units using regular expressions
-                order_data.append(re.search(r"Units ([\d,]+(?:\.\d+)?)", message.text).group(1))
+                order_data.append(re.search(r"Units ([\d,]+(?:\.\d+)?)", message).group(1))
                 
                 # Extract Entry or Close Price using regular expressions
-                order_data.append(re.search(r"@ ([\d,]+(?:\.\d+)?)", message.text).group(1))
+                order_data.append(re.search(r"@ ([\d,]+(?:\.\d+)?)", message).group(1))
 
                 # Prepare headers for the DataFrame
                 headers = ["Order No.", "Symbol", size_or_volume_label, "Units"]
     
                 # Check if Profit/Loss details are available in the message
-                pnl_header_present = "of" in message.text
+                pnl_header_present = "of" in message
                 if pnl_header_present:
                     headers.append("Close Price")
-                    # pnl_match = re.search(r"of\s([+-]?[\d.]+)", message.text)
-                    pnl_match = re.search(r"of\s([+-]?\d+(?:,\d{3})*(?:\.\d+)?)", message.text)
+                    pnl_match = re.search(r"of\s([+-]?\d+(?:,\d{3})*(?:\.\d+)?)", message)
                     order_data.append(pnl_match.group(1)) #if pnl_match else None)
                     headers.append("Profit/Loss")
                 else:
                     headers.append("Entry Price")
                 
                 # Click on the matching notification message for further actions
-                click_element(message)
+                click_element_with_wait(driver, element=msg)
                 
                 # Create DataFrame with the extracted data
-                order_Notification_Message = extract_order_data_details(driver, [order_data], headers, section_name="Notification Order Message")
+                order_Notification_Message = extract_order_data_details(driver, [order_data], headers, section_name=SectionName.NOTIFICATION_ORDER_MESSAGE)
                 overall = tabulate(order_Notification_Message.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
                 # Attach the formatted table to the report
-                attach_text(overall, name=f"Notification Order Message - {order_id}")
+                attach_text(overall, name=SectionName.NOTIFICATION_ORDER_MESSAGE)
                 
                 # Return the DataFrame containing the order notification message
                 return order_Notification_Message
@@ -156,22 +154,22 @@ def get_noti_ordersDetails(driver):
         header_labels = [header_mapping.get(element.text, element.text) for element in header_elements]
         header_labels.append("Type") # Append Currency label for deposit handling
 
-        elements = find_list_of_elements_by_testid(driver, data_testid="notification-order-details-value")
+        elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_VALUE)
 
         for element in elements:
             # Extract the text from the element
-            result.append(element.text)
+            result.append(get_label_of_element(element=element))
 
         # Extract the Buy or Sell text 
         order_type = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL_ORDDER_TYPE)
-        result.append(order_type.text)
+        result.append(get_label_of_element(element=order_type))
 
         # Create a DataFrame using the data
-        noti_order_details = extract_order_data_details(driver, [result], header_labels, section_name="Notification Order Details")
+        noti_order_details = extract_order_data_details(driver, [result], header_labels, section_name=SectionName.NOTIFICATION_ORDER_DETAIL)
         overall = tabulate(noti_order_details.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
         
         # Attach the formatted table to the report
-        attach_text(overall, name="Notification Order Details")
+        attach_text(overall, name=SectionName.NOTIFICATION_ORDER_DETAIL)
         
         # Close the modal dialog
         modal_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_ORDER_DETAILS_MODAL_CLOSE)

@@ -2,13 +2,14 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, TradeDirectionOption, TradeConstants, SLTPOption, ButtonModuleType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, close_delete_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -17,10 +18,10 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ab - Market")
 
 # Member Portal
-class TC_MT5_aB20():
+class TC_aB20():
 
             
-    @allure.title("TC_MT5_aB20")
+    @allure.title("TC_aB20")
 
     @allure.description(
         """
@@ -57,28 +58,28 @@ class TC_MT5_aB20():
             """ Place Market Order """
 
             with allure.step("Place Market Order"):
-                trade_market_order(driver=main_driver, trade_type="trade", option="sell", set_fillPolicy=True, set_stopLoss=False, tp_type="points")
+                trade_market_order(driver=main_driver, option=TradeDirectionOption.SELL, trade_constants=TradeConstants.SET_FILL_POLICY, tp_type=SLTPOption.POINTS)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Trade Open Position", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
                 
             """ End of Place Order """
             
             with allure.step("Order Panel: Open Position - Click on Close to Partial close an order"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close", set_marketSize=True, clearField=True, set_fillPolicy=True)
+                close_delete_order(driver=main_driver, close_options=TradeConstants.SET_CLOSE_MARKET_SIZE | TradeConstants.CLEAR_FIELD | TradeConstants.SET_FILL_POLICY)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the updated Open Position data"):
-                updated_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="New Open Position", row_number=[1])
-                
+                updated_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
+
                 if original_orderID == updated_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -87,9 +88,9 @@ class TC_MT5_aB20():
             """Comparison on Order History and newly closed Order """
 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
 
-                compare_dataframes(driver=main_driver, df1=trade_order_df, name1="Trade Open Position", df2=order_history_df, name2="Order History", compare_volume=False, compare_units=False)
+                compare_dataframes(driver=main_driver, df1=trade_order_df, name1=SectionName.TRADE_OPEN_POSITION, df2=order_history_df, name2=SectionName.ORDER_HISTORY, compare_options=TradeConstants.COMPARE_VOLUME | TradeConstants.COMPARE_UNITS)
 
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
@@ -99,7 +100,7 @@ class TC_MT5_aB20():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_msg_df, name2="Notification Order Message", compare_volume=False, compare_units=False, compare_profit_loss=True)
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=noti_msg_df, name2=SectionName.NOTIFICATION_ORDER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME | TradeConstants.COMPARE_UNITS | TradeConstants.COMPARE_PROFIT_LOSS)
 
                 # Concatenate all dataframes in the order_details_list into a single dataframe
                 noti_order_df = pd.concat(noti_order_details, ignore_index=True)
@@ -108,8 +109,8 @@ class TC_MT5_aB20():
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_order_df, name2="Notification Order Details", compare_volume=False, compare_units=False, compare_profit_loss=True)
-                
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=noti_order_df, name2=SectionName.NOTIFICATION_ORDER_DETAIL, compare_options=TradeConstants.COMPARE_VOLUME | TradeConstants.COMPARE_UNITS | TradeConstants.COMPARE_PROFIT_LOSS)
+
             """End of comparison on Order History and newly closed order"""
 
             with allure.step("Print Final Result for Closed Order"):

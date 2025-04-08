@@ -14,9 +14,9 @@ from common.desktop.module_read_access.utils import read_only_access
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR13():
+class TC_aR13():
 
-    @allure.title("TC_MT5_aR13")
+    @allure.title("TC_aR13")
     @allure.description(
         """
         Member unable to place trade with Read Only Access enable

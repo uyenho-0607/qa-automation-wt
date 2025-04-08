@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server, Menu, OrderPanel
+from enums.main import Server, Menu, TradeDirectionOption, TradeConstants, SLTPOption, ButtonModuleType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -16,9 +17,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_an - Asset OCT - Modify / Close Market Order")
 
 # Member Portal
-class TC_MT5_aN02():
+class TC_aN02():
 
-    @allure.title("TC_MT5_aN02")
+    @allure.title("TC_aN02")
 
     @allure.description(
         """
@@ -53,13 +54,13 @@ class TC_MT5_aN02():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
             
             with allure.step("Place Market Order"):
-                trade_oct_market_order(driver=main_driver, indicator_type="sell")
+                trade_oct_market_order(driver=main_driver, option=TradeDirectionOption.SELL)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Trade Open Position", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             """ Asset Page related """
 
@@ -67,7 +68,7 @@ class TC_MT5_aN02():
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
             
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Asset Open Position", row_number=[1])
+                asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.ASSET_OPEN_POSITION)
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -76,13 +77,13 @@ class TC_MT5_aN02():
             """ Start of Modify Order """
             
             with allure.step("Modify on Market Order"):
-                modify_market_order(driver=main_driver, trade_type="edit", row_number=[1], sl_type="points", set_takeProfit=False)
+                modify_market_order(driver=main_driver, sl_type=SLTPOption.POINTS)
 
             with allure.step("Retrieve the modified snackbar message"):
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the updated Open Position Order"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name="Updated Open Position", row_number=[1])
+                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
                 
                 if updated_orderID == asset_orderID:
                     assert True, "orderID are the same"
@@ -90,7 +91,7 @@ class TC_MT5_aN02():
                     assert False, f"Trade orderID - {updated_orderID} and Asset orderID - {asset_orderID} not matched"
                     
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
-                compare_dataframes(driver=main_driver, df1=updated_order_df, name1="Updated Open Position", df2=edit_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_OPEN_POSITION, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Print Modify Order Table Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)

@@ -13,9 +13,9 @@ from common.desktop.module_markets.utils import market_select_symbols, market_wa
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT07():
+class TC_aT07():
 
-    @allure.title("TC_MT5_aT07")
+    @allure.title("TC_aT07")
 
     @allure.description(
         """

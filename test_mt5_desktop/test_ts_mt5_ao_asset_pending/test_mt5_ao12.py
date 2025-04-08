@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server, Menu, OrderPanel
+from enums.main import Server, Menu, ButtonModuleType, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
+
 from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
@@ -9,7 +10,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_sub_menu.utils import menu_button
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stopLimit_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_limit_order, close_delete_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT5 Membersite - Desktop - Asset - Modify / Delete Pending Order")
@@ -17,9 +18,9 @@ from data_config.utils import compare_dataframes, process_and_print_data
 @allure.epic("MT5 Desktop ts_ao - Asset - Modify / Delete Pending Order")
 
 # Member Portal
-class TC_MT5_aO12():
+class TC_aO12():
 
-    @allure.title("TC_MT5_aO12")
+    @allure.title("TC_aO12")
 
     @allure.description(
         """
@@ -58,19 +59,19 @@ class TC_MT5_aO12():
             """ Place Stop Limit Order """
 
             with allure.step("Place Stop Limit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, tp_type="price",  expiryType="specified-date", expiryDate="19", targetMonth=parse("April 2025"), specifiedDate=True)
+                trade_stop_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, tp_type=SLTPOption.PRICE,  expiry_type=ExpiryType.SPECIFIED_DATE, expiry_date="19", target_month=parse("April 2025"))
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_tradeConfirmation_df = trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_confirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
 
             with allure.step("Retrieve the snackbar message"):
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Trade Pending Order", row_number=[1])
+                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Print Final Result"):
-                process_and_print_data(trade_order_df, trade_tradeConfirmation_df, trade_snackbar_banner_df)
+                process_and_print_data(trade_order_df, trade_confirmation_df, trade_snackbar_banner_df)
                 
             """ End of Place Order """
 
@@ -78,7 +79,7 @@ class TC_MT5_aO12():
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
 
             with allure.step("Verify if it is the same orderIDs"):
-                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name="Asset Pending Order", row_number=[1])
+                asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.ASSET_PENDING_ORDER)
                 if original_orderID == asset_orderID:
                     assert True, "orderID are the same"
                 else:
@@ -87,15 +88,15 @@ class TC_MT5_aO12():
             """ Delete Pending Order """
 
             with allure.step("Order Panel: Pending Order - Click on Delete button"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close")
+                close_delete_order(driver=main_driver)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.ORDER_AND_DEALS, section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.ORDER_AND_DEALS, section_name=SectionName.ORDER_HISTORY)
 
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Asset Pending Order", df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1=SectionName.ASSET_PENDING_ORDER, df2=order_history_df, name2=SectionName.ORDER_HISTORY)
             
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, snackbar_banner_df, order_history_df)

@@ -2,7 +2,8 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server, OrderPanel
+from enums.main import Server, TradeConstants, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -16,10 +17,10 @@ from data_config.utils import compare_dataframes, process_and_print_data, clear_
 @allure.epic("MT5 Desktop ts_aj - Bulk Close / Delete Orders")
 
 # Member Portal
-class TC_MT5_aJ03():
+class TC_aJ03():
 
                    
-    @allure.title("TC_MT5_aJ03")
+    @allure.title("TC_aJ03")
 
     @allure.description(
         """
@@ -45,7 +46,7 @@ class TC_MT5_aJ03():
 
             with allure.step("Bulk Close Orders"):
                 clear_orderIDs_csv(filename="MT5_Bulk.csv")
-                open_position_df = button_bulk_operation(driver=main_driver, filename="MT5_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name="Open Position", tab_order_type=OrderPanel.OPEN_POSITIONS, set_sorting=True)
+                open_position_df = button_bulk_operation(driver=main_driver, filename="MT5_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name=SectionName.TRADE_OPEN_POSITION, tab_order_type=OrderPanel.OPEN_POSITIONS, set_sorting=True)
 
             with allure.step("Retrieve snackbar message"):
                 get_bulk_snackbar_banner(driver=main_driver)
@@ -55,10 +56,10 @@ class TC_MT5_aJ03():
         
             with allure.step("Ensure the OrderID is display in order panel: Order History table"):
                 # Check order IDs in Order History table
-                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type=OrderPanel.HISTORY, section_name="Order History")
+                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
 
             with allure.step("Comparison on Order History and Open Position table"):
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=open_position_df, name2="Open Position", compare_volume=False, compare_units=False)
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=open_position_df, name2=SectionName.TRADE_OPEN_POSITION, compare_options=TradeConstants.COMPARE_VOLUME | TradeConstants.COMPARE_UNITS)
 
             with allure.step("Retrieve and compare Open Position and Notification Order Message / Details"):
                 # Call the method to get the lists of dataframes
@@ -68,13 +69,13 @@ class TC_MT5_aJ03():
                 if noti_message:  # Check if noti_message is not empty
                     noti_msg_df = pd.concat(noti_message, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_msg_df, name2="Notification Order Message", compare_profit_loss=True)
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=noti_msg_df, name2=SectionName.NOTIFICATION_ORDER_MESSAGE, compare_options=TradeConstants.COMPARE_PROFIT_LOSS)
 
                 # Compare against Open Position and Notification Order Details
                 if noti_order_details:  # Check if noti_order_details is not empty
                     noti_order_df = pd.concat(noti_order_details, ignore_index=True)
 
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=noti_order_df, name2="Notification Order Details", compare_profit_loss=True)
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=noti_order_df, name2=SectionName.NOTIFICATION_ORDER_DETAIL, compare_options=TradeConstants.COMPARE_PROFIT_LOSS)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(open_position_df, order_history_df, noti_msg_df, noti_order_df, group_by_order_no=True)

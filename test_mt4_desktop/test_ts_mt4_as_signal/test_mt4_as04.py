@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, SectionName
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -51,16 +51,16 @@ class TC_MT4_aS04():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Compare against the Copy Trade and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=copyTrade_df, name1="Copy Trade Details", df2=trade_snackbar_banner_df, name2="Snackbar Banner Message")
+                compare_dataframes(driver=main_driver, df1=copyTrade_df, name1=SectionName.COPY_TRADE_DETAIL, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Redirect to Asset Page"):
-                orderPanel_type, orderPanel_name = handle_order_type(driver=main_driver, order_type=label_OrderStatus)
+                order_panel_type, orderPanel_name = handle_order_type(driver=main_driver, order_type=label_OrderStatus)
 
             with allure.step("Retrieve the Newly Created Order"):
-                _, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=orderPanel_type, section_name=orderPanel_name, row_number=[1])
+                _, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=order_panel_type, section_name=orderPanel_name)
             
             with allure.step("Compare against the Snackbar message and Order Panel details"):
-                compare_dataframes(driver=main_driver, df1=trade_snackbar_banner_df, name1="Snackbar Banner Message", df2=trade_order_df, name2=orderPanel_name)
+                compare_dataframes(driver=main_driver, df1=trade_snackbar_banner_df, name1=SectionName.SNACKBAR_BANNER_MESSAGE, df2=trade_order_df, name2=orderPanel_name)
             
             with allure.step("Print the Order Table Result"):
                 process_and_print_data(copyTrade_df, trade_snackbar_banner_df, trade_order_df)
