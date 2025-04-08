@@ -1,7 +1,7 @@
 from common.mobileapp.module_trade.place_edit_order.utils import trade_oct_market_order, trade_market_order, modify_market_order, close_delete_order, trade_limit_order, modify_limit_order, trade_stop_order, modify_stop_order, trade_stop_limit_order, modify_stop_limit_order
 
 # Order Placing Window
-from common.mobileapp.module_trade.order_placing_window.utils import button_pre_trade, toggle_radio_button, swap_units_volume, input_size_volume, dropdown_order_type, trade_orders_confirmation_details, btn_minMax_size, btn_min_max_price, btn_min_max_stop_limit_price, btn_minMax_stopLoss, btn_minMax_takeProfit, button_trade_action
+from common.mobileapp.module_trade.order_placing_window.utils import button_pre_trade, toggle_radio_button, swap_units_volume, input_size_volume, dropdown_order_type, trade_orders_confirmation_details, button_trade_action
 
 # Snackbar
 from common.mobileapp.module_trade.toast_notification.utils import get_trade_snackbar_banner, get_neg_snackbar_banner, get_bulk_snackbar_banner
@@ -43,11 +43,6 @@ __all__ = [
     'input_size_volume',
     'dropdown_order_type',
     'trade_orders_confirmation_details',
-    'btn_minMax_size',
-    'btn_min_max_price',
-    'btn_min_max_stop_limit_price',
-    'btn_minMax_stopLoss',
-    'btn_minMax_takeProfit',
     'button_trade_action',
 
 # """
