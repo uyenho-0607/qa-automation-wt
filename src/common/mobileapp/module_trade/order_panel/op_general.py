@@ -2,9 +2,13 @@ import pandas as pd
 
 from tabulate import tabulate
 
+from constants.element_ids import DataTestID
+
+from constants.helper.driver import delay
+from constants.helper.element_android_app import wait_for_list_of_element_visibility_by_xpath
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
-from constants.helper.element import find_list_of_elements_by_xpath, spinner_element, visibility_of_element_by_xpath
+from constants.helper.element import find_list_of_elements_by_xpath, spinner_element, find_visible_element_by_testid
 
 
 """
@@ -19,7 +23,7 @@ def get_table_body(driver):
         # Wait till the spinner icon no longer display
         spinner_element(driver)
         
-        return visibility_of_element_by_xpath(driver, ".//tbody[contains(@data-testid, 'list')]")
+        return find_visible_element_by_testid(driver, ".//tbody[contains(@data-testid, 'list')]")
     
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -40,16 +44,16 @@ def get_table_body(driver):
 def get_table_headers(driver):
     try:
         
-        # Wait till the element is visible
-        visibility_of_element_by_xpath(driver, "//div[contains(@data-testid, 'label')]")
+        wait_for_list_of_element_visibility_by_xpath(driver, DataTestID.ASSET_DETAILED_LABEL)
         
-        thead_rows = find_list_of_elements_by_xpath(driver, "//div[contains(@data-testid, 'label')]")
+        thead_rows = find_list_of_elements_by_xpath(driver, DataTestID.ASSET_DETAILED_LABEL)
         thead_data = [header.text for header in thead_rows if header.text.strip() != '']
         
         for i, header in enumerate(thead_data):
             if header.lower() in ("price", "entry price"):
                 thead_data[i] = "Entry Price"
                 break
+        
         return thead_data
 
     except Exception as e:

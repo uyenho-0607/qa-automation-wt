@@ -29,13 +29,13 @@ def inspect_my_trade_orders(driver, symbol_name, order_type):
         displayed_symbol = top_row.find_element(By.XPATH, "//div[@data-testid='portfolio-row-symbol']").text.strip()
         
         if displayed_symbol != symbol_name:
-            raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")
+            assert False, f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'"
         
         # Validate order type (BUY/SELL)
         displayed_order_type = top_row.find_element(By.XPATH, "//span[@data-testid='portfolio-row-order-type']").text.strip()
         
         if displayed_order_type.upper() != order_type.upper():
-            raise AssertionError(f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'")
+            assert False, f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'"
         
         print(f"Order for symbol '{symbol_name}' with order type '{order_type}' is correctly displayed in the top row.")
         assert True

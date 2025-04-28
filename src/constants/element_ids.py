@@ -263,6 +263,8 @@ class DataTestID(str, Enum):
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     
+    PAGINATION_NEXT = 'pagination-next'
+    
     # Show / Hide columns
     COLUMN_PREFERENCE = 'column-preference'
     ORDER_COLUMN_PREFERENCE_MODAL_TITLE = 'order-column-preference-modal-title'
@@ -723,8 +725,11 @@ class DataTestID(str, Enum):
     
     # MOBILE / APP
     NOTIFICATION_BOX_TITLE = 'notification-box-title'
+    APP_NOTIFICATION_BOX_TITLE = '//*[@resource-id="notification-box-title"]'
     NOTIFICATION_BOX_DESCRIPTION = 'notification-box-description'
+    APP_NOTIFICATION_BOX_DESCRIPTION = '//*[@resource-id="notification-box-description"]'
     NOTIFICATION_BOX_CLOSE = 'notification-box-close'
+    APP_NOTIFICATION_BOX_CLOSE = '//*[@resource-id="notification-box-close"]'
 
     
     # NOTIFICATION ORDER DETAILS MODAL

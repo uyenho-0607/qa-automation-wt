@@ -3,10 +3,10 @@ from enums.main import SwapOptions, ButtonModuleType, SLTPOption, TradeConstants
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import populate_element_with_wait, spinner_element
 
-# from common.mobileapp.module_chart.chart import chart_minMax
+# from common.mobileapp.module_chart.chart import chart_min_max
 from common.mobileapp.module_trade.order_panel.order_panel_info import handle_track_close_edit
 from common.mobileapp.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, generate_min_point_disatance
-from common.mobileapp.module_trade.order_placing_window.utils import get_label_one_point_equal, button_pre_trade, trade_placingModal, input_size_volume, oct_buy_sell_type, fill_policy_type, handle_stop_loss, handle_take_profit, button_trade_action, close_partial_size
+from common.mobileapp.module_trade.order_placing_window.utils import get_label_one_point_equal, button_pre_trade, trade_placing_modal, input_size_volume, oct_buy_sell_type, fill_policy_type, handle_stop_loss, handle_take_profit, button_trade_action, close_partial_size
 
 
 """
@@ -158,7 +158,7 @@ def trade_market_order(driver, option: TradeDirectionOption, trade_type: ButtonM
         # Retrieve the current market price based on the order type and direction
         current_price = get_current_price(driver, trade_type, option, order_type=OrderExecutionType.MARKET)
         
-        trade_placingModal(driver)
+        trade_placing_modal(driver)
 
         # Retrieve the value of "One Point Equal" label
         label_one_points_equal = get_label_one_point_equal(driver, trade_type)

@@ -151,14 +151,12 @@ def invisibility_of_element_by_testid(driver, data_testid, duration: int | None 
 
 def find_presence_element_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
     wait_duration = derive_wait_duration(duration)
-    # Wait for the spinner to appear
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, xpath)))
 
 
 def find_presence_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
-    # Wait for the spinner to appear
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, data_test_id_string)))
 
 """
@@ -176,8 +174,6 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
 
     # Use WebDriverWait to wait for the element to be clickable
     element_on_focus = WebDriverWait(driver, wait_duration).until(clickable_element(element))
-    
-    # click_element(element=element_on_focus)
 
     # Input value within element
     populate_element(element_on_focus, text)
@@ -343,3 +339,33 @@ def swipe_left(driver, element, percent=0.75):
         "direction": "left",
         "percent": percent
     })
+
+
+# def scroll_and_click_expiry(driver):
+#     """
+#     Scrolls through a scrollable view until an element containing the text "Expiry" is visible, then clicks it.
+#     """
+#     element = driver.find_element_by_android_uiautomator(
+#         'new UiScrollable(new UiSelector().scrollable(true))'
+#         '.scrollIntoView(new UiSelector().textContains("Expiry"))'
+#     )
+#     # element.click()
+
+
+
+def scroll_and_click_expiry(driver, element):
+    """
+    Scrolls through a scrollable view until an element with the given resource-id is visible, then clicks it.
+
+    :param driver: Appium driver instance.
+    :param data_testid: The resource-id or identifier of the element.
+    """
+    
+    # element = driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,'new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text("YourElementText"))')
+    
+    driver.execute_script('mobile: scroll', {
+        'direction': 'down',
+        'element': element.id  # if you already have an element reference
+    })
+    
+    # element.click()

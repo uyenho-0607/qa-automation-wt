@@ -76,8 +76,7 @@ def extract_bearer_token(logs) -> str:
                 bearer_token = headers['authorization']
                 if bearer_token.startswith("Bearer "):
                     bearer_token = bearer_token[len("Bearer "):]
-                    append_token_file(bearer_token)
-                # print(f"Bearer token extracted: {bearer_token}\n")
+                    # append_token_file(bearer_token)
                 return bearer_token
     print("Bearer token not found in logs")
     return None

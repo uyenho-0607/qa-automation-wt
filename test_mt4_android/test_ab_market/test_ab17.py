@@ -37,8 +37,8 @@ class TC_aB17():
     )
 
     
-    def test_tc17(self, androidDriver):
-        self.driver = androidDriver
+    def test_tc17(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -69,7 +69,7 @@ class TC_aB17():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             """ End of Place Order """
             
@@ -91,7 +91,7 @@ class TC_aB17():
                 
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=original_orderID)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=original_order_id)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
                 if noti_message:  # Check if noti_message is not empty

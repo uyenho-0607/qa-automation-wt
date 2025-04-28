@@ -21,9 +21,11 @@ from common.mobileapp.module_login.language import select_and_verify_language, s
 """
 
 def click_splash_screen(driver):
-    find_presence_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
-    splash_screen = find_element_by_testid_with_wait(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
-    click_element(splash_screen)
+    # find_presence_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
+    
+    if is_element_present_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON):
+        splash_screen = find_element_by_testid_with_wait(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
+        click_element(splash_screen)
     
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -185,26 +187,11 @@ def handle_login_result(driver, expectation: AlertType, selected_language: str =
     Handles the login result based on the expectation.
     """
     
-    # language_specific_text = {
-    #     "English": "Trade",
-    #     "简体中文": "交易",
-    #     "繁体中文": "交易",
-    #     "ภาษาไทย": "เทรด",
-    #     "Tiếng Việt": "Giao dịch",
-    #     "Melayu": "Perdagangan",
-    #     "Bahasa Indonesia": "Berdagang",
-    #     "Japanese": "取引",
-    #     "Korean": "거래"
-    # }
-    
     # Wait for spinner element not display
     spinner_element(driver)
     
     # Determine the expected text based on the selected language
     verification_text = SettingLanguageMap.get_expected_text(selected_language) or "Trade"
-    
-    # Retrieve the expected text
-    # verification_text = language_specific_text.get(selected_language, "Trade")
     
     # Check if the test is present
     if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_MENU_OPTION_TRADE, text=verification_text):

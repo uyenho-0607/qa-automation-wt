@@ -4,7 +4,7 @@ from datetime import datetime
 from selenium.webdriver.common.action_chains import ActionChains
 
 from constants.helper.error_handler import handle_exception
-from constants.helper.element import spinner_element, click_element, visibility_of_element_by_xpath, get_label_of_element, find_element_by_xpath, find_list_of_elements_by_xpath
+from constants.helper.element import spinner_element, click_element, find_visible_element_by_testid, get_label_of_element, find_element_by_xpath, find_list_of_elements_by_xpath
 
 
 """
@@ -23,74 +23,24 @@ def scroll_to_element(driver, element):
 def select_date(driver, day, month, year):
     # day, month, year = date
 
-    day_element = visibility_of_element_by_xpath(driver, f"(//ul[@class='datepicker-scroll'])[1]/li[text()='{day}']")
-    # driver.execute_script("mobile: scrollTo", {"element": day_element})
-    # scroll_to_element(day_element)
-    # day_element.click()
+    day_element = find_visible_element_by_testid(driver, f"(//ul[@class='datepicker-scroll'])[1]/li[text()='{day}']")
 
-    month_element = visibility_of_element_by_xpath(driver, f"(//ul[@class='datepicker-scroll'])[2]/li[text()='{month}']")
+    month_element = find_visible_element_by_testid(driver, f"(//ul[@class='datepicker-scroll'])[2]/li[text()='{month}']")
     driver.execute_script("mobile: scrollTo", {"element": month_element})
-    # scroll_to_element(month_element)
-    # month_element.click()
     
-    year_element = visibility_of_element_by_xpath(driver, f"(//ul[@class='datepicker-scroll'])[3]/li[text()='{year}']")
+    year_element = find_visible_element_by_testid(driver, f"(//ul[@class='datepicker-scroll'])[3]/li[text()='{year}']")
     driver.execute_script("mobile: scrollTo", {"element": year_element})
-    # scroll_to_element(year_element)
-    # year_element.click()
 
-
-def calendar_datePicker333(driver, startDate, endDate):
-    try:
-
-        # Unpack start date tuple
-        start_day, start_month, start_year = startDate
-        
-        # Open start date picker
-        start_datePicker = visibility_of_element_by_xpath(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[1]")
-        click_element(element=start_datePicker)
-        # select_date(driver, startDate)
-
-        # Call select_date function for start date
-        select_date(driver, start_day, start_month, start_year)
-
-
-        # Unpack end date tuple
-        end_day, end_month, end_year = endDate
-        
-        # Open end date picker
-        end_datePicker = visibility_of_element_by_xpath(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[4]")
-        click_element(element=end_datePicker)
-        # select_date(driver, endDate)
-
-        # Call select_date function for end date
-        select_date(driver, end_day, end_month, end_year)
-        
-        
-        confirm_button = find_element_by_xpath(driver, "//div[normalize-space(text())='Confirm']")
-        click_element(element=confirm_button)
-
-    except Exception as e:
-        # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
-        
-        
-        
-        
-        
-        
-        
 
 def calendar_datePicker(driver):
     try:
         
         # Open start date picker
-        start_datePicker = visibility_of_element_by_xpath(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[1]")
+        start_datePicker = find_visible_element_by_testid(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[1]")
         click_element(element=start_datePicker)
 
 
         day_element = find_list_of_elements_by_xpath(driver, f"(//ul[@class='datepicker-scroll'])[1]/li")
-        # day = day_element.get_attribute("value")
-        # print("day", day)
                 
         # Set values directly using JavaScript
         driver.execute_script("arguments[0].value = '13';", day_element)
@@ -106,8 +56,6 @@ def calendar_datePicker(driver):
         # year = year_element.get_attribute("value")
         # print("year", year)
         driver.execute_script("arguments[0].value = '2025';", year_element)
-
-
 
 
     except Exception as e:
@@ -154,11 +102,11 @@ def OH_closeDate(driver, startDate, endDate):
         calendar_datePicker(driver, startDate, endDate)
         
         # calendar picker start date label
-        start_datePicker = visibility_of_element_by_xpath(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[1]")
+        start_datePicker = find_visible_element_by_testid(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[1]")
         datepicker_start_dt = get_label_of_element(element=start_datePicker)
 
         # calendar picker emd date label
-        end_datePicker = visibility_of_element_by_xpath(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[2]")
+        end_datePicker = find_visible_element_by_testid(driver, "(//div[contains(@class, 'r-1enofrn r-majxgm')])[2]")
         datepicker_end_dt = get_label_of_element(element=end_datePicker)
         
         # attach_text(error_message, name="Error message found:")

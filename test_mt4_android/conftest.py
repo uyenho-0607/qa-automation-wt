@@ -4,7 +4,7 @@ from appium.options.android import UiAutomator2Options
 
 
 @pytest.fixture(scope="function")
-def androidDriver(appium_server_url="http://localhost:4723"):
+def android_driver(appium_server_url="http://localhost:4723"):
     # Set up desired capabilities using UiAutomator2Options
     options = UiAutomator2Options()
     options.platform_name = 'Android'
@@ -17,12 +17,12 @@ def androidDriver(appium_server_url="http://localhost:4723"):
     # options.app_activity = "com.aquariux.wt.release.lirunex.MainActivity"
     
     # SIT 
-    # options.app_package = "com.aquariux.wt.sit.lirunex"
-    # options.app_activity = "com.aquariux.wt.sit.lirunex.MainActivity"
+    options.app_package = "com.aquariux.wt.sit.lirunex"
+    options.app_activity = "com.aquariux.wt.sit.lirunex.MainActivity"
     
     # UAT
-    options.app_package = "com.aquariux.lirunex.uat"
-    options.app_activity = "com.aquariux.lirunex.uat.MainActivity"
+    # options.app_package = "com.aquariux.lirunex.uat"
+    # options.app_activity = "com.aquariux.lirunex.uat.MainActivity"
     
     options.no_reset = True  # Do not reset app state
     options.full_reset = False

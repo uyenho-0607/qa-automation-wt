@@ -37,8 +37,8 @@ class TC_aB20():
     )
 
     
-    def test_tc20(self, androidDriver):
-        self.driver = androidDriver
+    def test_tc20(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -69,12 +69,12 @@ class TC_aB20():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             """ End of Place Order """
             
             with allure.step("Order Panel: Open Position - Click on Close to Partial close an order"):
-                close_delete_order(driver=main_driver)
+                close_delete_order(driver=main_driver, close_options=TradeConstants.SET_CLOSE_MARKET_SIZE | TradeConstants.CLEAR_FIELD | TradeConstants.SET_FILL_POLICY)
 
             with allure.step("Retrieve the partial closed order snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
@@ -82,7 +82,7 @@ class TC_aB20():
             """Comparison on Open Position and newly created Order """
             
             with allure.step("Retrieve the New Open Position data"):
-                orderIDs_new_openPosition, new_open_position_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
+                order_ids_new_openPosition, new_open_position_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
 
             """ Comparison on Order History and newly closed Order """
 
@@ -96,7 +96,7 @@ class TC_aB20():
 
             with allure.step("Retrieve and compare New Open Position and Notification Order Message"):
                 # Call the method to get the lists of dataframes
-                OP_noti_message, OP_noti_order_details = process_order_notifications(driver=main_driver, orderIDs=orderIDs_new_openPosition)
+                OP_noti_message, OP_noti_order_details = process_order_notifications(driver=main_driver, order_ids=order_ids_new_openPosition)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
                 if OP_noti_message:  # Check if noti_message is not empty
@@ -112,7 +112,7 @@ class TC_aB20():
                 
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=original_orderID)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=original_order_id)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
                 if noti_message:  # Check if noti_message is not empty

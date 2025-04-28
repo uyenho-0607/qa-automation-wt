@@ -1,4 +1,3 @@
-import re
 import random
 
 from enums.main import ButtonModuleType, SwapOptions, TradeConstants
@@ -8,7 +7,7 @@ from constants.helper.driver import delay
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import get_label_of_element, click_element, click_element_with_wait, clear_input_field, find_element_by_testid, find_element_by_testid_with_wait, find_visible_element_by_testid, populate_element_with_wait
+from constants.helper.element_android_app import get_label_of_element, click_element, click_element_with_wait, clear_input_field, find_element_by_testid, find_element_by_testid_with_wait, populate_element_with_wait
 
 from common.mobileapp.module_trade.order_placing_window.module_fill_policy import fill_policy_type
 
@@ -76,6 +75,7 @@ def swap_units_volume(driver, desired_state: SwapOptions):
 
 def input_size_volume(driver, desired_state: SwapOptions = SwapOptions.UNITS, swap: bool = True):
     try:
+        
         delay(2)
         
         size_input = find_element_by_testid_with_wait(driver, data_testid=DataTestID.TRADE_INPUT_VOLUME)
@@ -96,8 +96,10 @@ def input_size_volume(driver, desired_state: SwapOptions = SwapOptions.UNITS, sw
             random_value = random.randint(min_val, max_val)
         else:
             # Generate a random decimal within the specified range, rounded to two decimal places
-            random_value = round(random.uniform(min_val, max_val), 2)
-
+            random_value = round(random.uniform(min_val, max_val), 1)
+        
+        print("size", random_value)
+        
         # Populate the input field with the generated value
         populate_element_with_wait(driver, element=size_input, text=str(random_value))
 
@@ -149,12 +151,12 @@ def close_partial_size(driver, close_options: TradeConstants = TradeConstants.NO
             random_value = round(random.uniform(min_value_step, max_value), 2)
 
         # Find the input field for partial close size
-        partialClose_input = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_INPUT_VOLUME)
+        partial_close_input = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_INPUT_VOLUME)
 
         if TradeConstants.CLEAR_FIELD in close_options:
             # Select all text and delete the selected text
-            clear_input_field(partialClose_input)
-            populate_element_with_wait(driver, element=partialClose_input, text=str(random_value))
+            clear_input_field(partial_close_input)
+            populate_element_with_wait(driver, element=partial_close_input, text=str(random_value))
 
         if TradeConstants.SET_FILL_POLICY in close_options:
             fill_policy_type(driver, trade_type=ButtonModuleType.CLOSE)
@@ -163,77 +165,6 @@ def close_partial_size(driver, close_options: TradeConstants = TradeConstants.NO
         action_button = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_BUTTON_SUBMIT)
         click_element_with_wait(driver, element=action_button)
 
-    except Exception as e:
-        # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-
-
-"""
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                TRADE / EDIT - BUTTON MIN / MAX SIZE (VOLUME) (+ / - BUTTON)
----------------------------------------------------------------------------------------------------------------------------------------------------- 
-"""
-
-def btn_minMax_size(driver, minMax: str, number_of_clicks: int):
-    try:
-        
-        delay(0.2)
-        
-        # Find the button for increasing or decreasing the trade input volume
-        button_min_max = find_visible_element_by_testid(driver, data_testid=f"trade-input-volume-{minMax}")
-        
-        # Find the input field for the trade volume
-        input_field = find_visible_element_by_testid(driver, data_testid=DataTestID.TRADE_INPUT_VOLUME)
-
-        # Get the initial value of the input field and set it to 0.0 if empty
-        initial_value_str = input_field.get_attribute("text")
-        initial_value = float(initial_value_str) if initial_value_str.strip() else 0.0
-
-        # Get the placeholder attribute, which holds the increment value (e.g., "0.01")
-        placeholder_value = input_field.get_attribute('text')
-
-        # Extract the increment value from the placeholder using regular expression
-        increment = float(re.search(r'([\d\.]+)', placeholder_value).group(1))
-
-        # Loop through the number of clicks specified
-        for i in range(number_of_clicks):
-            # Click the button (either increase or decrease)
-            click_element(button_min_max)
-            
-            # Get the updated value after the click and set it to 0.0 if the field is empty
-            updated_value_str = input_field.get_attribute("text")
-            updated_value = float(updated_value_str) if updated_value_str.strip() else 0.0
-            
-            # Check if the value has incremented or decremented by the correct amount
-            if minMax == "increase":
-                difference = updated_value - initial_value
-                assert abs(difference - increment) < 1e-6, f"Value did not increment by {increment} after click {i+1}. Difference: {difference:.6f}"
-            elif minMax == "decrease":
-                difference = initial_value - updated_value
-                assert abs(difference - increment) < 1e-6, f"Value did not decrement by {increment} after click {i+1}. Difference: {difference:.6f}"
-            else:
-                raise ValueError("Invalid value for minMax. Must be 'increase' or 'decrease'.")
-
-            # Update the initial value to the current value for the next iteration
-            initial_value = updated_value
-
-            # Final check: ensure total increment or decrement matches the expected value
-            final_value = float(input_field.get_attribute("value"))
-            expected_value = initial_value + (increment * number_of_clicks) if minMax == "increase" else initial_value - (increment * number_of_clicks)
-            
-            # Assert that the final value is correct
-            assert abs(final_value - expected_value), f"Final value does not match expected value. Expected: {expected_value:.2f}, Got: {final_value:.2f}"
-
-            # Log the number of clicks and the final value
-            attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
-            attach_text(f"{final_value:.2f}", name=f"Final value: {final_value:.2f}")
-            
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)

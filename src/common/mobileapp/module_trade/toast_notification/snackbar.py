@@ -11,7 +11,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element, click_element_with_wait, get_label_of_element, find_element_by_testid, find_visible_element_by_testid
+from constants.helper.element_android_app import click_element, click_element_with_wait, get_label_of_element, find_element_by_testid, find_visible_element_by_testid, find_presence_element_by_testid
 
 
 """
@@ -41,10 +41,11 @@ def get_trade_snackbar_banner(driver):
         delay(1)
         
         # Wait for the snackbar message to be visible
-        notification_box = find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX)
+        # notification_box = find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX)
+        notification_box = find_presence_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX)
             
         # Wait for the message header to be visible and extract it
-        message_header = notification_box.find_element(AppiumBy.XPATH, '//*[@resource-id="notification-box-title"]')
+        message_header = notification_box.find_element(AppiumBy.XPATH, DataTestID.APP_NOTIFICATION_BOX_TITLE)
         extracted_header = get_label_of_element(message_header)
         print(extracted_header)
 
@@ -53,7 +54,7 @@ def get_trade_snackbar_banner(driver):
             raise AssertionError(f"Invalid message header: {extracted_header}")
 
         # Extract the message description
-        label_message_description = notification_box.find_element(AppiumBy.XPATH, '//*[@resource-id="notification-box-description"]')
+        label_message_description = notification_box.find_element(AppiumBy.XPATH, DataTestID.APP_NOTIFICATION_BOX_DESCRIPTION)
         label_message = get_label_of_element(label_message_description).strip()
         attach_text(label_message, name="Description_Message")
 
@@ -110,9 +111,8 @@ def get_trade_snackbar_banner(driver):
             snackbar_msg.append(take_profit_match.group(1))
             success_message_headers.append("Take Profit")
 
-        # btn_close = find_element_by_testid_with_wait(driver, data_testid=DataTestID.NOTIFICATION_BOX_CLOSE)
-        message_header = notification_box.find_element(AppiumBy.XPATH, '//*[@resource-id="notification-box-close"]')
-        # click_element(btn_close)
+        btn_close = notification_box.find_element(AppiumBy.XPATH, DataTestID.APP_NOTIFICATION_BOX_CLOSE)
+        click_element(btn_close)
         
         # Create a DataFrame with the snackbar message details
         order_notification_message = pd.DataFrame([snackbar_msg], columns=success_message_headers)

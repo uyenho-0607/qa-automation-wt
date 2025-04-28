@@ -23,8 +23,8 @@ class TC_MT4_aA02():
         """
     )
         
-    def test_TC02(self, androidDriver):
-        self.driver = androidDriver
+    def test_TC02(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
 
         # Get the class name dynamically

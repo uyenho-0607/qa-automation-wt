@@ -1,20 +1,21 @@
 import random
 
+from constants.helper.driver import delay
 from enums.main import ButtonModuleType, SLTPOption, TradeDirectionOption, OrderExecutionType, AlertType
 
 from constants.element_ids import DataTestID
 
-from constants.helper.element_android_app import click_element, populate_element, find_element_by_testid_with_wait, find_element_by_testid, get_label_of_element
+from constants.helper.element_android_app import click_element, populate_element_with_wait, find_element_by_testid_with_wait, find_element_by_testid, get_label_of_element
 from common.mobileapp.module_trade.order_placing_window.utils import dropdown_order_type, handle_entry_price, handle_stop_limit_price, handle_stop_loss, handle_take_profit
 
 
 # Define a global variable
-stopLimitPrice = None
+# stop_limit_price = None
 
 # To store the Stop Limit Price variable
 def log_stop_limit_price():
-    global stopLimitPrice  # Declare the use of the global variable
-    return stopLimitPrice
+    # global stop_limit_price  # Declare the use of the global variable
+    return stop_limit_price
 
 
 # To store the Entry Price variable
@@ -37,13 +38,13 @@ def log_entry_price(entry_price):
 """
 
 def get_random_point_distance(option, trade_type: ButtonModuleType):
-    if option in ["buy", "BUY LIMIT", "SELL STOP", "SELL STOP LIMIT"]:
+    if option in [TradeDirectionOption.BUY, TradeDirectionOption.BUY_LIMIT, TradeDirectionOption.SELL_STOP, TradeDirectionOption.SELL_STOP_LIMIT]:    
         if trade_type == ButtonModuleType.TRADE:
             min_point_distance = random.randint(300, 400) # Adjust the range as needed
         else: # For edit
             min_point_distance = random.randint(200, 300) # Adjust the range as needed
     
-    elif option in ["sell", "SELL LIMIT", "BUY STOP", "BUY STOP LIMIT"]:
+    elif option in [TradeDirectionOption.SELL, TradeDirectionOption.SELL_LIMIT, TradeDirectionOption.BUY_STOP, TradeDirectionOption.BUY_STOP_LIMIT]:    
         if trade_type == ButtonModuleType.TRADE:
             min_point_distance = random.randint(900, 1000) # Adjust the range as needed
         else: # For edit
@@ -80,13 +81,13 @@ def generate_min_point_disatance(trade_type: ButtonModuleType):
 
 # Get the Stop Loss Points
 def get_sl_point_distance(option, trade_type: ButtonModuleType):
-    if option in ["buy", "BUY", "BUY LIMIT", "BUY STOP", "BUY STOP LIMIT"]:
+    if option in [TradeDirectionOption.BUY, TradeDirectionOption.BUY_LIMIT, TradeDirectionOption.BUY_STOP, TradeDirectionOption.BUY_STOP_LIMIT]:    
         if trade_type == ButtonModuleType.TRADE:
             stop_loss_point = random.randint(400, 800) # Adjust the range as needed
         else: # For edit
             stop_loss_point = random.randint(200, 300) # Adjust the range as needed
     
-    elif option in ["sell", "SELL", "SELL LIMIT", "SELL STOP", "SELL STOP LIMIT"]:
+    elif option in [TradeDirectionOption.SELL, TradeDirectionOption.SELL_LIMIT, TradeDirectionOption.SELL_STOP, TradeDirectionOption.SELL_STOP_LIMIT]:    
         if trade_type == ButtonModuleType.TRADE:
             stop_loss_point = random.randint(800, 1500) # Adjust the range as needed
         else: # For edit
@@ -101,13 +102,13 @@ def get_sl_point_distance(option, trade_type: ButtonModuleType):
 
 # Get the Take Profit Points
 def get_tp_point_distance(option, trade_type: ButtonModuleType):
-    if option in ["buy", "BUY", "BUY LIMIT", "BUY STOP", "BUY STOP LIMIT"]:
+    if option in [TradeDirectionOption.BUY, TradeDirectionOption.BUY_LIMIT, TradeDirectionOption.BUY_STOP, TradeDirectionOption.BUY_STOP_LIMIT]:    
         if trade_type == ButtonModuleType.TRADE:
             take_profit_point = random.randint(1000, 2000) # Adjust the range as needed
         else: # For edit
             take_profit_point = random.randint(400, 900) # Adjust the range as needed
     
-    elif option in ["sell", "SELL", "SELL LIMIT", "SELL STOP", "SELL STOP LIMIT"]:
+    elif option in [TradeDirectionOption.SELL, TradeDirectionOption.SELL_LIMIT, TradeDirectionOption.SELL_STOP, TradeDirectionOption.SELL_STOP_LIMIT]:    
         if trade_type == ButtonModuleType.TRADE:
             take_profit_point = random.randint(600, 1000) # Adjust the range as needed
         else: # For edit
@@ -153,6 +154,7 @@ def get_current_price(driver, trade_type:ButtonModuleType, option: TradeDirectio
         TradeDirectionOption.BUY: DataTestID.TRADE_BUTTON_ORDER_BUY,
         TradeDirectionOption.SELL: DataTestID.TRADE_BUTTON_ORDER_SELL
     }
+    
     live_price_value = {
         TradeDirectionOption.BUY: DataTestID.TRADE_LIVE_BUY_PRICE,
         TradeDirectionOption.SELL: DataTestID.TRADE_LIVE_SELL_PRICE
@@ -176,7 +178,7 @@ def get_current_price(driver, trade_type:ButtonModuleType, option: TradeDirectio
             price_element = find_element_by_testid_with_wait(driver, data_testid=live_price_value[option])
             price_value = get_label_of_element(price_element).replace(',', '')
             print(f"Pending Order - {option.name} Price: {price_value}")
-        
+
         return float(price_value)
     
     else:  # If not a trade (Edit scenario))
@@ -199,7 +201,9 @@ def get_current_price(driver, trade_type:ButtonModuleType, option: TradeDirectio
 """
 
 
-def calculate_pending_entry_price(driver, trade_type: ButtonModuleType, option: TradeDirectionOption, order_type: OrderExecutionType, label_one_points_equal, current_price, entry_price_flag: AlertType = AlertType.POSITIVE):
+def calculate_pending_entry_price(driver, trade_type: ButtonModuleType, option: TradeDirectionOption, order_type: OrderExecutionType, 
+                                  label_one_points_equal, current_price, entry_price_flag: AlertType = AlertType.POSITIVE):
+    
     global entry_price  # Declare the use of the global variable
 
     entry_price_input = handle_entry_price(driver, trade_type)
@@ -257,11 +261,14 @@ def calculate_pending_entry_price(driver, trade_type: ButtonModuleType, option: 
         entry_price = positive_direction_map[order_type][option]
     else:
         entry_price = negative_direction_map[order_type][option]
+    
+    print("input entry price: ", entry_price)
+    delay(0.5)
+    populate_element_with_wait(driver, element=entry_price_input, text=float(f"{entry_price:.10g}"))
+    
+    log_entry_price(float(f"{entry_price:.10g}"))
 
-    populate_element(element=entry_price_input, text=entry_price)
-    log_entry_price(entry_price)
-
-    return entry_price
+    return float(f"{entry_price:.10g}")
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -269,15 +276,17 @@ def calculate_pending_entry_price(driver, trade_type: ButtonModuleType, option: 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stopLimit_Price(driver, trade_type: ButtonModuleType, option: TradeDirectionOption, label_one_points_equal, stopLimitPrice_flag: AlertType = AlertType.POSITIVE):
-    global stopLimitPrice  # Declare the use of the global variable
+def calculate_stop_limit_price(driver, trade_type: ButtonModuleType, option: TradeDirectionOption, 
+                              label_one_points_equal, stop_limit_price_flag: AlertType = AlertType.POSITIVE):
 
-    stopLimitPrice_input = handle_stop_limit_price(driver, trade_type)
+    global stop_limit_price  # Declare the use of the global variable
 
     min_point_distance = get_random_point_distance(option, trade_type)
 
     # Determine the base price based on stop limit or entry price
     price_value = log_entry_price(entry_price)
+
+    stop_limit_price_input = handle_stop_limit_price(driver, trade_type)
 
     price_adjustment = label_one_points_equal * min_point_distance
     # BUY = Stop Limit Price - (One point equals * Minimum Point Distance)
@@ -299,14 +308,15 @@ def calculate_stopLimit_Price(driver, trade_type: ButtonModuleType, option: Trad
         TradeDirectionOption.SELL_STOP_LIMIT: price_value - price_adjustment
     }
 
-    if stopLimitPrice_flag == AlertType.POSITIVE:
-        stopLimitPrice = positive_direction_map.get(option, price_value)
+    if stop_limit_price_flag == AlertType.POSITIVE:
+        stop_limit_price = positive_direction_map.get(option, price_value)
     else:
-        stopLimitPrice = negative_direction_map.get(option, price_value)
+        stop_limit_price = negative_direction_map.get(option, price_value)
 
-    populate_element(element=stopLimitPrice_input, text=stopLimitPrice)
+    print("input stop limit price: ", stop_limit_price)
+    populate_element_with_wait(driver, element=stop_limit_price_input, text=float(f"{stop_limit_price:.10g}"))
 
-    return stopLimitPrice
+    return float(f"{stop_limit_price:.10g}")
 
 
 """
@@ -322,14 +332,18 @@ def calculate_stopLimit_Price(driver, trade_type: ButtonModuleType, option: Trad
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_points_equal, stop_loss_flag: AlertType = AlertType.POSITIVE, is_stopLimit: bool = False):  # Flag to differentiate between Stop Limit and Limit
+def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_points_equal, 
+                                stop_loss_flag: AlertType = AlertType.POSITIVE, is_stop_limit: bool = False):  # Flag to differentiate between Stop Limit and Limit
+    
+    delay(0.5)
+
     # Common logic
     min_point_distance = generate_min_point_disatance(trade_type)
     stop_loss_point = get_sl_point_distance(option, trade_type)
     stop_loss_input = handle_stop_loss(driver, trade_type, sl_type)
 
     # Determine the base price based on stop limit or entry price
-    price_value = log_stop_limit_price() if is_stopLimit else log_entry_price(entry_price)
+    price_value = log_stop_limit_price() if is_stop_limit else log_entry_price(entry_price)
 
     # Define the calculation logic for BUY and SELL options
     price_adjustment = label_one_points_equal * min_point_distance
@@ -369,11 +383,11 @@ def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_p
         }
         
         stop_loss_value = reverse_direction_map.get(option, stop_loss_point)  # Default to stop_loss_point if not found
+    
+    print("input stop loss: ", stop_loss_value)
 
     # Populate the element with the calculated stop loss value
-    populate_element(element=stop_loss_input, text=stop_loss_value)
-
-    return stop_loss_value
+    populate_element_with_wait(driver, element=stop_loss_input, text=stop_loss_value)
 
 
 """
@@ -389,14 +403,18 @@ def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_p
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_pending_take_profit(driver, trade_type, tp_type, option, label_one_points_equal, take_profit_flag: AlertType = AlertType.POSITIVE, is_stopLimit: bool = False):  # Flag to differentiate between Stop Limit and Limit
+def calculate_pending_take_profit(driver, trade_type, tp_type, option, label_one_points_equal, 
+                                  take_profit_flag: AlertType = AlertType.POSITIVE, is_stop_limit: bool = False):  # Flag to differentiate between Stop Limit and Limit
+
+    delay(0.5)
+
     # Common logic
     min_point_distance = generate_min_point_disatance(trade_type)
     take_profit_point = get_sl_point_distance(option, trade_type)
     take_profit_input = handle_take_profit(driver, trade_type, tp_type)
 
     # Determine the base price based on stop limit or entry price
-    price_value = log_stop_limit_price() if is_stopLimit else log_entry_price(entry_price)
+    price_value = log_stop_limit_price() if is_stop_limit else log_entry_price(entry_price)
 
     # Define the calculation logic for BUY and SELL options
     price_adjustment = label_one_points_equal * min_point_distance
@@ -437,10 +455,10 @@ def calculate_pending_take_profit(driver, trade_type, tp_type, option, label_one
         
         take_profit_value = reverse_direction_map.get(option, take_profit_point)  # Default to stop_loss_point if not found
 
-    # Populate the element with the calculated stop loss value
-    populate_element(element=take_profit_input, text=take_profit_value)
+    print("input take profit: ", take_profit_value)
 
-    return take_profit_value
+    # Populate the element with the calculated stop loss value
+    populate_element_with_wait(driver, element=take_profit_input, text=float(f"{take_profit_value:.10g}"))
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

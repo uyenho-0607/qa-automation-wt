@@ -25,8 +25,8 @@ class TC_MT4_aR03():
         """
     )
     
-    def test_tc03(self, androidDriver):
-        self.driver = androidDriver
+    def test_tc03(self, android_driver):
+        self.driver = android_driver
         main_driver = self.driver
         session_id = main_driver.session_id
 

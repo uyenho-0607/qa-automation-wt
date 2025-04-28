@@ -8,6 +8,13 @@ class BaseEnum(str, Enum):
         return self.value  # Automatically return .value when converted to a string
 
 
+class CSVFileNameManager(BaseEnum):
+    MT4_DESKTOP_BULK = "MT4_Bulk.csv"
+    MT5_DESKTOP_BULK = "MT5_Bulk.csv"
+    MT4_DESKTOP_PENDING_ORDER = "MT4_Desktop_Pending_Order.csv"
+    MT5_DESKTOP_PENDING_ORDER = "MT5_Desktop_Pending_Order.csv"
+    
+
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 API ENVIRONMENT
@@ -15,11 +22,18 @@ class BaseEnum(str, Enum):
 """
 
 class API_Environment(BaseEnum):
-    MT4_SIT = "https://lirunex-mb.webtrader-sit.s20ip12.com/api/trade/v2/market"
-    MT4_UAT = "https://lirunex-mb.webtrader-uat.s20ip12.com/api/trade/v2/market"
-
-
-
+    MT4_MARKET_SIT = "https://lirunex-mb.webtrader-sit.s20ip12.com/api/trade/v2/market"
+    MT4_MARKET_UAT = "https://lirunex-mb.webtrader-uat.s20ip12.com/api/trade/v2/market"
+    
+    MT4_PENDING_SIT = "https://lirunex-mb.webtrader-sit.s20ip12.com/api/trade/v2/limit"
+    MT4_PENDING_UAT = "https://lirunex-mb.webtrader-uat.s20ip12.com/api/trade/v2/limit"
+    
+    MT5_MARKET_SIT = "https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/api/trade/v2/market"
+    MT5_MARKET_UAT = "https://transactcloudmt5-mb.webtrader-uat.s20ip12.com/api/trade/v2/market"
+    
+    MT5_PENDING_SIT = "https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/api/trade/v2/limit"
+    MT5_PENDING_UAT = "https://transactcloudmt5-mb.webtrader-uat.s20ip12.com/api/trade/v2/limit"
+    
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 SERVER
@@ -113,6 +127,7 @@ class AccountType(BaseEnum):
 class CredentialType(BaseEnum):
     INVESTOR_ACCOUNT = "investor_account"
     READ_ONLY_ACCESS = "read_only_access"
+    CHANGE_PASSWORD = "change_password"
     TOGGLE_REMEMBER_ME = "toggle_remember_me"
     CRM_CREDENTIAL = "crm_credential"
     DEFAULT = "credential"
@@ -251,6 +266,12 @@ class TradeDirectionOption(BaseEnum):
     SELL_STOP_LIMIT = "sell stop limit"
     
     
+@dataclass
+class TestConfig:
+    entry_price_flag: AlertType = AlertType.POSITIVE
+    stop_loss_flag: AlertType = AlertType.POSITIVE
+    take_profit_flag: AlertType = AlertType.POSITIVE
+    
     
 class TradeConstants(Flag):
     NONE = 0
@@ -281,6 +302,7 @@ class SLTPOption(BaseEnum):
 class TimeOptionType(BaseEnum):
     HOUR = "hour"
     MINUTE = "minute"
+    
 
 class ExpiryType(BaseEnum):
     GOOD_TILL_CANCELLED = "good-till-cancelled"

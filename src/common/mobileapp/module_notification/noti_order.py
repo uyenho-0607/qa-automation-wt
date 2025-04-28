@@ -21,7 +21,7 @@ from common.mobileapp.module_trade.order_panel.op_general import extract_order_d
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_orderNotification_msg(driver, order_id, noti_bell: bool):
+def get_order_notification_msg(driver, order_id, noti_bell: bool):
     try:
         
         if noti_bell:
@@ -107,7 +107,7 @@ def get_orderNotification_msg(driver, order_id, noti_bell: bool):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_noti_ordersDetails(driver):
+def get_notification_order_details_msg(driver):
 
     # Define header mapping outside the method for better performance
     header_mapping = {
@@ -176,22 +176,22 @@ def get_noti_ordersDetails(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def process_order_notifications(driver, orderIDs, noti_bell: bool = True):
+def process_order_notifications(driver, order_ids, noti_bell: bool = True):
     try:
         
         notification_msgs_list = []  # List to store notification messages dataframes
         order_details_list = []  # List to store order details dataframes
 
-        # Check if orderIDs is a list
-        if isinstance(orderIDs, list):
-            orderIDs = dict(enumerate(orderIDs)) # Convert list to dictionary with indices as keys
+        # Check if order_ids is a list
+        if isinstance(order_ids, list):
+            order_ids = dict(enumerate(order_ids)) # Convert list to dictionary with indices as keys
 
         # Handle multiple order IDs
-        for order_id in orderIDs.values():
-            noti_msg = get_orderNotification_msg(driver, order_id, noti_bell)
+        for order_id in order_ids.values():
+            noti_msg = get_order_notification_msg(driver, order_id, noti_bell)
             notification_msgs_list.append(noti_msg)
 
-            order_details = get_noti_ordersDetails(driver)
+            order_details = get_notification_order_details_msg(driver)
             order_details_list.append(order_details)
 
         return notification_msgs_list, order_details_list

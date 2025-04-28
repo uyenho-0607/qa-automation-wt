@@ -44,7 +44,7 @@ def get_label_one_point_equal(driver, trade_type: ButtonModuleType):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def trade_placingModal(driver):
+def trade_placing_modal(driver):
     return find_visible_element_by_testid(driver, data_testid=DataTestID.TRADE_BOTTOM_SHEET) 
 
 """
@@ -158,8 +158,6 @@ def button_trade_action(driver, trade_type: ButtonModuleType):
         }
         
         button_testid = trade_action_button.get(trade_type)
-        if not button_testid:
-            raise ValueError(f"Invalid button type: {trade_type}")
         
         # Locate the trade action button using the provided trade_type
         trade_action = find_element_by_testid_with_wait(driver, data_testid=button_testid)
