@@ -63,6 +63,12 @@ def signal_search_feature(driver):
 
         # Wait for any spinner to disappear
         spinner_element(driver)
+        
+        delay(1)
+        
+        if is_element_present_by_xpath(driver, "//button[normalize-space(text())='Express interest']"):
+            print("System is freemium, search bar not display")
+            return
 
         # Open the signal list
         btn_signal_list = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_FILTER_ALL)

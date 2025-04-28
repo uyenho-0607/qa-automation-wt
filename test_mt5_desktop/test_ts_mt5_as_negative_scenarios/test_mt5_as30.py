@@ -29,8 +29,8 @@ class TC_aS30():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc30(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc30(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

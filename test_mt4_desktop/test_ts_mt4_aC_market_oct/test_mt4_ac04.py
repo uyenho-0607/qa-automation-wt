@@ -35,8 +35,8 @@ class TC_aC04():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc04(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc04(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -63,14 +63,14 @@ class TC_aC04():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=trade_order_df, name1=SectionName.TRADE_OPEN_POSITION, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Retrieve and compare Open Position and Notification Order Message / Details"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=original_orderID)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=original_order_id)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
 
@@ -99,7 +99,7 @@ class TC_aC04():
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Order Panel data"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
+                updated_order_id, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_OPEN_POSITION, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
@@ -107,11 +107,11 @@ class TC_aC04():
             with allure.step("Print Modify Order Table Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)
                 
-            with allure.step("Verify if it is the same orderIDs"):
-                if original_orderID == updated_orderID:
+            with allure.step("Verify if it is the same order_ids"):
+                if original_order_id == updated_order_id:
                     assert True, "orderID are the same"
                 else:
-                    assert False, f"Place orderID - {original_orderID} and Modified orderID - {updated_orderID} not matched"
+                    assert False, f"Place orderID - {original_order_id} and Modified orderID - {updated_order_id} not matched"
 
         except Exception as e:
             test_failed = True  # Mark test as failed

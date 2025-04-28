@@ -56,24 +56,24 @@ def handle_stop_limit_price(driver, trade_type: ButtonModuleType):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def btn_min_max_stop_limit_price(driver, trade_type: str, minMax: str, number_of_clicks: int):
+def btn_min_max_stop_limit_price(driver, trade_type: str, min_max: str, number_of_clicks: int):
     """
     Interacts with the Stop Limit Price's min/max button to increment or decrement the price value.
     It clicks the button a specified number of times and validates the price change after each click.
     
     Arguments:
     - trade_type: The type of trade (e.g., "trade", "edit").
-    - minMax: Specifies whether to "increase" or "decrease" the value by clicking the min/max button.
+    - min_max: Specifies whether to "increase" or "decrease" the value by clicking the min/max button.
     - number_of_clicks: The number of times to click the min/max button for the operation.
     
     Raises:
-    - ValueError: If an invalid `minMax` value is provided.
+    - ValueError: If an invalid `min_max` value is provided.
     - AssertionError: If the value does not increment or decrement by the expected amount.
     """
     try:
 
-        # Locate the min/max button (increase or decrease) based on the trade type and minMax action
-        button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stop-limit-price-{minMax}")
+        # Locate the min/max button (increase or decrease) based on the trade type and min_max action
+        button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stop-limit-price-{min_max}")
         javascript_click(driver, element=button_min_max)
 
         # Locate the input field that holds the stop limit price
@@ -97,27 +97,27 @@ def btn_min_max_stop_limit_price(driver, trade_type: str, minMax: str, number_of
             print(f"Stop Limit Price - updated value after click {i+1}: {updated_value}")
 
             # Check if the value has changed by the expected increment amount
-            if minMax == "increase":
+            if min_max == "increase":
                 difference = updated_value - initial_value
                 assert abs(difference - increment) < 1e-6, f"Value did not increment by {increment} after click {i+1}. Difference: {difference:.6f}"
-            elif minMax == "decrease":
+            elif min_max == "decrease":
                 difference = initial_value - updated_value
                 assert abs(difference - increment) < 1e-6, f"Value did not decrement by {increment} after click {i+1}. Difference: {difference:.6f}"
             else:
-                raise ValueError("Invalid value for minMax. Must be 'increase' or 'decrease'.")
+                raise ValueError("Invalid value for min_max. Must be 'increase' or 'decrease'.")
 
             # Update initial_value to be the updated_value for the next iteration
             initial_value = updated_value
 
             # Final check: ensure total increment or decrement matches the expected value
             final_value = float(input_field.get_attribute("value"))
-            expected_value = initial_value + (increment * number_of_clicks) if minMax == "increase" else initial_value - (increment * number_of_clicks)
+            expected_value = initial_value + (increment * number_of_clicks) if min_max == "increase" else initial_value - (increment * number_of_clicks)
             
             # Assert if the final value doesn't match the expected value
             assert abs(final_value - expected_value), f"Final value does not match expected value. Expected: {expected_value:.2f}, Got: {final_value:.2f}"
 
             # Log the results for the user
-            attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
+            attach_text(str(number_of_clicks), name=f"{min_max.capitalize()} button clicked {i+1} times")
             attach_text(f"{final_value:.2f}", name=f"Final value: {final_value:.2f}")
             
     except Exception as e:

@@ -11,12 +11,12 @@ from common.desktop.module_trade.order_placing_window.utils import dropdown_orde
 
 
 # Define a global variable
-stopLimitPrice = None
+stop_limit_price = None
 
 # To store the Stop Limit Price variable
 def log_stop_limit_price():
-    global stopLimitPrice  # Declare the use of the global variable
-    return stopLimitPrice
+    global stop_limit_price  # Declare the use of the global variable
+    return stop_limit_price
 
 
 # To store the Entry Price variable
@@ -350,10 +350,10 @@ def calculate_pending_entry_price(driver, trade_type: ButtonModuleType, option: 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stopLimit_Price(driver, trade_type: ButtonModuleType, option: TradeDirectionOption, label_one_points_equal, stopLimitPrice_flag: AlertType = AlertType.POSITIVE):
-    global stopLimitPrice  # Declare the use of the global variable
+def calculate_stop_limit_price(driver, trade_type: ButtonModuleType, option: TradeDirectionOption, label_one_points_equal, stop_limit_price_flag: AlertType = AlertType.POSITIVE):
+    global stop_limit_price  # Declare the use of the global variable
 
-    stopLimitPrice_input = handle_stop_limit_price(driver, trade_type)
+    stop_limit_price_input = handle_stop_limit_price(driver, trade_type)
 
     min_point_distance = get_random_point_distance(option, trade_type)
 
@@ -380,14 +380,14 @@ def calculate_stopLimit_Price(driver, trade_type: ButtonModuleType, option: Trad
         TradeDirectionOption.SELL_STOP_LIMIT: price_value - price_adjustment
     }
 
-    if stopLimitPrice_flag == AlertType.POSITIVE:
-        stopLimitPrice = positive_direction_map.get(option, price_value)
+    if stop_limit_price_flag == AlertType.POSITIVE:
+        stop_limit_price = positive_direction_map.get(option, price_value)
     else:
-        stopLimitPrice = negative_direction_map.get(option, price_value)
+        stop_limit_price = negative_direction_map.get(option, price_value)
 
-    populate_element(element=stopLimitPrice_input, text=stopLimitPrice)
+    populate_element(element=stop_limit_price_input, text=stop_limit_price)
 
-    return stopLimitPrice
+    return stop_limit_price
 
 
 """
@@ -403,14 +403,14 @@ def calculate_stopLimit_Price(driver, trade_type: ButtonModuleType, option: Trad
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_points_equal, stop_loss_flag: AlertType = AlertType.POSITIVE, is_stopLimit: bool = False):  # Flag to differentiate between Stop Limit and Limit
+def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_points_equal, stop_loss_flag: AlertType = AlertType.POSITIVE, is_stop_limit: bool = False):  # Flag to differentiate between Stop Limit and Limit
     # Common logic
     min_point_distance = generate_min_point_disatance(trade_type)
     stop_loss_point = get_sl_point_distance(option, trade_type)
     stop_loss_input = handle_stop_loss(driver, trade_type, sl_type)
 
     # Determine the base price based on stop limit or entry price
-    price_value = log_stop_limit_price() if is_stopLimit else log_entry_price(entry_price)
+    price_value = log_stop_limit_price() if is_stop_limit else log_entry_price(entry_price)
 
     # Define the calculation logic for BUY and SELL options
     price_adjustment = label_one_points_equal * min_point_distance
@@ -470,14 +470,14 @@ def calculate_pending_stop_loss(driver, trade_type, sl_type, option, label_one_p
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_pending_take_profit(driver, trade_type, tp_type, option, label_one_points_equal, take_profit_flag: AlertType = AlertType.POSITIVE, is_stopLimit: bool = False):  # Flag to differentiate between Stop Limit and Limit
+def calculate_pending_take_profit(driver, trade_type, tp_type, option, label_one_points_equal, take_profit_flag: AlertType = AlertType.POSITIVE, is_stop_limit: bool = False):  # Flag to differentiate between Stop Limit and Limit
     # Common logic
     min_point_distance = generate_min_point_disatance(trade_type)
     take_profit_point = get_sl_point_distance(option, trade_type)
     take_profit_input = handle_take_profit(driver, trade_type, tp_type)
 
     # Determine the base price based on stop limit or entry price
-    price_value = log_stop_limit_price() if is_stopLimit else log_entry_price(entry_price)
+    price_value = log_stop_limit_price() if is_stop_limit else log_entry_price(entry_price)
 
     # Define the calculation logic for BUY and SELL options
     price_adjustment = label_one_points_equal * min_point_distance

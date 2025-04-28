@@ -24,8 +24,8 @@ class TC_aV05():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc05(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc05(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -38,10 +38,10 @@ class TC_aV05():
                 login_wt(driver=main_driver, server=Server.MT5)
             
             with allure.step("Link account"):
-                link_account(driver=main_driver, account_id="18094", accountPassword="zf25R!$MzF$g")
+                link_account(driver=main_driver, account_id="998459", accountPassword="Asdf!234")
                 
             with allure.step("Link account with error message promot"):
-                link_account(driver=main_driver, account_id="18094", accountPassword="zf25R!$MzF$g", expect_failure=True) # expected to fail
+                link_account(driver=main_driver, account_id="998459", accountPassword="Asdf!234", expect_failure=True) # expected to fail
                 
         except Exception as e:
             test_failed = True  # Mark test as failed

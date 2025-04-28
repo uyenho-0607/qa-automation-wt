@@ -3,7 +3,7 @@ from enums.main import ButtonModuleType, ExpiryType, TradeConstants, TradeDirect
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element
 
-from common.desktop.module_chart.chart import chart_minMax
+from common.desktop.module_chart.chart import chart_min_max
 from common.desktop.module_trade.order_panel.order_panel_info import handle_track_close_edit
 from common.desktop.module_trade.order_placing_window.utils import button_trade_module, get_label_one_point_equal, input_size_volume, expiry, button_trade_action
 from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, calculate_pending_entry_price, calculate_pending_stop_loss, calculate_pending_take_profit
@@ -24,7 +24,7 @@ def trade_stop_order(driver, option: TradeDirectionOption, expiry_type: ExpiryTy
         spinner_element(driver)
 
         if TradeConstants.SET_CHART in trade_constants or chart_fullscreen:
-            chart_minMax(driver, chart_fullscreen)
+            chart_min_max(driver, chart_fullscreen)
 
         button_trade_module(driver, trade_type)
 

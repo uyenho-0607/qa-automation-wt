@@ -35,8 +35,8 @@ class TC_aM06():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc06(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc06(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -66,20 +66,20 @@ class TC_aM06():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                original_order_id, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             """ End of Place Order """
             
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
                 
-            with allure.step("Verify if it is the same orderIDs"):
+            with allure.step("Verify if it is the same order_ids"):
                 asset_orderID, asset_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.ASSET_OPEN_POSITION)
                 
-                if original_orderID == asset_orderID:
+                if original_order_id == asset_orderID:
                     assert True, "orderID are the same"
                 else:
-                    assert False, f"Trade orderID - {original_orderID} and Asset orderID - {asset_orderID} not matched"
+                    assert False, f"Trade orderID - {original_order_id} and Asset orderID - {asset_orderID} not matched"
 
             """Start of Partial Close Order """
                 
@@ -101,7 +101,7 @@ class TC_aM06():
                     
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=asset_orderID)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=asset_orderID)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
 

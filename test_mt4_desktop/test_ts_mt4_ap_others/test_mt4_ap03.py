@@ -29,8 +29,8 @@ class TC_MT4_aP03():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc03(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc03(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -58,7 +58,7 @@ class TC_MT4_aP03():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Order Panel: Open Position - Click on Close to Partial close an order"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close", actions=[("increase", 3), ("decrease", 2)], trade_type="close-order", set_negMarket=True)
+                close_delete_order(driver=main_driver, order_action="close", actions=[("increase", 3), ("decrease", 2)], trade_type="close-order", set_negMarket=True)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

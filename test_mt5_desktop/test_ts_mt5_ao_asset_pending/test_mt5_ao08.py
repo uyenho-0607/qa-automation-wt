@@ -37,8 +37,8 @@ class TC_aO08():
     )
 
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc08(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc08(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -68,7 +68,7 @@ class TC_aO08():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, trade_confirmation_df, trade_snackbar_banner_df)
@@ -78,12 +78,12 @@ class TC_aO08():
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
 
-            with allure.step("Verify if it is the same orderIDs"):
+            with allure.step("Verify if it is the same order_ids"):
                 asset_orderID, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.ASSET_PENDING_ORDER)
-                if original_orderID == asset_orderID:
+                if original_order_id == asset_orderID:
                     assert True, "orderID are the same"
                 else:
-                    assert False, f"Trade orderID - {original_orderID} and Asset orderID - {asset_orderID} not matched"
+                    assert False, f"Trade orderID - {original_order_id} and Asset orderID - {asset_orderID} not matched"
 
             """ Delete Pending Order """
 

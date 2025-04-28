@@ -16,7 +16,7 @@ from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT4_aR09():
+class TC_MT5_aR09():
 
     @allure.title("TC_aR09")
 
@@ -27,8 +27,8 @@ class TC_MT4_aR09():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc09(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc09(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

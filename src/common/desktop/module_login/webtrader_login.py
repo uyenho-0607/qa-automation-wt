@@ -217,6 +217,7 @@ def handle_login_result(driver, button: AnnouncementModal, expectation: AlertTyp
         
         # If login is successful and no failure was expected, process the modal announcement (if applicable)
         modal_announcement(driver, button)
+
         return
     
     else:
@@ -289,7 +290,7 @@ def handle_alert_error(driver, expectation: AlertType):
 """
 
 # Login to WebTrader Website Release_SIT
-def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.UAT,
+def login_wt(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.SIT,
              account_type: AccountType = AccountType.LIVE,
              testcase_id: str = None, set_language: bool = False, set_username: bool = True, 
              button: AnnouncementModal = AnnouncementModal.GOT_IT,

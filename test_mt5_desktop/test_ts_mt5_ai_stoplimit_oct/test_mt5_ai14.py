@@ -38,8 +38,8 @@ class TC_aI14():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc14(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc14(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -66,7 +66,7 @@ class TC_aI14():
                 trade_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             with allure.step("Retrieve and compare Pending Order and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=trade_order_df, name1=SectionName.TRADE_PENDING_ORDER, df2=trade_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME)
@@ -85,7 +85,7 @@ class TC_aI14():
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
             
             with allure.step("Retrieve the Updated Order Panel data"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.UPDATED_PENDING_ORDER)
+                updated_order_id, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.UPDATED_PENDING_ORDER)
 
             with allure.step("Retrieve and compare the Updated Pending Order and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_PENDING_ORDER, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE, compare_options=TradeConstants.COMPARE_VOLUME)
@@ -93,11 +93,11 @@ class TC_aI14():
             with allure.step("Print Final Result"):
                 process_and_print_data(trade_order_df, edit_snackbar_banner_df, updated_order_df)
                         
-            with allure.step("Verify if it is the same orderIDs"):
-                if original_orderID == updated_orderID:
+            with allure.step("Verify if it is the same order_ids"):
+                if original_order_id == updated_order_id:
                     assert True, "orderID are the same"
                 else:
-                    assert False, f"Place orderID - {original_orderID} and Modified orderID - {updated_orderID} not matched"
+                    assert False, f"Place orderID - {original_order_id} and Modified orderID - {updated_order_id} not matched"
 
         except Exception as e:
             test_failed = True  # Mark test as failed

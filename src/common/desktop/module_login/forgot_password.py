@@ -52,7 +52,7 @@ def handle_reset_password_flow(driver, email, accountID, account_type):
     
     
 
-def forgot_password(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.UAT,
+def forgot_password(driver, server: Server, device_type: Platform = Platform.DESKTOP, env_type: EnvironmentType = EnvironmentType.SIT,
                     email: str = None, accountID: str = None, account_type: AccountType = AccountType.LIVE):
     try:
 

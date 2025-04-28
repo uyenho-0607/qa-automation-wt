@@ -28,6 +28,7 @@ def get_chart_symbol_name(driver):
             # # Extract the symbol name from the first element if it exists
             chart_symbolName = get_label_of_element(element=chart_symbol_name).split()[0]
             return chart_symbolName
+        
     except Exception as e:
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
@@ -45,7 +46,7 @@ def get_chart_symbol_name(driver):
 """
 
 # Min / Max the Chart
-def chart_minMax(driver, chart_fullscreen: str):
+def chart_min_max(driver, chart_fullscreen: str):
     """ 
     This function will wait for the page to load, ensure that the spinner element is not visible,
     and then click the fullscreen button to either expand or collapse the chart window.

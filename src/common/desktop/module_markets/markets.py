@@ -182,7 +182,7 @@ def handle_signal_option(driver, option_name, option):
                 continue
         
         # If neither state is matched, raise an exception or return a default value
-        raise Exception("Neither the xpath is wrong")
+        raise Exception("Failed to determine signal symbol state: neither favorite nor unfavorite xpath matched.")
 
 
 def select_random_symbol(driver, option):

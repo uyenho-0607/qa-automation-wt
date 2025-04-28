@@ -101,6 +101,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         else:
             demo_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_ACCOUNT_SIGNUP)
             click_element(element=demo_button)
+            assert demo_button, "Demo Account not found"
         
         """ Name field """
         # Generate a random name for the demo account if not provided
@@ -450,7 +451,7 @@ def validate_account_details(driver, demo_account_details):
     assert match.group(2) == demo_account_details["Leverage"], f"Leverage mismatch. Expected {demo_account_details["Leverage"]} but found {match.group(2)}"
 
     # Validate the Account Balance displayed matches the expected value from demo_account_details
-    account_balance = get_label_of_element(find_element_by_xpath(driver, "(//div[@class='sc-11khvbe-2 cGzlIk']//div)[1]//div[2]"))
+    account_balance = get_label_of_element(find_element_by_xpath(driver, "(//*[@class='sc-11khvbe-3 ggEICm'])[1]//div[2]"))
     # Extract the numerical value of the account balance from the displayed text using regex
     balance_value = re.search(r'\$(\d{1,3}(?:,\d{3})*)', account_balance).group(1)
     assert balance_value == demo_account_details["Deposit"], "Account balance mismatch"

@@ -29,8 +29,8 @@ class TC_aS28():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc28(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc28(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -60,7 +60,7 @@ class TC_aS28():
             """ Start of modifying Pending Order """
             
             with allure.step("Modify on Stop Limit Order"):
-                modify_stop_limit_order(driver=main_driver, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, stopLimitPrice_flag=AlertType.NEGATIVE)
+                modify_stop_limit_order(driver=main_driver, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, stop_limit_price_flag=AlertType.NEGATIVE)
 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

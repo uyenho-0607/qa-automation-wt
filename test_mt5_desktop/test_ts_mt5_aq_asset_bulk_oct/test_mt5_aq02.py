@@ -2,16 +2,18 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server, Menu, TradeConstants, OrderPanel, SectionName
+from enums.main import Server, Menu, TradeConstants, OrderPanel, BulkActionType, SectionName, CSVFileNameManager
 
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
+from data_config.api.request import create_mt5_market_order
+
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_sub_menu.utils import menu_button
-from common.desktop.module_trade.utils import toggle_radio_button, type_orderPanel, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
+from common.desktop.module_trade.utils import toggle_radio_button, type_orderPanel, button_bulk_operation, check_order_ids_in_table, get_bulk_snackbar_banner
 from common.desktop.module_notification.utils import process_order_notifications
-from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, read_orderIDs_from_csv
+from data_config.utils import compare_dataframes, process_and_print_data, clear_order_ids_csv, read_order_ids_from_csv
 
 @allure.parent_suite("MT5 Membersite - Desktop - Asset - Bulk Close / Delete Order")
 
@@ -29,8 +31,8 @@ class TC_aQ02():
         )
         
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc02(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc02(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -47,29 +49,32 @@ class TC_aQ02():
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
 
+            with allure.step("Create bulk market orders"):
+                create_mt5_market_order(driver=main_driver)
+                
             with allure.step("Select the Order Panel: Open Position"):
                 type_orderPanel(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS)
                 
             with allure.step("Bulk Close Orders"):
-                clear_orderIDs_csv(filename="MT5_Bulk.csv")
-                open_position_df = button_bulk_operation(driver=main_driver, filename="MT5_Bulk.csv", bulk_type="close", options_dropdown="loss", section_name=SectionName.ASSET_OPEN_POSITION, tab_order_type=OrderPanel.OPEN_POSITIONS, symbol_name_element=True, set_trade=False)
+                clear_order_ids_csv(filename=CSVFileNameManager.MT5_DESKTOP_BULK)
+                open_position_df = button_bulk_operation(driver=main_driver, filename=CSVFileNameManager.MT5_DESKTOP_BULK, bulk_type=BulkActionType.BULK_CLOSE, options_dropdown=BulkActionType.LOSS, section_name=SectionName.ASSET_OPEN_POSITION, tab_order_type=OrderPanel.OPEN_POSITIONS)
 
             with allure.step("Retrieve snackbar message"):
                 get_bulk_snackbar_banner(driver=main_driver)
                 
-            with allure.step("Read orderIDs from CSV"):
-                csv_orderIDs = read_orderIDs_from_csv(filename="MT5_Bulk.csv")
+            with allure.step("Read order_ids from CSV"):
+                csv_order_ids = read_order_ids_from_csv(filename=CSVFileNameManager.MT5_DESKTOP_BULK)
         
             with allure.step("Ensure the OrderID is display in order panel: Order History table"):
                 # Check order IDs in Order History table
-                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
+                order_history_df = check_order_ids_in_table(driver=main_driver, order_ids=csv_order_ids, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
 
             with allure.step("Comparison on Order History and Open Position table"):
                 compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=open_position_df, name2=SectionName.ASSET_OPEN_POSITION, compare_options=TradeConstants.COMPARE_PROFIT_LOSS | TradeConstants.COMPARE_UNITS)
 
             with allure.step("Retrieve and compare Open Position and Notification Order Message / Details"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=csv_orderIDs)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=csv_order_ids)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
                 if noti_message:  # Check if noti_message is not empty

@@ -1,12 +1,12 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, CredentialType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_trade.order_panel.order_panel_info import count_orderPanel
+from common.desktop.module_read_access.utils import read_only_access
 
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
@@ -17,16 +17,15 @@ from common.desktop.module_trade.order_panel.order_panel_info import count_order
 class TC_aR12():
 
     @allure.title("TC_aR12")
-
     @allure.description(
         """
-        Verify the total count is correct
+        Member unable to place trade with Read Only Access enable
         """
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc12(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc12(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -36,10 +35,13 @@ class TC_aR12():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT5)
+                login_wt(driver=main_driver, server=Server.MT5, credential_type=CredentialType.READ_ONLY_ACCESS)
 
             with allure.step("Trade page"):
-                count_orderPanel(driver=main_driver)
+                read_only_access(driver=main_driver, set_menu=True)
+
+            with allure.step("Asset page"):
+                read_only_access(driver=main_driver)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

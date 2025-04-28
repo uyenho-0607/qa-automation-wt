@@ -35,8 +35,8 @@ class TC_aM02():
     )
 
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc02(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc02(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -64,19 +64,19 @@ class TC_aM02():
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             """ End of Place Order """
             
             with allure.step("Redirect to Asset page"):
                 menu_button(driver=main_driver, menu=Menu.ASSETS)
             
-            with allure.step("Verify if it is the same orderIDs"):
+            with allure.step("Verify if it is the same order_ids"):
                 asset_orderID, _ = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.ASSET_OPEN_POSITION)
-                if original_orderID == asset_orderID:
+                if original_order_id == asset_orderID:
                     assert True, "orderID are the same"
                 else:
-                    assert False, f"Trade orderID - {original_orderID} and Asset orderID - {asset_orderID} not matched"
+                    assert False, f"Trade orderID - {original_order_id} and Asset orderID - {asset_orderID} not matched"
                    
             """ Start of Modify Order """
             
@@ -84,27 +84,27 @@ class TC_aM02():
                 modify_market_order(driver=main_driver, tp_type=SLTPOption.PRICE)
 
             with allure.step("Click on the Trade Confirmation button to update the order"):
-                edit_tradeConfirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)
+                edit_confirmation_df = trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)
 
             with allure.step("Retrieve the updated order snackbar message "):
                 edit_snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Compare against the Trade Confirmation and Snackbar message"):
-                compare_dataframes(driver=main_driver, df1=edit_tradeConfirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
+                compare_dataframes(driver=main_driver, df1=edit_confirmation_df, name1=SectionName.TRADE_CONFIRMATION_DETAILS, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
                 
             with allure.step("Retrieve the updated Open Position Order"):
-                updated_orderID, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
+                updated_order_id, updated_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.UPDATED_OPEN_POSITION)
                 
-                if updated_orderID == asset_orderID:
+                if updated_order_id == asset_orderID:
                     assert True, "orderID are the same"
                 else:
-                    assert False, f"Trade orderID - {updated_orderID} and Asset orderID - {asset_orderID} not matched"
+                    assert False, f"Trade orderID - {updated_order_id} and Asset orderID - {asset_orderID} not matched"
                     
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=updated_order_df, name1=SectionName.UPDATED_OPEN_POSITION, df2=edit_snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Print Final Result"):
-                process_and_print_data(trade_order_df, edit_tradeConfirmation_df, edit_snackbar_banner_df, updated_order_df)
+                process_and_print_data(trade_order_df, edit_confirmation_df, edit_snackbar_banner_df, updated_order_df)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

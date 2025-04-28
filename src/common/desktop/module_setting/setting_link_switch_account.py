@@ -176,7 +176,7 @@ def link_account(driver, account_id: str, accountPassword: str, expect_failure: 
         # Find and populate the accountID and password input field
         accountID_input = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_ACCOUNT_ID)
         populate_element(element=accountID_input, text=account_id)
-        
+
         accountID_input = find_element_by_testid(driver, data_testid=DataTestID.LINK_ACCOUNT_MODAL_PASSWORD)
         populate_element(element=accountID_input, text=accountPassword)
 

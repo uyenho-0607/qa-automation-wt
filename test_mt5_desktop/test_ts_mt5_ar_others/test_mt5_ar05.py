@@ -1,13 +1,14 @@
 import allure
 import pytest
 
-from enums.main import Server, SymbolsList, TradeDirectionOption, ButtonModuleType, OrderPanel
+from enums.main import Server, SymbolsList, TradeDirectionOption, ButtonModuleType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info, handle_track_close_edit, btn_min_max_stop_loss, btn_minMax_takeProfit
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info, handle_track_close_edit, btn_min_max_stop_loss, btn_min_max_take_profit
 
 @allure.parent_suite("MT5 Membersite - Desktop - Others")
 
@@ -27,8 +28,8 @@ class TC_aR05():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc05(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc05(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -72,8 +73,8 @@ class TC_aR05():
                 btn_min_max_stop_loss(driver=main_driver, trade_type="edit", type="points", min_max="decrease", number_of_clicks=3)
 
             with allure.step("Increase / Decrease Take Profit"):
-                btn_minMax_takeProfit(driver=main_driver, trade_type="edit", type="price", minMax="decrease", number_of_clicks=5)
-                btn_minMax_takeProfit(driver=main_driver, trade_type="edit", type="points", minMax="increase", number_of_clicks=3)
+                btn_min_max_take_profit(driver=main_driver, trade_type="edit", type="price", min_max="decrease", number_of_clicks=5)
+                btn_min_max_take_profit(driver=main_driver, trade_type="edit", type="points", min_max="increase", number_of_clicks=3)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

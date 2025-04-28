@@ -33,8 +33,8 @@ class TC_aC17():
     )
 
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc17(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc17(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -61,7 +61,7 @@ class TC_aC17():
                 get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                original_orderID, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                original_order_id, trade_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             """ End of Place Order """
             
@@ -78,7 +78,7 @@ class TC_aC17():
 
             with allure.step("Retrieve and compare Order History and Notification Order Message"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=original_orderID)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=original_order_id)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
                 if noti_message:  # Check if noti_message is not empty

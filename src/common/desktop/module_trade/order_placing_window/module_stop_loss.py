@@ -23,7 +23,7 @@ def handle_stop_loss(driver, trade_type: ButtonModuleType, sl_type: SLTPOption):
     - tp_type: The type of Stop Loss (e.g., 'price', 'points') that determines which specific input field to locate.
     
     Returns:
-    - takeProfit_element: The WebElement corresponding to the Stop Loss input field.
+    - take_profit_element: The WebElement corresponding to the Stop Loss input field.
     """
     
     # Define mapping for dropdown and its options
@@ -72,11 +72,11 @@ def btn_min_max_stop_loss(driver, trade_type, type, min_max, number_of_clicks):
     Arguments:
     - trade_type: The type of trade (e.g., 'trade', 'edit').
     - type: The type of value being modified ('price' or 'points').
-    - minMax: The action to perform, either 'increase' or 'decrease'.
+    - min_max: The action to perform, either 'increase' or 'decrease'.
     - number_of_clicks: The number of times to click the min/max button.
     
     Raises:
-    - ValueError: If an invalid `type` or `minMax` is provided.
+    - ValueError: If an invalid `type` or `min_max` is provided.
     - AssertionError: If the value does not change as expected after each click.
     """
     try:
@@ -113,7 +113,7 @@ def btn_min_max_stop_loss(driver, trade_type, type, min_max, number_of_clicks):
             elif min_max == "decrease":
                 difference = initial_value - updated_value
             else:
-                raise ValueError("Invalid value for minMax. Must be 'increase' or 'decrease'.")
+                raise ValueError("Invalid value for min_max. Must be 'increase' or 'decrease'.")
 
             # Assert that the difference is correct based on the type
             if type == "price":

@@ -250,7 +250,7 @@ def handle_track_close_edit(driver, trade_type):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                RETRIEVE ORDERIDs
+                                                RETRIEVE order_ids
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
@@ -307,7 +307,7 @@ def get_orderID(driver, row_number):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                EXTRACT TABLE ORDERs INFO (WITH ORDERIDs PRINT SEPERATELY TABLE)
+                                                EXTRACT TABLE ORDERs INFO (WITH order_ids PRINT SEPERATELY TABLE)
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
@@ -410,10 +410,10 @@ def get_order_panel_name(order_panel):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                REVIEW ORDERIDs FROM CSV
+                                                REVIEW order_ids FROM CSV
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-def review_pending_orderIDs(driver, order_ids, check_extended_tabs=False):
+def review_pending_order_ids(driver, order_ids, check_extended_tabs=False):
     """
     Reviews the pending order IDs across the available order panel tabs,
     comparing them with the provided order IDs.
@@ -525,11 +525,11 @@ def review_pending_orderIDs(driver, order_ids, check_extended_tabs=False):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                CHECK ORDERIDs IN TABLE
+                                                CHECK order_ids IN TABLE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def check_orderIDs_in_table(driver, order_ids, tab_order_type: OrderPanel, section_name: str):
+def check_order_ids_in_table(driver, order_ids, tab_order_type: OrderPanel, section_name: str):
     """
     Checks if the specified order IDs exist in the given order panel and extracts relevant data for processing.
 

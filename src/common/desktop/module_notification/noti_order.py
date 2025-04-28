@@ -18,7 +18,7 @@ from common.desktop.module_trade.order_panel.op_general import extract_order_dat
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_orderNotification_msg(driver, order_id: str):
+def get_order_notification_msg(driver, order_id: str):
     """
     Extracts details from the order notification message based on the provided order ID and returns
     the parsed details in a tabular format.
@@ -48,7 +48,7 @@ def get_orderNotification_msg(driver, order_id: str):
         
         for msg in noti_messages:
             message = get_label_of_element(element=msg)
-            print(message)
+            
             # Check if the order ID is present in the notification message
             if order_id in message:
                 # Attach the message text to the report for documentation purposes
@@ -117,7 +117,7 @@ def get_orderNotification_msg(driver, order_id: str):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def get_noti_ordersDetails(driver):
+def get_notification_order_details_msg(driver):
     """
     Fetches and processes notification order details from the UI, extracts the relevant information, 
     and returns a DataFrame with the extracted data.
@@ -194,13 +194,13 @@ def get_noti_ordersDetails(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def process_order_notifications(driver, orderIDs:str):
+def process_order_notifications(driver, order_ids:str):
     """
     Processes order notifications by extracting notification messages and order details 
     for each order ID in the provided list or dictionary.
 
     Arguments:
-    - orderIDs: (list or dict): A list or dictionary of order IDs to process.
+    - order_ids: (list or dict): A list or dictionary of order IDs to process.
 
     Returns:
     - notification_msgs_list: A list of DataFrames containing notification message details.
@@ -215,18 +215,18 @@ def process_order_notifications(driver, orderIDs:str):
         notification_msgs_list = []  # List to store notification messages dataframes
         order_details_list = []  # List to store order details dataframes
 
-        # Check if orderIDs is a list and convert to a dictionary if so
-        if isinstance(orderIDs, list):
-            orderIDs = dict(enumerate(orderIDs))
+        # Check if order_ids is a list and convert to a dictionary if so
+        if isinstance(order_ids, list):
+            order_ids = dict(enumerate(order_ids))
 
-        # Handle single / multiple orderIDs
-        for order_id in orderIDs.values():
+        # Handle single / multiple order_ids
+        for order_id in order_ids.values():
             # Retrieve the notification message for the current orderID
-            noti_msg = get_orderNotification_msg(driver, order_id)
+            noti_msg = get_order_notification_msg(driver, order_id)
             notification_msgs_list.append(noti_msg)
 
             # Retrieve the order details for the current orderID
-            order_details = get_noti_ordersDetails(driver)
+            order_details = get_notification_order_details_msg(driver)
             order_details_list.append(order_details)
 
         # Return the lists of notification messages and order details

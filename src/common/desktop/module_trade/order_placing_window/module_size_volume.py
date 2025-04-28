@@ -234,13 +234,13 @@ def close_partial_size(driver, close_options: TradeConstants = TradeConstants.NO
 
         print("random value for partial close", random_value)
             
-        partialClose_input = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_INPUT_VOLUME)
+        partial_close_input = find_element_by_testid(driver, data_testid=DataTestID.CLOSE_ORDER_INPUT_VOLUME)
         
         # If clearField is True, clear the input field before entering the new value
         if TradeConstants.CLEAR_FIELD in close_options:
             # Select all text and delete the selected text
-            clear_input_field(partialClose_input)
-            populate_element_with_wait(driver, element=partialClose_input, text=str(random_value))
+            clear_input_field(partial_close_input)
+            populate_element_with_wait(driver, element=partial_close_input, text=str(random_value))
 
         # If set_fillPolicy is True, set the fill policy before submitting the order
         if TradeConstants.SET_FILL_POLICY in close_options:
@@ -266,7 +266,7 @@ def close_partial_size(driver, close_options: TradeConstants = TradeConstants.NO
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_step=None):
+def verify_volume_min_max_buttons(driver, trade_type, actions: list, size_volume_step=None):
     """
     This function simulates clicks on the min/max button for adjusting the trade volume size,
     checks if the volume size is incremented or decremented correctly, considering the step's precision,
@@ -274,13 +274,13 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
 
     Arguments:
     - trade_type: The type of trade (e.g., 'trade', 'close-order').
-    - actions: A list of tuples where each tuple contains (minMax, number_of_clicks). 
-               'minMax' can be 'increase' or 'decrease'.
+    - actions: A list of tuples where each tuple contains (min_max, number_of_clicks). 
+               'min_max' can be 'increase' or 'decrease'.
                'number_of_clicks' is the number of clicks to simulate for that action.
     - size_volume_step: The step size for volume increments/decrements.
 
     Raises:
-    - ValueError: If 'minMax' is neither 'increase' nor 'decrease'.
+    - ValueError: If 'min_max' is neither 'increase' nor 'decrease'.
     - AssertionError: If the increment or decrement does not match the expected value.
     """
     try:
@@ -312,8 +312,8 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
         print(f"Specification - Lot Size / Volume Step: {size_volume_step} (Decimal places: {decimal_places})")
 
         # Step 6: Loop over the actions and perform clicks for each one
-        for minMax, number_of_clicks in actions:
-            button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume-{minMax}")
+        for min_max, number_of_clicks in actions:
+            button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-volume-{min_max}")
             initial_value_before_action = initial_value  # Save initial value before this action
 
             for i in range(number_of_clicks):
@@ -322,10 +322,10 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
                 # Get the updated value after the click
                 updated_value_str = input_field.get_attribute("value")
                 updated_value = float(updated_value_str) if updated_value_str.strip() else 0.0
-                print(f"Size - updated value after {minMax} click {i+1}: {updated_value}")
+                print(f"Size - updated value after {min_max} click {i+1}: {updated_value}")
 
                 # Calculate expected value after this click
-                if minMax == "increase":
+                if min_max == "increase":
                     expected_value = initial_value + size_volume_step
                 else:
                     expected_value = initial_value - size_volume_step
@@ -334,7 +334,7 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
                 expected_rounded = round(expected_value, decimal_places)
                 
                 # Verify the updated value matches the rounded expected value
-                assert abs(updated_value - expected_rounded) < 1e-6, (f"After {i+1} {minMax} click(s): Expected {expected_rounded}, got {updated_value}")
+                assert abs(updated_value - expected_rounded) < 1e-6, (f"After {i+1} {min_max} click(s): Expected {expected_rounded}, got {updated_value}")
                 
                 initial_value = updated_value  # Update for next iteration
 
@@ -342,7 +342,7 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
             final_value = float(input_field.get_attribute("value"))
             
             # Calculate total expected value for the action
-            if minMax == "increase":
+            if min_max == "increase":
                 total_expected = initial_value_before_action + (size_volume_step * number_of_clicks)
             else:
                 total_expected = initial_value_before_action - (size_volume_step * number_of_clicks)
@@ -350,12 +350,12 @@ def verify_volume_minMax_buttons(driver, trade_type, actions: list, size_volume_
             total_expected_rounded = round(total_expected, decimal_places)
             
             assert abs(final_value - total_expected_rounded) < 1e-6, (
-                f"Final value mismatch after {number_of_clicks} {minMax} clicks: "
+                f"Final value mismatch after {number_of_clicks} {min_max} clicks: "
                 f"Expected {total_expected_rounded}, got {final_value}"
             )
 
             # Logging
-            attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {number_of_clicks} times")
+            attach_text(str(number_of_clicks), name=f"{min_max.capitalize()} button clicked {number_of_clicks} times")
             attach_text(f"{final_value:.{decimal_places}f}", name=f"Final value: {final_value:.{decimal_places}f}")
         
     except Exception as e:

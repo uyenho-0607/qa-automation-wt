@@ -2,13 +2,13 @@ import allure
 import pytest
 import pandas as pd
 
-from enums.main import Server, ButtonModuleType, TradeConstants, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
+from enums.main import Server, TradeDirectionOption, OrderPanel, SectionName
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_chart.utils import chart_minMax
+from common.desktop.module_chart.utils import chart_min_max
 from common.desktop.module_trade.utils import toggle_radio_button, trade_oct_market_order, get_trade_snackbar_banner, extract_order_info
 from common.desktop.module_notification.utils import process_order_notifications
 from data_config.utils import compare_dataframes, process_and_print_data
@@ -33,8 +33,8 @@ class TC_MT4_aJ02():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc02(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc02(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -53,23 +53,23 @@ class TC_MT4_aJ02():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Market Order"):
-                trade_oct_market_order(driver=main_driver, option=TradeDirectionOption.SELL, set_Chart=True, chart_fullscreen="toggle")
+                trade_oct_market_order(driver=main_driver, option=TradeDirectionOption.SELL, chart_fullscreen="toggle")
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Exit Fullscreen Chart"):
-                chart_minMax(driver=main_driver, chart_fullscreen="exit")
+                chart_min_max(driver=main_driver, chart_fullscreen="exit")
 
             with allure.step("Retrieve the Open Position data"):
-                orderIDs_openPosition, open_position_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
+                order_ids_openPosition, open_position_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             with allure.step("Retrieve and compare Open Position and Snackbar banner message"):
                 compare_dataframes(driver=main_driver, df1=open_position_df, name1=SectionName.TRADE_OPEN_POSITION, df2=snackbar_banner_df, name2=SectionName.SNACKBAR_BANNER_MESSAGE)
 
             with allure.step("Retrieve and compare Open Position and Notification Order Message / Details"):
                 # Call the method to get the lists of dataframes
-                noti_message, noti_order_details = process_order_notifications(driver=main_driver, orderIDs=orderIDs_openPosition)
+                noti_message, noti_order_details = process_order_notifications(driver=main_driver, order_ids=order_ids_openPosition)
 
                 # Concatenate all dataframes in the notification_msgs list into a single dataframe
                 if noti_message:  # Check if noti_message is not empty

@@ -29,8 +29,8 @@ class TC_aS31():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc31(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc31(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -63,7 +63,7 @@ class TC_aS31():
             """ Start of modifying Pending Order """
             
             with allure.step("Modify on Stop Limit Order"):
-                modify_stop_limit_order(driver=main_driver, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, stopLimitPrice_flag=AlertType.NEGATIVE)
+                modify_stop_limit_order(driver=main_driver, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, stop_limit_price_flag=AlertType.NEGATIVE)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
                 trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)

@@ -1,12 +1,13 @@
 from enums.main import ButtonModuleType, SLTPOption, TradeConstants, TradeDirectionOption, OrderExecutionType, AlertType
 
+
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, populate_element
 
-from common.desktop.module_chart.chart import chart_minMax
+from common.desktop.module_chart.chart import chart_min_max
 from common.desktop.module_trade.order_panel.order_panel_info import handle_track_close_edit
 from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, generate_min_point_disatance
-from common.desktop.module_trade.order_placing_window.utils import oct_buy_sell_type, verify_volume_minMax_buttons, button_trade_module, get_label_one_point_equal, input_size_volume, fill_policy_type, handle_stop_loss, handle_take_profit, button_trade_action, handle_stop_loss, handle_take_profit, close_partial_size
+from common.desktop.module_trade.order_placing_window.utils import oct_buy_sell_type, verify_volume_min_max_buttons, button_trade_module, get_label_one_point_equal, input_size_volume, fill_policy_type, handle_stop_loss, handle_take_profit, button_trade_action, handle_stop_loss, handle_take_profit, close_partial_size
 from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
 
 """
@@ -14,7 +15,6 @@ from common.desktop.module_trade.order_placing_window.module_size_volume import 
                                                 TRADE / EDIT - CALCULATE MARKET STOP LOSS VALUE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
 
 def calculate_stop_loss(driver, trade_type: ButtonModuleType, sl_type: SLTPOption, option: TradeDirectionOption, label_one_points_equal, current_price, stop_loss_flag: AlertType = AlertType.POSITIVE):
     # Common logic
@@ -53,8 +53,6 @@ def calculate_stop_loss(driver, trade_type: ButtonModuleType, sl_type: SLTPOptio
     populate_element(element=stop_loss_input, text=stop_loss_value)
 
     return stop_loss_value
-
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -126,7 +124,7 @@ def trade_oct_market_order(driver, option: TradeDirectionOption, chart_fullscree
 
         # if set_Chart:
         if TradeConstants.SET_CHART in trade_constants or chart_fullscreen:
-            chart_minMax(driver, chart_fullscreen)
+            chart_min_max(driver, chart_fullscreen)
 
         # if set_OCT:
         if TradeConstants.SET_OCT in trade_constants:
@@ -156,13 +154,13 @@ def trade_oct_market_order(driver, option: TradeDirectionOption, chart_fullscree
 """
 
 
-def trade_market_order(driver, option: TradeDirectionOption, trade_type: ButtonModuleType = ButtonModuleType.TRADE, chart_fullscreen=None, sl_type=None, tp_type=None, trade_constants: TradeConstants = TradeConstants.NONE, stop_loss_flag: AlertType = AlertType.POSITIVE, take_profit_flag: AlertType = AlertType.POSITIVE):
+def trade_market_order(driver, option: TradeDirectionOption, trade_type: ButtonModuleType = ButtonModuleType.TRADE, chart_fullscreen=None, sl_type: SLTPOption = None, tp_type: SLTPOption = None, trade_constants: TradeConstants = TradeConstants.NONE, stop_loss_flag: AlertType = AlertType.POSITIVE, take_profit_flag: AlertType = AlertType.POSITIVE):
     try:
 
         spinner_element(driver)
 
         if TradeConstants.SET_CHART in trade_constants or chart_fullscreen:
-            chart_minMax(driver, chart_fullscreen)
+            chart_min_max(driver, chart_fullscreen)
         
         button_trade_module(driver, trade_type)
 
@@ -207,7 +205,7 @@ def trade_market_order(driver, option: TradeDirectionOption, trade_type: ButtonM
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def modify_market_order(driver, trade_type: ButtonModuleType = ButtonModuleType.EDIT, sl_type=None, tp_type=None, trade_constants: TradeConstants = TradeConstants.NONE, stop_loss_flag: AlertType = AlertType.POSITIVE, take_profit_flag: AlertType = AlertType.POSITIVE):
+def modify_market_order(driver, trade_type: ButtonModuleType = ButtonModuleType.EDIT, sl_type: SLTPOption = None, tp_type: SLTPOption = None, trade_constants: TradeConstants = TradeConstants.NONE, stop_loss_flag: AlertType = AlertType.POSITIVE, take_profit_flag: AlertType = AlertType.POSITIVE):
     try:
 
         # Perform order panel action based on trade type and row numbers
@@ -268,7 +266,7 @@ def close_delete_order(driver, actions: list = None, trade_type: ButtonModuleTyp
             _, lot_size, vol_step = button_trade_module(driver, trade_type=ButtonModuleType.SPECIFICATION)
 
             verify_button_behavior_at_min_max(driver, trade_type, lot_size=lot_size)
-            verify_volume_minMax_buttons(driver, trade_type, actions, size_volume_step=vol_step)
+            verify_volume_min_max_buttons(driver, trade_type, actions, size_volume_step=vol_step)
             verify_invalid_size_volume_input(driver, trade_type)
 
     except Exception as e:

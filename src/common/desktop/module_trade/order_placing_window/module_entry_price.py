@@ -56,7 +56,7 @@ def handle_entry_price(driver, trade_type: ButtonModuleType):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def btn_min_max_price(driver, trade_type, minMax, number_of_clicks):
+def btn_min_max_price(driver, trade_type, min_max, number_of_clicks):
     """
     This function interacts with a 'min' or 'max' button (depending on the trade type and action) 
     to adjust the price. It performs the specified number of clicks and verifies that the price changes
@@ -64,17 +64,17 @@ def btn_min_max_price(driver, trade_type, minMax, number_of_clicks):
 
     Arguments:
     - trade_type (str): The type of trade (e.g., "create", "edit").
-    - minMax (str): Determines whether to increase or decrease the price. Expected values: "increase" or "decrease".
+    - min_max (str): Determines whether to increase or decrease the price. Expected values: "increase" or "decrease".
     - number_of_clicks (int): The number of times the button should be clicked to adjust the price.
 
     Raises:
-    - ValueError: If the `minMax` value is not "increase" or "decrease".
+    - ValueError: If the `min_max` value is not "increase" or "decrease".
     - AssertionError: If the increment or decrement does not match the expected value.
     """
     try:
         
         # Locate the min/max button based on the trade type and action ('increase' or 'decrease')
-        button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-price-{minMax}")
+        button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-price-{min_max}")
         # Simulate a click on the button using JavaScript
         javascript_click(driver, element=button_min_max)
 
@@ -98,30 +98,30 @@ def btn_min_max_price(driver, trade_type, minMax, number_of_clicks):
             updated_value = float(updated_value_str) if updated_value_str.strip() else 0.0
             
             # Verify that the increment or decrement is correct
-            if minMax == "increase":
+            if min_max == "increase":
                 # Check if the value increased by the expected increment
                 difference = updated_value - initial_value
                 assert abs(difference - increment) < 1e-6, f"Value did not increment by {increment} after click {i+1}. Difference: {difference:.6f}"
-            elif minMax == "decrease":
+            elif min_max == "decrease":
                 # Check if the value increased by the expected increment
                 difference = initial_value - updated_value
                 assert abs(difference - increment) < 1e-6, f"Value did not decrement by {increment} after click {i+1}. Difference: {difference:.6f}"
             else:
-                # Raise an error if an invalid value for 'minMax' is provided
-                raise ValueError("Invalid value for minMax. Must be 'increase' or 'decrease'.")
+                # Raise an error if an invalid value for 'min_max' is provided
+                raise ValueError("Invalid value for min_max. Must be 'increase' or 'decrease'.")
 
             # Update initial_value for the next iteration to the current updated value
             initial_value = updated_value
 
             # Final check: ensure the total increment or decrement matches the expected value
             final_value = float(input_field.get_attribute("value"))
-            expected_value = initial_value + (increment * number_of_clicks) if minMax == "increase" else initial_value - (increment * number_of_clicks)
+            expected_value = initial_value + (increment * number_of_clicks) if min_max == "increase" else initial_value - (increment * number_of_clicks)
             
             # Assert if the final value doesn't match the expected value
             assert abs(final_value - expected_value), f"Final value does not match expected value. Expected: {expected_value:.2f}, Got: {final_value:.2f}"
 
             # Log the results for the user
-            attach_text(str(number_of_clicks), name=f"{minMax.capitalize()} button clicked {i+1} times")
+            attach_text(str(number_of_clicks), name=f"{min_max.capitalize()} button clicked {i+1} times")
             attach_text(f"{final_value}", name=f"Final value: {final_value}")
             
     except Exception as e:

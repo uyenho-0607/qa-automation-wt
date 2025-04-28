@@ -1,6 +1,6 @@
 
 from common.desktop.module_notification.noti_general import notification_bell, notification_type 
-from common.desktop.module_notification.noti_order import get_orderNotification_msg, get_noti_ordersDetails, process_order_notifications
+from common.desktop.module_notification.noti_order import get_order_notification_msg, get_notification_order_details_msg, process_order_notifications
 from common.desktop.module_notification.noti_system import noti_newDevice
 
 __all__ = [
@@ -10,8 +10,8 @@ __all__ = [
     'notification_type',
     
     # Notification Order
-    'get_orderNotification_msg',
-    'get_noti_ordersDetails',
+    'get_order_notification_msg',
+    'get_notification_order_details_msg',
     'process_order_notifications',
     
     # Notification System

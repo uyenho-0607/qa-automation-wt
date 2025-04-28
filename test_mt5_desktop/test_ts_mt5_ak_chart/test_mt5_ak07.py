@@ -8,7 +8,7 @@ from constants.helper.screenshot import attach_session_video_to_allure, attach_t
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_chart.utils import chart_minMax, chart_trade_modal_close
+from common.desktop.module_chart.utils import chart_min_max, chart_trade_modal_close
 from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_limit_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
@@ -33,8 +33,8 @@ class TC_aK07():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc07(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc07(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -68,7 +68,7 @@ class TC_aK07():
                 chart_trade_modal_close(driver=main_driver)
                 
             with allure.step("Exit Fullscreen Chart"):
-                chart_minMax(driver=main_driver, chart_fullscreen="exit")
+                chart_min_max(driver=main_driver, chart_fullscreen="exit")
                 
             with allure.step("Retrieve the Pending Order data"):
                 _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
