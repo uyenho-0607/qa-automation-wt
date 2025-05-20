@@ -1,13 +1,14 @@
+from enums.main import ButtonModuleType, SLTPOption, TradeConstants, TradeDirectionOption, OrderExecutionType, AlertType
+
+
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import spinner_element, populate_element
 
-from common.desktop.module_chart.chart import chart_minMax
-from common.desktop.module_trade.order_panel.order_panel_info import button_orderPanel_action
-from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, pointsDistance
-from common.desktop.module_trade.order_placing_window.utils import verify_volume_minMax_buttons, button_buy_sell_type, button_tradeModule, label_onePointEqual, input_size_volume, fillPolicy_type, handle_stop_loss, handle_takeProfit, button_trade_action, handle_stop_loss, handle_takeProfit, close_partialSize
+from common.desktop.module_chart.chart import chart_min_max
+from common.desktop.module_trade.order_panel.order_panel_info import handle_track_close_edit
+from common.desktop.module_trade.place_edit_order.price_related import get_current_price, get_edit_order_label, get_sl_point_distance, get_tp_point_distance, generate_min_point_disatance
+from common.desktop.module_trade.order_placing_window.utils import oct_buy_sell_type, verify_volume_min_max_buttons, button_trade_module, get_label_one_point_equal, input_size_volume, fill_policy_type, handle_stop_loss, handle_take_profit, button_trade_action, handle_stop_loss, handle_take_profit, close_partial_size
 from common.desktop.module_trade.order_placing_window.module_size_volume import verify_button_behavior_at_min_max, verify_invalid_size_volume_input
-
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -15,36 +16,43 @@ from common.desktop.module_trade.order_placing_window.module_size_volume import 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_stop_loss(driver, trade_type, sl_type, option, label_onePointsEqual, current_price, stopLoss_flag: bool = True):
+def calculate_stop_loss(driver, trade_type: ButtonModuleType, sl_type: SLTPOption, option: TradeDirectionOption, label_one_points_equal, current_price, stop_loss_flag: AlertType = AlertType.POSITIVE):
+    # Common logic
+    min_point_distance = generate_min_point_disatance(trade_type)
     
-    min_point_distance = pointsDistance(trade_type)
+    stop_loss_point = get_sl_point_distance(option, trade_type)
     
-    stopLoss_point = get_sl_point_distance(option, trade_type)
+    stop_loss_input = handle_stop_loss(driver, trade_type, sl_type)
 
-    stopLoss_input = handle_stop_loss(driver, trade_type, sl_type)
+    # Define the calculation logic for BUY and SELL options
+    price_adjustment = label_one_points_equal * min_point_distance
+    # BUY = Sell Price - (One point equals * Minimum Point Distance)
+    # SELL = Buy Price + (One point equals * Minimum Point Distance)
 
-    if stopLoss_flag: # For Positive scenario
-        if sl_type == "price":
-            if option in ["buy", "BUY"]:
-                # stopLoss_value = Sell price - (One point equals * Minimum Point Distance)
-                stopLoss_value = current_price - (label_onePointsEqual * min_point_distance)
-            if option in ["sell", "SELL"]:
-                # stopLoss_value = Buy price + (One point equals * Minimum Point Distance)
-                stopLoss_value = current_price + (label_onePointsEqual * min_point_distance)
-        elif sl_type == "points":
-            if option in ["buy", "BUY", "sell", "SELL"]:
-                stopLoss_value = stopLoss_point
-    else: # For Negative scenario
-        if option in ["buy", "BUY"]:
-            stopLoss_value = current_price + (label_onePointsEqual * min_point_distance)
+    direction_map = {
+        TradeDirectionOption.BUY: current_price - price_adjustment,
+        TradeDirectionOption.SELL: current_price + price_adjustment
+    }
 
-        if option in ["sell", "SELL"]:
-            stopLoss_value = current_price - (label_onePointsEqual * min_point_distance)
+    # For Positive scenario, use the price adjustment map
+    if stop_loss_flag == AlertType.POSITIVE:
+        if sl_type == SLTPOption.PRICE:
+            stop_loss_value = direction_map.get(option, stop_loss_point)  # Default to stop_loss_point if not found
+        else:
+            stop_loss_value = stop_loss_point
+    else:
+        # For Negative scenario, reverse the price adjustment
+        reverse_direction_map = {
+            TradeDirectionOption.BUY: current_price + price_adjustment,
+            TradeDirectionOption.SELL: current_price - price_adjustment
+        }
+        
+        stop_loss_value = reverse_direction_map.get(option, stop_loss_point)  # Default to stop_loss_point if not found
 
-    print("Stop Loss Value", stopLoss_value)
-    populate_element(element=stopLoss_input, text=stopLoss_value)
+    # Populate the element with the calculated stop loss value
+    populate_element(element=stop_loss_input, text=stop_loss_value)
 
-    return stopLoss_value
+    return stop_loss_value
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -58,39 +66,44 @@ def calculate_stop_loss(driver, trade_type, sl_type, option, label_onePointsEqua
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def calculate_take_profit(driver, trade_type, tp_type, option, label_onePointsEqual, current_price, takeProfit_flag: bool = True):
+def calculate_take_profit(driver, trade_type: ButtonModuleType, tp_type: SLTPOption, option: TradeDirectionOption, label_one_points_equal, current_price, take_profit_flag: AlertType = AlertType.POSITIVE):
+    # Common logic
+    min_point_distance = generate_min_point_disatance(trade_type)
     
-    min_point_distance = pointsDistance(trade_type)
-
-    takeProfit_point = get_tp_point_distance(option, trade_type)
-
-    takeProfit_input = handle_takeProfit(driver, trade_type, tp_type)
+    take_profit_point = get_tp_point_distance(option, trade_type)
     
-    if takeProfit_flag: # For Positive scenario
-        if tp_type == "price":
-            if option in ["buy", "BUY"]:
-                # takeProfit_value = Sell price + (One point equals * Minimum Point Distance)
-                takeProfit_value = current_price + (label_onePointsEqual * min_point_distance)
-                    
-            if option in ["sell", "SELL"]:
-                # takeProfit_value = Buy price - (One point equals * Minimum Point Distance)
-                takeProfit_value = current_price - (label_onePointsEqual * min_point_distance)
+    take_profit_input = handle_take_profit(driver, trade_type, tp_type)
 
-        elif tp_type == "points":
-            if option in ["buy", "BUY", "sell", "SELL"]:
-                takeProfit_value = takeProfit_point
-                
-    else: # For Negative scenario
-        if option in ["buy", "BUY"]:
-            takeProfit_value = current_price - (label_onePointsEqual * min_point_distance)
-                
-        if option in ["sell", "SELL"]:
-            takeProfit_value = current_price + (label_onePointsEqual * min_point_distance)
+    # Define the calculation logic for BUY and SELL options
+    price_adjustment = label_one_points_equal * min_point_distance
+    # BUY = Sell Price + (One point equals * Minimum Point Distance)
+    # SELL = Buy Price - (One point equals * Minimum Point Distance)
+    
+    direction_map = {
+        TradeDirectionOption.BUY: current_price + price_adjustment,
+        TradeDirectionOption.SELL: current_price - price_adjustment,
+    }
 
-    print("Take Profit Value", takeProfit_value)
-    populate_element(element=takeProfit_input, text=takeProfit_value)
+    # For Positive scenario, use the price adjustment map
+    if take_profit_flag == AlertType.POSITIVE:
+        if tp_type == SLTPOption.PRICE:
+            take_profit_value = direction_map.get(option, take_profit_point)  # Default to stop_loss_point if not found
+        else:
+            take_profit_value = take_profit_point
+    else:
+        # For Negative scenario, reverse the price adjustment
+        reverse_direction_map = {
+            TradeDirectionOption.BUY: current_price - price_adjustment,
+            TradeDirectionOption.SELL: current_price + price_adjustment,
+        }
+        
+        take_profit_value = reverse_direction_map.get(option, take_profit_point)  # Default to stop_loss_point if not found
 
-    return takeProfit_value
+    # Populate the element with the calculated stop loss value
+    populate_element(element=take_profit_input, text=take_profit_value)
+
+    return take_profit_value
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -104,22 +117,25 @@ def calculate_take_profit(driver, trade_type, tp_type, option, label_onePointsEq
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def trade_oct_market_order(driver, indicator_type, chart_fullscreen=None, set_Chart: bool = False, set_OCT: bool = True):
+def trade_oct_market_order(driver, option: TradeDirectionOption, chart_fullscreen=None, trade_constants: TradeConstants = TradeConstants.NONE):
     try:
         
         spinner_element(driver)
 
-        if set_Chart:
-            chart_minMax(driver, chart_fullscreen)
+        # if set_Chart:
+        if TradeConstants.SET_CHART in trade_constants or chart_fullscreen:
+            chart_min_max(driver, chart_fullscreen)
 
-        if set_OCT:
-            button_tradeModule(driver, module_Type="one-click-trading")
+        # if set_OCT:
+        if TradeConstants.SET_OCT in trade_constants:
+            button_trade_module(driver, trade_type=ButtonModuleType.ONE_CLICK_TRADING)
         
         # Input the size/volume
         input_size_volume(driver)
-                
-        indicator_type = button_buy_sell_type(driver, indicator_type)
-        return indicator_type
+        
+        option = oct_buy_sell_type(driver, option)
+        
+        return option
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -138,34 +154,36 @@ def trade_oct_market_order(driver, indicator_type, chart_fullscreen=None, set_Ch
 """
 
 
-def trade_market_order(driver, trade_type, option, chart_fullscreen=None, sl_type=None, tp_type=None, set_Chart: bool = False, set_fillPolicy: bool = False, set_stopLoss: bool = True,  stopLoss_flag: bool = True, set_takeProfit: bool = True, takeProfit_flag: bool = True):
+def trade_market_order(driver, option: TradeDirectionOption, trade_type: ButtonModuleType = ButtonModuleType.TRADE, chart_fullscreen=None, sl_type: SLTPOption = None, tp_type: SLTPOption = None, trade_constants: TradeConstants = TradeConstants.NONE, stop_loss_flag: AlertType = AlertType.POSITIVE, take_profit_flag: AlertType = AlertType.POSITIVE):
     try:
 
         spinner_element(driver)
 
-        if set_Chart:
-            chart_minMax(driver, chart_fullscreen)
+        if TradeConstants.SET_CHART in trade_constants or chart_fullscreen:
+            chart_min_max(driver, chart_fullscreen)
         
-        button_tradeModule(driver, module_Type="trade")
+        button_trade_module(driver, trade_type)
 
         # Retrieve the One Point Equal label data
-        label_onePointsEqual = label_onePointEqual(driver, trade_type="trade")
-        
+        label_one_points_equal = get_label_one_point_equal(driver, trade_type)
+
         # Retrieve the current price based on order type and option
-        current_price = get_current_price(driver, trade_type, option, partial_text="market")
+        current_price = get_current_price(driver, trade_type, option, order_type=OrderExecutionType.MARKET)
 
         # Input the size/volume
         input_size_volume(driver)
 
-        # Select the Fill Policy
-        if set_fillPolicy:
-            fillPolicy_type(driver, trade_type)
+        # Set the Fill Policy if required
+        if TradeConstants.SET_FILL_POLICY in trade_constants:
+            fill_policy_type(driver, trade_type)
 
-        if set_stopLoss: # if set_stopLoss is True
-            calculate_stop_loss(driver, trade_type, sl_type, option, label_onePointsEqual, current_price, stopLoss_flag)
+        # Set Stop Loss if specified or required
+        if TradeConstants.SET_STOP_LOSS in trade_constants or sl_type:
+            calculate_stop_loss(driver, trade_type, sl_type, option, label_one_points_equal, current_price, stop_loss_flag)
 
-        if set_takeProfit: # if set_takeProfit is True
-            calculate_take_profit(driver, trade_type, tp_type, option, label_onePointsEqual, current_price, takeProfit_flag)
+        # Set Take Profit if specified or required
+        if TradeConstants.SET_TAKE_PROFIT in trade_constants or tp_type:
+            calculate_take_profit(driver, trade_type, tp_type, option, label_one_points_equal, current_price, take_profit_flag)
 
         button_trade_action(driver, trade_type)
         
@@ -187,26 +205,26 @@ def trade_market_order(driver, trade_type, option, chart_fullscreen=None, sl_typ
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def modify_market_order(driver, trade_type, row_number, sl_type=None, tp_type=None, set_stopLoss: bool = True,  stopLoss_flag: bool = True, set_takeProfit: bool = True, takeProfit_flag: bool = True):
+def modify_market_order(driver, trade_type: ButtonModuleType = ButtonModuleType.EDIT, sl_type: SLTPOption = None, tp_type: SLTPOption = None, trade_constants: TradeConstants = TradeConstants.NONE, stop_loss_flag: AlertType = AlertType.POSITIVE, take_profit_flag: AlertType = AlertType.POSITIVE):
     try:
 
         # Perform order panel action based on trade type and row numbers
-        button_orderPanel_action(driver, trade_type, row_number)
+        handle_track_close_edit(driver, trade_type)
         
         # Get the current price from the market
         current_price = get_current_price(driver, trade_type)
         
         # Retrieve the label indicating points equal
-        label_onePointsEqual = label_onePointEqual(driver, trade_type="edit")
-        
+        label_one_points_equal = get_label_one_point_equal(driver, trade_type)
+
         # Get the edit order type label
         option = get_edit_order_label(driver)
 
-        if set_stopLoss: # if set_stopLoss is True
-            calculate_stop_loss(driver, trade_type, sl_type, option, label_onePointsEqual, current_price, stopLoss_flag)
+        if TradeConstants.SET_STOP_LOSS in trade_constants or sl_type:
+            calculate_stop_loss(driver, trade_type, sl_type, option, label_one_points_equal, current_price, stop_loss_flag)
 
-        if set_takeProfit: # if set_takeProfit is True
-            calculate_take_profit(driver, trade_type, tp_type, option, label_onePointsEqual, current_price, takeProfit_flag)
+        if TradeConstants.SET_TAKE_PROFIT in trade_constants or tp_type:
+            calculate_take_profit(driver, trade_type, tp_type, option, label_one_points_equal, current_price, take_profit_flag)
             
         # Perform the trade action (Update Order)
         button_trade_action(driver, trade_type)
@@ -230,24 +248,25 @@ def modify_market_order(driver, trade_type, row_number, sl_type=None, tp_type=No
 """
 
 # For closing market and deleting pending order
-def close_delete_order(driver, row_number, order_action, actions: list = None, trade_type=None, set_marketSize:bool = False, set_negMarket:bool = False, set_fillPolicy:bool = False, clearField: bool = False):
+def close_delete_order(driver, actions: list = None, trade_type: ButtonModuleType = ButtonModuleType.CLOSE, close_options: TradeConstants = TradeConstants.NONE):
     try:
 
         spinner_element(driver)
         
-        if trade_type == "close-order":
-            _, lot_size, vol_step = button_tradeModule(driver, module_Type="specification")
-
         # Clicking on the action (Edit / Close / Delete)
-        button_orderPanel_action(driver, order_action, row_number)
+        handle_track_close_edit(driver, trade_type)
         
-        if set_marketSize:
-            close_partialSize(driver, set_fillPolicy, clearField)
+        # if set_market_size:
+        if TradeConstants.SET_CLOSE_MARKET_SIZE in close_options:
+            close_partial_size(driver, close_options)
         
         # Test the (- / +) button, (Min / Max) button and validation check
-        if set_negMarket:
+        # if set_negMarket:
+        if TradeConstants.SET_NEG_MARKET in close_options:
+            _, lot_size, vol_step = button_trade_module(driver, trade_type=ButtonModuleType.SPECIFICATION)
+
             verify_button_behavior_at_min_max(driver, trade_type, lot_size=lot_size)
-            verify_volume_minMax_buttons(driver, trade_type, actions, size_volume_step=vol_step)
+            verify_volume_min_max_buttons(driver, trade_type, actions, size_volume_step=vol_step)
             verify_invalid_size_volume_input(driver, trade_type)
 
     except Exception as e:

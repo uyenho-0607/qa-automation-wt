@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption, TradeConstants, SLTPOption, ButtonModuleType, OrderPanel, SectionName
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -24,8 +25,8 @@ class TC_MT5_aA11():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc11(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc11(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

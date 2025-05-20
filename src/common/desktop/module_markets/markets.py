@@ -2,6 +2,7 @@ import random
 
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -19,7 +20,7 @@ from common.desktop.module_sub_menu.utils import menu_button
 def inspect_my_trade_orders(driver, symbol_name, order_type):
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer displays
         spinner_element(driver)
@@ -31,13 +32,13 @@ def inspect_my_trade_orders(driver, symbol_name, order_type):
         displayed_symbol = top_row.find_element(By.XPATH, "//div[@data-testid='portfolio-row-symbol']").text.strip()
         
         if displayed_symbol != symbol_name:
-            raise AssertionError(f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'")
+            assert False, f"Symbol '{symbol_name}' is not found in the top row, instead found '{displayed_symbol}'"
         
         # Validate order type (BUY/SELL)
         displayed_order_type = top_row.find_element(By.XPATH, "//span[@data-testid='portfolio-row-order-type']").text.strip()
         
         if displayed_order_type.upper() != order_type.upper():
-            raise AssertionError(f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'")
+            assert False, f"Order type '{order_type}' does not match displayed type '{displayed_order_type}'"
         
         print(f"Order for symbol '{symbol_name}' with order type '{order_type}' is correctly displayed in the top row.")
         assert True
@@ -51,7 +52,7 @@ def inspect_my_trade_orders(driver, symbol_name, order_type):
 def verify_no_orders_in_my_trades(driver):
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer displays
         spinner_element(driver)
@@ -145,7 +146,7 @@ def wait_for_menu_button(driver, option):
     """
     result = wait_for_text_to_be_present_in_element_by_xpath(driver, option["button_xpath"], text=option.get("menu_name", ""))
     if not result:
-        raise AssertionError(f"'{option.get('menu_name', '')}' button not found.")
+        assert False, f"'{option.get('menu_name', '')}' button not found."
 
 
 
@@ -181,7 +182,7 @@ def handle_signal_option(driver, option_name, option):
                 continue
         
         # If neither state is matched, raise an exception or return a default value
-        raise Exception("Neither the xpath is wrong")
+        raise Exception("Failed to determine signal symbol state: neither favorite nor unfavorite xpath matched.")
 
 
 def select_random_symbol(driver, option):
@@ -204,7 +205,7 @@ def verify_selected_tab(driver, option):
     matching tab text, and validating the presence of specific keys like 'fav_xpath'.
     """
     for tab_xpath in option["tab_xpath"]:
-        # tab = visibility_of_element_by_xpath(driver, tab_xpath)
+        # tab = find_visible_element_by_testid(driver, tab_xpath)
         tab = find_visible_element_by_testid(driver, data_testid=tab_xpath)
         if tab:  # Ensure the tab is visible
             tab_text = tab.text
@@ -271,7 +272,7 @@ def market_select_symbols(driver, option_name):
 
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Wait till the spinner icon no longer display
         spinner_element(driver)
@@ -343,7 +344,7 @@ def market_redirect_arrow(driver, option_name):
         
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         # Handle specific market options (e.g., 'Top Loser')
         if option_name == "Top Loser":
@@ -400,7 +401,7 @@ def news_section(driver):
     """
     try:
         # Redirect to the Markets page
-        menu_button(driver, menu="markets")
+        menu_button(driver, menu=Menu.MARKET)
         
         spinner_element(driver)
         

@@ -1,5 +1,5 @@
 
-from enums.main import AccountType, LoginResultState
+from enums.main import AccountType, AlertType
 from constants.element_ids import DataTestID
 
 from constants.helper.error_handler import handle_exception
@@ -67,7 +67,7 @@ def forgot_password(driver, email: str, accountID: str = None, account_type: Acc
         select_account_type(driver, account_type)
 
         if not is_element_present_by_xpath(driver, DataTestID.APP_FORGOT_PASSWORD):
-            raise AssertionError("Forgot Password button not found")
+            assert False, "Forgot Password button not found"
         
         click_element(find_element_by_xpath_with_wait(driver, DataTestID.APP_FORGOT_PASSWORD))
 
@@ -82,7 +82,7 @@ def forgot_password(driver, email: str, accountID: str = None, account_type: Acc
             return  # Exit after closing browser
 
         # Fallback error handling
-        handle_alert_error(driver, expectation=LoginResultState.SUCCESS)
+        handle_alert_error(driver, expectation=AlertType.SUCCESS)
 
     except Exception as e:
         handle_exception(driver, e)

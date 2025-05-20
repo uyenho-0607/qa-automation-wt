@@ -14,9 +14,9 @@ from common.desktop.module_announcement.utils import announcement_validation
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT10():
+class TC_aT10():
 
-    @allure.title("TC_MT5_aT10")
+    @allure.title("TC_aT10")
 
     @allure.description(
         """
@@ -25,8 +25,8 @@ class TC_MT5_aT10():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc10(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc10(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
 

@@ -1,13 +1,13 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, ButtonModuleType, TradeDirectionOption
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner, trade_ordersConfirmationDetails, button_trade_action
+from common.desktop.module_trade.utils import toggle_radio_button, swap_units_volume_conversion, button_buy_sell_type, get_trade_snackbar_banner, trade_orders_confirmation_details, button_trade_action
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
@@ -25,8 +25,8 @@ class TC_MT4_aP02():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc02(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc02(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -45,16 +45,16 @@ class TC_MT4_aP02():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
                 
             with allure.step("Enter Volume"):
-                swap_units_volume_conversion(driver=main_driver, module_Type="trade")
+                swap_units_volume_conversion(driver=main_driver, module_type=ButtonModuleType.TRADE)
                 
             with allure.step("Click on Sell button"):
-                button_buy_sell_type(driver=main_driver, indicator_type="sell")
+                button_buy_sell_type(driver=main_driver, option=TradeDirectionOption.SELL)
 
             with allure.step("Click on Place button"):
                 button_trade_action(driver=main_driver, trade_type="trade")
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)

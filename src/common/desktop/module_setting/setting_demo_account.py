@@ -5,6 +5,7 @@ import pyperclip
 from tabulate import tabulate
 from difflib import get_close_matches
  
+from enums.main import AlertType, Setting
 from constants.element_ids import DataTestID
 from constants.helper.screenshot import attach_text
 from constants.helper.driver import delay, get_current_url
@@ -28,7 +29,7 @@ def open_demo_account_error_msg(driver, setting: bool = False):
     try:
         # Open the demo account settings if the setting flag is True
         if setting:
-            button_setting(driver, setting_option="open-demo-account")
+            button_setting(driver, setting_option=Setting.OPEN_DEMO_ACCOUNT)
         else:
             demo_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_ACCOUNT_SIGNUP)
             click_element(element=demo_button)
@@ -96,10 +97,11 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
 
         # If the setting flag is True, open the demo account settings via the settings button
         if setting:
-            button_setting(driver, setting_option="open-demo-account")
+            button_setting(driver, setting_option=Setting.OPEN_DEMO_ACCOUNT)
         else:
             demo_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_ACCOUNT_SIGNUP)
             click_element(element=demo_button)
+            assert demo_button, "Demo Account not found"
         
         """ Name field """
         # Generate a random name for the demo account if not provided
@@ -109,10 +111,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         clear_input_field(element=input_name) # Clear any pre-filled value
         populate_element(element=input_name, text=first_name)  # Populate the input field with the random name
 
-        """ Email field """
-        # Use the provided email or generate a random one
-        # email_to_use = user_email if user_email else generate_random_name_and_email()[3]
-        
+        """ Email field """        
         # Fill in the Email field        
         input_email = find_element_by_testid(driver, data_testid=DataTestID.DEMO_ACCOUNT_CREATION_MODAL_EMAIL)
         populate_element(element=input_email, text=email)  # Populate the input field with the email
@@ -120,7 +119,7 @@ def open_demo_account_screen(driver, new_password=None, confirm_password=None, s
         """ Phone Number field """
         # Handle the Phone Number field
         dial_code = find_element_by_xpath(driver, "//div[@class='sc-1ks0xwr-0 fSgSbd']")
-        # dialCode = find_element_by_testid(driver, data_testid=DataTestID.COUNTRY_DIAL_CODE)
+        # dial_code = find_element_by_testid(driver, data_testid=DataTestID.COUNTRY_DIAL_CODE)
         click_element(element=dial_code) # Open the dial code dropdown
         
         # Wait for the dial code modal to appear
@@ -210,7 +209,7 @@ def get_copied_banner(driver):
         
         # Validate message header
         if extracted_header != "Success":
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message: {label_message}"
         
         # Close the notification
         btn_close = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_CLOSE_BUTTON)
@@ -232,7 +231,7 @@ def get_copied_banner(driver):
         if re.search(pattern, clipboard_text, re.MULTILINE):
             attach_text(clipboard_text, name="✅ Copied account creation details")
         else:
-            raise AssertionError("❌ Copy function failed or incorrect format.")
+            assert False, "❌ Copy function failed or incorrect format."
         
         # Retrieve the account details label
         demo_account_details = find_list_of_elements_by_xpath(driver, "//div[@class='sc-zee84o-4 hXfwHX']")
@@ -244,7 +243,7 @@ def get_copied_banner(driver):
             final_result = "\n".join(formatted_text)  # Join all elements into a single string
             
         if clipboard_text != final_result:
-            raise AssertionError("❌ Copy function failed or incorrect format.")
+            assert False, "❌ Copy function failed or incorrect format."
                 
     except Exception as e:
         handle_exception(driver, e)
@@ -292,7 +291,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         # Verify the presence of the "Your Demo Account is Ready!" message
         match = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid=DataTestID.DEMO_ACCOUNT_COMPLETION_MODAL_TITLE, text="Your Demo Account is Ready!")
         if not match:
-            raise AssertionError("Expected to redirect to 'Your Demo Account is Ready!' modal")
+            assert False, "Expected to redirect to 'Your Demo Account is Ready!' modal"
 
         # Retrieve header labels and map them
         header_elements = find_list_of_elements_by_testid(driver, data_testid=DataTestID.DEMO_COMPLETION_LABEL)
@@ -336,14 +335,14 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
             # get_copied_banner(driver)
 
             # if text == demo_account_info
-            modal_close = find_element_by_xpath(driver, "//div[@class='sc-1dvc755-6 hyBcLN']//*[name()='svg']")
+            modal_close = find_element_by_xpath(driver, "//div[@class='sc-1dvc755-6 eNWBtu']//*[name()='svg']")
             click_element(modal_close)
             
             # Verify the URL after closing the modal
             final_url = get_current_url(driver)
 
             if initial_url != final_url:
-                raise AssertionError("Page URL changed unexpectedly after closing the modal.")
+                assert False, "Page URL changed unexpectedly after closing the modal."
         else:
             handle_sign_in(driver, demo_account_details, new_password, confirm_password)
 
@@ -384,7 +383,7 @@ def handle_sign_in(driver, demo_account_details, new_password, confirm_password)
 
         # Ensure that the URL contains 'web/login' (indicating that we are on the login page)
         if "web/login" not in current_url:
-            raise AssertionError(f"Redirected to {current_url}, expected to be on the login page.")
+            assert False, f"Redirected to {current_url}, expected to be on the login page."
 
         # Validate the login username by checking if it matches the demo account username
         userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID)
@@ -452,7 +451,7 @@ def validate_account_details(driver, demo_account_details):
     assert match.group(2) == demo_account_details["Leverage"], f"Leverage mismatch. Expected {demo_account_details["Leverage"]} but found {match.group(2)}"
 
     # Validate the Account Balance displayed matches the expected value from demo_account_details
-    account_balance = get_label_of_element(find_element_by_xpath(driver, "(//div[@class='sc-11khvbe-3 jKLIbO'])[1]//div[@class='sc-11khvbe-5 doTcw']"))
+    account_balance = get_label_of_element(find_element_by_xpath(driver, "(//*[@class='sc-11khvbe-3 ggEICm'])[1]//div[2]"))
     # Extract the numerical value of the account balance from the displayed text using regex
     balance_value = re.search(r'\$(\d{1,3}(?:,\d{3})*)', account_balance).group(1)
     assert balance_value == demo_account_details["Deposit"], "Account balance mismatch"
@@ -472,7 +471,7 @@ def validate_account_details(driver, demo_account_details):
 def handle_changePassword(driver, demo_account_details, new_password, confirm_password):
 
     # Step 1: Navigate to the Change Password section
-    button_setting(driver, setting_option="change-password")
+    button_setting(driver, setting_option=Setting.CHANGE_PASSWORD)
     
     # Locate and populate the old password input field
     old_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_OLD_PASSWORD)
@@ -489,23 +488,19 @@ def handle_changePassword(driver, demo_account_details, new_password, confirm_pa
     # Find the submit button and click it
     submit_button = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM)
     click_element(element=submit_button)
-
-    alert_message, actual_alert_type = capture_alert(driver)
-
-    # Handle different types of alerts
-    if actual_alert_type == "success":
-        # Extract the label/message from the alert
-        label_message = get_label_of_element(alert_message)
     
-        # If the success message indicates a password change, process it
+    alert_message, actual_alert_type = capture_alert(driver)
+    label_message = get_label_of_element(alert_message)
+
+    if actual_alert_type == AlertType.SUCCESS:
         if "Account password has been updated successfully" in label_message:
             attach_text(label_message, name="Success message found:")
-            # Log the user out
-            button_setting(driver, setting_option="logout")
-            
+            button_setting(driver, setting_option=Setting.LOGOUT)  # Log the user out
         else:
-            # If the success message doesn't match, handle it as an unexpected message
             assert False, f"Unexpected success message: {label_message}"
+    else:
+        assert False, f"{label_message} prompted"
+    
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

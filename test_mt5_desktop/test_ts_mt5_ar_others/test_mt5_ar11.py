@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, OrderPanel
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -14,9 +15,9 @@ from common.desktop.module_trade.order_panel.utils import update_column_visibili
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT5_aR11():
+class TC_aR11():
 
-    @allure.title("TC_MT5_aR11")
+    @allure.title("TC_aR11")
 
     @allure.description(
         """
@@ -25,8 +26,8 @@ class TC_MT5_aR11():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc11(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc11(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -39,14 +40,14 @@ class TC_MT5_aR11():
                 login_wt(driver=main_driver, server=Server.MT5)
 
             with allure.step("Validate Column Visibility from Trade to Asset"):
-                update_column_visibility(driver=main_driver, tab_order_type="open-positions")
-                update_column_visibility(driver=main_driver, tab_order_type="pending-orders")
-                update_column_visibility(driver=main_driver, tab_order_type="history")
+                update_column_visibility(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS)
+                update_column_visibility(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS)
+                update_column_visibility(driver=main_driver, tab_order_type=OrderPanel.HISTORY)
                 
             with allure.step("Validate Column Visibility from Asset to Trade"):
-                update_column_visibility(driver=main_driver, tab_order_type="open-positions", set_menu=True)
-                update_column_visibility(driver=main_driver, tab_order_type="pending-orders", set_menu=True)
-                update_column_visibility(driver=main_driver, tab_order_type="history", set_menu=True)
+                update_column_visibility(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, set_menu=True)
+                update_column_visibility(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, set_menu=True)
+                update_column_visibility(driver=main_driver, tab_order_type=OrderPanel.HISTORY, set_menu=True)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

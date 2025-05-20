@@ -1,13 +1,13 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, ButtonModuleType, TradeDirectionOption, SLTPOption, ExpiryType, OrderPanel, SectionName
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, close_delete_order, trade_ordersConfirmationDetails, get_trade_snackbar_banner, extract_order_info
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_order, close_delete_order, trade_orders_confirmation_details, get_trade_snackbar_banner, extract_order_info
 from data_config.utils import compare_dataframes, process_and_print_data
 
 @allure.parent_suite("MT4 Membersite - Desktop - Trade - Stop Order")
@@ -34,8 +34,8 @@ class TC_mt4_af18():
     )
 
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc18(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc18(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -56,29 +56,29 @@ class TC_mt4_af18():
             """ Place Stop Order """
 
             with allure.step("Place Stop Order"):
-                trade_stop_order(driver=main_driver, trade_type="trade", option="sell", expiryType="good-till-cancelled", set_stopLoss=False, tp_type="points")
+                trade_stop_order(driver=main_driver, option=TradeDirectionOption.SELL, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, tp_type=SLTPOption.POINTS)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Pending Order", row_number=[1])
+                _, pending_order_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             """ End of Place Order """
                 
             with allure.step("Order Panel: Pending Order - Click on Delete button"):
-                close_delete_order(driver=main_driver, row_number=[1], order_action="close")
+                close_delete_order(driver=main_driver)
 
             with allure.step("Retrieve the snackbar message"):
                 snackbar_banner_df = get_trade_snackbar_banner(driver=main_driver)
 
             with allure.step("Retrieve the Order History data"):
-                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type="history", section_name="Order History", row_number=[1])
+                _, order_history_df = extract_order_info(driver=main_driver, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
 
-                compare_dataframes(driver=main_driver, df1=pending_order_df, name1="Pending Order", df2=order_history_df, name2="Order History")
+                compare_dataframes(driver=main_driver, df1=pending_order_df, name1=SectionName.TRADE_PENDING_ORDER, df2=order_history_df, name2=SectionName.ORDER_HISTORY)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, snackbar_banner_df, order_history_df)

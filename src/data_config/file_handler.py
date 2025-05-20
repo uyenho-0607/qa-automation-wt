@@ -2,7 +2,7 @@ import os
 import csv
 import json
 
-from enums.main import Server, SymbolsList
+from enums.main import Server, SymbolsList, CSVFileNameManager
 from constants.helper.screenshot import attach_text
 
 
@@ -83,7 +83,7 @@ def read_symbol_file(server: Server, symbol_type: SymbolsList):
         return data.get(server, {}).get(symbol_type, [])
         
     except Exception as e:
-        raise AssertionError(f"Error reading JSON file: {e}")
+        assert False, f"Error reading JSON file: {e}"
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -93,11 +93,11 @@ def read_symbol_file(server: Server, symbol_type: SymbolsList):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                APPEND ORDERIDs TO CSV
+                                                APPEND order_ids TO CSV
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def append_orderIDs_to_csv(order_ids, filename):
+def append_order_ids_to_csv(order_ids, filename: CSVFileNameManager):
     with open(filename, 'a', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
             
@@ -116,11 +116,11 @@ def append_orderIDs_to_csv(order_ids, filename):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                READ ORDERIDs FROM CSV
+                                                READ order_ids FROM CSV
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def read_orderIDs_from_csv(filename):
+def read_order_ids_from_csv(filename: CSVFileNameManager):
     order_ids = []
     try:
         with open(filename) as csvfile:
@@ -144,16 +144,13 @@ def read_orderIDs_from_csv(filename):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                CLEAR ORDERIDs FROM CSV
+                                                CLEAR order_ids FROM CSV
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def clear_orderIDs_csv(filename):
+def clear_order_ids_csv(filename: CSVFileNameManager):
     # Clears the existing 'order_ids.csv' file.
     try:
-        # folder_path = "./orders-csv"
-        # full_filename = os.path.join(folder_path, filename)
-        
         if os.path.exists(filename):
             os.remove(filename)
     except OSError as e:
@@ -168,7 +165,7 @@ def clear_orderIDs_csv(filename):
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                APPEND ORDERIDs TO TEXT FILE
+                                                APPEND order_ids TO TEXT FILE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
@@ -190,7 +187,7 @@ def append_token_file(name: str, file_path: str = "src/data_config/api/bearer_to
                                                 READ DTATA FROM TEXT FILE
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-            
+
 def read_token_file(file_path: str = "src/data_config/api/bearer_token.txt") -> None:
     try:
         with open(file_path, "r") as file:

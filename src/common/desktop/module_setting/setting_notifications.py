@@ -1,3 +1,4 @@
+from enums.main import Setting
 
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, get_current_url
@@ -6,6 +7,7 @@ from common.desktop.module_notification.noti_system import noti_newDevice
 from common.desktop.module_trade.order_placing_window.module_oct import toggle_radio_button
 from common.desktop.module_setting.setting_change_pwd import perform_login
 from common.desktop.module_setting.setting_general import button_setting
+
 
 
 """
@@ -17,13 +19,13 @@ from common.desktop.module_setting.setting_general import button_setting
 def notification_settings_modal(driver, category: str, desired_state: str, login_username: str = None, login_password: str = None, params_wt_url: str = None):
     try:
         
-        button_setting(driver, setting_option="notification-setting")
+        button_setting(driver, setting_option=Setting.NOTIFICATION_SETTING)
         
         # Toggle ON / OFF the radio button
         state = toggle_radio_button(driver, category, desired_state)
 
         # Log the user out
-        button_setting(driver, setting_option="logout")
+        button_setting(driver, setting_option=Setting.LOGOUT)
     
         # Get the current URL after logout
         current_url = get_current_url(driver)

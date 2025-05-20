@@ -2,6 +2,7 @@ import allure
 import pytest
 
 from enums.main import Server
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -24,8 +25,8 @@ class TC_MT4_aT06():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc06(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc06(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -35,7 +36,7 @@ class TC_MT4_aT06():
         try:
             
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, account_type="live", testcase_id="TC01")
+                login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Switch account"):
                 switch_or_delete_account(driver=main_driver, option="switch")

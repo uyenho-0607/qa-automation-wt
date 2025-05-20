@@ -58,7 +58,7 @@ def select_trade_symbol_from_watchlist(driver, excluded_tabs=None):
             click_element(random_symbol)  # Click on the selected symbol
         else:
             # Check for "No items found" message
-            # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
+            # no_items_message = find_visible_element_by_testid(driver, data_testid="empty-message")
             no_items_message = find_visible_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
             msg = get_label_of_element(element=no_items_message)
             print(f"Message displayed: {msg}")
@@ -68,7 +68,7 @@ def select_trade_symbol_from_watchlist(driver, excluded_tabs=None):
                 return select_trade_symbol_from_watchlist(driver, excluded_tabs)  # Recursive call to try another tab
             
             # Raise an error if no symbols were found for non-Favourites categories
-            raise AssertionError(f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab")
+            assert False, f"The message '{msg}' was displayed after selecting '{selected_category_text}' tab"
 
         # Verify if the correct symbol is displayed in the chart (ensuring the click was successful)
         chart_symbol_name = wait_for_text_to_be_present_in_element_by_testid(driver, data_testid="symbol-overview-id", text=label_symbol)
@@ -216,7 +216,7 @@ def handle_pre_selected_tab(driver):
                     assert False, "Top Gainer is pre-selected but Favourites tab has symbols."
                 else:  
                     # Verify and capture the message displayed in the Favourites tab
-                    # no_items_message = visibility_of_element_by_testid(driver, data_testid="empty-message")
+                    # no_items_message = find_visible_element_by_testid(driver, data_testid="empty-message")
                     no_items_message = find_visible_element_by_xpath(driver, "//div[@class='sc-gl6kw9-0 kqmkWT']")
                     msg = get_label_of_element(element=no_items_message)
                     print(f"Verified that the Favourites tab contains no symbols. Message displayed: {msg}")

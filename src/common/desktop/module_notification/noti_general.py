@@ -21,7 +21,7 @@ def notification_bell(driver):
     
     try:
         # Wait for the notification bell element to be visible before interacting
-        noti_bell = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_SELECTOR.value)
+        noti_bell = find_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_SELECTOR)
         
         # Use JavaScript to click the notification bell
         javascript_click(driver, element=noti_bell)
@@ -57,9 +57,9 @@ def notification_type(driver, notiType):
     try:
         
         button_testids = {
-            "order": DataTestID.TAB_NOTIFICATION_TYPE_ORDER.value,
-            "system": DataTestID.TAB_NOTIFICATION_TYPE_SYSTEM.value,
-            "information": DataTestID.TAB_NOTIFICATION_TYPE_INFORMATION.value
+            "order": DataTestID.TAB_NOTIFICATION_TYPE_ORDER,
+            "system": DataTestID.TAB_NOTIFICATION_TYPE_SYSTEM,
+            "information": DataTestID.TAB_NOTIFICATION_TYPE_INFORMATION
         }
         
         button_testid = button_testids.get(notiType)

@@ -1,7 +1,6 @@
 import pytest
 import chromedriver_autoinstaller
 
-import logging
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -9,26 +8,9 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options
 
 
-"""
-@pytest.fixture(scope="class")
-def chromeDriver() -> WebDriver:
-    options = webdriver.ChromeOptions()
-    options.add_experimental_option("detach", True)
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    return driver
-
-"""
-
-
-# Configure logging
-# logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-# logger = logging.getLogger(__name__)
-
-
 
 @pytest.fixture(scope="function")
-def chromeDriver() -> WebDriver:
+def chrome_driver() -> WebDriver:
     # This will install the correct version of ChromeDriver if not already installed
     # To be commented out if using the remote
     # chromedriver_autoinstaller.install()

@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, ButtonModuleType, TradeDirectionOption
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -25,8 +25,8 @@ class TC_MT4_aP01():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc01(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc01(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -45,10 +45,10 @@ class TC_MT4_aP01():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Enter Units"):
-                swap_units_volume_conversion(driver=main_driver, module_Type="one-click-trading", target_state="units")
+                swap_units_volume_conversion(driver=main_driver, module_type=ButtonModuleType.ONE_CLICK_TRADING, desired_state="units")
                 
             with allure.step("Click on Buy button"):
-                button_buy_sell_type(driver=main_driver, indicator_type="buy")
+                button_buy_sell_type(driver=main_driver, option=TradeDirectionOption.BUY)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)

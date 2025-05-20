@@ -1,13 +1,14 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, SymbolsList, TradeDirectionOption, ButtonModuleType
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, button_tradeModule, dropdown_orderType, button_buy_sell_type, verify_volume_minMax_buttons, btn_minMax_price, btn_min_max_stop_loss, btn_minMax_takeProfit
+from common.desktop.module_trade.utils import toggle_radio_button, button_trade_module, dropdown_order_type, button_buy_sell_type, verify_volume_min_max_buttons, btn_min_max_price, btn_min_max_stop_loss, btn_min_max_take_profit
 
 @allure.parent_suite("MT4 Membersite - Desktop - Others")
 
@@ -27,8 +28,8 @@ class TC_MT4_aP06():
         )
       
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc06(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc06(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -41,37 +42,37 @@ class TC_MT4_aP06():
                 login_wt(driver=main_driver, server=Server.MT4)
 
             with allure.step("Search symbol"):
-                input_symbol(driver=main_driver, server=Server.MT4, symbol_type="Symbols_Price")
+                input_symbol(driver=main_driver, server=Server.MT4, symbol_type=SymbolsList.SYMBOLS_PRICE)
                 
             with allure.step("Enable OCT"):
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Specification OCT"):
-                _, _, vol_step = button_tradeModule(driver=main_driver, module_Type="specification")
+                _, _, vol_step = button_trade_module(driver=main_driver, trade_type=ButtonModuleType.SPECIFICATION)
 
             with allure.step("Click on Trade tab"):
-                button_tradeModule(driver=main_driver, module_Type="trade")
+                button_trade_module(driver=main_driver, trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Select the orderType option: Limit"):
-                dropdown_orderType(driver=main_driver, partial_text="limit")
+                dropdown_order_type(driver=main_driver, partial_text="limit")
                 
             with allure.step("Click on Buy button"):
-                button_buy_sell_type(driver=main_driver, indicator_type="buy")
+                button_buy_sell_type(driver=main_driver, option=TradeDirectionOption.BUY)
                 
             with allure.step("Increase / Decrease Size"):
-                verify_volume_minMax_buttons(driver=main_driver, trade_type="trade", actions=[("increase", 5), ("decrease", 3)], size_volume_step=vol_step)
+                verify_volume_min_max_buttons(driver=main_driver, trade_type="trade", actions=[("increase", 5), ("decrease", 3)], size_volume_step=vol_step)
                 
             with allure.step("Increase / Decrease Entry Price"):
-                btn_minMax_price(driver=main_driver, trade_type="trade", minMax="decrease", number_of_clicks=5)
-                btn_minMax_price(driver=main_driver, trade_type="trade", minMax="increase", number_of_clicks=3)
+                btn_min_max_price(driver=main_driver, trade_type="trade", min_max="decrease", number_of_clicks=5)
+                btn_min_max_price(driver=main_driver, trade_type="trade", min_max="increase", number_of_clicks=3)
 
             with allure.step("Increase / Decrease Stop Loss"):
                 btn_min_max_stop_loss(driver=main_driver, trade_type="trade", type="price", min_max="decrease", number_of_clicks=5)
                 btn_min_max_stop_loss(driver=main_driver, trade_type="trade", type="points", min_max="increase", number_of_clicks=3)
 
             with allure.step("Increase / Decrease Take Profit"):
-                btn_minMax_takeProfit(driver=main_driver, trade_type="trade", type="price", minMax="increase", number_of_clicks=5)
-                btn_minMax_takeProfit(driver=main_driver, trade_type="trade", type="points", minMax="decrease", number_of_clicks=3)
+                btn_min_max_take_profit(driver=main_driver, trade_type="trade", type="price", min_max="increase", number_of_clicks=5)
+                btn_min_max_take_profit(driver=main_driver, trade_type="trade", type="points", min_max="decrease", number_of_clicks=3)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

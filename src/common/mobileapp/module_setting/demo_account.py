@@ -5,7 +5,7 @@ import re
 from tabulate import tabulate
 from difflib import get_close_matches
 
-from enums.main import Setting
+from enums.main import Menu, Setting
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
@@ -221,7 +221,7 @@ def get_copied_banner(driver):
         if re.search(pattern, clipboard_text, re.MULTILINE):
             attach_text(clipboard_text, name="✅ Copied account creation details")
         else:
-            raise AssertionError("❌ Copy function failed or incorrect format.")
+            assert False, "❌ Copy function failed or incorrect format."
                 
     except Exception as e:
         handle_exception(driver, e)
@@ -269,7 +269,7 @@ def demo_account_ready_screen(driver, new_password=None, confirm_password=None, 
         # Verify the presence of the "Your Demo Account is Ready!" message
         match = wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_DEMO_ACCOUNT_COMPLETION_TITLE, text="Your demo account has been opened successfully.")
         if not match:
-            raise AssertionError("Expected to redirect to 'Your Demo Account is Ready!' modal")
+            assert False, "Expected to redirect to 'Your Demo Account is Ready!' modal"
         
         delay(2)
         
@@ -407,7 +407,7 @@ def validate_account_details(driver, demo_account_details):
     assert balance_value == demo_account_details["Deposit"], "Account balance mismatch"
     
     # Redirect to asset page
-    menu_button(driver, menu="assets")
+    menu_button(driver, menu=Menu.ASSETS)
 
     # Validate the Account Name displayed matches the expected value from demo_account_details
     account_name = get_label_of_element(find_visible_element_by_xpath(driver, DataTestID.APP_ACCOUNT_NAME))

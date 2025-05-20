@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption, ExpiryType, AlertType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -28,8 +28,8 @@ class TC_MT4_aQ07():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc07(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc07(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -48,7 +48,7 @@ class TC_MT4_aQ07():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Place Limit Order"):
-                trade_limit_order(driver=main_driver, trade_type="trade", option="sell", entryPrice_flag=False, set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")
+                trade_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, entry_price_flag=AlertType.NEGATIVE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

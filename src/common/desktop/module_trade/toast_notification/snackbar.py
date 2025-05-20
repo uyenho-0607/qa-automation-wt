@@ -2,6 +2,7 @@ import re
 import pandas as pd
 
 from tabulate import tabulate
+from enums.main import SectionName
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -53,7 +54,7 @@ def get_trade_snackbar_banner(driver):
 
         # Check if the header is valid
         if extracted_header not in valid_message_headers:
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message description: {label_message}"
         
         # Initialize a list to hold parts of the snackbar message
         snackbar_msg = []
@@ -114,9 +115,9 @@ def get_trade_snackbar_banner(driver):
         
         # Create a DataFrame with the snackbar message details
         order_notification_message = pd.DataFrame([snackbar_msg], columns=success_message_headers)
-        order_notification_message['Section'] = "Snackbar Banner Message"
+        order_notification_message['Section'] = SectionName.SNACKBAR_BANNER_MESSAGE
         overall = tabulate(order_notification_message.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
-        attach_text(overall, name="Snackbar Banner Message")
+        attach_text(overall, name=SectionName.SNACKBAR_BANNER_MESSAGE)
 
         return order_notification_message  # Return DataFrame
 
@@ -219,7 +220,7 @@ def get_bulk_snackbar_banner(driver):
 
         # Check if the header is valid
         if extracted_header not in valid_message_headers:
-            raise AssertionError(f"Invalid message header: {extracted_header}, Message description: {label_message}")
+            assert False, f"Invalid message header: {extracted_header}, Message description: {label_message}"
     
         btn_close = find_element_by_testid(driver, data_testid="notification-close-button")
         trigger_click(driver, element=btn_close)

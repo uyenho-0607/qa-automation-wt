@@ -45,11 +45,6 @@ def find_element_by_testid_with_wait(driver, data_testid, duration: int | None =
     wait_duration = derive_wait_duration(duration)
     return WebDriverWait(driver, wait_duration).until(EC.element_to_be_clickable((AppiumBy.XPATH, data_test_id_string)))
 
-
-# Use WebDriver to find for element to according to specified css_selector string
-def find_element_by_css(driver, css_selector) -> WebElement:
-    return driver.find_element(AppiumBy.CSS_SELECTOR, css_selector)
-
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 FIND LIST OF ELEMENT BY XPATH / TESTID
@@ -65,10 +60,6 @@ def find_list_of_elements_by_testid(driver, data_testid):
     data_test_id_string = data_test_id_pattern.format(data_testid)
     return driver.find_elements(AppiumBy.XPATH, data_test_id_string)
 
-# Use WebDriver to find for list of elements to according to specified css_selector string
-def find_list_of_elements_by_css(driver, css_selector) -> list[WebElement]:
-    return driver.find_elements(AppiumBy.CSS_SELECTOR, css_selector)
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -80,7 +71,7 @@ def is_element_present_by_testid(driver, data_testid: str) -> bool:
     try:
         # Try to find the element
         # find_element_by_testid(driver, data_testid)
-        find_element_by_xpath_with_wait(driver, data_testid)
+        find_element_by_testid_with_wait(driver, data_testid)
         # Use WebDriver to find for element to according to specified xpath string
         return True
     except Exception:
@@ -101,9 +92,28 @@ def is_element_present_by_xpath(driver, xpath: str) -> bool:
     
 
 # Ensures the element is both present in the DOM and visible.
-def wait_for_element_visibility(driver, locator, duration: int | None = None) -> bool:
+def wait_for_element_visibility_by_xpath(driver, xpath_string, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
-    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(locator)) is not None
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(AppiumBy.XPATH, xpath_string)) is not None
+
+
+def wait_for_element_visibility_by_testid(driver, data_testid, duration: int | None = None) -> bool:
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    wait_duration = derive_wait_duration(duration)
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of(AppiumBy.XPATH, data_test_id_string)) is not None
+
+
+def wait_for_list_of_element_visibility_by_xpath(driver, xpath_string, duration: int | None = None) -> bool:
+    wait_duration = derive_wait_duration(duration)
+    elements = WebDriverWait(driver, wait_duration).until(EC.visibility_of_all_elements_located((AppiumBy.XPATH, xpath_string)))
+    return bool(elements)  # Returns True if at least one element is visible
+
+
+def wait_for_list_of_element_visibility_by_testid(driver, data_testid, duration: int | None = None) -> bool:
+    data_test_id_string = data_test_id_pattern.format(data_testid)
+    wait_duration = derive_wait_duration(duration)
+    elements = WebDriverWait(driver, wait_duration).until(EC.visibility_of_all_elements_located((AppiumBy.XPATH, data_test_id_string)))
+    return bool(elements)  # Returns True if at least one element is visible
 
 
 def find_visible_element_by_xpath(driver, xpath_string, duration: int | None = None) -> WebElement:
@@ -114,11 +124,10 @@ def find_visible_element_by_xpath(driver, xpath_string, duration: int | None = N
 def find_visible_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
-    visibility_of_element = WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-    return visibility_of_element
+    return WebDriverWait(driver, wait_duration).until(EC.visibility_of_element_located((AppiumBy.XPATH, data_test_id_string)))
 
 
-def invisibility_of_element_by_xpath(driver, xpath, duration: int | None = None) -> bool:
+def invisibility_of_element_by_testid(driver, xpath, duration: int | None = None) -> bool:
     wait_duration = derive_wait_duration(duration)
     try:
         return WebDriverWait(driver, wait_duration).until(EC.invisibility_of_element_located((AppiumBy.XPATH, xpath)))
@@ -142,16 +151,13 @@ def invisibility_of_element_by_testid(driver, data_testid, duration: int | None 
 
 def find_presence_element_by_xpath(driver, xpath, duration: int | None = None) -> WebElement:
     wait_duration = derive_wait_duration(duration)
-    # Wait for the spinner to appear
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, xpath)))
 
 
 def find_presence_element_by_testid(driver, data_testid, duration: int | None = None) -> WebElement:
     data_test_id_string = data_test_id_pattern.format(data_testid)
     wait_duration = derive_wait_duration(duration)
-    # Wait for the spinner to appear
     return WebDriverWait(driver, wait_duration).until(EC.presence_of_element_located((AppiumBy.XPATH, data_test_id_string)))
-
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -185,7 +191,7 @@ def populate_element_with_wait(driver, element: WebElement, text: str, duration:
         
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
-                                                TO AUTO SCROLL INTO VIEW
+                                                TO CLEAR INPUT FIELD
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
@@ -263,7 +269,6 @@ def get_label_of_element(element) -> str:
     else:
         element.text
     
-    # return label if label else ""
     return label
 
 """
@@ -275,7 +280,7 @@ def get_label_of_element(element) -> str:
 # Checking the loading spinner
 def spinner_element(driver):
     try:
-        invisibility_of_element_by_testid(driver, data_testid=DataTestID.SPIN_LOADER.value)
+        invisibility_of_element_by_testid(driver, data_testid=DataTestID.SPIN_LOADER)
     except Exception as e:
         # Attach a screenshot with the function name in the filename
         take_screenshot(driver, f"Exception_Screenshot")
@@ -291,3 +296,76 @@ def bulk_spinner_element(driver, timeout=10):
         # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
         raise Exception("Timeout waiting for loading icon to disappear. Check if the API is slow")
+    
+    
+
+"""
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                               SCROLLABLE
+---------------------------------------------------------------------------------------------------------------------------------------------------- 
+"""
+
+# Scroll Horizontal (Right)
+def scroll_horizontally_right_scrollview(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollForward()')
+
+# Scroll Horizontal (Left)
+def scroll_horizontally_left(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollBackward()')
+
+# Scrolls down
+def scroll_vertically_down(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.ScrollView")).scrollForward()')
+
+# Scrolls up
+def scroll_vertically_up(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.ScrollView")).scrollBackward()')
+    
+    
+def scroll_horizontally_right_scrollview(driver): 
+    driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, 'new UiScrollable(new UiSelector().scrollable(true)className("android.widget.ScrollView")).setAsHorizontalList().scrollForward()')
+
+
+def swipe_left(driver, element, percent=0.75):
+    """
+    Perform a left swipe on the given element.
+    
+    :param driver: Appium WebDriver instance
+    :param element: WebElement to swipe on
+    :param percent: Percentage of the element's width to swipe (default is 75%)
+    """
+    driver.execute_script("mobile: swipeGesture", {
+        "elementId": element.id,
+        "direction": "left",
+        "percent": percent
+    })
+
+
+# def scroll_and_click_expiry(driver):
+#     """
+#     Scrolls through a scrollable view until an element containing the text "Expiry" is visible, then clicks it.
+#     """
+#     element = driver.find_element_by_android_uiautomator(
+#         'new UiScrollable(new UiSelector().scrollable(true))'
+#         '.scrollIntoView(new UiSelector().textContains("Expiry"))'
+#     )
+#     # element.click()
+
+
+
+def scroll_and_click_expiry(driver, element):
+    """
+    Scrolls through a scrollable view until an element with the given resource-id is visible, then clicks it.
+
+    :param driver: Appium driver instance.
+    :param data_testid: The resource-id or identifier of the element.
+    """
+    
+    # element = driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR,'new UiScrollable(new UiSelector().scrollable(true)).scrollIntoView(new UiSelector().text("YourElementText"))')
+    
+    driver.execute_script('mobile: scroll', {
+        'direction': 'down',
+        'element': element.id  # if you already have an element reference
+    })
+    
+    # element.click()

@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import button_theme
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV04():
+class TC_aV04():
 
-    @allure.title("TC_MT5_aV04")
+    @allure.title("TC_aV04")
 
     @allure.description(
         """
@@ -24,8 +24,8 @@ class TC_MT5_aV04():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc04(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc04(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

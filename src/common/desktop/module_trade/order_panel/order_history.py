@@ -1,7 +1,4 @@
-import traceback
-
-from datetime import datetime
-
+from dateutil.parser import parse
 from constants.helper.driver import delay
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
@@ -47,7 +44,7 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
         
         # Navigate to the target start month
         while True:
-            current_startMonth = datetime.strptime(year_month.text, "%B %Y")
+            current_startMonth = parse(year_month.text)
             if current_startMonth == target_startMonth:
                 break
             elif current_startMonth < target_startMonth:
@@ -61,7 +58,7 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
         
         # Navigate to the target end month
         while True:
-            current_endMonth = datetime.strptime(year_month.text, "%B %Y")
+            current_endMonth = parse(year_month.text)
             if current_endMonth == target_endMonth:
                 break
             elif current_endMonth < target_endMonth:
@@ -75,7 +72,7 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
 
     except Exception as e:
         # Handle any exceptions that occur during the execution
-        handle_exception(driver, e)
+        handle_exception(driver, e)   
       
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -89,93 +86,68 @@ def calendar_datePicker(driver, startDate, endDate, target_startMonth, target_en
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
+
 # Function to check if a table date is within the datepicker range
 def is_within_range(date_str, start_dt, end_dt):
     """
     Checks if a given date string is within the specified date range.
-
+    
     Arguments:
-    - date_str (str): The date string to check, in the format "%Y-%m-%d %H:%M:%S".
+    - date_str (str): The date string to check.
     - start_dt (datetime): The start date of the range.
     - end_dt (datetime): The end date of the range.
-
+    
     Returns:
     - bool: True if the date_str is within the range, False otherwise.
     """
     # Convert table date to datetime object
-    date_dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+    date_dt = parse(date_str)
     # Check if the date is within the datepicker range
     return start_dt.date() <= date_dt.date() <= end_dt.date()
-
 
 
 def OH_closeDate(driver, startDate: str, endDate: str, target_startMonth: str, target_endMonth: str):
     """
     Verifies that the "Closed Date" values from the Order History table are within the specified date range.
-
-    This function interacts with the calendar date picker to select a date range, retrieves the 
-    "Close Date" values from the table, and checks if each date falls within the selected range.
-
-    Arguments:
-    - startDate (str): The start date in the format '03'.
-    - endDate (str): The end date in the format '05'.
-    - target_startMonth (str): The target start month for calendar selection. (e.g. datetime.strptime("October 2025", "%B %Y"))
-    - target_endMonth (str): The target end month for calendar selection. (e.g. datetime.strptime("November 2025", "%B %Y"))
-
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     try:
-        # Ensure the page is fully loaded and any spinner is gone
+        # Wait for spinner element to disappear
         spinner_element(driver)
         
-        # Select the target date range using the date picker
         calendar_datePicker(driver, startDate, endDate, target_startMonth, target_endMonth)
-
-        # Extract the selected date range from the calendar picker label
+        
         label_date = find_element_by_testid(driver, data_testid="calender-button-assets-content")
         date_content = get_label_of_element(element=label_date)
         
-        # Extract the date range from the content (assuming the format is DD/MM/YYYY - DD/MM/YYYY)
         start_date_str, end_date_str = date_content.split(" - ")
         
-        # Convert the extracted date range into datetime objects (in the format DD/MM/YYYY)
-        datepicker_start_dt = datetime.strptime(start_date_str, "%d/%m/%Y")
-        datepicker_end_dt = datetime.strptime(end_date_str, "%d/%m/%Y")
-
+        # Convert the extracted date range into datetime objects
+        datepicker_start_dt = parse(start_date_str)
+        datepicker_end_dt = parse(end_date_str)
+        
         delay(2)
-
-        # Locate the table body
+        
         get_table_body(driver)
-        
-        # Locate the table header
         get_table_headers(driver)
-        
-        # Wait till the spinner icon no longer display
         spinner_element(driver)
         
-        # Extract all elements containing the "Close Date" values
         OH_closeDate_elements = find_list_of_elements_by_testid(driver, data_testid="asset-history-column-close-date")
         if not OH_closeDate_elements:
-            # # Check if the table has any data
             empty_message_elements = find_list_of_elements_by_xpath(driver, "//tbody[contains(@data-testid, '-list')]//div[@data-testid='empty-message']")
             if empty_message_elements:
                 empty_message = empty_message_elements[0].text.strip()
                 assert False, f"Table is empty. Message: '{empty_message}'"
         
-        # Iterate over each close date element
         for element in OH_closeDate_elements:
-            table_date = element.text  # Extract the date text from the WebElement
+            table_date = element.text
             if is_within_range(table_date, datepicker_start_dt, datepicker_end_dt):
                 attach_text(f"{table_date} is within the datepicker range {date_content}", name=f"Order History Date: {table_date}")
-                assert True  # If the date is within range, assert True
+                assert True
             else:
                 attach_text(f"{table_date} is outside the datepicker range {date_content}", name=f"Order History Date: {table_date}")
-                assert False,  f"An exception occurred: {str(e)}\n{traceback.format_exc()}"
-
-
+                assert False, f"Date {table_date} is out of range."
+    
     except Exception as e:
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
 
 """

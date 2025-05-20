@@ -13,9 +13,9 @@ from common.desktop.module_setting.setting_account_details import sum_by_currenc
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV01():
+class TC_aV01():
 
-    @allure.title("TC_MT5_aV01")
+    @allure.title("TC_aV01")
 
     @allure.description(
         """
@@ -24,8 +24,8 @@ class TC_MT5_aV01():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc01(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc01(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

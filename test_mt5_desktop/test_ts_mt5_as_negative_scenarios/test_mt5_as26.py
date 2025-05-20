@@ -1,22 +1,22 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption, SLTPOption, ExpiryType, AlertType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_stopLimit_order, get_neg_snackbar_banner
+from common.desktop.module_trade.utils import toggle_radio_button, trade_stop_limit_order, get_neg_snackbar_banner
 
 @allure.parent_suite("MT5 Membersite - Desktop - Negative Scenarios")
 
 @allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS26():
+class TC_aS26():
 
-    @allure.title("TC_MT5_aS26")
+    @allure.title("TC_aS26")
 
     @allure.description(
         """
@@ -28,8 +28,8 @@ class TC_MT5_aS26():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc26(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc26(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -48,7 +48,7 @@ class TC_MT5_aS26():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Stop Limit Order"):
-                trade_stopLimit_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, tp_type="price", takeProfit_flag=False, expiryType="good-till-cancelled")
+                trade_stop_limit_order(driver=main_driver, option=TradeDirectionOption.SELL, tp_type=SLTPOption.PRICE, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, take_profit_flag=AlertType.NEGATIVE)
 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

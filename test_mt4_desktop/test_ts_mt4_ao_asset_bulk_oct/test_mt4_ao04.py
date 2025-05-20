@@ -1,14 +1,17 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, Menu, OrderPanel, BulkActionType, SectionName, CSVFileNameManager
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_sub_menu.utils import menu_button
-from common.desktop.module_trade.utils import toggle_radio_button, button_bulk_operation, check_orderIDs_in_table, get_bulk_snackbar_banner
-from data_config.utils import compare_dataframes, process_and_print_data, clear_orderIDs_csv, read_orderIDs_from_csv
+from common.desktop.module_trade.utils import toggle_radio_button, button_bulk_operation, check_order_ids_in_table, get_bulk_snackbar_banner
+from data_config.utils import compare_dataframes, process_and_print_data, clear_order_ids_csv, read_order_ids_from_csv
+from data_config.api.request import create_mt4_pending_order
+
 
 @allure.parent_suite("MT4 Membersite - Desktop - Asset - Bulk Close / Delete Order")
 
@@ -26,8 +29,8 @@ class TC_MT4_aO04():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc04(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc04(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -42,29 +45,31 @@ class TC_MT4_aO04():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
                 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
+                
+            with allure.step("Create bulk pending (limit) orders"):
+                create_mt4_pending_order(driver=main_driver)
                 
             with allure.step("Bulk Delete Orders"):
-                clear_orderIDs_csv(filename="MT4_Bulk.csv")
-                pending_order_df = button_bulk_operation(driver=main_driver, filename="MT4_Bulk.csv", bulk_type="delete", section_name="Pending Order", tab_order_type="pending-orders", symbol_name_element=True, set_trade=False)
+                clear_order_ids_csv(filename=CSVFileNameManager.MT4_DESKTOP_BULK)
+                pending_order_df = button_bulk_operation(driver=main_driver, filename=CSVFileNameManager.MT4_DESKTOP_BULK, bulk_type=BulkActionType.BULK_DELETE, section_name=SectionName.ASSET_PENDING_ORDER, tab_order_type=OrderPanel.PENDING_ORDERS)
 
             with allure.step("Retrieve snackbar message"):
                 get_bulk_snackbar_banner(driver=main_driver)
             
-            with allure.step("Read orderIDs from CSV"):
-                csv_orderIDs = read_orderIDs_from_csv(filename="MT4_Bulk.csv")
+            with allure.step("Read order_ids from CSV"):
+                csv_order_ids = read_order_ids_from_csv(filename=CSVFileNameManager.MT4_DESKTOP_BULK)
         
             with allure.step("Ensure the OrderID is display in order panel: Order History table"):
                 # Check order IDs in Order History table
-                order_history_df = check_orderIDs_in_table(driver=main_driver, order_ids=csv_orderIDs, tab_order_type="history", section_name="Order History")
+                order_history_df = check_order_ids_in_table(driver=main_driver, order_ids=csv_order_ids, tab_order_type=OrderPanel.HISTORY, section_name=SectionName.ORDER_HISTORY)
         
             with allure.step("Comparison on Order History and Pending Order table"):
-                compare_dataframes(driver=main_driver, df1=order_history_df, name1="Order History", df2=pending_order_df, name2="Pending Order")
+                compare_dataframes(driver=main_driver, df1=order_history_df, name1=SectionName.ORDER_HISTORY, df2=pending_order_df, name2=SectionName.ASSET_PENDING_ORDER)
 
             with allure.step("Print Final Result"):
                 process_and_print_data(pending_order_df, order_history_df, group_by_order_no=True)
             
-
         except Exception as e:
             test_failed = True  # Mark test as failed
             if test_failed:

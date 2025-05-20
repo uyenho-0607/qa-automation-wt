@@ -1,12 +1,10 @@
 import random
-from selenium.webdriver.common.by import By
 
 from enums.main import Server, SymbolsList
 from constants.element_ids import DataTestID
 
-from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import clear_input_field, click_element, click_element_with_wait, find_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath, find_element_by_xpath_with_wait, find_list_of_elements_by_xpath, is_element_present_by_testid, is_element_present_by_xpath, populate_element, find_list_of_elements_by_testid, spinner_element, find_visible_element_by_xpath, find_visible_element_by_testid, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
+from constants.helper.element_android_app import clear_input_field, click_element, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, find_list_of_elements_by_xpath, is_element_present_by_xpath, populate_element, spinner_element, find_visible_element_by_xpath, wait_for_text_to_be_present_in_element_by_testid, get_label_of_element
 
 from data_config.file_handler import read_symbol_file
 from common.desktop.module_chart.chart import get_chart_symbol_name
@@ -132,11 +130,11 @@ def search_symbol_variations(driver, server: Server, symbol_type: SymbolsList = 
                 if matched_rows:
                     print(f"✅ Matching rows found for '{input_search}':\n" + "\n".join(matched_rows))
                 else:
-                    raise AssertionError(f"No matching row found for symbol: {input_search}")
+                    assert False, f"No matching row found for symbol: {input_search}"
             else:
                 no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'Type something to search')]")
                 msg = get_label_of_element(no_items_message)
-                raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+                assert False, f"No matching row found for symbol: {input_search} with message: {msg}"
     
     except Exception as e:
         handle_exception(driver, e)
@@ -168,8 +166,8 @@ def clear_search_history(driver):
         
         # Verify search history is cleared
         if not is_element_present_by_xpath(driver, DataTestID.APP_SEARCH_HISTORY_LABEL):
-            raise AssertionError("Expected Search History to be hidden")
-        
+            assert False, "Expected Search History to be hidden"
+            
         print("Element not present")
 
     except Exception as e:

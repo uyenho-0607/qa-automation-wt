@@ -13,9 +13,9 @@ from common.desktop.module_setting.utils import notification_settings_modal
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV10():
+class TC_aV10():
 
-    @allure.title("TC_MT5_aV10")
+    @allure.title("TC_aV10")
 
     @allure.description(
         """
@@ -24,8 +24,8 @@ class TC_MT5_aV10():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc10(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc10(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

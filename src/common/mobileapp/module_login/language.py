@@ -5,6 +5,7 @@ from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element_android_app import click_element, find_element_by_testid, find_list_of_elements_by_xpath, get_label_of_element, find_element_by_testid_with_wait
+from enums.main import LoginLanguageMap
 
 
 """
@@ -17,24 +18,8 @@ def select_and_verify_language(driver):
     """
     Randomly selects three different languages from the dropdown,
     verifies if the change is reflected on the login button, and repeats for each language.
-
-    Args:
-        driver (webdriver): Selenium WebDriver instance.
     """
     try:
-        
-        # Language map for verification values
-        language_map = {
-            "English": "Sign in",
-            "简体中文": "登录",
-            "繁体中文": "登錄",
-            "ภาษาไทย": "เปิดบัญชีซื้อขายจริง",
-            "Tiếng Việt": "Đăng nhập",
-            "Melayu": "Log masuk",
-            "Bahasa Indonesia": "Masuk",
-            "Japanese": "ログイン",
-            "Korean": "로그인"
-        }
 
         # Step 1: Locate the language dropdown
         language_dropdown = find_element_by_testid_with_wait(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN)
@@ -72,10 +57,9 @@ def select_and_verify_language(driver):
             # Step 5: Verify if the change is reflected
             submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT)
             button_text = get_label_of_element(submit_button).strip()
-            # button_text = submit_button.text.strip()
-
-            # Get the expected value from the language map
-            expected_text = language_map.get(selected_language)
+        
+            # Determine the expected text based on the selected language
+            expected_text = LoginLanguageMap.get_expected_text(selected_language)
 
             # Compare the button text with the expected text
             if button_text == expected_text:

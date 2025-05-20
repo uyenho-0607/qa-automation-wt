@@ -6,6 +6,7 @@ from tabulate import tabulate
 
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
+from enums.main import TradeConstants
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -33,84 +34,63 @@ def normalize_value(x):
     else:
         return s
     
-
-def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = True, compare_units: bool = True, compare_profit_loss: bool = False):
+def compare_dataframes(driver, df1, df2, name1, name2, compare_options: TradeConstants = TradeConstants.NONE):
     """
     Compare two dataframes and automatically detect columns for comparison, ignoring trailing zeros and commas.
-
-    Arguments:
-    - driver: WebDriver instance for handling exceptions (unused in this function but required for interface)
-    - df1 (DataFrame): First dataframe
-    - df2 (DataFrame): Second dataframe
-    - name1 (str): Name of the first dataframe for reporting
-    - name2 (str): Name of the second dataframe for reporting
-    - compare_profit_loss (bool): Flag to indicate whether to compare the "Profit/Loss" value
-
-    Raises:
-    - AssertionError: If mismatched values are found
     """
     try:
-        # Check if inputs are valid DataFrames
-        if not isinstance(df1, pd.DataFrame):
-            raise TypeError(f"df1 is not a DataFrame, it is a {type(df1)}")
-        if not isinstance(df2, pd.DataFrame):
-            raise TypeError(f"df2 is not a DataFrame, it is a {type(df2)}")
+        if not isinstance(df1, pd.DataFrame) or not isinstance(df2, pd.DataFrame):
+            raise TypeError("Both df1 and df2 must be pandas DataFrames")
 
-        # Check if either of the dataframes is empty
         if df1.empty or df2.empty:
             raise ValueError("One or both of the dataframes are empty.")
         
-        # Find common columns for comparison
         common_columns = list(set(df1.columns) & set(df2.columns))
 
-        # Handle "Volume" or "Size" dynamically
-        size_columns = ["Volume", "Size"]
-        for column in size_columns:
-            if column in common_columns:
-                if not compare_volume:  # If the flag is False, exclude the column from comparison
-                    common_columns.remove(column)
-
-        # If Profit/Loss should not be compared, exclude it from the common columns
-        for column, condition in [("Profit/Loss", compare_profit_loss), ("Units", compare_units)]:
-            if not condition and column in common_columns:
+        # Handle columns dynamically based on enum flags
+        exclusions = {
+            "Volume": TradeConstants.COMPARE_VOLUME,
+            "Size": TradeConstants.COMPARE_VOLUME,
+            "Units": TradeConstants.COMPARE_UNITS,
+            "Profit/Loss": TradeConstants.COMPARE_PROFIT_LOSS
+        }
+        
+        # By default, always exclude 'Profit/Loss'
+        if compare_options & TradeConstants.COMPARE_PROFIT_LOSS == TradeConstants.NONE:
+            if "Profit/Loss" in common_columns:
+                print("Excluding 'Profit/Loss' column by default.")
+                common_columns.remove("Profit/Loss")
+                
+        # Exclude columns based on the flags in compare_options
+        for column, flag in exclusions.items():
+            if column in common_columns and (compare_options & flag):  # Exclude if the flag is set
+                print(f"Excluding column: {column} because compare_options includes {flag}")
                 common_columns.remove(column)
 
         if not common_columns:
             raise ValueError("No common columns found between the two dataframes")
         
-        # Concatenate the dataframes with only common columns
+        # Merge DataFrames based on common columns
         master_df = pd.concat([df1[common_columns], df2[common_columns]])
 
-        # Group by 'Order No.' if it exists, otherwise treat as a single group
-        if 'Order No.' in common_columns:
-            grouped = master_df.groupby('Order No.')
-        else:
-            grouped = [("All", master_df)]
+        # Group by 'Order No.' if available
+        grouped = master_df.groupby('Order No.') if 'Order No.' in common_columns else [("All", master_df)]
 
         for orderID, group in grouped:
-            # Transpose the group dataframe and fill missing values with '-'
             group_transposed = group.set_index('Section').T.fillna('-')
-
-            # Convert to formatted table using tabulate
             formatted_table = tabulate(group_transposed, tablefmt='grid', stralign='center', headers='keys')
             attach_text(formatted_table, name=f"Table Comparison for {name1} and {name2} - {orderID}")
 
-            # Extract index values from transposed DataFrame
             desired_index = group_transposed.index.tolist()
-            
-            # Get values of 'df1' and 'df2' columns for detected common fields
             df1_values = group_transposed.loc[desired_index, name1]
             df2_values = group_transposed.loc[desired_index, name2]
 
-            # Normalize values by removing commas and trailing zeros
             df1_values_stripped = df1_values.apply(normalize_value)
             df2_values_stripped = df2_values.apply(normalize_value)
 
-            # Find mismatched values
             mismatched = (df1_values_stripped != df2_values_stripped)
             
             if mismatched.any():
-                # Display mismatched values
                 error_message = f"Values do not match for {orderID} in the following fields:\n"
                 mismatched_details = pd.DataFrame({
                     'Field': df1_values_stripped[mismatched].index,
@@ -119,14 +99,14 @@ def compare_dataframes(driver, df1, df2, name1, name2, compare_volume: bool = Tr
                 })
                 error_message += mismatched_details.to_string(index=False)
                 attach_text(error_message, name="Mismatch Details")
-                raise AssertionError(error_message)
+                assert False, error_message
             else:
                 attach_text(f"All values match for {orderID}", name=f"Comparison on {name1} and {name2} Result")
 
     except Exception as e:
         print(f"An error occurred during dataframe comparison between {name1} and {name2}. Error: {str(e)}")
-        # Handle any exceptions that occur during the execution
         handle_exception(driver, e)
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 

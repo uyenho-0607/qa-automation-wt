@@ -1,15 +1,18 @@
+from enums.main import ButtonModuleType, SLTPOption
+from constants.element_ids import DataTestID
+
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, clear_input_field, find_element_by_testid, javascript_click
 
-from common.desktop.module_trade.order_placing_window.opw_button_action import label_onePointEqual
+from common.desktop.module_trade.order_placing_window.opw_button_action import get_label_one_point_equal
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                 TRADE / EDIT - STOP LOSS FIELD
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_stop_loss(driver, trade_type, sl_type):
+def handle_stop_loss(driver, trade_type: ButtonModuleType, sl_type: SLTPOption):
     """
     Handles the interaction with the Stop Loss input field in a trading platform.
     This function locates the Stop Loss input field, clears it if the trade is being edited,
@@ -17,20 +20,35 @@ def handle_stop_loss(driver, trade_type, sl_type):
     
     Arguments:
     - trade_type: The type of trade (e.g., 'trade', 'edit').
-    - sl_type: The type of stop loss (e.g., 'price', 'points') that determines which specific input field to locate.
+    - tp_type: The type of Stop Loss (e.g., 'price', 'points') that determines which specific input field to locate.
     
     Returns:
-    - stop_loss_element: The WebElement corresponding to the Stop Loss input field.
+    - take_profit_element: The WebElement corresponding to the Stop Loss input field.
     """
     
-    # Locate the Stop Loss input field based on the trade type and stop loss type (sl_type)
-    stop_loss_element = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stoploss-{sl_type}")
+    # Define mapping for dropdown and its options
+    button_testids = {
+        ButtonModuleType.TRADE: {
+            SLTPOption.PRICE: DataTestID.TRADE_INPUT_STOPLOSS_PRICE,
+            SLTPOption.POINTS: DataTestID.TRADE_INPUT_STOP_LOSS_POINTS,
+        },
+        ButtonModuleType.EDIT: {
+            SLTPOption.PRICE: DataTestID.EDIT_INPUT_STOPLOSS_PRICE,
+            SLTPOption.POINTS: DataTestID.EDIT_INPUT_STOP_LOSS_POINTS
+        }
+    }
+
+    stop_loss_testid = button_testids[trade_type][sl_type]
+
+    # Locate the Stop Loss input field
+    stop_loss_element = find_element_by_testid(driver, data_testid=stop_loss_testid)
+    print(stop_loss_testid)
     
-    # If the trade type is "edit", clear the existing value in the input field
-    if trade_type == "edit":
-        clear_input_field(stop_loss_element) # Clear the field before updating the value
-    
-    # Return the element representing the input field
+    # Clear the input field if in edit mode
+    if trade_type == ButtonModuleType.EDIT:
+        clear_input_field(element=stop_loss_element)
+        
+    # Return the stop loss element for further actions if required
     return stop_loss_element
 
 """
@@ -54,17 +72,17 @@ def btn_min_max_stop_loss(driver, trade_type, type, min_max, number_of_clicks):
     Arguments:
     - trade_type: The type of trade (e.g., 'trade', 'edit').
     - type: The type of value being modified ('price' or 'points').
-    - minMax: The action to perform, either 'increase' or 'decrease'.
+    - min_max: The action to perform, either 'increase' or 'decrease'.
     - number_of_clicks: The number of times to click the min/max button.
     
     Raises:
-    - ValueError: If an invalid `type` or `minMax` is provided.
+    - ValueError: If an invalid `type` or `min_max` is provided.
     - AssertionError: If the value does not change as expected after each click.
     """
     try:
         # Locate the min/max button based on trade type, stop loss type, and the action (increase/decrease)
-        button_minMax = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stoploss-{type}-{min_max}")
-        click_element(button_minMax)
+        button_min_max = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stoploss-{type}-{min_max}")
+        click_element(button_min_max)
 
         # Locate the input field where the stop loss value is displayed
         input_field = find_element_by_testid(driver, data_testid=f"{trade_type}-input-stoploss-{type}")
@@ -73,7 +91,7 @@ def btn_min_max_stop_loss(driver, trade_type, type, min_max, number_of_clicks):
         initial_value_str = input_field.get_attribute("value")
         if type == "price":
             initial_value = float(initial_value_str) if initial_value_str.strip() else 0.0
-            increment = label_onePointEqual(driver, trade_type) # Get the increment for price
+            increment = get_label_one_point_equal(driver, trade_type) # Get the increment for price
         elif type == "points":
             initial_value = int(initial_value_str) if initial_value_str.strip() else 0
             increment = 1  # For points, increment is always 1
@@ -82,7 +100,7 @@ def btn_min_max_stop_loss(driver, trade_type, type, min_max, number_of_clicks):
         
          # Loop to click the button a specified number of times
         for i in range(number_of_clicks):
-            javascript_click(driver, element=button_minMax)
+            javascript_click(driver, element=button_min_max)
 
             # Get the updated value based on value_type
             updated_value_str = input_field.get_attribute("value")
@@ -95,7 +113,7 @@ def btn_min_max_stop_loss(driver, trade_type, type, min_max, number_of_clicks):
             elif min_max == "decrease":
                 difference = initial_value - updated_value
             else:
-                raise ValueError("Invalid value for minMax. Must be 'increase' or 'decrease'.")
+                raise ValueError("Invalid value for min_max. Must be 'increase' or 'decrease'.")
 
             # Assert that the difference is correct based on the type
             if type == "price":

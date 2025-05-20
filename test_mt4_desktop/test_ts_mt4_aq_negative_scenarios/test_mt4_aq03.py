@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption, SLTPOption, OrderPanel, SectionName, AlertType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -28,8 +28,8 @@ class TC_MT4_aQ03():
     )
 
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc03(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc03(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -48,16 +48,16 @@ class TC_MT4_aQ03():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Market Order"):
-                trade_oct_market_order(driver=main_driver, indicator_type="buy")
+                trade_oct_market_order(driver=main_driver, option=TradeDirectionOption.BUY)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
             
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             with allure.step("Modify order"):
-                modify_market_order(driver=main_driver, trade_type="edit", row_number=[1], stopLoss_flag=False, sl_type="price", set_takeProfit=False)
+                modify_market_order(driver=main_driver, sl_type=SLTPOption.PRICE, stop_loss_flag=AlertType.NEGATIVE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

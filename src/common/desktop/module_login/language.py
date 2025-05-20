@@ -4,6 +4,7 @@ from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
 from constants.helper.element import click_element, click_element_with_wait, find_element_by_testid, find_list_of_elements_by_testid, find_visible_element_by_testid, get_label_of_element
+from enums.main import LoginLanguageMap
 
 
 """
@@ -21,20 +22,6 @@ def select_and_verify_language(driver):
         driver (webdriver): Selenium WebDriver instance.
     """
     try:
-        
-        # Language map for verification values
-        language_map = {
-            "English": "Sign in",
-            "简体中文": "登录",
-            "繁体中文": "登錄",
-            "ภาษาไทย": "เปิดบัญชีซื้อขายจริง",
-            "Tiếng Việt": "Đăng nhập",
-            "Melayu": "Log masuk",
-            "Bahasa Indonesia": "Masuk",
-            "Japanese": "ログイン",
-            "Korean": "로그인"
-        }
-
         # Step 1: Locate the language dropdown
         language_dropdown = find_visible_element_by_testid(driver, data_testid=DataTestID.LANGUAGE_DROPDOWN)
 
@@ -70,8 +57,8 @@ def select_and_verify_language(driver):
             submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT)
             button_text = get_label_of_element(element=submit_button)
 
-            # Get the expected value from the language map
-            expected_text = language_map.get(selected_language)
+            # Get the expected value from the Enum
+            expected_text = LoginLanguageMap.get_expected_text(selected_language)
             
             # Compare the button text with the expected text
             assert button_text == expected_text, f"Verification failed for language '{selected_language}', Expected: '{expected_text}', Found: '{button_text}''"

@@ -13,9 +13,9 @@ from common.desktop.module_markets.utils import market_redirect_arrow
 @allure.epic("MT5 Desktop ts_at - Markets")
 
 # Member Portal
-class TC_MT5_aT06():
+class TC_aT06():
 
-    @allure.title("TC_MT5_aT06")
+    @allure.title("TC_aT06")
 
     @allure.description(
         """
@@ -28,8 +28,8 @@ class TC_MT5_aT06():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc06(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc06(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

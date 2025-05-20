@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, AccountType, CredentialType, LoginResultState
+from enums.main import Server, AccountType, CredentialType, AlertType
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -25,8 +25,8 @@ class TC_MT4_aA06():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc06(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc06(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -36,7 +36,7 @@ class TC_MT4_aA06():
         try:
 
             with allure.step("Login to Web Trader Membersite"):
-                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO, testcase_id="TC02", credential_type=CredentialType.INVALID_CREDENTIAL, expectation=LoginResultState.FAILURE)
+                login_wt(driver=main_driver, server=Server.MT4, account_type=AccountType.DEMO, testcase_id="TC02", credential_type=CredentialType.INVALID_CREDENTIAL, expectation=AlertType.FAILURE)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

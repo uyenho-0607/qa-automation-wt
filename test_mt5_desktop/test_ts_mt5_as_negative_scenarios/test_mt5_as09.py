@@ -1,7 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, TradeDirectionOption, ExpiryType, OrderPanel, SectionName, AlertType
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -14,9 +15,9 @@ from common.desktop.module_trade.utils import toggle_radio_button, trade_limit_o
 @allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS09():
+class TC_aS09():
 
-    @allure.title("TC_MT5_aS09")
+    @allure.title("TC_aS09")
 
     @allure.description(
         """
@@ -28,8 +29,8 @@ class TC_MT5_aS09():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc09(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc09(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -48,18 +49,18 @@ class TC_MT5_aS09():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="checked")
 
             with allure.step("Place Limit Order"):
-                trade_limit_order(driver=main_driver, trade_type="trade", option="buy", expiryType="good-till-day", set_stopLoss=False, set_takeProfit=False)
+                trade_limit_order(driver=main_driver, option=TradeDirectionOption.BUY, expiry_type=ExpiryType.GOOD_TILL_DAY)
 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Pending Order"):
-                extract_order_info(driver=main_driver, tab_order_type="pending-orders", section_name="Pending Order", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.PENDING_ORDERS, section_name=SectionName.TRADE_PENDING_ORDER)
 
             """ Start of modifying Pending Order """
 
             with allure.step("Modify on Limit Order"):
-                modify_limit_order(driver=main_driver, trade_type="edit", row_number=[1], entryPrice_flag=False, set_stopLoss=False, set_takeProfit=False, expiryType="good-till-cancelled")
+                modify_limit_order(driver=main_driver, expiry_type=ExpiryType.GOOD_TILL_CANCELLED, entry_price_flag=AlertType.NEGATIVE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

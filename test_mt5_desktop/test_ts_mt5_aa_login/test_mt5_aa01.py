@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from enums.main import Server, AccountType, CredentialType
+from enums.main import Server, AccountType, CredentialType, Setting
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -25,8 +25,8 @@ class TC_MT5_aA01():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def t_tc01(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def t_tc01(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -38,7 +38,7 @@ class TC_MT5_aA01():
                 login_wt(driver=main_driver, server=Server.MT5, account_type=AccountType.CRM, credential_type=CredentialType.CRM_CREDENTIAL)
 
             with allure.step("Successfully Logout"):
-                button_setting(driver=main_driver, setting_option="logout")
+                button_setting(driver=main_driver, setting_option=Setting.LOGOUT)
 
         except Exception as e:
             test_failed = True  # Mark test as failed

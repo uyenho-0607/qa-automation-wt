@@ -1,13 +1,13 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, CSVFileNameManager
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
-from common.desktop.module_trade.utils import review_pending_orderIDs
-from data_config.utils import read_orderIDs_from_csv
+from common.desktop.module_trade.utils import review_pending_order_ids
+from data_config.utils import read_order_ids_from_csv
 
 
 @allure.parent_suite("MT4 Membersite - Pending Order Expiry Review")
@@ -27,8 +27,8 @@ class TC_review_pending_order_expiry():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_review_order_expiry(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_review_order_expiry(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -40,13 +40,13 @@ class TC_review_pending_order_expiry():
             with allure.step("Login to Web Trader Membersite"):
                 login_wt(driver=main_driver, server=Server.MT4, testcase_id="TC01")
 
-            with allure.step("Read orderIDs from CSV"):
+            with allure.step("Read order_ids from CSV"):
                 # get_server_local_time(driver=main_driver)
-                orderIDs = read_orderIDs_from_csv(filename="MT4_Desktop_Pending_Order.csv")
+                order_ids = read_order_ids_from_csv(filename=CSVFileNameManager.MT4_DESKTOP_PENDING_ORDER)
         
             with allure.step("Ensure the OrderID is display in order panel table"):
                 # # Check order IDs in Order History table
-                review_pending_orderIDs(driver=main_driver, order_ids=orderIDs)
+                review_pending_order_ids(driver=main_driver, order_ids=order_ids)
                 
         except Exception as e:
             test_failed = True  # Mark test as failed

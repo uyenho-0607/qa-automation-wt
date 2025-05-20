@@ -1,10 +1,10 @@
 
 import random
 
+from enums.main import Menu
 from constants.helper.driver import delay, get_current_url, switch_to_new_window
 from constants.helper.element import spinner_element, javascript_click, click_element, find_list_of_elements_by_xpath, find_visible_element_by_xpath, is_element_present_by_xpath
 from constants.helper.error_handler import handle_exception
-
 
 from common.desktop.module_sub_menu.sub_menu import menu_button
 
@@ -19,7 +19,7 @@ def education_video(driver):
     try:
         
         # Redirect to the Markets page
-        menu_button(driver, menu="education")
+        menu_button(driver, menu=Menu.EDUCATION)
 
         spinner_element(driver)
         
@@ -29,7 +29,7 @@ def education_video(driver):
         # find the list of the education list
         education_lists = find_list_of_elements_by_xpath(driver, "//div[contains(@class, 'sc-10lehzk-0 fVYmwG')]")
         if not education_lists:
-            raise AssertionError("Page is empy")
+            assert False, "Page is empy"
         
         # Select a random deposit option from the dropdown
         random_deposit_option = random.choice(education_lists)
@@ -54,9 +54,9 @@ def education_video(driver):
             if not is_playing:
                 print("Video is playing")
             else:
-                raise AssertionError("Video is NOT playing")
+                assert False, "Video is NOT playing"
         else:
-            raise AssertionError("No video is displayed")
+            assert False, "No video is displayed"
             
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -77,7 +77,7 @@ def video_redirection(driver):
     try:
         
         # Redirect to the Markets page
-        menu_button(driver, menu="education")
+        menu_button(driver, menu=Menu.EDUCATION)
 
         spinner_element(driver)
         
@@ -87,7 +87,7 @@ def video_redirection(driver):
         # find the list of the education list
         education_lists = find_list_of_elements_by_xpath(driver, "//div[contains(@class, 'sc-10lehzk-0 fVYmwG')]")
         if not education_lists:
-            raise AssertionError("Page is empy")
+            assert False, "Page is empy"
         
         # Select a random deposit option from the dropdown
         random_deposit_option = random.choice(education_lists)
@@ -116,9 +116,9 @@ def video_redirection(driver):
                 print("Redirect to youtube website: ", current_url)
             else:
                 # Raise an assertion error
-                raise AssertionError("Expected to redirect to youtube website")
+                assert False, "Expected to redirect to youtube website"
         else:
-            raise AssertionError("No video is displayed")
+            assert False, "No video is displayed"
         
     except Exception as e:
         # Handle any exceptions that occur during the execution

@@ -11,7 +11,8 @@ class DataTestID(str, Enum):
     IN_APP_BROWSER_CLOSE_BUTTON = '//android.widget.ImageButton[@content-desc="Close tab"]'
     
     # APP < BACK BUTTON
-    APP_NAVIGATION_BACK_BUTTON = "navigation-back-button"
+    APP_NAVIGATION_BACK_BUTTON = 'navigation-back-button'
+    ACTION_SHEET_CANCEL_BUTTON = 'action-sheet-cancel-button'
     
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -63,6 +64,7 @@ class DataTestID(str, Enum):
     APP_RESET_PASSWORD_EMAIL_ADDRESS = '//android.widget.EditText[@text="Enter your email address"]'
     APP_RESET_PASSWORD_ACCOUNT_ID = '//android.widget.EditText[@text="Enter your account ID"]'
     APP_RESET_PASSWORD_SUBMIT = '//android.view.ViewGroup[@content-desc="Submit"]'
+    
     APP_HELP_IS_ON_THE_WAY = '//android.widget.TextView[@text="Help is on the way!"]'
     APP_CONTACT_SUPPORT = '//android.widget.TextView[@text="Contact Support"]'
     APP_BACK_TO_LOGIN_SCREEN = '//android.widget.TextView[@text="Back to login screen"]'
@@ -123,9 +125,7 @@ class DataTestID(str, Enum):
     FEATURE_ANNOUNCEMENT_MODAL_TRY_IT_NOW_BUTTON = 'feature-announcement-modal-try-it-now-button'
     FEATURE_ANNOUNCEMENT_MODAL_MEDIA_LEFT_BUTTON = 'feature-announcement-modal-media-left-button'
     FEATURE_ANNOUNCEMENT_MODAL_MEDIA_RIGHT_BUTTON = 'feature-announcement-modal-media-right-button'
-    
-    
-    
+
     HOME_ANNOUNCEMENT = '(//android.view.ViewGroup/android.widget.HorizontalScrollView)[1]//android.widget.TextView'
 
     """
@@ -140,11 +140,14 @@ class DataTestID(str, Enum):
     SIDE_BAR_OPTION_ASSETS = 'side-bar-option-assets'
     SIDE_BAR_OPTION_SIGNAL = 'side-bar-option-signal'
     SIDE_BAR_OPTION_NEWS = 'side-bar-option-news'
+    SIDE_BAR_OPTION_DEALER = 'side-bar-option-dealer'
+    SIDE_BAR_OPTION_EDUCATION = 'side-bar-option-education'
+    
     SPIN_LOADER = 'spin-loader'
     
     # APP
-    APP_MENU_OPTION_HOME = '//android.widget.TextView[@text="Home"]'
-    APP_MENU_OPTION_MARKET = '(//android.widget.TextView[@text="Markets"])[2]'
+    APP_MENU_OPTION_HOME = '//android.view.ViewGroup[contains(@content-desc, "Home")]'
+    APP_MENU_OPTION_MARKET = '//android.view.ViewGroup[contains(@content-desc, "Markets")]'
     APP_MENU_OPTION_TRADE = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[3]/android.widget.TextView[2]'
     APP_MENU_OPTION_INFO = '//android.widget.TextView[@text="Info"]'
     APP_MENU_OPTION_ASSETS = '//android.view.ViewGroup[1]/android.widget.FrameLayout/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup/android.view.ViewGroup[2]/android.view.ViewGroup[5]'
@@ -173,8 +176,6 @@ class DataTestID(str, Enum):
     APP_SEARCH_HISTORY_LABEL = '//android.widget.TextView[@text="Search History"]'
     SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL = 'symbol-input-search-items-symbol'
     SYMBOL_INPUT_SEARCH_ITEMS_SYMBOL_NAME = '//*[@data-testid="symbol-input-search-items"]//div[1]/div[1]'
-       
-
 
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -220,6 +221,10 @@ class DataTestID(str, Enum):
     APP_MSG_NO_ITEMS_AVAILABLE = '//android.widget.TextView[@text="No items available"]'
     
     # APP WATCHLIST TAB NAME
+    APP_MARKET_SYMBOL_ROW_REMOVE = '//android.widget.TextView[@text="Remove"]'
+    APP_MARKET_SYMBOL_ROW_ITEMS = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup'
+    APP_MARKET_WATCHLIST_SYMBOL_NAME = '//android.widget.ScrollView/android.view.ViewGroup/android.view.ViewGroup//android.widget.TextView[2]'
+    APP_MARKET_WATCHLIST_FAV_SYMBOL_NAME = '//android.widget.TextView[3]'
     APP_TAB_TOP_ALL = '//android.widget.TextView[@text="All"]'
     APP_TAB_TOP_FAVOURITES = '//android.view.ViewGroup[@content-desc="Favourites"]'
     APP_TAB_TOP_PICK = '//android.view.ViewGroup[@content-desc="Top Pick"]'
@@ -233,10 +238,9 @@ class DataTestID(str, Enum):
     APP_SYMBOL_PREFERENCE_SAVE = '//android.widget.TextView[@text="Save Changes"]'
     APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]'
     APP_SYMBOL_PREFERENCE_OPTION_CHECKED = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]'
-    
-    APP_SYMBOL_PREFERENCE_OPTION_UNCHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[not(.//android.widget.TextView)]/parent::*'
-    APP_SYMBOL_PREFERENCE_OPTION_CHECKED_PARENT = '//android.widget.ScrollView//android.view.ViewGroup[@content-desc]//android.view.ViewGroup[.//android.widget.TextView]/parent::*'
-    
+    APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_UNCHECKED = '//android.view.ViewGroup[@content-desc="Show all"]/android.view.ViewGroup'
+    APP_SYMBOL_PREFERENCE_OPTION_SHOW_ALL_CHECKED = '//android.view.ViewGroup[contains(@content-desc, "Show all")]/android.view.ViewGroup[android.widget.TextView]'
+
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     SIGNAL
@@ -258,41 +262,39 @@ class DataTestID(str, Enum):
                                                     ORDER PANEL TABLE
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
+    
+    PAGINATION_NEXT = 'pagination-next'
+    
+    # Show / Hide columns
+    COLUMN_PREFERENCE = 'column-preference'
+    ORDER_COLUMN_PREFERENCE_MODAL_TITLE = 'order-column-preference-modal-title'
+    ORDER_COLUMN_PREFERENCE_MODAL_SAVE = 'order-column-preference-modal-save'
+    ORDER_COLUMN_PREFERENCE_MODAL_CLOSE = 'order-column-preference-modal-close'
+    
+    
     # ORDER PANEL TABLE
     ASSET_ORDER_TYPE = 'asset-order-type'
+    ASSET_DETAILED_HEADER_SYMBOL = 'asset-detailed-header-symbol'
+    ASSET_HEADER_VIEW_ALL = 'asset-header-view-all' # VIEW ALL TRANSACTION
     TAB_ASSET_ORDER_TYPE_OPEN_POSITIONS = 'tab-asset-order-type-open-positions'
     TAB_ASSET_ORDER_TYPE_PENDING_ORDERS = 'tab-asset-order-type-pending-orders'
     TAB_ASSET_ORDER_TYPE_HISTORY = 'tab-asset-order-type-history'
     TAB_ASSET_ORDER_TYPE_HISTORY_POSITIONS_HISTORY = 'tab-asset-order-type-history-positions-history'
     TAB_ASSET_ORDER_TYPE_HISTORY_ORDERS_AND_DEALS = 'tab-asset-order-type-history-orders-and-deals'
-
-
-    # ORDER HISTORY TABLE ID
-    ASSET_HISTORY_POSITION_TABLE = 'asset-history-position-table'
-    ASSET_HISTORY_ORDER_DEAL_TABLE = 'asset-history-order-deal-table'
-    ASSET_HISTORY_POSITION_TABLE_HEADER = 'asset-history-position-table-header'
-    ASSET_HISTORY_ORDER_DEAL_TABLE_HEADER = 'asset-history-order-deal-table-header'
-    CALENDAR_BUTTON_ASSETS_CONTENT = 'calender-button-assets-content'
-    ASSET_HISTORY_COLUMN_CLOSE_DATE = 'asset-history-column-close-date'
-    ASSET_HISTORY_COLUMN_CLOSE_PRICE = 'asset-history-column-close-price'
-    ASSET_HISTORY_COLUMN_COMMISSION = 'asset-history-column-commission'
-    ASSET_HISTORY_COLUMN_ENTRY_PRICE = 'asset-history-column-entry-price'
-    ASSET_HISTORY_COLUMN_OPEN_DATE = 'asset-history-column-open-date'
-    ASSET_HISTORY_COLUMN_SYMBOL = 'asset-history-column-symbol'
-    ASSET_HISTORY_COLUMN_ORDER_ID = 'asset-history-column-order-id'
-    ASSET_HISTORY_COLUMN_ORDER_TYPE = 'asset-history-column-order-type'
-    ASSET_HISTORY_COLUMN_PROFIT = 'asset-history-column-profit'
-    ASSET_HISTORY_COLUMN_REMARKS = 'asset-history-column-remarks'
-    ASSET_HISTORY_COLUMN_SIZE = 'asset-history-column-size'
-    ASSET_HISTORY_COLUMN_STATUS = 'asset-history-column-status'
-    ASSET_HISTORY_COLUMN_STOP_LOSS = 'asset-history-column-stop-loss'
-    ASSET_HISTORY_COLUMN_SWAP = 'asset-history-column-swap'
-    ASSET_HISTORY_COLUMN_TAKE_PROFIT = 'asset-history-column-take-profit'
-    ASSET_HISTORY_COLUMN_UNITS = 'asset-history-column-units'
+    
+    ASSET_DETAILED_VALUE = '//*[contains(@resource-id, "value")]'
+    ASSET_DETAILED_LABEL = '//*[contains(@resource-id, "label")]'
+    ASSET_DETAILED_ORDERID_VALUE = '//*[contains(@resource-id, "order-id-value")]'
+    ASSET_LIST_ITEM_EXPAND = '(//*[contains(@resource-id, "list-item-expand")])[1]'
+    ASSET_LIST_BUTTON_TRACK = '(//*[contains(@resource-id, "button-track")])[1]'
+    ASSET_LIST_BUTTON_CLOSE = '(//*[contains(@resource-id, "button-close")])[1]'
+    ASSET_LIST_BUTTON_EDIT = '(//*[contains(@resource-id, "button-edit")])[1]'
+    ASSET_LIST_ITEM_ORDER_NO = '(//*[contains(@resource-id, "list-item-order-no")])[1]'
 
 
     # OPEN POSITION TABLE ID
     ASSET_OPEN_TABLE = 'asset-open-table'
+    ASSET_OPEN_LIST_ITEM_EXPAND = 'asset-open-list-item-expand'
     ASSET_OPEN_TABLE_HEADER = 'asset-open-table-header'
     ASSET_OPEN_BUTTON_CLOSE = 'asset-open-button-close'
     ASSET_OPEN_BUTTON_EDIT = 'asset-open-button-edit'
@@ -315,6 +317,7 @@ class DataTestID(str, Enum):
 
     # PENDING ORDER TABLE ID
     ASSET_PENDING_TABLE = 'asset-pending-table'
+    ASSET_PENDING_LIST_ITEM_EXPAND = 'asset-pending-list-item-expand'
     ASSET_OPENDING_TABLE_HEADER = 'asset-pending-table-header'
     ASSET_PENDING_BUTTON_CLOSE = 'asset-pending-button-close'
     ASSET_PENDING_BUTTON_EDIT = 'asset-pending-button-edit'
@@ -335,13 +338,113 @@ class DataTestID(str, Enum):
     ASSET_PENDING_COLUMN_VOLUME = 'asset-pending-column-volume'
     ASSET_PENDING_LIST = 'asset-pending-list'
 
+        
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    ORDER HISTORY - POSITION TABLE
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
+    
+    # ORDER HISTORY TABLE ID
+    ASSET_HISTORY_POSITION_LIST = 'asset-history-position-list' # DS
+    ASSET_HISTORY_POSITION_TABLE = 'asset-history-position-table'  # DS
+    ASSET_HISTORY_POSITION_TABLE_HEADER = 'asset-history-position-table-header' # DS
+    ASSET_HISTORY_ITEM_EXPAND = 'asset-history-position-list-item-expand' # APP
 
+    
+    # DESKTOP
+    ASSET_HISTORY_COLUMN_CLOSE_DATE = 'asset-history-column-close-date'
+    ASSET_HISTORY_COLUMN_CLOSE_PRICE = 'asset-history-column-close-price'
+    ASSET_HISTORY_COLUMN_COMMISSION = 'asset-history-column-commission'
+    ASSET_HISTORY_COLUMN_ENTRY_PRICE = 'asset-history-column-entry-price'
+    ASSET_HISTORY_COLUMN_OPEN_DATE = 'asset-history-column-open-date'
+    ASSET_HISTORY_COLUMN_SYMBOL = 'asset-history-column-symbol'
+    ASSET_HISTORY_COLUMN_ORDER_ID = 'asset-history-column-order-id'
+    ASSET_HISTORY_COLUMN_ORDER_TYPE = 'asset-history-column-order-type'
+    ASSET_HISTORY_COLUMN_PROFIT = 'asset-history-column-profit'
+    ASSET_HISTORY_COLUMN_REMARKS = 'asset-history-column-remarks'
+    ASSET_HISTORY_COLUMN_SIZE = 'asset-history-column-size'
+    ASSET_HISTORY_COLUMN_STATUS = 'asset-history-column-status'
+    ASSET_HISTORY_COLUMN_STOP_LOSS = 'asset-history-column-stop-loss'
+    ASSET_HISTORY_COLUMN_SWAP = 'asset-history-column-swap'
+    ASSET_HISTORY_COLUMN_TAKE_PROFIT = 'asset-history-column-take-profit'
+    ASSET_HISTORY_COLUMN_UNITS = 'asset-history-column-units'
+    
+    
+    # ORDER HISTORY - VALUE (APP)
+    ASSET_HISTORY_COLUMN_OPEN_DATE_VALUE = 'asset-history-column-open-date-value'
+    ASSET_HISTORY_COLUMN_CLOSE_DATE_VALUE = 'asset-history-column-close-date-value'
+    ASSET_HISTORY_COLUMN_ORDER_ID_VALUE = 'asset-history-column-order-id-value'
+    ASSET_HISTORY_COLUMN_STATUS_VALUE = 'asset-history-column-status-value'
+    ASSET_HISTORY_COLUMN_SIZE_VALUE = 'asset-history-column-size-value'
+    ASSET_HISTORY_COLUMN_UNITS_VALUE = 'asset-history-column-units-value'
+    ASSET_HISTORY_COLUMN_ENTRY_PRICE_VALUE = 'asset-history-column-entry-price-value'
+    ASSET_HISTORY_COLUMN_TAKE_PROFIT_VALUE = 'asset-history-column-take-profit-value'
+    ASSET_HISTORY_COLUMN_STOP_LOSS_VALUE = 'asset-history-column-stop-loss-value'
+    ASSET_HISTORY_COLUMN_REMARKS_VALUE = 'asset-history-column-remarks-value'
+    
+    # ORDER HISTORY - LABEL (APP)
+    ASSET_HISTORY_COLUMN_OPEN_DATE_LABEL = 'asset-history-column-open-date-label'
+    ASSET_HISTORY_COLUMN_CLOSE_DATE_LABEL = 'asset-history-column-close-date-label'
+    ASSET_HISTORY_COLUMN_ORDER_ID_LABEL = 'asset-history-column-order-id-label'
+    ASSET_HISTORY_COLUMN_STATUS_LABEL = 'asset-history-column-status-label'
+    ASSET_HISTORY_COLUMN_SIZE_LABEL = 'asset-history-column-size-label'
+    ASSET_HISTORY_COLUMN_UNITS_LABEL = 'asset-history-column-units-label'
+    ASSET_HISTORY_COLUMN_ENTRY_PRICE_LABEL = 'asset-history-column-entry-price-label'
+    ASSET_HISTORY_COLUMN_TAKE_PROFIT_LABEL = 'asset-history-column-take-profit-label'
+    ASSET_HISTORY_COLUMN_STOP_LOSS_LABEL = 'asset-history-column-stop-loss-label'
+    ASSET_HISTORY_COLUMN_REMARKS_LABEL = 'asset-history-column-remarks-label'
+    
+    """
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+                                                    ORDER HISTORY - ORDER & DEAL TABLE
+    ---------------------------------------------------------------------------------------------------------------------------------------------------- 
+    """
+    
+    # CALENDAR   
+    CALENDAR_BUTTON_ASSETS_CONTENT = 'calender-button-assets-content' # DS
+
+    # ORDER HISTORY - ORDER & DEAL (DESKTOP)
+    ASSET_HISTORY_ORDER_DEAL_TABLE = 'asset-history-order-deal-table'
+    ASSET_HISTORY_ORDER_DEAL_TABLE_HEADER = 'asset-history-order-deal-table-header'
+    ASSET_HISTORY_ORDER_DEAL_LIST = 'asset-history-order-deal-list'
+    
+    # ORDER HISTORY - ORDER & DEAL VALUE (APP)
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_OPEN_DATE_VALUE = 'asset-history-order-deal-column-open-date-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_CLOSE_DATE_VALUE = 'asset-history-order-deal-column-close-date-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_ORDER_ID_VALUE = 'asset-history-order-deal-column-order-id-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_STATUS_VALUE = 'asset-history-order-deal-column-status-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_SIZE_VALUE = 'asset-history-order-deal-column-size-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_UNITS_VALUE = 'asset-history-order-deal-column-units-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_FILL_POLICY_VALUE = 'asset-history-order-deal-column-fill-policy-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_ENTRY_PRICE_VALUE = 'asset-history-order-deal-column-entry-price-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_TAKE_PROFIT_VALUE = 'asset-history-order-deal-column-take-profit-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_STOP_LOSS_VALUE = 'asset-history-order-deal-column-stop-loss-value'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_REMARKS_VALUE = 'asset-history-order-deal-column-remarks-value'
+    
+    # ORDER HISTORY - ORDER & DEAL LABEL (APP)
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_OPEN_DATE_LABEL = 'asset-history-order-deal-column-open-date-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_CLOSE_DATE_LABEL = 'asset-history-order-deal-column-close-date-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_ORDER_ID_LABEL = 'asset-history-order-deal-column-order-id-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_STATUS_LABEL = 'asset-history-order-deal-column-status-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_SIZE_LABEL = 'asset-history-order-deal-column-size-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_UNITS_LABEL = 'asset-history-order-deal-column-units-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_FILL_POLICY_LABEL = 'asset-history-order-deal-column-fill-policy-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_ENTRY_PRICE_LABEL = 'asset-history-order-deal-column-entry-price-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_TAKE_PROFIT_LABEL = 'asset-history-order-deal-column-take-profit-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_STOP_LOSS_LABEL = 'asset-history-order-deal-column-stop-loss-label'
+    ASSET_HISTORY_ORDER_DEAL_COLUMN_REMARKS_LABEL = 'asset-history-order-deal-column-remarks-label'
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     CHART
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
-    CHART_STAR_SYMBOL = 'chart-star-symbol'
+    APP_CHART_STAR_SYMBOL = 'chart-star-symbol'
+    CHART_STAR_SYMBOL_UNWATCH = 'chart-star-symbol-unwatch'
+    CHART_STAR_SYMBOL_WATCH = 'chart-star-symbol-watch'
+    WATCHLIST_STAR_UNWATCH = 'watchlist-star-unwatch'
+    WATCHLIST_STAR_WATCH = 'watchlist-star-watch'
     CHART_TRADE_BUTTON_CLOSE = 'chart-trade-button-close'
     CHART_TOGGLE_FULLSCREEN = 'chart-toggle-fullscreen'
     CHART_EXIT_FULLSCREEN ='chart-exit-fullscreen'
@@ -405,9 +508,13 @@ class DataTestID(str, Enum):
     
     # ORDER TYPE SELECTION
     TRADE_DROPDOWN_ORDER_TYPE = 'trade-dropdown-order-type'
-    TRADE_DROPDOWN_ORDER_TYPE_Market = 'trade-dropdown-order-type-market'
-    TRADE_DROPDOWN_ORDER_TYPE_Limit = 'trade-dropdown-order-type-limit'
-    TRADE_DROPDOWN_ORDER_TYPE_Stop = 'trade-dropdown-order-type-stop'
+    TRADE_DROPDOWN_ORDER_TYPE_MARKET = 'trade-dropdown-order-type-market'
+    TRADE_DROPDOWN_ORDER_TYPE_LIMIT = 'trade-dropdown-order-type-limit'
+    TRADE_DROPDOWN_ORDER_TYPE_STOP = 'trade-dropdown-order-type-stop'
+    TRADE_DROPDOWN_ORDER_TYPE_STOP_LIMIT = 'trade-dropdown-order-type-stop-limit'
+    
+    TRADE_BOTTOM_SHEET = 'trade-bottom-sheet'
+    TRADE_BUTTON_PRE_TRADE_DETAILS = 'trade-button-pre-trade-details'
     
     # SIZE / VOLUME
     TRADE_INPUT_VOLUME = 'trade-input-volume'
@@ -418,35 +525,41 @@ class DataTestID(str, Enum):
     TRADE_ONE_POINT_EQUAL_LABEL = 'trade-one-point-equal-label'
     
     # FILL POLICY
-    TRADE_ORDER_DROPDOWN_FILL_POLICY = 'trade-order-dropdown-fill-policy'
+    TRADE_DROPDOWN_FILL_POLICY = 'trade-dropdown-fill-policy'
     TRADE_DROPDOWN_FILL_POLICY_FILL_OR_KILL = 'trade-dropdown-fill-policy-fill-or-kill'
     TRADE_DROPDOWN_FILL_POLICY_IMMEDIATE_OR_CANCEL = 'trade-dropdown-fill-policy-immediate-or-cancel'
     TRADE_DROPDOWN_FILL_POLICY_RETURN = 'trade-dropdown-fill-policy-return'
     
     # PRICE
     TRADE_INPUT_PRICE = 'trade-input-price'
-    TRADE_INPUT_PRICE_INCREASE = 'trade-input-price-increase'
     TRADE_INPUT_PRICE_DECREASE = 'trade-input-price-decrease'
+    TRADE_INPUT_PRICE_INCREASE = 'trade-input-price-increase'
+    
+    # STOP LIMIT PRICE
+    TRADE_INPUT_STOP_LIMIT_PRICE = 'trade-input-stop-limit-price'
+    TRADE_INPUT_STOP_LIMIT_PRICE_DECREASE = 'trade-input-stop-limit-price-decrease'
+    TRADE_INPUT_STOP_LIMIT_PRICE_INCREASE = 'trade-input-stop-limit-price-increase'
 
     # PLACE TAKE PROFIT BY POINTS
-    TRADE_INPUT_TAKEPROFIT_POINTS = 'trade-input-takeprofit-points'
-    TRADE_INPUT_TAKEPROFIT_POINTS_DECREASE = 'trade-input-takeprofit-points-decrease'
-    TRADE_INPUT_TAKEPROFIT_POINTS_INCREASE = 'trade-input-takeprofit-points-increase'
+    TRADE_INPUT_TAKE_PROFIT_POINTS = 'trade-input-takeprofit-points'
+    TRADE_INPUT_TAKE_PROFIT_POINTS_DECREASE = 'trade-input-takeprofit-points-decrease'
+    TRADE_INPUT_TAKE_PROFIT_POINTS_INCREASE = 'trade-input-takeprofit-points-increase'
     
     # PLACE TAKE PROFIT BY PRICE
     TRADE_INPUT_TAKEPROFIT_PRICE = 'trade-input-takeprofit-price'
-    TRADE_INPUT_TAKEPROFIT_PRICE_INCREASE = 'trade-input-takeprofit-price-increase'
     TRADE_INPUT_TAKEPROFIT_PRICE_DECREASE = 'trade-input-takeprofit-price-decrease'
+    TRADE_INPUT_TAKEPROFIT_PRICE_INCREASE = 'trade-input-takeprofit-price-increase'
     
     # PLACE STOP LOSS BY POINTS
-    TRADE_INPUT_STOPLOSS_POINTS = 'trade-input-stoploss-points'
-    TRADE_INPUT_STOPLOSS_POINTS_DECREASE = 'trade-input-stoploss-points-decrease'
-    TRADE_INPUT_STOPLOSS_POINTS_INCREASE = 'trade-input-stoploss-points-increase'
+    TRADE_INPUT_STOP_LOSS_POINTS = 'trade-input-stoploss-points'
+    TRADE_INPUT_STOP_LOSS_POINTS_DECREASE = 'trade-input-stoploss-points-decrease'
+    TRADE_INPUT_STOP_LOSS_POINTS_INCREASE = 'trade-input-stoploss-points-increase'
 
     # PLACE STOP LOSS BY POINTS
     TRADE_INPUT_STOPLOSS_PRICE = 'trade-input-stoploss-price'
-    TRADE_INPUT_STOPLOSS_PRICE_INCREASE = 'trade-input-stoploss-price-increase'
     TRADE_INPUT_STOPLOSS_PRICE_DECREASE = 'trade-input-stoploss-price-decrease'
+    TRADE_INPUT_STOPLOSS_PRICE_INCREASE = 'trade-input-stoploss-price-increase'
+
     
     # EXPIRY
     TRADE_DROPDOWN_EXPIRY = 'trade-dropdown-expiry'
@@ -454,16 +567,17 @@ class DataTestID(str, Enum):
     TRADE_DROPDOWN_EXPIRY_GOOD_TILL_DAY = 'trade-dropdown-expiry-good-till-day'
     TRADE_DROPDOWN_EXPIRY_SPECIFIED_DATE = 'trade-dropdown-expiry-specified-date'
     TRADE_DROPDOWN_EXPIRY_SPECIFIED_DATE_AND_TIME = 'trade-dropdown-expiry-specified-date-and-time'
-    TRADE_DROPDOWN_EXPIRY_DATE = 'trade-input-expiry-date'
-    TRADE_DROPDOWN_EXPIRY_TIME = 'trade-input-expiry-time'
-    TRADE_DROPDOWN_EXPIRY_TIME_HOUR = 'trade-input-expiry-time-hour'
-    TRADE_DROPDOWN_EXPIRY_TIME_MINUTE = 'trade-input-expiry-time-minute'
+    TRADE_INPUT_EXPIRY_DATE = 'trade-input-expiry-date'
+    TRADE_INPUT_EXPIRY_TIME = 'trade-input-expiry-time'
+    TRADE_INPUT_EXPIRY_TIME_HOUR = 'trade-input-expiry-time-hour'
+    TRADE_INPUT_EXPIRY_TIME_MINUTE = 'trade-input-expiry-time-minute'
     
     # PLACE / UPDATE
     TRADE_BUTTON_ORDER = 'trade-button-order'
     
-    # EDIT CONFIRMATION DIALOG
-    TRADE_CONFIRMATION_DIALOG = 'trade-confirmation-modal'
+    # TRADE CONFIRMATION DIALOG
+    APP_TRADE_CONFIRMATION_TITLE = '//android.widget.TextView[@text="Trade Confirmation"]'
+    TRADE_CONFIRMATION_MODAL = 'trade-confirmation-modal'
     TRADE_CONFIRMATION_ORDER_TYPE = 'trade-confirmation-order-type'
     TRADE_CONFIRMATION_SYMBOL = 'trade-confirmation-symbol'
     TRADE_CONFIRMATION_LABEL = 'trade-confirmation-label'
@@ -491,28 +605,33 @@ class DataTestID(str, Enum):
     
     # MODIFY PRICE
     EDIT_INPUT_PRICE = 'edit-input-price'
-    EDIT_INPUT_PRICE_INCREASE = 'edit-input-price-increase'
     EDIT_INPUT_PRICE_DECREASE = 'edit-input-price-decrease'
+    EDIT_INPUT_PRICE_INCREASE = 'edit-input-price-increase'
 
     # MODIFY STOP LOSS BY POINTS
-    EDIT_INPUT_STOPLOSS_POINTS = 'edit-input-stoploss-points'
-    EDIT_INPUT_STOPLOSS_POINTS_DECREASE = 'edit-input-stoploss-points-decrease'
-    EDIT_INPUT_STOPLOSS_POINTS_INCREASE = 'edit-input-stoploss-points-increase'
+    EDIT_INPUT_STOP_LOSS_POINTS = 'edit-input-stoploss-points'
+    EDIT_INPUT_STOP_LOSS_POINTS_DECREASE = 'edit-input-stoploss-points-decrease'
+    EDIT_INPUT_STOP_LOSS_POINTS_INCREASE = 'edit-input-stoploss-points-increase'
     
     # MODIFY STOP LOSS BY PRICE
     EDIT_INPUT_STOPLOSS_PRICE = 'edit-input-stoploss-price'
-    EDIT_INPUT_STOPLOSS_PRICE_INCREASE = 'edit-input-stoploss-price-increase'
     EDIT_INPUT_STOPLOSS_PRICE_DECREASE = 'edit-input-stoploss-price-decrease'
+    EDIT_INPUT_STOPLOSS_PRICE_INCREASE = 'edit-input-stoploss-price-increase'
+
+    # STOP LIMIT PRICE
+    EDIT_INPUT_STOP_LIMIT_PRICE = 'edit-input-stop-limit-price'
+    EDIT_INPUT_STOP_LIMIT_PRICE_DECREASE = 'edit-input-stop-limit-price-decrease'
+    EDIT_INPUT_STOP_LIMIT_PRICE_INCREASE = 'edit-input-stop-limit-price-increase'
     
     # MODIFY TAKE PROFIT BY PRICE
     EDIT_INPUT_TAKEPROFIT_PRICE = 'edit-input-takeprofit-price'
     EDIT_INPUT_TAKEPROFIT_PRICE_DECREASE = 'edit-input-takeprofit-price-increase'
     EDIT_INPUT_TAKEPROFIT_PRICE_INCREASE = 'edit-input-takeprofit-price-decrease'
-    
+
     # MODIFY TAKE PROFIT BY POINTS
-    EDIT_INPUT_TAKEPROFIT_POINTS = 'edit-input-takeprofit-points'
-    EDIT_INPUT_TAKEPROFIT_POINTS_DECREASE = 'edit-input-takeprofit-points-decrease'
-    EDIT_INPUT_TAKEPROFIT_POINTS_INCREASE = 'edit-input-takeprofit-points-increase'
+    EDIT_INPUT_TAKE_PROFIT_POINTS = 'edit-input-takeprofit-points'
+    EDIT_INPUT_TAKE_PROFIT_POINTS_DECREASE = 'edit-input-takeprofit-points-decrease'
+    EDIT_INPUT_TAKE_PROFIT_POINTS_INCREASE = 'edit-input-takeprofit-points-increase'
     
     # MODIFY EXPIRY
     EDIT_DROPDOWN_EXPIRY = 'edit-dropdown-expiry'
@@ -520,16 +639,16 @@ class DataTestID(str, Enum):
     EDIT_DROPDOWN_EXPIRY_GOOD_TILL_DAY = 'edit-dropdown-expiry-good-till-day'
     EDIT_DROPDOWN_EXPIRY_SPECIFIED_DATE = 'edit-dropdown-expiry-specified-date'
     EDIT_DROPDOWN_EXPIRY_SPECIFIED_DATE_AND_TIME = 'edit-dropdown-expiry-specified-date-and-time'
-    EDIT_DROPDOWN_EXPIRY_DATE = 'edit-input-expiry-date'
-    EDIT_DROPDOWN_EXPIRY_TIME = 'edit-input-expiry-time'
-    EDIT_DROPDOWN_EXPIRY_TIME_HOUR = 'edit-input-expiry-time-hour'
-    EDIT_DROPDOWN_EXPIRY_TIME_MINUTE = 'edit-input-expiry-time-minute'
+    EDIT_INPUT_EXPIRY_DATE = 'edit-input-expiry-date'
+    EDIT_INPUT_EXPIRY_TIME = 'edit-input-expiry-time'
+    EDIT_INPUT_EXPIRY_TIME_HOUR = 'edit-input-expiry-time-hour'
+    EDIT_INPUT_EXPIRY_TIME_MINUTE = 'edit-input-expiry-time-minute'
 
     # UPDATE BUTTON
     EDIT_BUTTON_ORDER = 'edit-button-order'
     
     # EDIT CONFIRMATION DIALOG
-    EDIT_CONFIRMATION_DIALOG = 'edit-confirmation-modal'
+    EDIT_CONFIRMATION_MODAL = 'edit-confirmation-modal'
     EDIT_CONFIRMATION_ORDER_ID = 'edit-confirmation-order-id'
     EDIT_CONFIRMATION_ORDER_TYPE = 'edit-confirmation-order-type'
     EDIT_CONFIRMATION_SYMBOL = 'edit-confirmation-symbol'
@@ -543,8 +662,9 @@ class DataTestID(str, Enum):
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
     """
     # CLOSE ORDER
+    CLOSE_ORDER = 'close-order'
     CLOSE_ORDER_INPUT_VOLUME = 'close-order-input-volume'
-    'close-order-input-volume-max-value'
+    CLOSE_ORDER_INPUT_VOLUME_MAX_VALUE = 'close-order-input-volume-max-value'
     CLOSE_ORDER_INPUT_VOLUME_STATIC_MIN = 'close-order-input-volume-static-min'
     CLOSE_ORDER_INPUT_VOLUME_STATIC_MAX = 'close-order-input-volume-static-max'
     CLOSE_ORDER_INPUT_VOLUME_DECREASE = 'close-order-input-volume-decrease'
@@ -552,8 +672,8 @@ class DataTestID(str, Enum):
     CLOSE_ORDER_DROPDOWN_FILL_POLICY = 'close-order-dropdown-fill-policy'
     CLOSE_ORDER_DROPDOWN_FILL_POLICY_FILL_OR_KILL = 'close-order-dropdown-fill-policy-fill-or-kill'
     CLOSE_ORDER_DROPDOWN_FILL_POLICY_IMMEDIATE_OR_CANCEL = 'close-order-dropdown-fill-policy-immediate-or-cancel'
-    CLOSE_BUTTON_SUBMIT = 'close-button-submit'
-    CLOSE_BUTTON_CANCEL = 'close-order-cancel'
+    CLOSE_ORDER_BUTTON_SUBMIT = 'close-order-button-submit'
+    CLOSE_ORDER_BUTTON_CANCEL = 'close-order-button-cancel'
 
 
     # BULK CLOSE MODULE
@@ -605,18 +725,22 @@ class DataTestID(str, Enum):
     
     # MOBILE / APP
     NOTIFICATION_BOX_TITLE = 'notification-box-title'
+    APP_NOTIFICATION_BOX_TITLE = '//*[@resource-id="notification-box-title"]'
     NOTIFICATION_BOX_DESCRIPTION = 'notification-box-description'
+    APP_NOTIFICATION_BOX_DESCRIPTION = '//*[@resource-id="notification-box-description"]'
     NOTIFICATION_BOX_CLOSE = 'notification-box-close'
+    APP_NOTIFICATION_BOX_CLOSE = '//*[@resource-id="notification-box-close"]'
 
     
     # NOTIFICATION ORDER DETAILS MODAL
     NOTIFICATION_ORDER_DETAILS_LABEL = 'notification-order-details-label'
     NOTIFICATION_ORDER_DETAILS_VALUE = 'notification-order-details-value'
+    APP_NOTIFICATION_ORDER_DETAILS_VALUE = '//*[@resource-id="android:id/content"]//android.widget.TextView[@resource-id="notification-order-details-label"]/parent::*/android.widget.TextView[not(@resource-id="notification-order-details-label")][position()>1]'
     NOTIFICATION_ORDER_DETAILS_MODAL = 'notification-order-details-modal'
     NOTIFICATION_ORDER_DETAILS_MODAL_ORDDER_TYPE = 'notification-order-details-modal-order-type'
     NOTIFICATION_ORDER_DETAILS_MODAL_CLOSE = 'notification-order-details-modal-close'
     
-
+    
     """
     ---------------------------------------------------------------------------------------------------------------------------------------------------- 
                                                     SETTING
@@ -633,6 +757,7 @@ class DataTestID(str, Enum):
     SETTING_OPTION_OCT = 'setting-option-oct'
     SETTING_OPTION_NOTIFICATION_SETTING = 'setting-option-notification-setting'
     SETTING_OPTION_LANGUGAGE = 'setting-option-language'
+    SETTING_OPTION_LANGUGAGE_ITEMS = '//*[@data-testid="setting-option-language"]//li'
     SETTING_OPTION_APPEARANCE = 'setting-option-appearance'
     
     # Change Password
@@ -651,7 +776,7 @@ class DataTestID(str, Enum):
     APP_CHANGE_PASSWORD_MODAL_CONFIRM = '//android.view.ViewGroup[@content-desc="Submit"]'
     
     
-    # END OF CHANGE PASSWORD
+    # SETTING
     
     SETTING_OPTION_LINKED_DEVICE = 'setting-option-linked-device'
     SETTING_OPTION_BIOMETRICS_SETTING = 'setting-option-biometrics-settings'

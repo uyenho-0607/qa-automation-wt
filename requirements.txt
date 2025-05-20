@@ -6,7 +6,7 @@
 # Required python libraries to run project
 allure-pytest==2.13.2
 allure-python-commons==2.13.2
-Appium-Python-Client==4.2.0
+Appium-Python-Client==5.0.0
 websocket-client==1.8.0
 attrs==23.2.0
 flake8==7.0.0
@@ -23,7 +23,7 @@ setuptools==69.0.3
 wheel==0.42.0
 
 # Required python libraries for automated testing of UI
-selenium==4.17.2
+selenium==4.30.0
 webdriver-manager==4.0.1
 chromedriver_autoinstaller==0.6.4
 

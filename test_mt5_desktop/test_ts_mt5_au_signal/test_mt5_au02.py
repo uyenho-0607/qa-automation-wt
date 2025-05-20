@@ -14,9 +14,9 @@ from common.desktop.module_signal.signal import verify_copy_to_order_is_disabled
 @allure.epic("MT5 Desktop ts_au - Signal")
 
 # Member Portal
-class TC_MT5_aU02():
+class TC_aU02():
 
-    @allure.title("TC_MT5_aU02")
+    @allure.title("TC_aU02")
 
     @allure.description(
         """
@@ -25,9 +25,9 @@ class TC_MT5_aU02():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc02(self, chromeDriver, request):
+    def test_tc02(self, chrome_driver, request):
 
-        self.driver = chromeDriver
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         

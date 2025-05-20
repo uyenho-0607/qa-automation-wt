@@ -1,4 +1,6 @@
+from enums.main import AlertType, Setting
 from constants.element_ids import DataTestID
+
 from constants.helper.screenshot import attach_text
 from constants.helper.error_handler import handle_exception
 from constants.helper.driver import access_url, get_current_url
@@ -28,15 +30,15 @@ def populate_password_fields(driver, old_password, new_password, confirm_passwor
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     # Locate and populate the old password input field
-    old_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_OLD_PASSWORD.value)
+    old_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_OLD_PASSWORD)
     populate_element(element=old_password_input, text=old_password)
 
     # Locate and populate the new password input field
-    new_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_NEW_PASSWORD.value)
+    new_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_NEW_PASSWORD)
     populate_element(element=new_password_input, text=new_password)
 
     # Locate and populate the confirm password input field
-    confirm_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD.value)
+    confirm_password_input = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM_NEW_PASSWORD)
     populate_element(element=confirm_password_input, text=confirm_password)
 
 """
@@ -49,20 +51,20 @@ def populate_password_fields(driver, old_password, new_password, confirm_passwor
                                                 SUBMIT AND HANDLE ALERT
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
-
-def submit_and_handle_alert(driver, expected_alert_type, login_username, login_password, params_wt_url=None):
+        
+def submit_and_handle_alert(driver, expected_alert_type: AlertType, login_username, login_password, params_wt_url=None):
     """
     Submits a form and handles the alert that appears afterward.
     
     Arguments:
-    - expected_alert_type: The expected type of alert, such as "success" or "error".
+    - expected_alert_type: The expected type of alert (AlertType.SUCCESS, AlertType.ERROR).
     - login_username: The username to be used for further actions in case of a success alert.
     
     Raises:
     - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
     """
     # Find the submit button and click it
-    submit_button = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM.value)
+    submit_button = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CONFIRM)
     click_element(element=submit_button)
     
     # Try to capture the alert message and type
@@ -75,18 +77,22 @@ def submit_and_handle_alert(driver, expected_alert_type, login_username, login_p
 
         # Check if the actual alert type matches the expected one
         if actual_alert_type != expected_alert_type:
-            assert False, f"Test failed: Expected alert type '{expected_alert_type}' but got '{actual_alert_type}' with message: {label_message}"
+            assert False, (
+                f"Test failed: Expected alert type '{expected_alert_type}' but got "
+                f"'{actual_alert_type}' with message: {label_message}"
+            )
 
         # Handle different types of alerts
-        if actual_alert_type == "success":
+        if actual_alert_type == AlertType.SUCCESS:
             handle_success(driver, label_message, login_username, login_password, params_wt_url)
-        elif actual_alert_type == "error":
+        elif actual_alert_type == AlertType.ERROR:
             handle_error(driver, label_message)
 
     else:
         # If no alert message is found, log and fail the test
         attach_text("No alert found.", name="Alert check")
         assert False, "No alert message displayed after form submission."
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -106,24 +112,20 @@ def capture_alert(driver):
 
     Returns:
     - Tuple (alert_message, alert_type) where:
-        - alert_message: The WebElement representing the alert message.
-        - alert_type: A string indicating the type of alert ("success", "error", or "no_alert").
-        
-    Raises:
-    - AssertionError: If any exception occurs, an assertion is raised with the error message and stack trace.
+        - alert_message: The WebElement representing the alert message, or None if no alert is found.
+        - alert_type: An AlertType enum indicating the type of alert (SUCCESS, ERROR, or NO_ALERT).
     """
-    alert_types = [("alert-success", "success"), ("alert-error", "error")]
+    alert_types = [("alert-success", AlertType.SUCCESS), ("alert-error", AlertType.ERROR)]
 
     for data_testid, alert_type in alert_types:
         try:
             alert_message = find_visible_element_by_testid(driver, data_testid=data_testid)
             return alert_message, alert_type
-        except Exception as e:
-            # print(f"Error while capturing {alert_type} alert: {e}")
-            continue  # Proceed to next alert type if the current one fails
+        except Exception:
+            continue  # Proceed to the next alert type if the current one fails
 
-    # If no alert is found, return None with type 'no_alert'
-    return None, "no_alert"
+    return None, AlertType.NO_ALERT
+
 
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -137,7 +139,7 @@ def capture_alert(driver):
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
 """
 
-def handle_success(driver, label_message, login_username, login_password, params_wt_url=None,):
+def handle_success(driver, label_message, login_username, login_password, params_wt_url=None):
     """
     Handles the success alert after an action such as a password change and performs subsequent actions.
 
@@ -154,7 +156,7 @@ def handle_success(driver, label_message, login_username, login_password, params
         attach_text(label_message, name="Success message found: ")
         
         # Log the user out
-        button_setting(driver, setting_option="logout")
+        button_setting(driver, setting_option=Setting.LOGOUT)
         
         # Get the current URL after logout
         current_url = get_current_url(driver)
@@ -196,15 +198,15 @@ def perform_login(driver, login_username, login_password):
     select_account_type(driver, account_type="live")
     
     # Find and populate the username input field
-    userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID.value)
+    userinput_name = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_USER_ID)
     populate_element(element=userinput_name, text=login_username)
 
     # Find and populate the password input field
-    password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD.value)
+    password_input = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_PASSWORD)
     populate_element(element=password_input, text=login_password)
 
     # Submit the login form
-    submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT.value)
+    submit_button = find_element_by_testid(driver, data_testid=DataTestID.LOGIN_SUBMIT)
     click_element(submit_button)
     
     # Wait until the login process completes (spinner disappears)
@@ -260,7 +262,7 @@ def handle_error(driver, label_message):
             break  # Stop after finding the first matching error message
 
     # Close the modal dialog
-    btn_close = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CLOSE.value)
+    btn_close = find_element_by_testid(driver, data_testid=DataTestID.CHANGE_PASSWORD_MODAL_CLOSE)
     click_element(element=btn_close)
 
 """
@@ -293,7 +295,7 @@ def change_password(driver, old_password, new_password, confirm_password, alert_
     try:
         
         # Step 1: Navigate to the Change Password section
-        button_setting(driver, setting_option="change-password")
+        button_setting(driver, setting_option=Setting.CHANGE_PASSWORD)
 
         # Validate input parameters
         if not all([old_password, new_password, confirm_password]):

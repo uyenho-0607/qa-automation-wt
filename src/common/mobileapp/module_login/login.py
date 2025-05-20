@@ -1,7 +1,7 @@
 import random
 
 from constants.element_ids import DataTestID
-from enums.main import AccountType, CredentialType, LoginResultState, Server
+from enums.main import AccountType, AnnouncementModal, CredentialType, AlertType, Server, SettingLanguageMap
 
 from constants.helper.error_handler import handle_exception
 from constants.helper.screenshot import attach_text
@@ -21,9 +21,11 @@ from common.mobileapp.module_login.language import select_and_verify_language, s
 """
 
 def click_splash_screen(driver):
-    find_presence_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
-    splash_screen = find_element_by_testid_with_wait(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
-    click_element(splash_screen)
+    # find_presence_element_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
+    
+    if is_element_present_by_testid(driver, data_testid=DataTestID.ADS_SKIP_BUTTON):
+        splash_screen = find_element_by_testid_with_wait(driver, data_testid=DataTestID.ADS_SKIP_BUTTON)
+        click_element(splash_screen)
     
 """
 ---------------------------------------------------------------------------------------------------------------------------------------------------- 
@@ -122,7 +124,7 @@ def select_account_type(driver, account_type: AccountType = AccountType.LIVE):
 
 
 def wt_user_login(driver, server: Server, testcase_id: str = None, selected_language: str = None, 
-                  expectation: LoginResultState = LoginResultState.SUCCESS, 
+                  expectation: AlertType = AlertType.SUCCESS, 
                   credential_type: CredentialType = CredentialType.DEFAULT) -> None:
     
     # Load credentials from the JSON file
@@ -135,7 +137,7 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
     # Retrieve the specific server data for the given client and "MemberSite"
     server_data = data[server]["MemberSite"]
 
-    if expectation == LoginResultState.FAILURE:
+    if expectation == AlertType.FAILURE:
         if not testcase_id:
             raise ValueError("testcase_id must be provided for invalid_credential.")
         
@@ -180,40 +182,28 @@ def wt_user_login(driver, server: Server, testcase_id: str = None, selected_lang
 """
 
 
-def handle_login_result(driver, expectation: LoginResultState, selected_language: str = None):
+def handle_login_result(driver, expectation: AlertType, selected_language: str = None):
     """
     Handles the login result based on the expectation.
     """
     
-    language_specific_text = {
-        "English": "Trade",
-        "简体中文": "交易",
-        "繁体中文": "交易",
-        "ภาษาไทย": "เทรด",
-        "Tiếng Việt": "Giao dịch",
-        "Melayu": "Perdagangan",
-        "Bahasa Indonesia": "Berdagang",
-        "Japanese": "取引",
-        "Korean": "거래"
-    }
-    
     # Wait for spinner element not display
     spinner_element(driver)
     
-    # Retrieve the expected text
-    verification_text = language_specific_text.get(selected_language, "Trade")
+    # Determine the expected text based on the selected language
+    verification_text = SettingLanguageMap.get_expected_text(selected_language) or "Trade"
     
     # Check if the test is present
     if wait_for_text_to_be_present_in_element_by_xpath(driver, DataTestID.APP_MENU_OPTION_TRADE, text=verification_text):
         print("Successfully Logged In")
         
         # If login succeeded but failure was expected, log the unexpected success and fail the test
-        if expectation == LoginResultState.FAILURE:
+        if expectation == AlertType.FAILURE:
             attach_text("Expected failure, but login succeeded. Test failed.", name="Unexpected Success")
             assert False, "Expected failure, but login succeeded."
         
         # If login is successful and no failure was expected, process the modal announcement (if applicable)
-        modal_announcement(driver)
+        modal_announcement(driver, button=AnnouncementModal.GOT_IT)
         return
         
     else:
@@ -233,7 +223,7 @@ def handle_login_result(driver, expectation: LoginResultState, selected_language
 """
 
 
-def handle_alert_error(driver, expectation: LoginResultState):
+def handle_alert_error(driver, expectation: AlertType):
     """
     Handles expected or unexpected login failures.
     """
@@ -253,7 +243,7 @@ def handle_alert_error(driver, expectation: LoginResultState):
         "Account already linked", "FXCRM Invalid Login"
     ]
 
-    if expectation == LoginResultState.FAILURE:
+    if expectation == AlertType.FAILURE:
         if error_message in expected_errors:
             attach_text("Expected failure condition met.", name="Expected Failure")
             assert True
@@ -289,7 +279,7 @@ def handle_alert_error(driver, expectation: LoginResultState):
 def login_wt(driver, server: Server, testcase_id: str = None, 
              account_type: AccountType = AccountType.LIVE,
              set_language: bool = False, set_username: bool = True, 
-             expectation: LoginResultState = LoginResultState.SUCCESS, 
+             expectation: AlertType = AlertType.SUCCESS, 
              credential_type: CredentialType = CredentialType.DEFAULT) -> tuple[str, str] | None:
     
     """

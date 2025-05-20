@@ -1,22 +1,23 @@
 import allure
 import pytest
 
-from enums.main import Server
+from enums.main import Server, ButtonModuleType, TradeDirectionOption, SLTPOption, OrderPanel, SectionName, AlertType
+
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
 from common.desktop.module_login.utils import login_wt
 from common.desktop.module_symbol.utils import input_symbol
-from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, modify_market_order, get_trade_snackbar_banner, get_neg_snackbar_banner, extract_order_info, trade_ordersConfirmationDetails
+from common.desktop.module_trade.utils import toggle_radio_button, trade_market_order, modify_market_order, get_trade_snackbar_banner, get_neg_snackbar_banner, extract_order_info, trade_orders_confirmation_details
 
 @allure.parent_suite("MT5 Membersite - Desktop - Negative Scenarios")
 
 @allure.epic("MT5 Desktop ts_as - Negative Scenarios")
 
 # Member Portal
-class TC_MT5_aS04():
+class TC_aS04():
 
-    @allure.title("TC_MT5_aS04")
+    @allure.title("TC_aS04")
 
     @allure.description(
         """
@@ -28,8 +29,8 @@ class TC_MT5_aS04():
         )
         
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc04(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc04(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -48,22 +49,22 @@ class TC_MT5_aS04():
                 toggle_radio_button(driver=main_driver, category="OCT", desired_state="unchecked")
 
             with allure.step("Place Market Order"):
-                trade_market_order(driver=main_driver, trade_type="trade", option="sell", set_stopLoss=False, set_takeProfit=False)
+                trade_market_order(driver=main_driver, option=TradeDirectionOption.SELL)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="trade")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.TRADE)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_trade_snackbar_banner(driver=main_driver)
                 
             with allure.step("Retrieve the Newly Created Open Position Order"):
-                extract_order_info(driver=main_driver, tab_order_type="open-positions", section_name="Open Position", row_number=[1])
+                extract_order_info(driver=main_driver, tab_order_type=OrderPanel.OPEN_POSITIONS, section_name=SectionName.TRADE_OPEN_POSITION)
 
             with allure.step("Modify order"):
-                modify_market_order(driver=main_driver, trade_type="edit", row_number=[1], set_stopLoss=False, takeProfit_flag=False, tp_type="price")
+                modify_market_order(driver=main_driver, tp_type=SLTPOption.PRICE, take_profit_flag=AlertType.NEGATIVE)
 
             with allure.step("Click on the Trade Confirmation button to place the order"):
-                trade_ordersConfirmationDetails(driver=main_driver, trade_type="edit")
+                trade_orders_confirmation_details(driver=main_driver,  trade_type=ButtonModuleType.EDIT)
                 
             with allure.step("Retrieve the snackbar message"):
                 get_neg_snackbar_banner(driver=main_driver)

@@ -5,6 +5,7 @@ import pandas as pd
 from tabulate import tabulate
 from selenium.webdriver.common.by import By
 
+from enums.main import Menu, SectionName
 from constants.element_ids import DataTestID
 from constants.helper.driver import delay
 from constants.helper.error_handler import handle_exception
@@ -30,14 +31,14 @@ def perform_search(driver, input_search):
     delay(1)
     
     # Wait for search results
-    if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value):
-        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+    if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST):
+        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST)
         rows = tbody.find_elements(By.XPATH, ".//tr")
         
         matched_rows = []  # Initialize an empty list to store matching rows
 
         for row in rows:
-            symbol_element = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_SYMBOL.value}']")
+            symbol_element = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_SYMBOL}']")
             symbol_text = symbol_element.text  # Extract the symbol text
             
             # Check if the input search term is in the extracted symbol text
@@ -48,30 +49,36 @@ def perform_search(driver, input_search):
         if matched_rows:
             print(f"✅ Matching rows found for '{input_search}': {matched_rows}")
         else:
-            raise AssertionError(f"No matching row found for symbol: {input_search}")
+            assert False, f"No matching row found for symbol: {input_search}"
     else:
         no_items_message = find_visible_element_by_xpath(driver, "//*[contains(text(), 'No items available')]")
         msg = get_label_of_element(no_items_message)
-        raise AssertionError(f"No matching row found for symbol: {input_search} with message: {msg}")
+        assert False, f"No matching row found for symbol: {input_search} with message: {msg}"
 
 
 def signal_search_feature(driver):
     try:
         # Navigate to the 'Signal' menu
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
 
         # Wait for any spinner to disappear
         spinner_element(driver)
+        
+        delay(1)
+        
+        if is_element_present_by_xpath(driver, "//button[normalize-space(text())='Express interest']"):
+            print("System is freemium, search bar not display")
+            return
 
         # Open the signal list
-        btn_signal_list = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_FILTER_ALL.value)
+        btn_signal_list = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_FILTER_ALL)
         click_element(element=btn_signal_list)
         
         delay(1)
 
         # Wait for the signal list table to load
-        if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value):
-            tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+        if is_element_present_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST):
+            tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST)
             
             # Get all rows in the table (limit to 10)
             rows = tbody.find_elements(By.XPATH, ".//tr")[:10]
@@ -79,12 +86,12 @@ def signal_search_feature(driver):
             # Extract symbol names from the rows
             symbol_list = []
             for row in rows:
-                row_symbol_element = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_SYMBOL.value}']")
+                row_symbol_element = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_SYMBOL}']")
                 symbol_text = get_label_of_element(row_symbol_element)
                 symbol_list.append(symbol_text)
 
             if not symbol_list:
-                raise AssertionError("No symbols found in the signal list")
+                assert False, "No symbols found in the signal list"
             
             # Randomly pick a symbol from the list
             selected_symbol = random.choice(symbol_list)
@@ -97,7 +104,7 @@ def signal_search_feature(driver):
             perform_search(driver, input_search=selected_symbol[:2])
 
         else:
-            raise AssertionError("Signal list table not found")
+            assert False, "Signal list table not found"
 
     except Exception as e:
         # Handle exceptions with a dedicated function
@@ -118,7 +125,7 @@ def express_interest(driver, click_submit: bool = True):
     try:
 
         # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
         
         # Wait for any spinner element to disappear
         spinner_element(driver)
@@ -131,31 +138,31 @@ def express_interest(driver, click_submit: bool = True):
         wait_for_text_to_be_present_in_element_by_xpath(driver, "//div[@class='sc-1mpscps-2 iUoyTa']", text="Express Your Interest")
         content = get_label_of_element(element=find_element_by_xpath(driver, "(//div[@data-testid='confirmation-modal']//div)[4]")).strip()
         if content != "Let us know if you're interested in more trade analysis and plans. Your input helps us prioritise features that matter to you!":
-            raise AssertionError("Content does not match the expected result")
+            assert False, "Content does not match the expected result"
         
         if click_submit:
             btn_submit = find_element_by_xpath(driver, "//button[normalize-space(text())='Submit']")
             click_element(element=btn_submit)
             
             # Wait for snackbar message and extract header & description
-            find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX.value)
-            message_header = find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE.value)
+            find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_BOX)
+            message_header = find_visible_element_by_testid(driver, data_testid=DataTestID.NOTIFICATION_TITLE)
             extracted_header = get_label_of_element(message_header)
         
             # Validate message header
             if extracted_header != "Your interest has been submitted":
-                raise AssertionError(f"Invalid message header: {extracted_header}")
+                assert False, f"Invalid message header: {extracted_header}"
             
-            result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL.value)
+            result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL)
             if not result:
-                raise AssertionError("Confirmation dialog should not be visible")
+                assert False, "Confirmation dialog should not be visible"
         else:
             btn_cancel = find_element_by_xpath(driver, "//button[normalize-space(text())='Cancel']")
             click_element(element=btn_cancel)
             
-            result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL.value)
+            result = invisibility_of_element_by_testid(driver, data_testid=DataTestID.CONFIRMATION_MODAL)
             if not result:
-                raise AssertionError("Confirmation dialog should not be visible")
+                assert False, "Confirmation dialog should not be visible"
             
     except Exception as e:
         # Handle any exceptions that occur during the execution
@@ -176,7 +183,7 @@ def express_interest(driver, click_submit: bool = True):
 def verify_copy_to_order_is_disabled(driver):
     try:
         # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
         
         # Wait for any spinner element to disappear
         spinner_element(driver)
@@ -184,7 +191,7 @@ def verify_copy_to_order_is_disabled(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST)
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
 
@@ -192,7 +199,7 @@ def verify_copy_to_order_is_disabled(driver):
 
         # Loop through the rows to find a valid tradable symbol
         for row in rows:
-            row_status = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_ORDER_STATUS.value}']")
+            row_status = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_ORDER_STATUS}']")
             label_status = get_label_of_element(row_status)
             print(f"Checking row with status: {label_status}")
             
@@ -243,7 +250,7 @@ def select_valid_signal_to_trade(driver):
     """
     try:
         # Navigate to the 'Signal' menu using a helper function
-        menu_button(driver, menu="signal")
+        menu_button(driver, menu=Menu.SIGNAL)
         
         # Wait for any spinner element to disappear
         spinner_element(driver)
@@ -251,7 +258,7 @@ def select_valid_signal_to_trade(driver):
         delay(2)
         
         # Wait for the signal list table to load
-        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST.value)
+        tbody = find_visible_element_by_testid(driver, data_testid=DataTestID.SIGNAL_LIST)
 
         # Get all rows in the table
         rows = tbody.find_elements(By.XPATH, ".//tr")
@@ -261,7 +268,7 @@ def select_valid_signal_to_trade(driver):
         # Loop through the rows to find a valid tradable symbol
         for row in rows:
             # Find the status column for the current row
-            row_status = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_ORDER_STATUS.value}']")
+            row_status = row.find_element(By.XPATH, f".//*[@data-testid='{DataTestID.SIGNAL_ROW_ORDER_STATUS}']")
             label_status = get_label_of_element(row_status)
             print(f"Checking row with status: {label_status}")
             
@@ -381,9 +388,9 @@ def button_copyTrade(driver):
         copyTrade_headers.append("Type")
 
         # Extract and append Entry Price
-        entryPrice = find_visible_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[2]")
-        label_entryPrice = get_label_of_element(entryPrice)
-        copyTrade_elements.append(label_entryPrice)
+        entry_price = find_visible_element_by_xpath(driver, "(//div[@data-testid='analysis-action-value'])[2]")
+        label_entry_price = get_label_of_element(entry_price)
+        copyTrade_elements.append(label_entry_price)
         copyTrade_headers.append("Entry Price")
 
         # Extract and append Stop Loss
@@ -400,12 +407,12 @@ def button_copyTrade(driver):
 
         # Create a DataFrame with the extracted copy trade details
         copyTrade_details = pd.DataFrame([copyTrade_elements], columns=copyTrade_headers)
-        copyTrade_details['Section'] = "Copy Trade Details"
+        copyTrade_details['Section'] = SectionName.COPY_TRADE_DETAIL
 
         # Transpose the DataFrame for better readability and format it using tabulate
         overall = tabulate(copyTrade_details.set_index('Section').T.fillna('-'), headers='keys', tablefmt='grid', stralign='center')
         # Attach the formatted table to the report for documentation purposes
-        attach_text(overall, name="Copy Trade Details")
+        attach_text(overall, name=SectionName.COPY_TRADE_DETAIL)
         
         # Perform the trade action (e.g., 'trade')
         button_trade_action(driver, trade_type="trade")
@@ -462,7 +469,7 @@ def handle_order_type(driver, order_type: str):
         open_positions_types = ["BUY", "SELL"]
 
         # Navigate to assets menu
-        menu_button(driver, menu="assets")
+        menu_button(driver, menu=Menu.ASSETS)
 
         # Determine tab based on order type
         order_tabs = {

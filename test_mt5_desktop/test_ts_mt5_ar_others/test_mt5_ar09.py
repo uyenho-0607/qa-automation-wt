@@ -1,8 +1,8 @@
 import allure
 import pytest
 
-from enums.main import Server
-from datetime import datetime
+from enums.main import Server, Menu, OrderPanel
+from dateutil.parser import parse
 from constants.helper.driver import shutdown
 from constants.helper.screenshot import attach_session_video_to_allure, attach_text
 
@@ -16,9 +16,9 @@ from common.desktop.module_trade.utils import type_orderPanel, OH_closeDate
 @allure.epic("MT5 Desktop ts_ar - Others")
 
 # Member Portal
-class TC_MT4_aR09():
+class TC_MT5_aR09():
 
-    @allure.title("TC_MT5_aR09")
+    @allure.title("TC_aR09")
 
     @allure.description(
         """
@@ -27,8 +27,8 @@ class TC_MT4_aR09():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc09(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc09(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
@@ -44,20 +44,20 @@ class TC_MT4_aR09():
                 input_symbol(driver=main_driver, server=Server.MT5)
 
             with allure.step("Select the Order Panel: Order History"):
-                type_orderPanel(driver=main_driver, tab_order_type="history", sub_tab="positions-history", position=True)
+                type_orderPanel(driver=main_driver, tab_order_type=OrderPanel.HISTORY)
                 
             with allure.step("Retrieve the Order Panel data"):
-                OH_closeDate(driver=main_driver, startDate="3", endDate="4",
-                             target_startMonth=datetime.strptime("October 2025", "%B %Y"),
-                             target_endMonth=datetime.strptime("October 2025", "%B %Y"))
+                OH_closeDate(driver=main_driver, startDate="20", endDate="28",
+                             target_startMonth=parse("March 2025"), 
+                             target_endMonth=parse("March 2025"))
 
             with allure.step("Redirect to Asset page"):
-                menu_button(driver=main_driver, menu="assets")
+                menu_button(driver=main_driver, menu=Menu.ASSETS)
                 
             with allure.step("Retrieve the Order Panel data"):
-                OH_closeDate(driver=main_driver, startDate="3", endDate="4",
-                             target_startMonth=datetime.strptime("October 2025", "%B %Y"),
-                             target_endMonth=datetime.strptime("October 2025", "%B %Y"))
+                OH_closeDate(driver=main_driver, startDate="20", endDate="28",
+                             target_startMonth=parse("March 2025"), 
+                             target_endMonth=parse("March 2025"))
                 
         except Exception as e:
             test_failed = True  # Mark test as failed

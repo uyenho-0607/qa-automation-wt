@@ -14,9 +14,9 @@ from common.desktop.module_setting.setting_contact_information import contact_in
 @allure.epic("MT5 Desktop ts_av - Setting")
 
 # Member Portal
-class TC_MT5_aV12():
+class TC_aV12():
 
-    @allure.title("TC_MT5_aV12")
+    @allure.title("TC_aV12")
 
     @allure.description(
         """
@@ -25,8 +25,8 @@ class TC_MT5_aV12():
     )
     
     @pytest.mark.flaky(reruns=1, reruns_delay=2)  # Retry once if the test fails
-    def test_tc12(self, chromeDriver, request):
-        self.driver = chromeDriver
+    def test_tc12(self, chrome_driver, request):
+        self.driver = chrome_driver
         main_driver = self.driver
         session_id = main_driver.session_id
         
