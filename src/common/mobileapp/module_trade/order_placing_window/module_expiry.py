@@ -5,7 +5,7 @@ from enums.main import ButtonModuleType, ExpiryType, TimeOptionType
 from constants.element_ids import DataTestID
 
 from constants.helper.error_handler import handle_exception
-from constants.helper.element_android_app import click_element_with_wait, find_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, scroll_and_click_expiry
+from constants.helper.element_android_app import click_element_with_wait, find_element_by_testid, find_element_by_testid_with_wait, find_element_by_xpath_with_wait, scroll_to_expiry
 
 
 """
@@ -150,8 +150,7 @@ def expiry(driver, trade_type: ButtonModuleType, expiry_type: ExpiryType, expiry
 
         policy_data = expiry_map[trade_type]
         
-        
-        scroll_and_click_expiry(driver)
+        scroll_to_expiry(driver)
         
         # Step 1: Open the expiry dropdown
         # Scroll until the element containing text "Expiry" is visible        
