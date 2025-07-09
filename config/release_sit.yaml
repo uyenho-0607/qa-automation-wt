@@ -1,0 +1,50 @@
+# GENERAL #
+
+
+root_url: https://root.webtrader-releasesit.s20ip12.com/root
+user_root: ...
+password_root: ...
+
+lirunex:
+  base_url: https://lirunex-mb.webtrader-sit.s20ip12.com/web
+  bo_url: https://lirunex-backoffice.webtrader-sit.s20ip12.com/backoffice
+
+  credentials:
+    mt4:
+      user_live: 2092007779
+      password_live: gAAAAABoRp8W1tm5lvV8Pk1tlrKTw99Lsge4rTNImDgWB63hjW4w4JwhNWM--gbxcP1ScQvAvc-7C16Zh1pHHykIo8p5C8phcA==
+
+      user_crm: ...
+      password_crm: ...
+
+      user_demo: 2092007779
+      password_demo: gAAAAABoRp8W1tm5lvV8Pk1tlrKTw99Lsge4rTNImDgWB63hjW4w4JwhNWM--gbxcP1ScQvAvc-7C16Zh1pHHykIo8p5C8phcA==
+
+    mt5:
+
+      user_live: 569200612
+      password_live: gAAAAABoR5gLdttTrMzGL_ZZ3KGId8f7hhTi6YBO0FnqN3DTqc_6IbNIyToiphuzEN63qDzgYnTJj8wmHEagFmG7e0V3iSo8pg==
+
+      user_crm: ...
+      password_crm: ...
+
+      user_demo: 569200612
+      password_demo: gAAAAABoR5gLdttTrMzGL_ZZ3KGId8f7hhTi6YBO0FnqN3DTqc_6IbNIyToiphuzEN63qDzgYnTJj8wmHEagFmG7e0V3iSo8pg==
+
+  android_package: ...
+  ios_bundle: ...
+
+transactCloud:
+  base_url: https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/web
+  bo_url: https://transactcloudmt5-backoffice.webtrader-sit.s20ip12.com/backoffice/
+
+  credentials:
+    mt5:
+      user_live: 998536
+      password_live: gAAAAABoRp8W1tm5lvV8Pk1tlrKTw99Lsge4rTNImDgWB63hjW4w4JwhNWM--gbxcP1ScQvAvc-7C16Zh1pHHykIo8p5C8phcA==
+
+      user_demo: 998536
+      password_demo: gAAAAABoRp8W1tm5lvV8Pk1tlrKTw99Lsge4rTNImDgWB63hjW4w4JwhNWM--gbxcP1ScQvAvc-7C16Zh1pHHykIo8p5C8phcA==
+
+  android_package: ...
+  ios_bundle: ...
