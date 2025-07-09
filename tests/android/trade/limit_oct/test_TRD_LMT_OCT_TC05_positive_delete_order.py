@@ -1,0 +1,30 @@
+from src.data.enums import AssetTabs, OrderType
+from src.data.objects.notification_object import ObjectNoti
+from src.data.objects.trade_object import ObjectTrade
+
+from src.utils.logging_utils import logger
+
+
+def test(android, symbol, get_asset_tab_amount, cancel_delete_order, create_order_data):
+    trade_object = ObjectTrade(order_type=OrderType.LIMIT, symbol=symbol)
+    tab = AssetTabs.PENDING_ORDER
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
+    # ------------------- #
+
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order")
+    create_order_data(trade_object)
+
+    logger.info(f"Verify {tab.title()} amount: {tab_amount + 1}")
+    android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
+
+    logger.info("Step 2: Delete pending order")
+    android.trade_screen.asset_tab.delete_pending_order(trade_object=trade_object, confirm=False)
+
+    logger.info("Verify Delete order notification banner")
+    android.home_screen.notifications.verify_notification_banner(*ObjectNoti(trade_object).delete_order_banner())
+
+    logger.info(f"Verify {tab.title()} amount = {tab_amount}")
+    android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount)
+
+    logger.info("Verify item is no longer displayed")
+    android.trade_screen.asset_tab.verify_item_displayed(tab, trade_object.order_id, is_display=False)
