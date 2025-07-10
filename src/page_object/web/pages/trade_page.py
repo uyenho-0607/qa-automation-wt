@@ -1,6 +1,5 @@
-from src.apis.trade_api import TradeAPI
 from src.core.actions.web_actions import WebActions
-from src.data.enums import URLPaths, OrderType
+from src.data.enums import URLPaths
 from src.data.objects.trade_object import ObjectTrade
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -9,7 +8,6 @@ from src.page_object.web.components.trade.chart import Chart
 from src.page_object.web.components.trade.place_order_panel import PlaceOrderPanel
 from src.page_object.web.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.format_utils import remove_commas
 
 
 class TradePage(BasePage):
