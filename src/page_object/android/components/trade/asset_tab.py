@@ -123,7 +123,7 @@ class AssetTab(BaseTrade):
             "tab_specific": {
                 AssetTabs.OPEN_POSITION: {"profit": self.__item_take_profit},
                 AssetTabs.PENDING_ORDER: {
-                    "stop_limit_price": self.__item_stop_limit_price if ProjectConfig.is_mt5() else None,
+                    "stop_limit_price": self.__item_stop_limit_price if ProjectConfig.is_non_oms() else None,
                     "expiry": self.__item_expiry,
                 }
             }
@@ -167,7 +167,7 @@ class AssetTab(BaseTrade):
     def select_tab(self, tab: AssetTabs) -> None:
         """Select the specified asset tab."""
         if tab.is_sub_history():
-            if not ProjectConfig.is_mt5():
+            if not ProjectConfig.is_non_oms():
                 self.actions.click(cook_element(self.__tab, locator_format(AssetTabs.HISTORY)))
                 return
 
@@ -233,7 +233,7 @@ class AssetTab(BaseTrade):
         not confirm or self.confirm_close_order()
 
     def partial_close_position(self, order_id=0, trade_object=None, volume=0, confirm=True):
-        if not ProjectConfig.is_mt5():
+        if not ProjectConfig.is_non_oms():
             trade_object.pop("order_id", None)
 
         order_id = order_id or trade_object.get("order_id", 0)
@@ -306,7 +306,7 @@ class AssetTab(BaseTrade):
             expected["order_type"] = f"{trade_object.trade_type.upper()} {trade_object.order_type.upper()}"
             expected["entry_price"] = add_commas(expected["entry_price"])
 
-            if ProjectConfig.is_mt5():
+            if ProjectConfig.is_non_oms():
                 expected["stop_limit_price"] = trade_object.get("stop_limit_price", "--")
 
         if "history" in tab.lower():

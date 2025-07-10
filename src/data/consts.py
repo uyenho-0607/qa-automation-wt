@@ -1,7 +1,6 @@
 from pathlib import Path
 
-from src.data.enums import Server
-from src.data.project_info import ProjectConfig
+from src.data.enums import Client
 
 # Framework Paths
 ROOTDIR = Path(__file__).parent.parent.parent
@@ -22,19 +21,14 @@ CHECK_ICON = "✔"
 FAILED_ICON = "✘"
 
 SYMBOLS = {
-    Server.MT5: [
+    Client.TRANSACT_CLOUD: [
         "BAKE.USD",
         "DASH.USD",
         "AXS.USD",
     ],
-    Server.MT4: [
+    Client.LIRUNEX: [
         "DASHUSD.std",
         "XRPUSD.std",
         "LTCUSD.std"
     ]
-}
-
-CRYPTO_SYMBOLS = {
-    Server.MT5: ["AVAX.USD", "AXS.USD", "BAKE.USD", "DASH.USD", "DOGE.USD"],
-    Server.MT4: ["BTCUSD.std", "DASHUSD.std", "ETHUSD.std", "LTCUSD.std", "XRPUSD.std"]
 }

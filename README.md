@@ -280,8 +280,6 @@ The framework supports various test markers for categorization:
 - `sanity`: Sanity test suite
 - `critical`: Critical priority tests
 - `uat`: Tests for UAT environment only
-- `mt4`: Tests for MT4 server only
-- `mt5`: Tests for MT5 server only
 - `not_demo`: Tests not for demo accounts
 - `not_live`: Tests not for live accounts
 - `not_crm`: Tests not for CRM accounts

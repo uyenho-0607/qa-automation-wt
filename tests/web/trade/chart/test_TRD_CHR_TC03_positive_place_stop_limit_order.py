@@ -6,7 +6,7 @@ from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.mt5
+@pytest.mark.non_oms
 @pytest.mark.parametrize(
     "trade_type, order_type, expiry, sl_type, tp_type",
     [

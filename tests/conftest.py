@@ -13,7 +13,7 @@ from src.utils.logging_utils import logger
 
 @pytest.fixture(scope="package")
 def symbol():
-    selected_symbol = random.choice(SYMBOLS[ProjectConfig.server])
+    selected_symbol = random.choice(SYMBOLS[ProjectConfig.client])
 
     logger.debug(f"- Getting details of symbol {selected_symbol!r}")
     market_details = APIClient().market.get_symbol_details(selected_symbol)

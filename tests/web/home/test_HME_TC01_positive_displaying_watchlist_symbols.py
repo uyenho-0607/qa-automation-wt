@@ -1,4 +1,5 @@
 import time
+
 import pytest
 
 from src.apis.api_client import APIClient
@@ -9,27 +10,13 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-# @pytest.mark.parametrize(
-#     "tab", [
-#         WatchListTab.ALL,
-#         WatchListTab.FOREX,
-#         WatchListTab.FAVOURITES,
-#         WatchListTab.TOP_PICKS,
-#         WatchListTab.TOP_LOSER,
-#         WatchListTab.TOP_GAINER,
-#         WatchListTab.SHARES,
-#         WatchListTab.INDEX,
-#         WatchListTab.COMMODITIES,
-#         WatchListTab.CRYPTO,
-#     ]
-# )
 @pytest.mark.parametrize("tab", WatchListTab.list_values())
 def test(web, tab, setup_test):
     exp_symbols = setup_test(tab)
 
     logger.info("Step 1: Get random displaying symbol")
     web.trade_page.watch_list.select_tab(tab)
-    time.sleep(3)
+    time.sleep(2)
     select_symbol = web.trade_page.watch_list.get_random_symbol()
 
     logger.info(f"Step 2: Select {select_symbol!r}")
@@ -53,9 +40,9 @@ def setup_test():
         symbols = APIClient().market.get_watchlist_items(tab, get_symbols=True)
 
         if not symbols and tab == WatchListTab.FAVOURITES:
-            for symbol in SYMBOLS[ProjectConfig.server][:3]:
+            for symbol in SYMBOLS[ProjectConfig.client][:3]:
                 APIClient().market.post_starred_symbol(symbol)
-            symbols = SYMBOLS[ProjectConfig.server][:3]
+            symbols = SYMBOLS[ProjectConfig.client][:3]
 
         return symbols
 

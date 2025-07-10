@@ -31,7 +31,7 @@ class ObjectNoti(BaseObject):
     @staticmethod
     def __format_volume(message: str) -> str:
         """Format volume text based on server type."""
-        if not ProjectConfig.is_mt5():
+        if ProjectConfig.is_mt4():
             return message.replace("Volume", "Size")
         return message
 

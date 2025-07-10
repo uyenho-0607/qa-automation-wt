@@ -22,8 +22,8 @@ def setup_markets_tests(web, symbol):
     logger.info("- Navigate  & Login to MemberSite")
     web.home_page.goto()
     web.login_page.login()
-    web.home_page.wait_for_spin_loader()
     web.home_page.feature_announcement_modal.got_it()
+    web.home_page.wait_for_spin_loader()
 
 
 @pytest.fixture

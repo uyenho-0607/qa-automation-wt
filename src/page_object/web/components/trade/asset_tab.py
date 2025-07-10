@@ -142,7 +142,6 @@ class AssetTab(BaseTrade):
             "swap", "commission", "expiry_date", "pending_price",
             "close_date", "current_price", "close_price"
         ]
-        # todo: add check remarks
         # Get all columns for the order
         cols = self.actions.find_elements(cook_element(self.__cols_by_id, tab.get_col(), order_id))
         res = {}
@@ -179,7 +178,7 @@ class AssetTab(BaseTrade):
             ],
             "tab_specific": {
                 AssetTabs.OPEN_POSITION: ["profit"],
-                AssetTabs.PENDING_ORDER: ["expiry"] + (["fill-policy"] if ProjectConfig.is_mt5() else []),
+                AssetTabs.PENDING_ORDER: ["expiry"] + (["fill-policy"] if not ProjectConfig.is_mt4() else []),
                 AssetTabs.POSITIONS_HISTORY: ["remarks"]
             }
         }

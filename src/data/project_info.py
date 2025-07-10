@@ -13,14 +13,19 @@ class StepLogs:
 
 
 class ProjectConfig:
+    client: str = None
     server: str = None
     account: str = None
     platform: str = "web"
     headers: dict = {}
 
     @classmethod
-    def is_mt5(cls):
-        return cls.server == "mt5"
+    def is_non_oms(cls):
+        return cls.client == "transactCloud"
+
+    @classmethod
+    def is_mt4(cls):
+        return cls.client == "mt4"
 
     @classmethod
     def is_web(cls):

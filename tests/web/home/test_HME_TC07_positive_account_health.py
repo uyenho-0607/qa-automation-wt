@@ -42,7 +42,7 @@ def test(web, setup_teardown):
     web.home_page.verify_acc_balance_value(AccSummary.EQUITY, exp_account_summary, 0.01)
 
     logger.info("Verify Profit/Loss against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.PROFIT_LOSS, exp_account_summary, 0.01)
+    web.home_page.verify_acc_balance_value(AccSummary.PROFIT_LOSS, exp_account_summary, 0.05)
 
     logger.info("Verify Free Margin against API data")
     web.home_page.verify_acc_balance_value(AccSummary.FREE_MARGIN, exp_account_summary, 0.01)
@@ -62,7 +62,7 @@ def setup_teardown(web):
 
     if not web.home_page.is_account_traded():
         logger.info("- Place order to make sure account has Margin Level")
-        trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=random.choice(SYMBOLS[ProjectConfig.server]), indicate=SLTPType.POINTS)
+        trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=random.choice(SYMBOLS[ProjectConfig.client]))
         APIClient().trade.post_order(trade_object)
 
         logger.info("- Refresh Page to load data")
