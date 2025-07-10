@@ -159,14 +159,9 @@ class BaseActions:
             timeout=EXPLICIT_WAIT,
     ) -> None:
         """Wait for element to be invisible, NO exception will be raised if element is not found"""
-        wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout=timeout)
-        ele = self.find_element(locator, SHORT_WAIT, raise_exception=False, show_log=False)
-
-        if ele:
-            try:
-                wait.until(EC.invisibility_of_element_located(locator))
-            except Exception:
-                pass
+        self.find_element(
+            locator, timeout, cond=EC.invisibility_of_element_located, raise_exception=False, show_log=False
+        )
 
 
     def wait_for_element_visible(
