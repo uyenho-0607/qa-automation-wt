@@ -68,7 +68,7 @@ class LoginPage(BasePage):
             self, userid=None, password=None,
             account_type: AccountType = None,
             language: Language = None,
-            wait=True
+            wait=True,
     ):
         if language:
             self.select_language(language)

@@ -28,6 +28,7 @@ class CountryDialCode(BaseEnum):
     VIETNAM = 84
     CHINA = 86
     THAILAND = 66
+    KOREA = 82
 
 
 class DepositAmount(BaseEnum):

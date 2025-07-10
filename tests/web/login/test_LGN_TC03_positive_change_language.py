@@ -26,6 +26,7 @@ def test(web):
 
     logger.info("Step 4: Continue to login ")
     web.login_page.login()
+    web.home_page.feature_announcement_modal.got_it()
 
     logger.info("Verify login success")
     web.home_page.verify_acc_info_displayed()

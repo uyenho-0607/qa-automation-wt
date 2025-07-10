@@ -7,6 +7,7 @@ from src.utils.logging_utils import logger
 def test(web):
     logger.info("Step 1: Login with valid userid and password")
     web.login_page.login()
+    web.home_page.feature_announcement_modal.got_it()
 
     logger.info("Verify trade/ home page URL is correct")
     web.home_page.verify_page_url()

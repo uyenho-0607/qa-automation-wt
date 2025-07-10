@@ -29,7 +29,7 @@ def test(web, tab, setup_test):
 
     logger.info("Step 1: Get random displaying symbol")
     web.trade_page.watch_list.select_tab(tab)
-    time.sleep(3)
+    time.sleep(2)
     select_symbol = web.trade_page.watch_list.get_random_symbol()
 
     logger.info(f"Step 2: Select {select_symbol!r}")
