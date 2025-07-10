@@ -38,4 +38,5 @@ def test(web, symbol, get_asset_tab_amount, sl_type, tp_type, ):
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
     logger.info(f"Verify item details in Asset Tab")
+
     web.trade_page.asset_tab.verify_item_data(trade_object)

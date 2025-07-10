@@ -83,7 +83,7 @@ class TradeAPI(BaseAPI):
             "indicate": indicate.upper(),
             "stopLoss": float(trade_params.stop_loss),
             "takeProfit": float(trade_params.take_profit),
-            "fillPolicy": self.fill_policy_map.get(trade_object.get("fill_policy"), 0),
+            "fillPolicy": self.fill_policy_map.get(trade_object.get("fill_policy")),
             "tradeExpiry": self.expiry_map.get(trade_object.get("expiry")),
             "price": float(trade_params.entry_price) if not order_type == OrderType.MARKET else None,
             "priceTrigger": float(trade_params.stop_limit_price) if order_type.is_stp_limit() else None,

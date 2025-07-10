@@ -67,7 +67,6 @@ def pytest_sessionstart(session: pytest.Session):
     Config.config.argo_cd = argo_cd
     Config.config.env = env
     Config.config.client = client
-    ProjectConfig.client = client
     Config.config.server = Server.MT5 if client == Client.TRANSACT_CLOUD else server
     ProjectConfig.server = server
     Config.config.account = account
@@ -84,7 +83,7 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
 
         if any(value in item.nodeid for value in ["stop_limit", "stop limit"]):
-            item.add_marker("non_oms")
+            item.add_marker("mt5")
             item.add_marker("stop_limit_suite")
 
         if "market" in item.nodeid:
@@ -114,8 +113,8 @@ def pytest_runtest_setup(item: pytest.Item):
     if item.get_closest_marker("uat") and Config.config.env != "uat":
         pytest.skip("This test is for UAT environment only !")
 
-    if item.get_closest_marker("non_oms") and not ProjectConfig.is_non_oms():
-        pytest.skip("This test is for Non-OMS server only !")
+    if item.get_closest_marker("mt5") and not ProjectConfig.is_mt5():
+        pytest.skip("This test is for MT5 server only !")
 
     if item.get_closest_marker("not_demo") and ProjectConfig.is_demo():
         pytest.skip("This test is not for demo account !")

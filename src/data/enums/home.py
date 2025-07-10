@@ -82,7 +82,7 @@ class WatchListTab(BaseEnum):
     def list_values(cls, except_val=None):
         except_val = except_val if isinstance(except_val, list) else [except_val]
         lis_val = [item for item in cls if item not in except_val]
-        if ProjectConfig.is_non_oms():
+        if ProjectConfig.is_mt5():
             lis_val.remove(cls.SHARES)
         return lis_val
 
@@ -111,7 +111,7 @@ class WatchListTab(BaseEnum):
 
     @classmethod
     def sub_tabs(cls):
-        if ProjectConfig.is_non_oms():
+        if ProjectConfig.is_mt5():
             return [cls.COMMODITIES, cls.CRYPTO, cls.FOREX, cls.INDEX]
 
         return [cls.SHARES, cls.FOREX, cls.COMMODITIES, cls.INDEX, cls.CRYPTO]

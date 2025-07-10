@@ -189,7 +189,7 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_fill_policy(self, fill_policy: FillPolicy | str) -> Optional[str]:
         """Select the fill policy for the order. Return selected fill_policy"""
-        if not ProjectConfig.is_non_oms() or not fill_policy:
+        if not ProjectConfig.is_mt5() or not fill_policy:
             return None
 
         logger.debug(f"- Select fill policy: {fill_policy.capitalize()!r}")

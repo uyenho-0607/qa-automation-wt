@@ -34,7 +34,7 @@ class OrderType(BaseEnum):
     @classmethod
     def sample_values(cls):
         list_val = [cls.MARKET, cls.LIMIT, cls.STOP]
-        if ProjectConfig.is_non_oms():
+        if ProjectConfig.is_mt5():
             list_val.append(cls.STOP_LIMIT)
 
         return random.choice(list_val)
@@ -62,7 +62,7 @@ class Expiry(BaseEnum):
             return None
 
         list_val = [cls.GOOD_TILL_CANCELLED, cls.GOOD_TILL_DAY]
-        if ProjectConfig.is_non_oms():
+        if ProjectConfig.is_mt5():
             list_val = cls.list_values()
 
         return random.choice(list_val)
@@ -79,7 +79,7 @@ class FillPolicy(BaseEnum):
         """
         Get a random fill policy based on order type and server configuration.
         """
-        if ProjectConfig.is_mt4():
+        if not ProjectConfig.is_mt5():
             return None
 
         if order_type == OrderType.MARKET:

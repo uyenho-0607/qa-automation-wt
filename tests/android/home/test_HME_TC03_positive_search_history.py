@@ -8,7 +8,7 @@ from src.utils.logging_utils import logger
 
 
 def test(android):
-    symbol_list = random.sample(SYMBOLS[ProjectConfig.client], k=3)
+    symbol_list = random.sample(SYMBOLS[ProjectConfig.server], k=3)
 
     for index, symbol_name in enumerate(symbol_list):
         logger.info(f"Step {index + 1}: Search and select symbol: {symbol_name!r}")

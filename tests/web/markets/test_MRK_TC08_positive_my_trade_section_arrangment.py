@@ -9,7 +9,7 @@ from src.utils.logging_utils import logger
 
 def test(web):
 
-    symbol_list = random.choices(SYMBOLS[ProjectConfig.client], k=5)
+    symbol_list = random.choices(SYMBOLS[ProjectConfig.server], k=5)
 
     logger.info("Step 1: Select Tab Crypto")
     web.trade_page.watch_list.select_tab(WatchListTab.CRYPTO)

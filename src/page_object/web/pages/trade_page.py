@@ -39,4 +39,4 @@ class TradePage(BasePage):
         expected = {k: v for k, v in api_data.items() if k in actual.keys()}
         expected["volume"] = api_data["lotSize"]
 
-        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=["openPrice"])
+        soft_assert(actual, expected)

@@ -1,7 +1,5 @@
 from selenium.webdriver.common.by import By
 
-from selenium.webdriver.common.by import By
-
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.page_object.web.base_page import BasePage

@@ -102,8 +102,7 @@ class WatchList(BaseTrade):
         all_symbols = set()  # Use set to avoid duplicates
         scroll_attempts = 0
         last_count = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 3)
-        logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
+        max_scroll_attempts: int = 40
 
         while scroll_attempts < max_scroll_attempts:
             # Get current visible symbols
@@ -114,14 +113,16 @@ class WatchList(BaseTrade):
             all_symbols.update(new_symbols)
 
             # Check if we've found all expected symbols
-            if set(all_symbols) == set(expected_symbols):
+            if expected_symbols and set(all_symbols) == set(expected_symbols):
                 logger.debug(f"Found all expected symbols after {scroll_attempts + 1} scroll attempts. Stopping early.")
                 break
 
             # Check if we're not finding new symbols (end of list)
             if len(all_symbols) == last_count:
                 logger.debug("No new symbols found in this scroll attempt")
-                if set(all_symbols) == set(expected_symbols):
+                # Try one more scroll to be sure we're at the end
+                scroll_attempts += 1
+                if scroll_attempts >= max_scroll_attempts or set(all_symbols) == set(expected_symbols):
                     break
             else:
                 last_count = len(all_symbols)
@@ -135,19 +136,18 @@ class WatchList(BaseTrade):
 
             scroll_attempts += 1
 
-        result = list(all_symbols)
+        result = list([item for item in all_symbols if item])
         logger.debug(f"Finished scrolling. Total symbols collected: {len(result)}")
         return result
 
-    def get_current_symbols(self, tab: WatchListTab = None):
+    def get_current_symbols(self, tab: WatchListTab = WatchListTab.ALL):
         """Get current displayed symbols on screen"""
         if tab:
             self.select_tab(tab)
 
         elements = self.actions.find_elements(self.__items)
         if elements:
-            res = [ele.text.strip() for ele in elements]
-            return [item for item in res if item]
+            return [ele.text.strip() for ele in elements]
         return []
 
     def get_random_symbol(self, tab=None):

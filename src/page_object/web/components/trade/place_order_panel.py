@@ -1,5 +1,4 @@
 import random
-import time
 from typing import Literal
 
 from selenium.webdriver.common.by import By
@@ -114,6 +113,7 @@ class PlaceOrderPanel(BaseTrade):
             self.agree_and_continue()
 
     def select_tab(self, tab: TradeTab):
+        # time.sleep(0.5)
         self.actions.click(cook_element(self.__trade_tab, tab))
 
     # UI Control Buttons
@@ -180,37 +180,21 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_trade_type(self, trade_type: TradeType) -> None:
         """Select trade type (BUY/SELL)."""
-        locator = cook_element(self.__btn_trade, trade_type.lower())
-        if "selected" in self.actions.get_attribute(locator, "class"):
-            logger.debug(f"- Trade Type {trade_type.value!r} already correct")
-            return
-
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
-        self.actions.click(locator)
+        self.actions.click(cook_element(self.__btn_trade, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
-        locator = cook_element(self.__opt_order_type, locator_format(order_type))
-        if "selected" in self.actions.get_attribute(locator, "class"):
-            logger.debug(f"- Order Type {order_type.value!r} already selected")
-            return
-
         logger.debug(f"- Select order type: {order_type.capitalize()!r}")
         self.actions.click(self.__drp_order_type)
-        time.sleep(1)
-        self.actions.click(locator)
+        self.actions.click(cook_element(self.__opt_order_type, locator_format(order_type)))
 
     def _select_fill_policy(self, fill_policy: FillPolicy | str) -> str | None:
         """Select fill policy for the order. Return selected fill_policy."""
-        if ProjectConfig.is_mt4() or not fill_policy:
+        if not ProjectConfig.is_mt5() or not fill_policy:
             return
 
-        locator = cook_element(self.__opt_fill_policy, locator_format(fill_policy))
-        if "selected" in self.actions.get_attribute(locator, "class"):
-            logger.debug(f"- Fill Policy: {fill_policy.capitalize()!r} already selected")
-            return
-
-        logger.debug(f"- Select Fill Policy: {fill_policy.capitalize()!r}")
+        logger.debug(f"- Select fill policy: {fill_policy.capitalize()!r}")
         self.actions.click(self.__drp_fill_policy)
         self.actions.click(cook_element(self.__opt_fill_policy, locator_format(fill_policy)))
 

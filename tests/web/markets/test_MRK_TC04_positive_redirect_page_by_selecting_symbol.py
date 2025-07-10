@@ -53,7 +53,7 @@ def setup_test(web):
     section_symbol = DotDict()
 
     logger.info("- Navigate to Market Page")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
 
     logger.info("- Get section symbols")
     web.markets_page.get_last_symbol(store_data=section_symbol)
