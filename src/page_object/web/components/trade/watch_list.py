@@ -136,7 +136,7 @@ class WatchList(BaseTrade):
 
             scroll_attempts += 1
 
-        result = list(all_symbols)
+        result = list([item for item in all_symbols if item])
         logger.debug(f"Finished scrolling. Total symbols collected: {len(result)}")
         return result
 
