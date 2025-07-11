@@ -57,11 +57,10 @@ class WebDriver:
                         os.environ["TESTGRID_URL"] = testgrid_url_response['url']
                         testgrid_url = testgrid_url_response['url']
 
-
                     driver = webdriver.Remote(testgrid_url, options=options)
 
                 else:
-                    driver = webdriver.Chrome(options=options, service=service)
+                    driver = webdriver.Chrome(options=options)
 
             case "firefox":
                 options = FirefoxOptions()
