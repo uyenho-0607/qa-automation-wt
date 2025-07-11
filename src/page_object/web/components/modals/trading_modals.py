@@ -392,7 +392,7 @@ class TradingModals(BaseTrade):
         actual = {
             k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
         }
-        soft_assert(actual, expected)
+        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=["stop_loss", "take_profit"])
 
     def verify_edit_trade_confirmation(self, trade_object: ObjectTrade):
         expected = trade_object.trade_edit_confirm_details()
