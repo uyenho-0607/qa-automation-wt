@@ -139,7 +139,7 @@ class ObjectTrade(BaseObject):
 
         if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
             expected |= {"remarks": "--"}
-            if not ProjectConfig.is_non_oms():
+            if ProjectConfig.is_mt4():
                 expected |= {"status": "CLOSED"}
 
         return {k: v for k, v in expected.items() if v}

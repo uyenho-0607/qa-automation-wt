@@ -12,7 +12,7 @@ GRID_SERVER = "http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub"
 
 # Timeouts (in seconds)
 EXPLICIT_WAIT = 10
-IMPLICIT_WAIT = 1
+IMPLICIT_WAIT = 0.5
 PAGE_LOAD_WAIT = 30
 SHORT_WAIT = 2
 QUICK_WAIT = 0.5
@@ -28,7 +28,7 @@ SYMBOLS = {
     ],
     Client.LIRUNEX: [
         "DASHUSD.std",
-        "XRPUSD.std",
+        # "XRPUSD.std",
         "LTCUSD.std"
     ]
 }

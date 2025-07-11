@@ -102,7 +102,7 @@ class WatchList(BaseTrade):
         all_symbols = set()  # Use set to avoid duplicates
         scroll_attempts = 0
         last_count = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 3)
+        max_scroll_attempts: int = int(len(expected_symbols) / 2)
         logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
         while scroll_attempts < max_scroll_attempts:
@@ -128,7 +128,7 @@ class WatchList(BaseTrade):
 
             # Scroll down in the container
             try:
-                self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.3)
+                self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.5)
             except Exception as e:
                 logger.warning(f"Error during scroll: {e}")
                 break
@@ -220,20 +220,10 @@ class WatchList(BaseTrade):
         super().verify_empty_message(self.__empty_message, UIMessages.NO_ITEM_AVAILABLE)
 
     def verify_tabs_displayed(self):
-
-        parent_tabs = WatchListTab.parent_tabs()
-
-        logger.debug("Check parent tabs")
+        expected_tabs = WatchListTab.parent_tabs() + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
         actual_tabs = self.actions.find_elements(self.__all_tabs)
         list_values = [ele.text.strip() for ele in actual_tabs]
-        soft_assert(list_values, parent_tabs)
-
-        logger.info("Check sub tabs")
-        self.select_tab(WatchListTab.ALL)
-        actual_tabs = self.actions.find_elements(self.__all_tabs)
-
-        list_values = [ele.text.strip() for ele in actual_tabs if ele.text.strip() not in parent_tabs]
-        soft_assert(list_values, [item.name.capitalize() for item in WatchListTab.sub_tabs()])
+        soft_assert(list_values, expected_tabs)
 
     def verify_tab_selected(self, tab: WatchListTab = WatchListTab.ALL):
         soft_assert(self.wait_for_tab_selected(tab), True, error_message=f"Tab {tab.capitalize()} is not selected")
