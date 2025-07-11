@@ -25,7 +25,7 @@ class ProjectConfig:
 
     @classmethod
     def is_mt4(cls):
-        return cls.client == "mt4"
+        return cls.server == "mt4"
 
     @classmethod
     def is_web(cls):
