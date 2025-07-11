@@ -29,10 +29,11 @@ class ObjectNoti(BaseObject):
         self.stop_limit_price = trade_object.get("stop_limit_price")
 
     @staticmethod
-    def __format_volume(message: str) -> str:
+    def __format_volume(message: str, check_details=False) -> str:
         """Format volume text based on server type."""
-        if ProjectConfig.is_mt4():
+        if ProjectConfig.is_mt4() or (check_details and not ProjectConfig.is_non_oms()):
             return message.replace("Volume", "Size")
+
         return message
 
     def __format_prices(self):
@@ -99,7 +100,7 @@ class ObjectNoti(BaseObject):
         if remove_price:
             message = message.split("@")[0]  # skip checking entry_price as appium is slow and cannot get exact entry value
 
-        return self.__format_volume(message)
+        return self.__format_volume(message, check_details=True)
 
     def close_order_success_banner(self, **kwargs):
         self._update_attributes(**kwargs)
