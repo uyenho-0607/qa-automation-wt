@@ -11,7 +11,7 @@ from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
-from src.utils.format_utils import add_commas
+from src.utils.format_utils import format_str_price
 from src.utils.logging_utils import logger
 
 
@@ -63,7 +63,7 @@ class DemoAccountModal(BasePage):
 
         if deposit:
             self.actions.click_by_offset(self.__deposit, x_offset=50, y_offset=20)
-            self.actions.click(cook_element(self.__item_deposit, add_commas(deposit)))
+            self.actions.click(cook_element(self.__item_deposit, format_str_price(deposit, 0)))
 
     def agree_and_continue(self, check=True):
         if check and self.actions.is_element_displayed(self.__chb_agreement_unchecked, timeout=3):

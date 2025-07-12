@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType, Expiry
@@ -11,12 +9,8 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
     [
-        ("stop_loss", SLTPType.PRICE, None),
-        ("stop_loss", SLTPType.POINTS, None),
-        ("take_profit", None, SLTPType.PRICE),
-        ("take_profit", None, SLTPType.POINTS),
-        ("stop_loss, take_profit", SLTPType.PRICE, SLTPType.PRICE),
-        ("stop_loss, take_profit", SLTPType.POINTS, SLTPType.POINTS),
+        ("stop_loss", SLTPType.random_values(), None),
+        ("take_profit", None, SLTPType.random_values()),
         ("stop_loss, take_profit", *SLTPType.random_values(amount=2)),
     ]
 )

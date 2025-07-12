@@ -1,45 +1,20 @@
+from typing import Dict, Any, Optional, Tuple
+
+from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_object import BaseObject
 from src.data.project_info import ProjectConfig
-from src.utils.format_utils import format_prices, remove_commas
+from src.utils.format_utils import format_str_prices, remove_comma
 
 
 class ObjectTrade(BaseObject):
     """A class representing a trade order with basic information.
+    
     Attributes:
         - trade_type: TradeType (BUY, SELL, default is BUY)
         - order_type: OrderType (MARKET, LIMIT, STOP, STOP_LIMIT, default is MARKET)
         - symbol: str (symbol name)
     """
-
-    # API Mapping dictionaries
-    expiry_map = {
-        Expiry.GOOD_TILL_DAY: "GTD",
-        Expiry.GOOD_TILL_CANCELLED: "GTC",
-        Expiry.SPECIFIED_DATE: "SPECIFIED_DAY",
-        Expiry.SPECIFIED_DATE_TIME: "SPECIFIED_TIMESTAMP"
-    }
-
-    fill_policy_map = {
-        FillPolicy.FILL_OR_KILL: 0,
-        FillPolicy.IMMEDIATE_OR_CANCEL: 1,
-        FillPolicy.RETURN: 2
-    }
-
-    order_type_map = {
-        # Market orders
-        (OrderType.MARKET, TradeType.BUY): 0,
-        (OrderType.MARKET, TradeType.SELL): 1,
-        # Limit orders
-        (OrderType.LIMIT, TradeType.BUY): 2,
-        (OrderType.LIMIT, TradeType.SELL): 3,
-        # Stop orders
-        (OrderType.STOP, TradeType.BUY): 4,
-        (OrderType.STOP, TradeType.SELL): 5,
-        # Stop Limit orders
-        (OrderType.STOP_LIMIT, TradeType.BUY): 8,
-        (OrderType.STOP_LIMIT, TradeType.SELL): 9
-    }
 
     POINT_STEP = None
     CONTRACT_SIZE = None
@@ -49,127 +24,178 @@ class ObjectTrade(BaseObject):
             self,
             trade_type: TradeType | str = TradeType.sample_values(),
             order_type: OrderType | str = OrderType.sample_values(),
-            symbol: object = "",
+            symbol: str = "",
+            expiry: Expiry | str = None,
+            fill_policy: FillPolicy | str = None,
             **kwargs
     ) -> None:
         super().__init__(**kwargs)
 
-        # required/ basic attributes
         self.trade_type = trade_type
         self.order_type = order_type
         self.symbol = symbol
-
-        # other additional attributes
-        self.expiry = kwargs.get("expiry", Expiry.sample_values(self.order_type))
-        self.fill_policy = kwargs.get("fill_policy", FillPolicy.sample_values(self.order_type))
+        self.expiry = expiry or Expiry.sample_values(self.order_type)
+        self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)
 
         self._update_attributes(**kwargs)
 
-    def __format_prices(self):
-
-        entry_price, stop_loss, take_profit = self.get("entry_price"), self.get("stop_loss"), self.get("take_profit")
-        format_num = self.POINT_STEP
-        entry_price, stop_loss, take_profit = format_prices([entry_price, stop_loss, take_profit], self.DECIMAL)
-
-        return entry_price, stop_loss, take_profit
-
-    def trade_confirm_details(self):
-        # format prices
-        _, stop_loss, take_profit = self.__format_prices()
-
-        order_type = self.trade_type.upper()
-        if not self.order_type == OrderType.MARKET:
-            order_type += f" {self.order_type.upper()}"
-
-        expected = {
-            "order_type": order_type,
-            "symbol": self.symbol,
-            "volume": self.get("volume"),
-            "units": self.get("units"),
-            "stop_loss": stop_loss or "--",
-            "take_profit": take_profit or "--",
-            "fill_policy": self.get("fill_policy"),
-            "expiry": self.get("expiry")
+    @classmethod
+    def get_expiry_map(cls, expiry: Expiry | str) -> str:
+        """Get expiry mapping for API calls."""
+        map_dict = {
+            Expiry.GOOD_TILL_DAY: "GTD",
+            Expiry.GOOD_TILL_CANCELLED: "GTC",
+            Expiry.SPECIFIED_DATE: "SPECIFIED_DAY",
+            Expiry.SPECIFIED_DATE_TIME: "SPECIFIED_TIMESTAMP"
         }
 
-        return {k: v for k, v in expected.items() if v}
+        return map_dict.get(expiry, None)
 
-    def trade_edit_confirm_details(self):
-        _, stop_loss, take_profit = self.__format_prices()
+    @classmethod
+    def get_fill_policy_map(cls, fill_policy: FillPolicy | str) -> int:
+        """Get fill policy mapping for API calls."""
+        map_dict = {
+            FillPolicy.FILL_OR_KILL: 0,
+            FillPolicy.IMMEDIATE_OR_CANCEL: 1,
+            FillPolicy.RETURN: 2
+        }
+        return map_dict.get(fill_policy, 0)
 
-        expected = {
-            "order_no": f"Order No. : {self.get('order_id', 0)}",
-            "order_type": self.trade_type.upper() + (
-                f" {self.order_type.upper()}" if self.order_type != OrderType.MARKET else ""),
+    @classmethod
+    def get_order_type_map(cls, order_type: OrderType | str, trade_type: TradeType | str) -> int:
+        """Get order type mapping for API calls."""
+        map_dict = {
+            # Market orders
+            (OrderType.MARKET, TradeType.BUY): 0,
+            (OrderType.MARKET, TradeType.SELL): 1,
+            # Limit orders
+            (OrderType.LIMIT, TradeType.BUY): 2,
+            (OrderType.LIMIT, TradeType.SELL): 3,
+            # Stop orders
+            (OrderType.STOP, TradeType.BUY): 4,
+            (OrderType.STOP, TradeType.SELL): 5,
+            # Stop Limit orders
+            (OrderType.STOP_LIMIT, TradeType.BUY): 8,
+            (OrderType.STOP_LIMIT, TradeType.SELL): 9
+        }
+        return map_dict.get((order_type, trade_type), 0)
+
+    def _get_order_type(self) -> str:
+        """Return order type in correct format for UI display."""
+        return self.trade_type.upper() + (f" {self.order_type.upper()}" if self.order_type != OrderType.MARKET else "")
+
+    def _format_prices(self) -> Tuple[str, str, str, str]:
+        """Format all price values to string format with proper decimal places and commas."""
+        prices = [self.get("stop_limit_price"), self.get("entry_price"), self.get("stop_loss"), self.get("take_profit")]
+        return format_str_prices(prices, self.DECIMAL)
+
+    def _format_volume_units(self) -> None:
+        """Format volume and units to correct string format."""
+        volume, units = format_str_prices([self.volume, self.units], 0)
+        self._update_attributes(units=units, volume=volume)
+
+    def tolerance_fields(self, api_format=False) -> list:
+        """Get fields that require tolerance checking."""
+        tolerance_fields = []
+        if self.get("sl_type") == SLTPType.POINTS:
+            tolerance_fields.append("stop_loss" if not api_format else "stopLoss")
+        if self.get("tp_type") == SLTPType.POINTS:
+            tolerance_fields.append("take_profit" if not api_format else "takeProfit")
+
+        return tolerance_fields
+
+    def _build_base_details(self, include_order_id: bool = False) -> Dict[str, Any]:
+        """Build base details dictionary for various trade confirmations."""
+        # Format prices and volume
+        stp_limit_price, entry_price, stop_loss, take_profit = self._format_prices()
+        self._format_volume_units()
+        details = {}
+
+        # Add order ID if requested
+        if include_order_id:
+            details["order_no"] = f"Order No. : {self.get('order_id', 0)}"
+
+        details |= {
+            "order_type": self._get_order_type(),
             "symbol": self.symbol,
-            "volume": self.get("volume"),
-            "units": self.get("units"),
+            "volume": self.volume,
+            "units": self.units,
             "stop_loss": stop_loss or "--",
             "take_profit": take_profit or "--",
-            "fill_policy": self.get("fill_policy"),
-            "expiry": self.get("expiry")
+            "fill_policy": self.fill_policy,
+            "expiry": self.expiry
         }
 
-        return {k: v for k, v in expected.items() if v}
+        return {k: v for k, v in details.items() if v}
 
-    def asset_item_data(self, tab: AssetTabs = None):
-        # OPEN_POSITIONS: check: entry_price, order_type (BUY or SELL), stop_loss, take_profit, units, volume
-        # PENDING_ORDER: check: entry_price, order_type (BUY or SELL), stop_loss, take_profit, units, volume, expiry
-        # HISTORY: check: entry_price, order_type (BUY or SELL), stop_loss, take_profit, units, volume, status
+    def trade_confirm_details(self) -> Dict[str, Any]:
+        """Get trade confirmation details for UI verification."""
+        stp_limit_price, entry_price, stop_loss, take_profit = self._format_prices()
+        details = self._build_base_details()
+        # Add entry price for non-market orders
+        if not self.order_type.is_market():
+            details["entry_price"] = entry_price
+
+        # Add stop limit price for stop limit orders
+        if self.order_type.is_stp_limit():
+            details["stop_limit_price"] = stp_limit_price
+
+        return details
+
+    def trade_edit_confirm_details(self) -> Dict[str, Any]:
+        """Get trade edit confirmation details for UI verification."""
+        return self._build_base_details(include_order_id=True)
+
+    def asset_item_data(self, tab: Optional[AssetTabs] = None) -> Dict[str, Any]:
+        """Get asset item data for different tabs."""
+        stp_limit_price, entry_price, stop_loss, take_profit = self._format_prices()
+        self._format_volume_units()
 
         tab = tab or AssetTabs.get_tab(self.order_type)
-        entry_price, stop_loss, take_profit = self.__format_prices()
 
-        expected = {
-            "trade_type": self.trade_type.upper(),
-            "order_type": self.order_type.upper(),
-            "volume": self.get("volume"),
-            "units": self.get("units"),
-            "expiry": self.get("expiry"),
+        details = {
+            "order_type": self._get_order_type(),
+            "volume": self.volume if ProjectConfig.is_mt4() or tab != AssetTabs.PENDING_ORDER else f"{self.volume} / 0",
+            "units": self.units,
             "entry_price": entry_price,
             "stop_loss": stop_loss or "--",
-            "take_profit": take_profit or "--"
+            "take_profit": take_profit or "--",
+            "expiry": self.expiry,
         }
 
-        expected["order_type"] = expected.pop("trade_type", None)
-
+        # Add tab-specific details
         if tab == AssetTabs.PENDING_ORDER:
-            expected["order_type"] = f"{self.trade_type.upper()} {self.order_type.upper()}"
-            expected["fill_policy"] = self.get("fill_policy")
+            details |= {
+                "fill_policy": self.fill_policy,
+                "pending_price": None if ProjectConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
+            }
 
         if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
-            expected |= {"remarks": "--"}
+            details["remarks"] = "--"
             if ProjectConfig.is_mt4():
-                expected |= {"status": "CLOSED"}
+                details["status"] = "CLOSED"
 
-        return {k: v for k, v in expected.items() if v}
+        return {k: v for k, v in details.items() if v}
 
-    def api_data_format(self):
-        actual = {
-            'orderType': self.order_type_map.get((self.order_type, self.trade_type), None),
+    def api_data_format(self) -> Dict[str, Any]:
+        """Format trade data for API calls."""
+        api_data = {
+            'orderType': self.get_order_type_map(self.order_type, self.trade_type),
             'symbol': self.symbol,
-            'tradeExpiry': self.expiry_map.get(self.expiry, None),
-            'fillPolicy': self.fill_policy_map.get(self.fill_policy, 0),
+            'tradeExpiry': self.get_expiry_map(self.expiry),
+            'fillPolicy': self.get_fill_policy_map(self.fill_policy),
             'volume': float(self.volume),
-            'units': remove_commas(self.units, to_float=True),
-            'stopLoss': remove_commas(self.stop_loss, to_float=True),
-            'takeProfit': remove_commas(self.take_profit, to_float=True),
+            'units': remove_comma(self.units),
+            'stopLoss': remove_comma(self.stop_loss),
+            'takeProfit': remove_comma(self.take_profit),
             'orderId': self.order_id
         }
 
-        if self.order_type == OrderType.MARKET:
-            actual["openPrice"] = remove_commas(self.entry_price, to_float=True)
+        # Add price based on order type
+        api_data |= {"openPrice" if self.order_type.is_market() else "price": remove_comma(self.entry_price)}
 
-        else:
-            actual["price"] = remove_commas(self.entry_price, to_float=True)
+        # Add stop limit price for stop limit orders
+        if self.order_type.is_stp_limit():
+            api_data["priceTrigger"] = remove_comma(self.stop_limit_price)
 
-        if self.order_type == OrderType.STOP_LIMIT:
-            actual["priceTrigger"] = remove_commas(self.stop_limit_price, to_float=True)
-
-        if self.stop_loss == "--":
-            actual["stopLoss"] = 0
-
-        if self.take_profit == "--":
-            actual["takeProfit"] = 0
-
-        return actual
+        return api_data

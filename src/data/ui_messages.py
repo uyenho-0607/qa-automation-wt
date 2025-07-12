@@ -48,7 +48,7 @@ class UIMessages:
     # Order Closure
     CLOSE_ORDER_BANNER_TITLE = "Close Order"
     CLOSE_ORDER_BANNER_DES = "{} - {} order closed successfully."
-    POSITION_CLOSED_NOTI_RESULT = "Position Closed: #{} {}: Volume {} / Units {} "
+    POSITION_CLOSED_NOTI_RESULT = "Position Closed: #{} {}: Volume {} / Units {} @ {}"
     BULK_CLOSE_OP_BANNER_TITLE = "Bulk closure of open positions"
 
     # Order Deletion

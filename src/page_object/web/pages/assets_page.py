@@ -5,8 +5,8 @@ from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.trading_modals import TradingModals
 from src.page_object.web.components.trade.asset_tab import AssetTab
 from src.page_object.web.components.trade.watch_list import WatchList
-from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, compare_with_tolerance
+from src.utils.assert_utils import soft_assert, compare_with_tolerance
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
 from src.utils.logging_utils import logger
 

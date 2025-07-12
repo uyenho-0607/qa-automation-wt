@@ -6,7 +6,7 @@ from src.apis.order_api import OrderAPI
 from src.data.enums import FillPolicy, Expiry, TradeType, OrderType, SLTPType
 from src.data.objects.trade_object import ObjectTrade
 from src.utils import DotDict
-from src.utils.format_utils import format_with_decimal, add_commas
+from src.utils.format_utils import format_with_decimal, format_str_price
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_trade_parameters
 
@@ -16,11 +16,6 @@ class TradeAPI(BaseAPI):
 
     _endpoint = "/trade/v2/"
     _symbol_details = DotDict()
-
-    # Mapping dictionaries
-    expiry_map = ObjectTrade.expiry_map
-    fill_policy_map = ObjectTrade.fill_policy_map
-    order_type_map = ObjectTrade.order_type_map
 
     def __init__(self):
         super().__init__()
@@ -46,7 +41,7 @@ class TradeAPI(BaseAPI):
 
     def _get_order_type_code(self, order_type: OrderType, trade_type: TradeType) -> int:
         """Get the order type code for the API."""
-        return self.order_type_map.get((order_type, trade_type), 0)
+        return ObjectTrade.get_order_type_map(order_type, trade_type)
 
     @staticmethod
     def _get_expiration_timestamp(expiry, move_days: int = 1) -> int | None:
@@ -83,8 +78,8 @@ class TradeAPI(BaseAPI):
             "indicate": indicate.upper(),
             "stopLoss": float(trade_params.stop_loss),
             "takeProfit": float(trade_params.take_profit),
-            "fillPolicy": self.fill_policy_map.get(trade_object.get("fill_policy"), 0),
-            "tradeExpiry": self.expiry_map.get(trade_object.get("expiry")),
+            "fillPolicy": ObjectTrade.get_fill_policy_map(trade_object.get("fill_policy")),
+            "tradeExpiry": ObjectTrade.get_expiry_map(trade_object.get("expiry")),
             "price": float(trade_params.entry_price) if not order_type == OrderType.MARKET else None,
             "priceTrigger": float(trade_params.stop_limit_price) if order_type.is_stp_limit() else None,
             "expiration": self._get_expiration_timestamp(trade_object.get("expiry"))
@@ -107,8 +102,8 @@ class TradeAPI(BaseAPI):
         payload["order_id"] = response["clOrdId"]
         
         # Calculate units and volume
-        payload["units"] = add_commas(symbol_details.contract_size * payload["lotSize"])
-        payload["volume"] = str(payload.pop("lotSize"))
+        payload["units"] = symbol_details.contract_size * payload["lotSize"]
+        payload["volume"] = payload.pop("lotSize")
         payload["entry_price"] = str(payload.pop("price", 0))
         
         # Handle stop limit price

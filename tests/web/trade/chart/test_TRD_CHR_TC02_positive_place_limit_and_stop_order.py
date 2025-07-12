@@ -9,10 +9,8 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize(
     "trade_type, order_type, expiry, sl_type, tp_type",
     [
-        (TradeType.sample_values(), OrderType.LIMIT, Expiry.GOOD_TILL_DAY, *SLTPType.sample_values(amount=2)),
-        (TradeType.sample_values(), OrderType.LIMIT, Expiry.GOOD_TILL_CANCELLED, *SLTPType.sample_values(amount=2)),
-        (TradeType.sample_values(), OrderType.STOP, Expiry.GOOD_TILL_DAY, *SLTPType.sample_values(amount=2)),
-        (TradeType.sample_values(), OrderType.STOP, Expiry.GOOD_TILL_CANCELLED, *SLTPType.sample_values(amount=2)),
+        (TradeType.sample_values(), OrderType.random_values(except_val=[OrderType.MARKET]), Expiry.GOOD_TILL_DAY, *SLTPType.sample_values(amount=2)),
+        (TradeType.sample_values(), OrderType.random_values(except_val=[OrderType.MARKET]), Expiry.GOOD_TILL_CANCELLED, *SLTPType.sample_values(amount=2)),
     ]
 )
 def test(web, symbol, get_asset_tab_amount, trade_type, order_type, sl_type, tp_type, expiry, disable_OCT):

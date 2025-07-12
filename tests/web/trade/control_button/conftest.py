@@ -53,7 +53,7 @@ def setup_close_position_test(web, get_asset_tab_amount, symbol):
         logger.info("- Wait for asset tab amount increase")
         web.trade_page.asset_tab.wait_for_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
-    web.trade_page.asset_tab.get_last_item_data(trade_object=trade_object)
+    web.trade_page.asset_tab.get_item_data(trade_object=trade_object)
     max_vol = trade_object.get("volume", 0)
     order_id = trade_object.get("order_id", 0)
 

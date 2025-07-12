@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from src.data.enums import Features, WatchListTab
@@ -22,10 +20,10 @@ def test(web, setup_test):
     web.home_page.notifications.verify_alert_success_message(UIMessages.ALL_CHANGES_SAVED)
 
     logger.info("Verify hidden symbols")
-    web.markets_page.watch_list.verify_symbols_displayed(tab, store_dict.hide, is_display=False)
+    web.markets_page.watch_list.verify_symbols_displayed(store_dict.hide, is_display=False)
 
     logger.info("Verify displayed symbol")
-    web.markets_page.watch_list.verify_symbols_displayed(tab, store_dict.show)
+    web.markets_page.watch_list.verify_symbols_displayed(store_dict.show)
 
 
 @pytest.fixture(autouse=True)

@@ -1,6 +1,6 @@
 import random
 import time
-from typing import Optional, List, Dict, Any, Literal
+from typing import Optional, List, Literal
 
 from selenium.webdriver.common.by import By
 
@@ -8,12 +8,10 @@ from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts
 from src.data.objects.trade_object import ObjectTrade
-from src.data.project_info import ProjectConfig
 from src.page_object.web.components.trade.base_trade import BaseTrade
-from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
-from src.utils.format_utils import get_asset_tab_number, format_dict_to_string, locator_format
+from src.utils.format_utils import extract_asset_tab_number, format_dict_to_string, locator_format
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_partial_close
 
@@ -61,13 +59,13 @@ class AssetTab(BaseTrade):
 
     # Table locators
     __table_headers = (By.XPATH, "//*[@data-testid='asset-{}-table-header']//th[text()='{}']")
-    __cols = (By.CSS_SELECTOR, data_testid('asset-{}-column-{}'))
 
     __col_symbol = (By.CSS_SELECTOR, data_testid('asset-{}-column-symbol'))
     __col_order_ids = (By.CSS_SELECTOR, data_testid('asset-{}-column-order-id'))
 
+    __first_item = (By.CSS_SELECTOR, "tr:first-of-type *[data-testid*='asset-{}-column']")
     __item_by_id = (By.XPATH, "//*[@data-testid='asset-{}-column-order-id' and text()='{}']")
-    __cols_by_id = (By.XPATH, "//*[@data-testid='asset-{}-column-order-id' and text()='{}']/parent::tr/td")
+    __cols_by_id = (By.XPATH, "//*[@data-testid='asset-{}-column-order-id' and text()='{}']/parent::tr/*[contains(@data-testid, 'asset')]")
     __item_profit_by_id = (
         By.XPATH,
         "//div[contains(text(), '+')]/ancestor::td[@data-testid='asset-open-column-profit']"
@@ -90,7 +88,7 @@ class AssetTab(BaseTrade):
         """Get the number of items in the specified tab."""
         time.sleep(2)
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
-        return get_asset_tab_number(amount)
+        return extract_asset_tab_number(amount)
 
     def get_last_order_id(self, trade_object: ObjectTrade, tab: AssetTabs = None) -> str:
         """Get the latest order ID from the specified tab and update value into trade_object."""
@@ -135,69 +133,31 @@ class AssetTab(BaseTrade):
         """Get a list of all symbols in the specified tab."""
         return self._get_col_value(tab, "symbol")
 
-    def get_item_data(self, tab: AssetTabs, order_id: int | str, trade_object: Optional[DotDict] = None) -> Dict[str, Any]:
-        """Get item details whether by order_id"""
-        self.select_tab(tab)
-        ignore_cols = [
-            "swap", "commission", "expiry_date", "pending_price",
-            "close_date", "current_price", "close_price"
-        ]
-        # Get all columns for the order
-        cols = self.actions.find_elements(cook_element(self.__cols_by_id, tab.get_col(), order_id))
-        res = {}
-        # Process each column
-        for col in cols:
-            col_name = col.get_attribute("data-testid").split("column-")[-1].replace("-", "_")
-            # Skip unwanted columns
-            if col_name in ignore_cols:
-                continue
+    def get_item_data(self, tab: AssetTabs = None, order_id=None, trade_object: ObjectTrade = None):
+        """Get item data based on order_id or last item, DO NOT leave tab & trade_object = None at the same time"""
 
-            col_value = col.text.strip()
+        if not tab and trade_object is not None:
+            tab = AssetTabs.get_tab(trade_object.get("order_type"))
 
-            # Adjust special values
-            col_name = col_name.replace("size", "volume")
-            col_value = col_value.split(" /")[0] if col_name == "volume" else col_value
-            res[col_name] = col_value
+        locator = cook_element(self.__cols_by_id if order_id else self.__first_item, tab.get_col(), order_id)
+        elements = self.actions.find_elements(locator)
+        res = {
+            ele.get_attribute("data-testid").split("column-")[-1].replace("-", "_"): ele.text.strip() for ele in elements
+        }
+
+        if "size" in res:
+            res["volume"] = res.pop("size")
+
+        # todo: improve to check close_volume / x
+        if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
+            res["volume"] = res["volume"].split(" / ")[0]
 
         logger.debug(f"- Item summary: {format_dict_to_string(res)}")
+
         if trade_object:
-            trade_object.update({k: v for k, v in res.items() if k != "order_type"})
+            res.pop("order_type", None)
+            trade_object |= res
 
-        return res
-
-    def get_last_item_data(self, tab: AssetTabs = None, trade_object: Optional[DotDict] = None) -> Dict[str, Any]:
-        """Get latest item details from asset tab."""
-        tab = tab or AssetTabs.get_tab(trade_object.order_type)
-        self.select_tab(tab)
-
-        # Define column configurations
-        column_config = {
-            "general_cols": [
-                "order-id", "order-type", "volume", "units",
-                "entry-price", "take-profit", "stop-loss"
-            ],
-            "tab_specific": {
-                AssetTabs.OPEN_POSITION: ["profit"],
-                AssetTabs.PENDING_ORDER: ["expiry"] + (["fill-policy"] if not ProjectConfig.is_mt4() else []),
-                AssetTabs.POSITIONS_HISTORY: ["remarks"]
-            }
-        }
-        # Combine base and tab-specific columns
-        columns = column_config["general_cols"] + column_config["tab_specific"].get(tab, [])
-
-        # Process each column
-        res = {
-            col.replace("-", "_"): self.actions.get_text(cook_element(self.__cols, tab.get_col(), col))
-            for col in columns
-        }
-
-        # handle special values
-        res["volume"] = res["volume"].split(" /")[0]
-        # Remove None values
-        res = {k: v for k, v in res.items() if v}
-
-        logger.debug(f"Item summary: {format_dict_to_string(res)}")
-        not trade_object or trade_object.update(res)
         return res
 
     # ------------------------ ACTIONS ------------------------ #
@@ -383,22 +343,17 @@ class AssetTab(BaseTrade):
         soft_assert(self.get_tab_amount(tab), expected_amount)
 
     def verify_item_data(self, trade_object: ObjectTrade, tab: AssetTabs = None) -> None:
-        """Verify that the item data matches the expected data."""
+        """Verify item data in asset tab"""
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
         self.select_tab(tab)
 
-        # Handle actual
-        if trade_object.get("order_id"):
-            actual = self.get_item_data(tab, trade_object.order_id)
+        expected = trade_object.asset_item_data(tab)
 
-        else:
-            actual = self.get_last_item_data(tab)
-            trade_object.order_id = actual.pop("order_id")
+        # actual
+        item_data = self.get_item_data(tab, trade_object.get("order_id"))
+        actual = {k: v for k, v in item_data.items() if k in expected}
 
-        # skip unwanted value
-        actual.pop("profit", None)
-        actual.pop("symbol", None)  # todo: recheck in case checking on asset page and trade page
-        soft_assert(actual, trade_object.asset_item_data(tab), tolerance=0.01, tolerance_fields=["stop_loss", "take_profit"])
+        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_item_displayed(self, tab: AssetTabs, order_id: int | str | list, is_display: bool = True) -> None:
         """Verify that an item is displayed or not displayed."""

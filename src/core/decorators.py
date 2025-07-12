@@ -17,14 +17,29 @@ def attach_table_details(func):
     def _wrapper(*args, **kwargs):
         __tracebackhide__ = True
         actual, expected, *_ = args
-        func(*args, **kwargs)
+        
+        # Store the comparison result if it's returned by the function
+        comparison_result = None
+        
+        # Call the function and capture any returned comparison result
+        result = func(*args, **kwargs)
+        
+        # Check if the function returned a comparison result (for soft_assert)
+        if isinstance(result, dict) and "res" in result and "diff" in result:
+            comparison_result = result
 
         if all([isinstance(actual, dict), isinstance(expected, dict)]):
             title = "Verify Table Details"
             if StepLogs.test_steps:
                 title += f" - {StepLogs.test_steps[-1]}"
 
-            attach_verify_table(actual, expected, title=title)
+            attach_verify_table(
+                actual, expected, 
+                tolerance_percent=kwargs.get("tolerance"), 
+                tolerance_fields=kwargs.get("tolerance_fields"), 
+                title=title,
+                comparison_result=comparison_result
+            )
 
     return _wrapper
 

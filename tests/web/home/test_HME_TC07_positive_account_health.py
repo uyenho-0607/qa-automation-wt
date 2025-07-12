@@ -26,7 +26,7 @@ def test(web, setup_teardown):
     logger.info("Verify account details")
     web.home_page.verify_account_details(acc_details)
 
-    logger.info("Step 1: Toggle balance summary and show all account summary items")
+    logger.info("Step 3: Toggle balance summary and show all account summary items")
     web.home_page.check_uncheck_balance_items(AccSummary.checkbox_list())
 
     logger.info("Verify Account Balance against API data")
@@ -47,7 +47,7 @@ def test(web, setup_teardown):
     logger.info("Verify Free Margin against API data")
     web.home_page.verify_acc_balance_value(AccSummary.FREE_MARGIN, exp_account_summary, 0.01)
 
-    logger.info("Step 2: Toggle balance summary")
+    logger.info("Step 4: Toggle balance summary")
     web.home_page.toggle_balance_summary()
 
     logger.info("Verify Account Summary against Account Dropdown")

@@ -1,7 +1,5 @@
 import pytest
 
-import pytest
-
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
 from src.data.enums import Features

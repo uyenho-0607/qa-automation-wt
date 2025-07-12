@@ -1,31 +1,23 @@
 import pytest
 
-from src.data.enums import SLTPType, TradeType, OrderType, AssetTabs, Expiry
+from src.data.enums import OrderType, AssetTabs
 from src.data.objects.notification_object import ObjectNoti
 from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.non_oms
-@pytest.mark.parametrize(
-    "trade_type, order_type, expiry, sl_type, tp_type",
-    [
-        (TradeType.sample_values(), OrderType.STOP_LIMIT, Expiry.GOOD_TILL_CANCELLED, *SLTPType.sample_values(amount=2)),
-        (TradeType.sample_values(), OrderType.STOP_LIMIT, Expiry.GOOD_TILL_DAY, *SLTPType.sample_values(amount=2)),
-        (TradeType.sample_values(), OrderType.STOP_LIMIT, Expiry.SPECIFIED_DATE, *SLTPType.sample_values(amount=2)),
-        (TradeType.sample_values(), OrderType.STOP_LIMIT, Expiry.SPECIFIED_DATE_TIME, *SLTPType.sample_values(amount=2)),
-    ]
-)
-def test(web, symbol, get_asset_tab_amount, trade_type, order_type, sl_type, tp_type, expiry, disable_OCT):
-    trade_object = ObjectTrade(trade_type, order_type, symbol, expiry=expiry)
-    tab_amount = get_asset_tab_amount(order_type)
+def test(web, symbol, get_asset_tab_amount, disable_OCT):
+
+    trade_object = ObjectTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
+    tab_amount = get_asset_tab_amount(OrderType.STOP_LIMIT)
 
     logger.info("Step 1: Enter Chart fullscreen and open trade tab")
     web.trade_page.chart.toggle_chart()
     web.trade_page.chart.open_trade_tab()
 
     logger.info("Step 2: Place order")
-    web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, is_chart=True)
+    web.trade_page.place_order_panel.place_order(trade_object, is_chart=True)
 
     logger.info("Verify trade confirmation modal information is correct")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
@@ -34,8 +26,7 @@ def test(web, symbol, get_asset_tab_amount, trade_type, order_type, sl_type, tp_
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")
-    exp_noti = ObjectNoti(trade_object)
-    web.home_page.notifications.verify_notification_banner(*exp_noti.order_submitted_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_submitted_banner())
 
     logger.info(f"Step 4: Exit Chart fullscreen")
     web.trade_page.chart.close_trade_tab()

@@ -3,9 +3,11 @@ from typing import Any
 
 from src.data.enums import TradeType, OrderType
 from src.data.enums.trading import SLTPType
+from src.data.objects.trade_object import ObjectTrade
 from src.utils import DotDict
-from src.utils.format_utils import remove_commas, format_with_decimal, add_commas
-from src.utils.logging_utils import logger
+from src.utils.format_utils import format_with_decimal, format_str_price
+from src.utils.format_utils import remove_comma
+
 
 def count_leading_zeros_after_decimal(number):
     # Convert to string in case of scientific notation
@@ -30,7 +32,7 @@ def _random_min_point_distance(live_price: str | float) -> int:
     Args:
         live_price: Current market price
     """
-    live_price = remove_commas(live_price, to_float=True)
+    live_price = remove_comma(live_price)
     # Get the decimal precision to calculate valid range
     one_point = _get_decimal_precision(live_price)
     if int(float(live_price)) >= 1:
@@ -38,7 +40,7 @@ def _random_min_point_distance(live_price: str | float) -> int:
 
     else:
         zero_count = count_leading_zeros_after_decimal(live_price)
-        max_point = 1 / (one_point * 10 * int(f'1{'0'*zero_count}'))
+        max_point = 1 / (one_point * 10 * int(f'1{'0' * zero_count}'))
     res = random.randint(int(max_point * 0.6), int(max_point * 0.95))
 
     return res
@@ -69,7 +71,7 @@ def _get_price_adjustment(live_price: str | float, is_invalid=False):
 
     one_point_value = _get_decimal_precision(live_price)
     price_adjustment = one_point_value * _random_min_point_distance(live_price)
-    live_price = remove_commas(live_price, to_float=True)
+    live_price = remove_comma(live_price)
 
     if is_invalid:
         price_adjustment = -price_adjustment
@@ -77,8 +79,8 @@ def _get_price_adjustment(live_price: str | float, is_invalid=False):
     increased_price = abs(live_price + price_adjustment)
     decreased_price = abs(live_price - price_adjustment)
 
-    increased_price = format_with_decimal(increased_price, one_point_value)
-    decreased_price = format_with_decimal(decreased_price, one_point_value)
+    increased_price = format_with_decimal(increased_price, ObjectTrade.DECIMAL or one_point_value)
+    decreased_price = format_with_decimal(decreased_price, ObjectTrade.DECIMAL or one_point_value)
 
     return increased_price, decreased_price
 
@@ -125,7 +127,7 @@ def _random_sl_tp_points(
         TP = Entry - (points * one_point_value) -> must cap to avoid negative
     """
     one_point_value = _get_decimal_precision(live_price)
-    live_price = remove_commas(live_price, to_float=True)
+    live_price = remove_comma(live_price)
     max_safe_points = round((live_price / one_point_value) * 0.9)
 
     def get_points(is_limited: bool) -> int:
@@ -257,15 +259,15 @@ def calculate_trade_parameters(
 
 
 def calculate_partial_close(trade_object):
-    volume, units = int(trade_object.volume), int(remove_commas(trade_object.units))
+    volume, units = int(trade_object.volume), int(remove_comma(trade_object.units))
     close_volume = random.randint(1, volume - 1)
     left_volume = volume - close_volume
     left_units = int(units * left_volume / volume)
     close_units = int(units - left_units)
 
     return DotDict(
-        left_volume=add_commas(left_volume, 0),
-        close_volume=add_commas(close_volume, 0),
-        left_units=add_commas(left_units, 0),
-        close_units=add_commas(close_units, 0),
+        left_volume=format_str_price(left_volume, 0),
+        close_volume=format_str_price(close_volume, 0),
+        left_units=format_str_price(left_units, 0),
+        close_units=format_str_price(close_units, 0),
     )

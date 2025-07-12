@@ -21,8 +21,8 @@ def test(web, symbol, sl_type, tp_type, search_symbol):
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, submit=True)
     web.home_page.notifications.close_noti_banner()
 
-    logger.info("Step 2: Get item order_id from notification")
-    web.trade_page.asset_tab.get_last_item_data(trade_object=trade_object)  # reload new data
+    logger.info("Step 2: Get placed order data in asset tab")
+    web.trade_page.asset_tab.get_item_data(trade_object=trade_object)
 
     logger.info("Step 3: Navigate to Asset Page and close Position")
     web.home_page.navigate_to(Features.ASSETS)

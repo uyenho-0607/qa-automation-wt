@@ -7,7 +7,7 @@ from src.data.consts import SYMBOLS
 from src.data.enums import OrderType, BulkCloseOpts
 from src.data.objects.trade_object import ObjectTrade
 from src.data.project_info import ProjectConfig
-from src.utils.format_utils import format_prices
+from src.utils.format_utils import format_str_prices
 from src.utils.logging_utils import logger
 
 
@@ -63,7 +63,7 @@ def update_entry_price(web):
 
             if resp.get("openPrice"):
                 logger.debug(f"- Update entry price from {trade_object.entry_price} to {resp["openPrice"]}")
-                trade_object["entry_price"] = format_prices(round(resp["openPrice"], ndigits=ObjectTrade.DECIMAL), ObjectTrade.DECIMAL)
+                trade_object["entry_price"] = format_str_prices(round(resp["openPrice"], ndigits=ObjectTrade.DECIMAL), ObjectTrade.DECIMAL)
 
         return None
 
