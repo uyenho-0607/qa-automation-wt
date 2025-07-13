@@ -255,7 +255,7 @@ def compare_noti_with_tolerance(
                         logger.debug(f"- Updating {key}: {actual_price[key]} -> {expected_price[key]}")
                         actual = re.sub(pattern, lambda m: m.group(0).replace(
                             re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
-                            str(expected_price[key])
+                            format_str_price(expected_price[key], ObjectTrade.DECIMAL)
                         ), actual)
                     else:
                         logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")

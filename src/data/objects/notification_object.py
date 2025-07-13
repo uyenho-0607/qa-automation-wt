@@ -30,7 +30,7 @@ class ObjectNoti(BaseObject):
         self.trade_type = trade_object.trade_type
         self.symbol = trade_object.symbol
         self.volume = trade_object.volume
-        self.units = trade_object.units
+        self.units = format_str_price(trade_object.units, 0)
 
         # prices
         self.stop_loss = trade_object.get("stop_loss")
