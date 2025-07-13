@@ -1,6 +1,6 @@
 import pytest
 
-from data.enums import WatchListTab
+from src.data.enums import WatchListTab
 from src.utils.logging_utils import logger
 
 

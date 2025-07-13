@@ -11,9 +11,9 @@ from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.feature_announcement_modal import FeatureAnnouncementModal
 from src.page_object.web.components.notifications import Notifications
 from src.page_object.web.components.settings import Settings
-from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import data_testid, cook_element, compare_with_tolerance
-from src.utils.format_utils import remove_commas, format_acc_balance
+from src.utils.assert_utils import soft_assert, compare_with_tolerance
+from src.utils.common_utils import data_testid, cook_element
+from src.utils.format_utils import remove_comma, format_acc_balance
 from src.utils.logging_utils import logger
 
 
@@ -161,10 +161,10 @@ class HomePage(BasePage):
     def verify_acc_total_balance(self):
         balance_items = self.actions.find_elements(self.__account_balance_item)
         sum_balance = sum(
-            [remove_commas(element.text.strip(), to_float=True) for element in balance_items]
+            [remove_comma(element.text.strip()) for element in balance_items]
         )
         total_balance = self.actions.get_text(self.__total_account_balance)
-        soft_assert(sum_balance, remove_commas(total_balance.replace("USD", ""), to_float=True))
+        soft_assert(sum_balance, remove_comma(total_balance.replace("USD", "")))
 
     def verify_acc_balance_value(self, item: AccSummary, exp_dict: dict, tolerance_percent: float = 0):
         """Verify account summary item against exp_dict (should be response from API get account)"""

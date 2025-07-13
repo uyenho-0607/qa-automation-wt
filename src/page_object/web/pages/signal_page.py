@@ -13,7 +13,7 @@ from src.page_object.web.components.trade.place_order_panel import PlaceOrderPan
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, data_testid
-from src.utils.format_utils import remove_commas
+from src.utils.format_utils import remove_comma
 from src.utils.logging_utils import logger
 
 
@@ -169,14 +169,14 @@ class SignalPage(BasePage):
             trade_object |= {
                 "trade_type": self.actions.get_text(self.__analysis_action).upper(),
                 "order_type": self.actions.get_text(self.__analysis_order_status).split(" ")[-1],
-                "take_profit": remove_commas(take_profit[tp_index - 1].text.strip()),
-                "stop_loss": remove_commas(self.actions.get_text(self.__analysis_sl)),
+                "take_profit": remove_comma(take_profit[tp_index - 1].text.strip()),
+                "stop_loss": remove_comma(self.actions.get_text(self.__analysis_sl)),
             }
 
             # Update entry price if Order Type != Market
             trade_object.entry_price = self.place_order_panel.get_live_price(trade_object.trade_type)
             if trade_object.order_type != OrderType.MARKET:
-                trade_object.entry_price = remove_commas(self.actions.get_text(self.__analysis_entry))
+                trade_object.entry_price = remove_comma(self.actions.get_text(self.__analysis_entry))
 
         # input volume
         volume = random.randint(1, 10)

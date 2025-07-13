@@ -1,9 +1,5 @@
-import random
-
-from src.data.consts import SYMBOLS
 from src.data.objects.notification_object import ObjectNoti
 from src.data.objects.trade_object import ObjectTrade
-from src.data.project_info import ProjectConfig
 from src.utils.logging_utils import logger
 
 

@@ -25,9 +25,11 @@ def test(web, symbol, sl_type, tp_type, search_symbol):
 
     logger.info("Step 2: Get item order_id from notification")
     web.home_page.notifications.get_open_position_order_id(trade_object)
-    web.trade_page.asset_tab.get_item_data(AssetTabs.OPEN_POSITION, trade_object.order_id, trade_object)
 
-    logger.info("Step 3: Navigate to Asset Page and close Position")
+    logger.info("Step 3: Get item data from asset tab")
+    web.trade_page.asset_tab.get_item_data(order_id=trade_object.order_id, trade_object=trade_object)
+
+    logger.info("Step 4: Navigate to Asset Page and close Position")
     web.home_page.navigate_to(Features.ASSETS)
     web.assets_page.asset_tab.partial_close_position(trade_object.order_id, trade_object=new_object)
 

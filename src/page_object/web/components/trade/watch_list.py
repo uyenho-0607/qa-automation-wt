@@ -240,10 +240,8 @@ class WatchList(BaseTrade):
 
         self.actions.verify_elements_displayed(locators, timeout=SHORT_WAIT)
 
-    def verify_symbols_displayed(self, tab: WatchListTab = None, symbols: str | list = None, is_display=True):
+    def verify_symbols_displayed(self, symbols: str | list = None, is_display=True):
         """Verify symbol is displayed in tab"""
-        if tab:
-            self.select_tab(tab)
 
         symbols = symbols if isinstance(symbols, list) else [symbols]
         locator_list = [cook_element(self.__item_by_name, symbol) for symbol in symbols]

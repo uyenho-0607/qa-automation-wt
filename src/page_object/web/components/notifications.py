@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT
 from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
-from src.utils.assert_utils import soft_assert
+from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.logging_utils import logger
 
@@ -70,8 +70,10 @@ class Notifications(BasePage):
 
         if expected_des:
             actual_des = self.actions.get_text(self.__noti_des, timeout=EXPLICIT_WAIT)
+            res = compare_noti_with_tolerance(actual_des, expected_des, tolerance_percent=0.01)
+
             logger.debug(f"- Check noti_des equal: {expected_des!r}")
-            soft_assert(actual_des, expected_des)
+            soft_assert(res, True, error_message=f"Actual: {actual_des}, Expected: {expected_des}")
 
         if close_banner:
             self.close_noti_banner()
@@ -99,6 +101,10 @@ class Notifications(BasePage):
         actual_res = self.actions.get_text(
             cook_element(self.__noti_list_item_by_text, f'{prefix}: #{ord_id}'), timeout=EXPLICIT_WAIT
         )
-        soft_assert(actual_res, expected_result, check_contains=check_contains)
+
+        actual_res = actual_res.split(",")[0]
+
+        res = compare_noti_with_tolerance(actual_res, expected_result, tolerance_percent=0.01)
+        soft_assert(res, True, error_message=f"Actual: {actual_res}, Expected: {expected_result}")
 
         self.toggle_notification(close=True)

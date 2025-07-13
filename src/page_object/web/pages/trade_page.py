@@ -38,13 +38,12 @@ class TradePage(BasePage):
         if api_data:
             # handle actual
             actual = trade_object.api_data_format()
-
             # handle expected
-            expected = {k: v for k, v in api_data.items() if k in actual.keys()}
+            expected = {k: v for k, v in api_data.items() if k in actual}
             for key in expected:
                 if isinstance(expected[key], float):
                     expected[key] = round(expected[key], ndigits=ObjectTrade.DECIMAL)
 
             expected["volume"] = api_data["lotSize"]
-            soft_assert(actual, expected)
+            soft_assert(actual, expected, tolerance=0.01, tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"])
 

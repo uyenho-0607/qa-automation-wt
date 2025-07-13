@@ -3,7 +3,6 @@ import pytest
 from src.data.enums import AssetTabs, OrderType, SLTPType
 from src.data.objects.notification_object import ObjectNoti
 from src.data.objects.trade_object import ObjectTrade
-
 from src.utils.logging_utils import logger
 
 

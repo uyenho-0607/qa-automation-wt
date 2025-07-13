@@ -1,9 +1,9 @@
 import random
 
 import pytest
-from src.utils.logging_utils import logger
-from src.data.enums import AccSummary
 
+from src.data.enums import AccSummary
+from src.utils.logging_utils import logger
 
 pytestmark = [pytest.mark.critical]
 

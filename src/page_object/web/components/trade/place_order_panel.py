@@ -4,16 +4,16 @@ from typing import Literal
 
 from selenium.webdriver.common.by import By
 
+from src.data.objects.trade_object import ObjectTrade
 from src.core.actions.web_actions import WebActions
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
 from src.data.project_info import ProjectConfig
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
-from src.utils.format_utils import locator_format, format_dict_to_string, add_commas
+from src.utils.format_utils import locator_format, format_dict_to_string, format_str_price
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_trade_parameters
-
 
 class PlaceOrderPanel(BaseTrade):
     """Panel for placing orders in the trading interface.
@@ -261,7 +261,7 @@ class PlaceOrderPanel(BaseTrade):
 
     def place_order(
             self,
-            trade_object: DotDict,
+            trade_object: ObjectTrade,
             sl_type: SLTPType = SLTPType.PRICE,
             tp_type: SLTPType = SLTPType.PRICE,
             swap_to_units: bool = False,
@@ -310,17 +310,19 @@ class PlaceOrderPanel(BaseTrade):
 
         if sl_type == SLTPType.POINTS:
             stop_loss = self._get_input_sl()
+            trade_object.sl_type = sl_type # update sl_type for define tolerance fields
 
         if tp_type == SLTPType.POINTS:
             take_profit = self._get_input_tp()
+            trade_object.tp_type = tp_type # update sl_type for define tolerance fields
 
         # Load input data into trade_object
         volume, units = (units, volume) if swap_to_units else (volume, units)
 
         trade_details = {
             'live_price': self.get_live_price(trade_type),
-            'volume': add_commas(volume),
-            'units': add_commas(units),
+            'volume': volume,
+            'units': units,
             'entry_price': trade_params.entry_price,
             'stop_limit_price': trade_params.stop_limit_price,
             'stop_loss': stop_loss,
@@ -407,8 +409,8 @@ class PlaceOrderPanel(BaseTrade):
         # Load input data into trade_object
         trade_details = {
             'entry_price': live_price,
-            'volume': add_commas(volume),
-            'units': add_commas(units),
+            'volume': volume,
+            'units': units,
             'stop_loss': '--',
             'take_profit': '--',
         }
@@ -469,8 +471,8 @@ class PlaceOrderPanel(BaseTrade):
         entry_price = params.entry_price if order_type == OrderType.MARKET else self._get_input_price()
 
         trade_details = {
-            'volume': add_commas(volume),
-            'units': add_commas(self._get_volume_info_value()),
+            'volume': volume,
+            'units': self._get_volume_info_value(),
             'entry_price': entry_price,
             'stop_loss': self._get_input_sl(),
             'take_profit': self._get_input_tp(),

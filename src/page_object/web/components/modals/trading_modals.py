@@ -40,6 +40,9 @@ class TradingModals(BaseTrade):
     __confirm_price = (
         By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Price']/following-sibling::div"
     )
+    __confirm_stp_limit_price = (
+        By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Stop Limit Price']/following-sibling::div"
+    )
     __confirm_stop_loss = (
         By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Stop Loss']/following-sibling::div"
     )
@@ -73,39 +76,17 @@ class TradingModals(BaseTrade):
 
     __btn_confirm_update_order = (By.CSS_SELECTOR, data_testid('edit-confirmation-button-confirm'))
     __edit_symbol_price = (By.CSS_SELECTOR, data_testid('edit-symbol-price'))
-    __edit_confirm_order_id = (
-        By.CSS_SELECTOR, data_testid('edit-confirmation-order-id')
-    )
-    __edit_confirm_order_type = (
-        By.CSS_SELECTOR, data_testid('edit-confirmation-order-type')
-    )
-    __edit_confirm_symbol = (
-        By.CSS_SELECTOR, data_testid('edit-confirmation-symbol')
-    )
+    __edit_confirm_order_id = (By.CSS_SELECTOR, data_testid('edit-confirmation-order-id'))
+    __edit_confirm_order_type = (By.CSS_SELECTOR, data_testid('edit-confirmation-order-type'))
+    __edit_confirm_symbol = (By.CSS_SELECTOR, data_testid('edit-confirmation-symbol'))
     __edit_confirm_volume = (
-        By.XPATH,
-        "//div[@data-testid='edit-confirmation-label' and (normalize-space(text()) = 'Volume' or normalize-space(text()) = 'Size')]/following-sibling::div"
+        By.XPATH, "//div[@data-testid='edit-confirmation-label' and (text()='Volume' or text()='Size')]/following-sibling::div"
     )
-    __edit_confirm_units = (
-        By.XPATH,
-        "//div[@data-testid='edit-confirmation-label' and normalize-space(text())='Units']/following-sibling::div"
-    )
-    __edit_confirm_stop_loss = (
-        By.XPATH,
-        "//div[@data-testid='edit-confirmation-label' and normalize-space(text())='Stop Loss']/following-sibling::div"
-    )
-    __edit_confirm_take_profit = (
-        By.XPATH,
-        "//div[@data-testid='edit-confirmation-label' and normalize-space(text())='Take Profit']/following-sibling::div"
-    )
-    __edit_confirm_fill_policy = (
-        By.XPATH,
-        "//div[@data-testid='edit-confirmation-label' and normalize-space(text())='Fill Policy']/following-sibling::div"
-    )
-    __edit_confirm_expiry = (
-        By.XPATH,
-        "//div[@data-testid='edit-confirmation-label' and normalize-space(text())='Expiry']/following-sibling::div"
-    )
+    __edit_confirm_units = (By.XPATH, "//div[@data-testid='edit-confirmation-label' and text()='Units']/following-sibling::div")
+    __edit_confirm_stop_loss = (By.XPATH, "//div[@data-testid='edit-confirmation-label' and text()='Stop Loss']/following-sibling::div")
+    __edit_confirm_take_profit = (By.XPATH, "//div[@data-testid='edit-confirmation-label' and text()='Take Profit']/following-sibling::div")
+    __edit_confirm_fill_policy = (By.XPATH, "//div[@data-testid='edit-confirmation-label' and text()='Fill Policy']/following-sibling::div")
+    __edit_confirm_expiry = (By.XPATH, "//div[@data-testid='edit-confirmation-label' and text()='Expiry']/following-sibling::div")
 
     # control buttons
     __btn_inc_dec_sl = (By.CSS_SELECTOR, data_testid('edit-input-stoploss-{}-{}'))  # price/ points - increase/ decrease
@@ -171,7 +152,7 @@ class TradingModals(BaseTrade):
         self.actions.clear_field(locator)
         self.actions.send_keys(locator, value)
 
-    def _input_edit_price(self, value, order_type: OrderType = None):
+    def _input_edit_price(self, value, order_type: OrderType | str = None):
         if not order_type or order_type == OrderType.MARKET:
             return
 
@@ -179,7 +160,7 @@ class TradingModals(BaseTrade):
         self.actions.clear_field(self.__txt_edit_price)
         self.actions.send_keys(self.__txt_edit_price, value)
 
-    def _input_edit_stp_price(self, value, order_type: OrderType = None):
+    def _input_edit_stp_price(self, value, order_type: OrderType | str = None):
         if not order_type or not order_type.is_stp_limit():
             return
 
@@ -242,12 +223,13 @@ class TradingModals(BaseTrade):
 
     def modify_order(
             self,
-            trade_object: DotDict,
+            trade_object: ObjectTrade,
             tab: AssetTabs = None,
             sl_type: SLTPType = None,
             tp_type: SLTPType = None,
             fill_policy: FillPolicy = None,
-            expiry: Expiry = None
+            expiry: Expiry = None,
+            confirm=False
     ):
         """
         Modify stop loss/ take profit/ fill policy/ Expiry
@@ -270,7 +252,9 @@ class TradingModals(BaseTrade):
             self._input_edit_price(params.entry_price, order_type)
             trade_object.entry_price = params.entry_price
 
-        self._input_edit_stp_price(params.stop_limit_price, order_type)
+        if order_type.is_stp_limit():
+            self._input_edit_stp_price(params.stop_limit_price, order_type)
+            trade_object.stop_limit_price = params.stop_limit_price
 
         self._input_edit_sl(stop_loss, sl_type)
         if sl_type == SLTPType.POINTS:
@@ -289,17 +273,18 @@ class TradingModals(BaseTrade):
             trade_object["fill_policy"] = fill_policy
 
         self.click_edit_order_btn()
-        # update trade object
 
+        # update trade object
         if sl_type:
             trade_object.stop_loss = stop_loss
+            trade_object.sl_type = sl_type
 
         if tp_type:
             trade_object.take_profit = take_profit
+            trade_object.tp_type = tp_type
 
-        trade_object |= {
-            "stop_limit_price": params.stop_limit_price if order_type.is_stp_limit() else None,
-        }
+        if confirm:
+            self.confirm_update_order()
 
     def modify_invalid_order(
             self,
@@ -378,7 +363,6 @@ class TradingModals(BaseTrade):
 
         # Handle actual dict
         locator_list = [
-            
             self.__confirm_order_type,
             self.__confirm_symbol,
             self.__confirm_volume,
@@ -389,10 +373,17 @@ class TradingModals(BaseTrade):
         not expected.get("fill_policy") or locator_list.append(self.__confirm_fill_policy)
         not expected.get("expiry") or locator_list.append(self.__confirm_expiry)
 
+        if trade_object.order_type != OrderType.MARKET:
+            locator_list.append(self.__confirm_price)
+
+        if trade_object.order_type.is_stp_limit():
+            locator_list.append(self.__confirm_stp_limit_price)
+
         actual = {
             k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
         }
-        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=["stop_loss", "take_profit"])
+
+        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_edit_trade_confirmation(self, trade_object: ObjectTrade):
         expected = trade_object.trade_edit_confirm_details()
@@ -408,8 +399,9 @@ class TradingModals(BaseTrade):
 
         not expected.get("fill_policy") or actual_locators.append(self.__edit_confirm_fill_policy)
         not expected.get("expiry") or actual_locators.append(self.__edit_confirm_expiry)
+
         actual = {
             k: v for k, v in zip(list(expected.keys()), [self.actions.get_text(locator) for locator in actual_locators])
         }
 
-        soft_assert(actual, expected)
+        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=trade_object.tolerance_fields())

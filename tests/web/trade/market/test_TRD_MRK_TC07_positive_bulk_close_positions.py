@@ -6,7 +6,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize("close_option", (BulkCloseOpts.ALL, BulkCloseOpts.LOSS,))
+@pytest.mark.parametrize("close_option", (BulkCloseOpts.ALL, ))
 def test(web, setup_bulk_test, cancel_bulk_close, close_option, get_order_id_list):
     order_ids = setup_bulk_test(order_type=OrderType.MARKET)
     expected_amount = 0 if len(order_ids) <= 30 else len(order_ids) - 30

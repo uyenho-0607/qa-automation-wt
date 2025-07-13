@@ -29,13 +29,13 @@ def is_float(s):
         return False
 
 
-def get_asset_tab_number(text: str) -> int | None:
+def extract_asset_tab_number(text: str) -> int | None:
     """Extract number from text, Example: "Open Position (13)" 13"""
     match = re.search(r"\((\d+)\)", text)
     return int(match.group(1)) if match else 0
 
 
-def get_decimal_places(number):
+def get_decimal(number):
     """ Return the decimal places: EX: 123 >> 0, 123.10 >> 2, 123.123 >> 3"""
     decimal_places = 0
 
@@ -45,67 +45,55 @@ def get_decimal_places(number):
     return decimal_places
 
 
-def remove_commas(input_str: str, to_float: bool = False) -> float | int | str:
+def remove_comma(input_str: str, to_float: bool = True) -> float | int | str:
     """Remove commas from a string and return a float or int if possible."""
-    # Remove commas from string
     res = str(input_str).replace(",", "")
     if to_float:
         try:
             res = float(res)
 
         except (ValueError, TypeError):
+            logger.debug(f"Failed to convert {input_str} to float")
             res = input_str
 
     return res
 
 
-def format_with_decimal(num_to_convert: int | float, decimal_places: float | str) -> str:
+def format_with_decimal(num_to_convert: int | float, decimal_places: float | str):
     """Add specific decimal places based on decimal_places: number = 123.1, decimal_places = 1.12 >> number = 123.10"""
     if isinstance(num_to_convert, str):
         return num_to_convert
 
-    decimal_places = len(str(decimal_places).split(".")[-1])
+    decimal_places = decimal_places if isinstance(decimal_places, int) else get_decimal(decimal_places)
+    if not decimal_places:
+        return num_to_convert
+
     return f"{num_to_convert:.{decimal_places}f}"
 
 
-def add_commas(number: float | int | str, decimal_places: int = None) -> str:
-    """
-    Format a number with commas as thousand separators and specified decimal places.
-    """
+def format_str_price(number: float | int | str, decimal_places: int = None) -> str:
+    """Format a number with commas as thousand separators and specified decimal places."""
+    if not number:
+        return number
+
     if is_float(number) or is_integer(number):
-        decimal_places = decimal_places or get_decimal_places(number)
-        number = remove_commas(number, to_float=True)
-        format_str = "{:,.%df}" % decimal_places
+        number = remove_comma(number)
+        format_str = "{:,.%df}" % (decimal_places if decimal_places is not None else get_decimal(number))
         return format_str.format(number)
 
     return number
 
 
-def format_prices(prices, decimal: int = None):
+def format_str_prices(prices, decimal: int = None):
     """
     Format all prices value back to one general format for more stable
     Sample: 1,234.10
     """
-    # decimal = decimal or ObjectTrade.DECIMAL
     prices = prices if isinstance(prices, list) else [prices]
     res = []
-    logger.debug(f"Formating number: {prices}")
     # Add comas if not yet - convert to float
     for price in prices:
-        price = add_commas(price)
-        if not price or price == "--":
-            price = price
-
-        else:
-            # add missing zero if any
-            cur_decimal_places = get_decimal_places(price)
-            if decimal != cur_decimal_places:
-                # Format the value to match the decimal places
-                if "." not in str(price):
-                    price = str(price) + "."
-
-                price = str(price) + "0" * (decimal - cur_decimal_places)
-
+        price = format_str_price(price, decimal_places=decimal)
         res.append(price)
 
     return res if len(prices) > 1 else res[0]

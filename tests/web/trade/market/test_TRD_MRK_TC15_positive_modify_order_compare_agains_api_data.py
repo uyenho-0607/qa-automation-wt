@@ -14,10 +14,7 @@ def test(web, symbol, close_edit_confirm_modal, create_order_data):
     create_order_data(trade_object)
 
     logger.info(f"Step 2: Update item stop loss and take profit")
-    web.trade_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
-
-    logger.info("Step 3: Confirm update order")
-    web.trade_page.modals.confirm_update_order()
+    web.trade_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
 
     logger.info(f"Verify item details after update")
     web.trade_page.asset_tab.verify_item_data(trade_object)

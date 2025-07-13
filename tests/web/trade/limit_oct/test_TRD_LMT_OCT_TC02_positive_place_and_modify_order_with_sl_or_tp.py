@@ -9,11 +9,9 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize(
     "field, place_type, edit_type",
     [
-        ("stop_loss", SLTPType.POINTS, SLTPType.POINTS),
-        ("stop_loss", SLTPType.PRICE, SLTPType.PRICE),
+        ("stop_loss", SLTPType.random_values(), SLTPType.random_values()),
         ("stop_loss", *SLTPType.random_values(amount=2)),
-        ("take_profit", SLTPType.POINTS, SLTPType.POINTS),
-        ("take_profit", SLTPType.PRICE, SLTPType.PRICE),
+        ("take_profit", SLTPType.random_values(), SLTPType.random_values()),
         ("take_profit", *SLTPType.random_values(amount=2)),
     ]
 )
