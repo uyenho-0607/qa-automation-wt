@@ -73,7 +73,7 @@ class Notifications(BasePage):
             res = compare_noti_with_tolerance(actual_des, expected_des, tolerance_percent=0.01)
 
             logger.debug(f"- Check noti_des equal: {expected_des!r}")
-            soft_assert(res, True, error_message=f"Actual: {actual_des}, Expected: {expected_des}")
+            soft_assert(res, True, error_message=f"Actual: {actual_des}\n Expected: {expected_des}")
 
         if close_banner:
             self.close_noti_banner()
@@ -102,9 +102,11 @@ class Notifications(BasePage):
             cook_element(self.__noti_list_item_by_text, f'{prefix}: #{ord_id}'), timeout=EXPLICIT_WAIT
         )
 
-        actual_res = actual_res.split(",")[0]
+        if prefix == "position closed":
+                actual_res = actual_res.split(", Loss of")[0]
+                actual_res = actual_res.split(", Profit of")[0]
 
         res = compare_noti_with_tolerance(actual_res, expected_result, tolerance_percent=0.01)
-        soft_assert(res, True, error_message=f"Actual: {actual_res}, Expected: {expected_result}")
+        soft_assert(res, True, error_message=f"Actual: {actual_res}\n Expected: {expected_result}")
 
         self.toggle_notification(close=True)

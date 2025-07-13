@@ -77,12 +77,14 @@ class PlaceOrderPanel(BaseTrade):
         """Get current stop loss value from input field."""
         locator = cook_element(self.__txt_stop_loss, SLTPType.PRICE.lower())
         self.actions.click(locator)
+        time.sleep(0.5)
         return self.actions.get_value(locator)
 
     def _get_input_tp(self) -> str:
         """Get current take profit value from input field."""
         locator = cook_element(self.__txt_take_profit, SLTPType.PRICE.lower())
         self.actions.click(locator)
+        time.sleep(0.5)
         return self.actions.get_value(locator)
 
     def _get_input_price(self):
