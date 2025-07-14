@@ -78,6 +78,9 @@ def format_str_price(number: float | int | str, decimal_places: int = None) -> s
 
     if is_float(number) or is_integer(number):
         number = remove_comma(number)
+        if number.is_integer():
+            number = int(number)
+
         format_str = "{:,.%df}" % (decimal_places if decimal_places is not None else get_decimal(number))
         return format_str.format(number)
 

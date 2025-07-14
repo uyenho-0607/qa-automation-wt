@@ -70,10 +70,11 @@ class Notifications(BasePage):
 
         if expected_des:
             actual_des = self.actions.get_text(self.__noti_des, timeout=EXPLICIT_WAIT)
-            res = compare_noti_with_tolerance(actual_des, expected_des, tolerance_percent=0.01)
-
             logger.debug(f"- Check noti_des equal: {expected_des!r}")
-            soft_assert(res, True, error_message=f"Actual: {actual_des}\n Expected: {expected_des}")
+            compare_noti_with_tolerance(actual_des, expected_des)
+
+            # res = compare_noti_with_tolerance(actual_des, expected_des, tolerance_percent=0.01)
+            # soft_assert(res, True, error_message=f"Actual: {actual_des}\n Expected: {expected_des}")
 
         if close_banner:
             self.close_noti_banner()
@@ -106,7 +107,8 @@ class Notifications(BasePage):
                 actual_res = actual_res.split(", Loss of")[0]
                 actual_res = actual_res.split(", Profit of")[0]
 
-        res = compare_noti_with_tolerance(actual_res, expected_result, tolerance_percent=0.01)
-        soft_assert(res, True, error_message=f"Actual: {actual_res}\n Expected: {expected_result}")
+        # res = compare_noti_with_tolerance(actual_res, expected_result, tolerance_percent=0.01)
+        compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
+        # soft_assert(res, True, error_message=f"Actual: {actual_res}\n Expected: {expected_result}")
 
         self.toggle_notification(close=True)
