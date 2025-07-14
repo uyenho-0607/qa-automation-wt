@@ -90,7 +90,7 @@ def compare_with_tolerance(
     tolerance = tolerance_percent * expected
 
     diff = abs(actual - expected)
-    diff_percent = diff / expected
+    diff_percent = diff / expected if expected else 0
 
     if diff:
         logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance:.2f} ({tolerance_percent:.2f}%), Diff: {diff:.4f}, Diff Percent: {diff_percent:.4f}")
@@ -237,7 +237,7 @@ def compare_noti_with_tolerance(
         all_results.append(res)
 
         if res:
-            # Replace price in actual with expected price for string comparison
+            # Replace price in expected with actual price for string comparison
             pattern_key_mapping = {
                 r'@\s*[\d,]+\.?\d*': 'entry_price',
                 r'Entry Price:\s*[\d,]+\.?\d*': 'entry_price',
@@ -251,18 +251,18 @@ def compare_noti_with_tolerance(
                 if key in expected_price and key in actual_price and key not in processed_keys:
                     # Only update if prices are different (within tolerance but not exactly the same)
                     if abs(actual_price[key] - expected_price[key]) > 0:
-                        # updated_val = format_str_price(expected_price[key], ObjectTrade.DECIMAL)
-                        logger.debug(f"- Updating {key}: {actual_price[key]} -> {expected_price[key]}")
-                        actual = re.sub(pattern, lambda m: m.group(0).replace(
+
+                        logger.debug(f"- Updating {key}: {expected_price[key]} -> {actual_price[key]}")
+                        expected = re.sub(pattern, lambda m: m.group(0).replace(
                             re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
-                            format_str_price(expected_price[key], ObjectTrade.DECIMAL)
-                        ), actual)
+                            format_str_price(actual_price[key])
+                        ), expected)
                     else:
                         logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
                     
                     processed_keys.add(key)  # Mark this key as processed
 
-            logger.debug(f"- Noti after adjust prices: {actual!r}")
+            logger.debug(f"- Expected noti after adjust prices: {expected!r}")
 
     all_results.append(actual == expected)
 
