@@ -29,6 +29,6 @@ SYMBOLS = {
     Client.LIRUNEX: [
         "DASHUSD.std",
         "XRPUSD.std",
-        "LTCUSD.std"
+        "ETHUSD.std"
     ]
 }
