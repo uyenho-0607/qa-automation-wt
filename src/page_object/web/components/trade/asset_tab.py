@@ -342,6 +342,12 @@ class AssetTab(BaseTrade):
         self.wait_for_tab_amount(tab, expected_amount)
         soft_assert(self.get_tab_amount(tab), expected_amount)
 
+    def verify_tab_selected(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
+        locator = cook_element(self.__tab, locator_format(tab))
+        is_select = "selected" in self.actions.get_attribute(locator, "class")
+        soft_assert(is_select, True, error_message=f"Tab {tab.value!r} is not selected")
+
+
     def verify_item_data(self, trade_object: ObjectTrade, tab: AssetTabs = None) -> None:
         """Verify item data in asset tab"""
         tab = tab or AssetTabs.get_tab(trade_object.order_type)

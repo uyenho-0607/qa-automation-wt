@@ -1,3 +1,4 @@
+import random
 import time
 
 import pytest
@@ -41,7 +42,9 @@ def setup_test():
 
         if not symbols and tab == WatchListTab.FAVOURITES:
             for symbol in SYMBOLS[ProjectConfig.client][:3]:
+                logger.info(f"- Mark star symbol: {symbol!r}")
                 APIClient().market.post_starred_symbol(symbol)
+
             symbols = SYMBOLS[ProjectConfig.client][:3]
 
         return symbols
@@ -53,4 +56,5 @@ def setup_test():
 def cleanup(tab):
     yield
     if tab == WatchListTab.FAVOURITES:
+        logger.info(f"- Delete all star symbols")
         APIClient().market.delete_starred_symbols()

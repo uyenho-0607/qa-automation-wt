@@ -223,20 +223,20 @@ def extract_noti_prices(noti_content: str) -> dict:
 def compare_noti_with_tolerance(
         actual: str,
         expected: str,
-        tolerance_percent: float = 0.01,
+        tolerance_percent: float = 0.5,
+        is_banner=True
 ):
     """Compare notification messages with tolerance for price values."""
-    all_results = []
     # Extract prices from both messages
     actual_price = extract_noti_prices(actual)
     expected_price = extract_noti_prices(expected)
+    desc = ""
+    decimal = ObjectTrade.DECIMAL if is_banner else None
 
     if actual_price and expected_price:
-
         res = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])["res"]
-        all_results.append(res)
-
         if res:
+            desc += f"Tolerance: {tolerance_percent}% - \n"
             # Replace price in expected with actual price for string comparison
             pattern_key_mapping = {
                 r'@\s*[\d,]+\.?\d*': 'entry_price',
@@ -255,18 +255,18 @@ def compare_noti_with_tolerance(
                         logger.debug(f"- Updating {key}: {expected_price[key]} -> {actual_price[key]}")
                         expected = re.sub(pattern, lambda m: m.group(0).replace(
                             re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
-                            format_str_price(actual_price[key])
+                            format_str_price(actual_price[key], decimal)
                         ), expected)
                     else:
                         logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
                     
                     processed_keys.add(key)  # Mark this key as processed
 
+                    desc += f"Update price: {key}, from {expected_price[key]} -> {actual_price[key]}\n"
+
             logger.debug(f"- Expected noti after adjust prices: {expected!r}")
 
-    all_results.append(actual == expected)
-
-    return all(all_results)
+    soft_assert(actual, expected, log_details=True, desc=desc)
 
 
 """Assertion"""

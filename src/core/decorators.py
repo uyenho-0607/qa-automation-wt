@@ -7,7 +7,7 @@ from selenium.common import StaleElementReferenceException, ElementNotInteractab
     ElementClickInterceptedException
 
 from src.data.project_info import StepLogs
-from src.utils.allure_utils import attach_verify_table
+from src.utils.allure_utils import attach_verify_table, log_verification_result
 from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
 
@@ -39,6 +39,14 @@ def attach_table_details(func):
                 tolerance_fields=kwargs.get("tolerance_fields"), 
                 title=title,
                 comparison_result=comparison_result
+            )
+
+        elif kwargs.get("log_details"):
+            name = "Verification Details"
+            if StepLogs.test_steps:
+                name += f" - {StepLogs.test_steps[-1]}"
+            log_verification_result(
+                actual, expected, result, desc=kwargs.get("desc", "") + kwargs.get("err_msg", "") if not result else "", name=name
             )
 
     return _wrapper

@@ -1,7 +1,10 @@
-from src.data.enums import Features, MarketsSection, WatchListTab
+import pytest
+
+from src.data.enums import Features, MarketsSection, WatchListTab, AssetTabs
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.critical
 def test(web, ):
     logger.info(f"Step 1: Select arrow: {MarketsSection.MY_TRADE.title()!r}")
     web.home_page.navigate_to(Features.MARKETS)
@@ -9,6 +12,9 @@ def test(web, ):
 
     logger.info("Verify Page is redirected to Asset Page")
     web.assets_page.verify_page_url()
+
+    logger.info("Verify Open Position Tab is selected")
+    web.assets_page.asset_tab.verify_tab_selected(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Step 2: Select arrow: {MarketsSection.TOP_PICKS.title()!r}")
     web.home_page.navigate_to(Features.MARKETS)
