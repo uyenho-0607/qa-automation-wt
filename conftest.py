@@ -6,7 +6,7 @@ import pytest
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR
-from src.data.enums import Server, Client
+from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, ProjectConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
 from src.utils.logging_utils import logger
@@ -55,12 +55,17 @@ def pytest_sessionstart(session: pytest.Session):
     client = session.config.getoption("client")
     server = session.config.getoption("server")
     account = session.config.getoption("account")
+
+    if account == AccountType.LIVE and client == Client.LIRUNEX:
+        account = "crm"
+
     user = session.config.getoption("user")
     browser = session.config.getoption("browser")
     headless = session.config.getoption("headless")
     allure_dir = session.config.getoption("allure_report_dir")
 
     logger.info(f">> Load environment configuration - Client: {client.capitalize()!r}")
+    logger.info(f">> Account: {account.capitalize()!r}")
     Config.load_config(env, client)
 
     # Save options config to Config

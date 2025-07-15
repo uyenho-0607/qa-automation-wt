@@ -30,22 +30,7 @@ def test(web, setup_teardown):
     web.home_page.check_uncheck_balance_items(AccSummary.checkbox_list())
 
     logger.info("Verify Account Balance against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.BALANCE, exp_account_summary)
-
-    logger.info("Verify Margin Used against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.MARGIN_USED, exp_account_summary)
-
-    logger.info("Verify Margin Level against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.MARGIN_LEVEL, exp_account_summary, 0.01)
-
-    logger.info("Verify Equity against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.EQUITY, exp_account_summary, 0.01)
-
-    logger.info("Verify Profit/Loss against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.PROFIT_LOSS, exp_account_summary, 0.05)
-
-    logger.info("Verify Free Margin against API data")
-    web.home_page.verify_acc_balance_value(AccSummary.FREE_MARGIN, exp_account_summary, 0.01)
+    web.home_page.verify_acc_balance_value(exp_account_summary)
 
     logger.info("Step 4: Toggle balance summary")
     web.home_page.toggle_balance_summary()
