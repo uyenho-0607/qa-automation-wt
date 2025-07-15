@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import SLTPType, OrderType, Expiry
+from src.data.enums import OrderType, SLTPType, Expiry
 from src.data.objects.notification_object import ObjectNoti
 from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
@@ -8,23 +8,27 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 @pytest.mark.parametrize(
-    "field, place_type, edit_type",
+    "exclude_field, update_field",
     [
-        ("stop_loss", *SLTPType.random_values(amount=2)),
-        ("take_profit", *SLTPType.random_values(amount=2)),
+        ("SL", "SL"),
+        ("SL", "TP"),
+        ("SL", "SL,TP"),
+        ("TP", "SL"),
+        ("TP", "TP"),
+        ("TP", "SL,TP"),
     ]
 )
-def test(web, symbol, create_order_data, field, place_type, edit_type, close_edit_confirm_modal):
-    sl_tp_val = {("stop_loss" if field == "take_profit" else "take_profit"): 0, "indicate": place_type}
-    update_sl_type, update_tp_type = (edit_type, None) if field == "stop_loss" else (None, edit_type)
+def test(web, symbol, create_order_data, exclude_field, update_field, close_edit_confirm_modal):
 
-    trade_object = ObjectTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, **sl_tp_val)
+    trade_object = ObjectTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
+    trade_object[exclude_field] = 0
+    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with {field!r}")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
     create_order_data(trade_object)
 
-    logger.info(f"Step 2: Update pending order with {field!r} - type: {edit_type.capitalize()!r}")
-    web.trade_page.modals.modify_order(trade_object, sl_type=update_sl_type, tp_type=update_tp_type, expiry=Expiry.sample_values(trade_object.order_type))
+    logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
+    web.trade_page.modals.modify_order(trade_object, **update_info, expiry=Expiry.sample_values(trade_object.order_type))
 
     logger.info("Verify edit confirmation info")
     web.trade_page.modals.verify_edit_trade_confirmation(trade_object)
@@ -35,5 +39,5 @@ def test(web, symbol, create_order_data, field, place_type, edit_type, close_edi
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner())
 
-    logger.info(f"Verify item details after update")
+    logger.info(f"Verify order details after update")
     web.trade_page.asset_tab.verify_item_data(trade_object)

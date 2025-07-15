@@ -5,8 +5,10 @@ from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.skip
 @pytest.mark.critical
 def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
+    """This test is covered in Limit package"""
     trade_object = ObjectTrade(order_type=OrderType.STOP, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
