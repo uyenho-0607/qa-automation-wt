@@ -113,8 +113,9 @@ def pytest_runtest_setup(item: pytest.Item):
     sub_suite = sub_suite.replace("_", " ").title()
     # Set allure labels
     allure.dynamic.parent_suite(server.upper())
-    allure.dynamic.suite(account)
+    allure.dynamic.suite(account.capitalize())
     allure.dynamic.sub_suite(sub_suite)
+    allure.dynamic.feature(sub_suite)
 
     if item.get_closest_marker("uat") and Config.config.env != "uat":
         pytest.skip("This test is for UAT environment only !")
