@@ -173,18 +173,20 @@ def pytest_runtest_makereport(item, call):
     allure_dir = Config.config.allure_dir
 
     # Start recording at the beginning of the test
-    if driver and report.when == "setup" and platform in ['android', 'ios']:
-        if allure_dir and os.path.exists(ROOTDIR / allure_dir):
-            try:
-                driver.start_recording_screen(options={"bit_rate": 200000, "video_size": "480x270"})
-                logger.debug(f"Started screen recording for {platform} test")
+    if driver and report.when == "setup":
 
-            except Exception as e:
-                logger.error(f"Failed to start screen recording: {str(e)}")
+        if platform in ['android', 'ios']:
+            if allure_dir and os.path.exists(ROOTDIR / allure_dir):
+                try:
+                    driver.start_recording_screen(options={"bit_rate": 200000, "video_size": "480x270"})
+                    logger.debug(f"Started screen recording for {platform} test")
 
-            if report.failed:
-                attach_screenshot(driver, name="setup")
-                logger.error(f"Test setup failed: {report.longreprtext}")
+                except Exception as e:
+                    logger.error(f"Failed to start screen recording: {str(e)}")
+
+        if report.failed:
+            attach_screenshot(driver, name="setup")
+            logger.error(f"Test setup failed: {report.longreprtext}")
 
     # Handle test completion
     if report.when == "call":
