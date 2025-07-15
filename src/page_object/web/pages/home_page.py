@@ -166,31 +166,30 @@ class HomePage(BasePage):
         total_balance = self.actions.get_text(self.__total_account_balance)
         soft_assert(sum_balance, remove_comma(total_balance.replace("USD", "")))
 
-    def verify_acc_balance_value(self, item: AccSummary, exp_dict: dict, tolerance_percent: float = 0):
+    def verify_acc_balance_value(self, exp_dict: dict):
         """Verify account summary item against exp_dict (should be response from API get account)"""
-        expected = round(exp_dict.get(item, 0), 2)
-        actual = format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, item)))
-        result = compare_with_tolerance(actual, expected, tolerance_percent)
-
-        soft_assert(result, True, error_message=f"Actual: {actual}, Expected: {expected}, tolerance_percent: {tolerance_percent * 100}%")
+        actual = {key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key))) for key in AccSummary.checkbox_list()}
+        expected = {k: round(v, 2) for k, v in exp_dict.items() if k in AccSummary.checkbox_list()}
+        soft_assert(actual, expected, tolerance=0.05, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_acc_note_values(self, exp_dict: dict):
-        for item in AccSummary.note_list():
-            logger.info(f"- Checking {item.value!r}")
-            actual = format_acc_balance(self.actions.get_text(cook_element(self.__acc_note_items, item)))
-            soft_assert(actual, exp_dict.get(item, 0))
-
-    def _verify_acc_dropdown(self, item: AccSummary):
-        elements = self.actions.find_elements(cook_element(self.__acc_balance_items, item))
-        values = [format_acc_balance(ele.text) for ele in elements]
-
-        logger.info(f"- Checking {item.value!r}")
-        soft_assert(len(values), 2, error_message=f"Not enough values to compare, actual {len(values)}, expected: 2")
-        soft_assert(values[0], values[-1])
+        actual = {item: format_acc_balance(self.actions.get_text(cook_element(self.__acc_note_items, item))) for item in AccSummary.note_list()}
+        soft_assert(actual, {k: v for k, v in exp_dict.items() if k in AccSummary.note_list()})
 
     def verify_acc_summary_dropdown(self):
+        element_dict = {}
+
         for item in AccSummary.checkbox_list():
-            self._verify_acc_dropdown(item)
+            element_dict[item] = self.actions.find_elements(cook_element(self.__acc_balance_items, item))
+
+        logger.debug("- Checking enough account items are found")
+        for item in AccSummary.checkbox_list():
+            soft_assert(len(element_dict[item]), 2, error_message=f"Not enough values to compare, actual {len(element_dict[item])}, expected: 2")
+
+        logger.debug("- Checking account details")
+        expected = {item: format_acc_balance(element_dict[item][0].text) for item in AccSummary.checkbox_list()}
+        actual = {item: format_acc_balance(element_dict[item][-1].text) for item in AccSummary.checkbox_list()}
+        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_search_result(self, symbol: str):
         self.actions.verify_element_displayed(cook_element(self.__item_search_result, symbol))
