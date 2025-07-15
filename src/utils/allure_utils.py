@@ -164,7 +164,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     if data.get("attachments"):
 
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Chart Comparison Summary"]]
+        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Chart Comparison Summary" , "setup"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
