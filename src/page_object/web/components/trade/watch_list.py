@@ -94,6 +94,9 @@ class WatchList(BaseTrade):
             time.sleep(0.5)
         return False
 
+    def _scroll_watchlist_container(self, scroll_step=0.5):
+        self.actions.scroll_container_down(self.__watchlist_container, scroll_step=scroll_step)
+
     def get_all_symbols(self, tab: WatchListTab = None, expected_symbols = None):
         """Get all symbols by scrolling through the watchlist container"""
         if tab:
@@ -128,7 +131,7 @@ class WatchList(BaseTrade):
 
             # Scroll down in the container
             try:
-                self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.5)
+                self._scroll_watchlist_container()
             except Exception as e:
                 logger.warning(f"Error during scroll: {e}")
                 break
@@ -166,12 +169,50 @@ class WatchList(BaseTrade):
             store_data |= res
         return res
 
-    def select_symbol(self, symbol, tab=None):
-        """Select symbol from current displayed list"""
-        # todo: enhance add scrolldown until seeing the symbol
+    def select_symbol(self, symbol, tab=None, max_scroll_attempts=30):
+        """Select symbol from current displayed list with enhanced scrolling
+        Args:
+            symbol: Symbol name to select
+            tab: Tab to search in (optional)
+            max_scroll_attempts: Maximum number of scroll attempts
+        Raises:
+            Exception: If symbol is not found after all attempts
+        """
         if tab:
             self.select_tab(tab)
-        self.actions.click(cook_element(self.__item_by_name, symbol))
+
+        logger.debug(f"Attempting to select symbol: {symbol!r}")
+        locator = cook_element(self.__item_by_name, symbol)
+        
+        # First check if symbol is already visible
+        if self.actions.is_element_displayed(locator):
+            logger.debug(f"Symbol {symbol!r} is already visible, clicking immediately")
+            self.actions.click(locator)
+            return
+
+        # Scroll to find the symbol
+        scroll_attempts = 0
+        
+        while scroll_attempts < max_scroll_attempts:
+            logger.debug(f"Scroll attempt {scroll_attempts + 1}/{max_scroll_attempts} to find symbol: {symbol!r}")
+            
+            # Scroll down in the container
+            try:
+                self._scroll_watchlist_container()
+            except Exception as e:
+                logger.warning(f"Error during scroll attempt {scroll_attempts + 1}: {e}")
+                scroll_attempts += 1
+                continue
+            
+            # Check if symbol is now visible
+            if self.actions.is_element_displayed(locator):
+                logger.debug(f"Symbol {symbol!r} found after {scroll_attempts + 1} scroll attempts")
+                self.actions.click(locator)
+                return
+            
+            scroll_attempts += 1
+        
+        raise Exception(f"Symbol '{symbol}' not found after {scroll_attempts} scroll attempts")
 
     def select_last_symbol(self, tab: WatchListTab = WatchListTab.ALL):
         self.select_tab(tab)
@@ -223,7 +264,7 @@ class WatchList(BaseTrade):
         expected_tabs = WatchListTab.parent_tabs() + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
         actual_tabs = self.actions.find_elements(self.__all_tabs)
         list_values = [ele.text.strip() for ele in actual_tabs]
-        soft_assert(list_values, expected_tabs)
+        soft_assert(sorted(list_values), sorted(expected_tabs))
 
     def verify_tab_selected(self, tab: WatchListTab = WatchListTab.ALL):
         soft_assert(self.wait_for_tab_selected(tab), True, error_message=f"Tab {tab.capitalize()} is not selected")

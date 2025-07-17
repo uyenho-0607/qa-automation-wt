@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web, symbol, create_order_data, sl_type, tp_type, close_edit_confirm_modal):
-    trade_object = ObjectTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, indicate=SLTPType.sample_values())
+    trade_object = ObjectTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")

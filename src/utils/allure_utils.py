@@ -3,6 +3,7 @@ import glob
 import json
 import os
 import time
+import uuid
 from typing import Dict, Any
 
 import allure
@@ -177,6 +178,10 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     # Customize test case name
     data["name"] = data["fullName"].split(".")[-1].replace("#test", "")
     data["name"] = " ".join(data["name"].split("_"))
+
+    # Customize test's properties
+    data["fullName"] = f"{data['fullName']}[{ProjectConfig.client}][{ProjectConfig.server}]"
+    data["historyId"] = uuid.uuid4().hex
 
 
 def _add_check_icon(data):
@@ -406,7 +411,6 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     html += "</table>"
     allure.attach(html, name=title, attachment_type=allure.attachment_type.HTML)
-
 
 def log_verification_result(actual: any, expected: any, res: bool, desc: str = "", name="Verification Details"):
     """Log verification results in a structured way."""

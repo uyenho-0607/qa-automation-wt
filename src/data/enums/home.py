@@ -72,7 +72,7 @@ class WatchListTab(BaseEnum):
     TOP_PICKS = "Top Picks"
     TOP_GAINER = "Top Gainer"
     TOP_LOSER = "Top Loser"
-    COMMODITIES = "Comms"
+    COMMODITIES = "Commodities"
     CRYPTO = "Crypto"
     FOREX = "Forex"
     INDEX = "Index"
@@ -100,7 +100,8 @@ class WatchListTab(BaseEnum):
 
         special_cases = {
             self.FAVOURITES: "my-watchlist" if page == Features.TRADE else self.lower(),
-            self.TOP_PICKS: "popular"
+            self.TOP_PICKS: "popular",
+            self.COMMODITIES: "comms"
         }
 
         return special_cases.get(self, locator_format(self))

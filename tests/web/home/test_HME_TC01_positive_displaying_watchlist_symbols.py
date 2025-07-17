@@ -10,7 +10,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize("tab", WatchListTab.list_values())
+@pytest.mark.parametrize("tab", reversed(WatchListTab.list_values()))
 def test(web, tab, setup_test):
     exp_symbols = setup_test(tab)
 

@@ -4,16 +4,17 @@ from typing import Literal
 
 from selenium.webdriver.common.by import By
 
-from src.data.objects.trade_object import ObjectTrade
 from src.core.actions.web_actions import WebActions
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
+from src.data.objects.trade_object import ObjectTrade
 from src.data.project_info import ProjectConfig
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
-from src.utils.format_utils import locator_format, format_dict_to_string, format_str_price
+from src.utils.format_utils import locator_format, format_dict_to_string
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_trade_parameters
+
 
 class PlaceOrderPanel(BaseTrade):
     """Panel for placing orders in the trading interface.
