@@ -94,7 +94,7 @@ class TradeAPI(BaseAPI):
         # Remove None values
         return {k: v for k, v in payload.items() if v is not None}
 
-    def _update_trade_object(self, trade_object: DotDict, payload: dict, response: dict):
+    def _update_trade_object(self, trade_object: DotDict, payload: dict, response: dict, update_price=True):
         """Update trade object with response data and calculated values."""
         symbol_details = self._symbol_details[trade_object.symbol]
         
@@ -115,7 +115,7 @@ class TradeAPI(BaseAPI):
         payload["take_profit"] = payload.pop("takeProfit", "--")
         
         # For market orders, get actual entry price from order details
-        if trade_object.order_type == OrderType.MARKET:
+        if trade_object.order_type == OrderType.MARKET and update_price:
             logger.debug("Getting placed order details for updating entry_price")
             order_details = self._order_api.get_orders_details(
                 trade_object.symbol, trade_object.order_type, payload["order_id"]
@@ -137,7 +137,7 @@ class TradeAPI(BaseAPI):
         trade_object.update(payload)
         trade_object.pop("indicate", None)
 
-    def post_order(self, trade_object: ObjectTrade):
+    def post_order(self, trade_object: ObjectTrade, update_price=True):
         """Place a trading order."""
         max_retries = 3
         
@@ -154,7 +154,7 @@ class TradeAPI(BaseAPI):
                 response = self.post(endpoint, payload)
 
                 # Update trade object with response data
-                self._update_trade_object(trade_object, payload, response)
+                self._update_trade_object(trade_object, payload, response, update_price)
 
                 return response
 

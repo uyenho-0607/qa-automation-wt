@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT
 from src.data.enums import URLSites, URLPaths
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
@@ -58,7 +58,8 @@ class BasePage:
     def wait_for_spin_loader(self, timeout: int = EXPLICIT_WAIT):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
-        self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=SHORT_WAIT):
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def refresh_page(self):
         self.actions.refresh()

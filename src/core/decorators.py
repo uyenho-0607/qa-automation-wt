@@ -7,7 +7,7 @@ from selenium.common import StaleElementReferenceException, ElementNotInteractab
     ElementClickInterceptedException
 
 from src.data.project_info import StepLogs
-from src.utils.allure_utils import attach_verify_table, log_verification_result
+from src.utils.allure_utils import attach_verify_table, log_verification_result, attach_screenshot
 from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
 
@@ -62,19 +62,22 @@ def handle_stale_element(func):
         for attempt in range(max_retries + 1):  # +1 for initial attempt
             try:
                 return func(self, *args, **kwargs)
+
             except (StaleElementReferenceException, ElementNotInteractableException, ElementClickInterceptedException) as e:
                 # Clear any broken steps that might have been added from the previous attempt
-                if StepLogs.broken_steps:
+                if StepLogs.broken_steps and attempt < max_retries + 1:
                     StepLogs.broken_steps.pop()
 
                 if attempt < max_retries:
                     logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
                     time.sleep(1)
                     continue
+
                 else:
                     # Final attempt failed, re-raise the exception
                     logger.error(f"{type(e).__name__} for locator {args[0]} after {max_retries + 1} attempts")
                     raise e
+
         return None
 
     return wrapper

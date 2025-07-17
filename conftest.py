@@ -2,7 +2,6 @@ import os.path
 import shutil
 import allure
 import pytest
-
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR
@@ -87,7 +86,6 @@ def pytest_sessionstart(session: pytest.Session):
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
-
         if any(value in item.nodeid for value in ["stop_limit", "stop limit"]):
             item.add_marker("non_oms")
             item.add_marker("stop_limit_suite")
@@ -111,12 +109,13 @@ def pytest_runtest_setup(item: pytest.Item):
     module = item.module.__name__.split(".")[2:-1]  # not count test, web, and test name
     sub_suite = " - ".join(item.capitalize() for item in module)
     sub_suite = sub_suite.replace("_", " ").title()
-    # Set allure labels
-    allure.dynamic.parent_suite(server.upper())
-    allure.dynamic.suite(account.capitalize())
-    allure.dynamic.sub_suite(sub_suite)
-    allure.dynamic.feature(sub_suite)
 
+
+    # Set allure labels
+    allure.dynamic.parent_suite(ProjectConfig.client.upper())
+    allure.dynamic.suite(server.upper())
+    allure.dynamic.sub_suite(sub_suite)
+    
     if item.get_closest_marker("uat") and Config.config.env != "uat":
         pytest.skip("This test is for UAT environment only !")
 
@@ -153,9 +152,9 @@ def pytest_sessionfinish(session: pytest.Session):
         platform = f"{ProjectConfig.platform.capitalize()}" + (f" - {browser.capitalize()}" if ProjectConfig.is_web() else "")
 
         env_data = {
-            "Client": " ".join(map(str.capitalize, Config.config.client.split("_"))),
             "Platform": platform,
             "Environment": Config.config.env.capitalize(),
+            "Account": Config.config.account.capitalize(),
         }
 
         with open(f"{allure_dir}/environment.properties", "w") as f:
