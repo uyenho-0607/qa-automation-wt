@@ -196,7 +196,7 @@ class AssetTab(BaseTrade):
 
     click_delete_button = click_close_button
 
-    def delete_pending_order(self, order_id: int = 0, trade_object: ObjectTrade = None, confirm=True) -> None:
+    def delete_pending_order(self, order_id: int = 0, trade_object: ObjectTrade = None, confirm=True, wait=True) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         tab = AssetTabs.PENDING_ORDER
         if order_id:
@@ -214,14 +214,19 @@ class AssetTab(BaseTrade):
 
         if confirm:
             self.confirm_delete_order()
+        if wait:
+            self.wait_for_spin_loader()
 
-    def bulk_delete_orders(self) -> None:
+    def bulk_delete_orders(self, wait=True) -> None:
         """Delete multiple pending orders at once."""
         self.select_tab(AssetTabs.PENDING_ORDER)
         self.actions.click(self.__bulk_delete)
         self.confirm_bulk_delete()
 
-    def full_close_position(self, order_id: int = 0, confirm=True) -> None:
+        if wait:
+            self.wait_for_spin_loader()
+
+    def full_close_position(self, order_id: int = 0, confirm=True, wait=True) -> None:
         tab = AssetTabs.OPEN_POSITION
         self.select_tab(tab)
         if order_id:
@@ -231,8 +236,9 @@ class AssetTab(BaseTrade):
             self.click_close_button()
 
         not confirm or self.confirm_close_order()
+        not wait or self.wait_for_spin_loader()
 
-    def partial_close_position(self, order_id=0, trade_object=None, volume=0, confirm=True):
+    def partial_close_position(self, order_id=0, trade_object=None, volume=0, confirm=True, wait=True):
         order_id = order_id or trade_object.get("order_id", 0)
         tab = AssetTabs.OPEN_POSITION
         if order_id:
@@ -260,13 +266,17 @@ class AssetTab(BaseTrade):
 
         self.actions.send_keys(self.__txt_close_order, close_volume)
         not confirm or self.confirm_close_order()
+        not wait or self.wait_for_spin_loader()
 
-    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL) -> None:
+    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL, wait=True) -> None:
         """Close multiple positions at once using the specified option."""
         self.select_tab(AssetTabs.OPEN_POSITION)
         self.actions.click(self.__bulk_close)
         self.actions.click(cook_element(self.__drp_bulk_close, locator_format(option)))
         self.confirm_bulk_close(option)
+
+        if wait:
+            self.wait_for_spin_loader()
 
     def adjust_close_volume_by_control_button(
             self,

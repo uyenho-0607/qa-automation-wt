@@ -1,3 +1,4 @@
+import allure
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType
@@ -6,6 +7,7 @@ from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
+@allure.issue("https://aquariux.atlassian.net/browse/WT-8757", "WT-8757")
 @pytest.mark.critical
 @pytest.mark.parametrize(
     "sl_type, tp_type",

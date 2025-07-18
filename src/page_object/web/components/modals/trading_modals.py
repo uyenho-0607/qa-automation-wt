@@ -1,6 +1,7 @@
 import random
 import time
 
+from dotenv.variables import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -12,7 +13,7 @@ from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
-from src.utils.format_utils import locator_format
+from src.utils.format_utils import locator_format, is_integer
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_trade_parameters, calculate_price, calculate_stp_price, \
     calculate_sl_tp_price
@@ -116,21 +117,21 @@ class TradingModals(BaseTrade):
         """Return current price of the symbol"""
         time.sleep(0.5)
         if not order_type or order_type == OrderType.MARKET:
-            return self.actions.get_text(self.__edit_symbol_price, retry=True)
+            return self.actions.get_text(self.__edit_symbol_price)
 
         return self.actions.get_value(self.__txt_edit_price)
 
     def _get_edit_sl(self):
         locator = cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower())
         self.actions.click(locator)
-        res = self.actions.get_value(locator, retry=True)
+        res = self.actions.get_value(locator)
         logger.debug(f"- Edit SL: {res!r}")
         return res
 
     def _get_edit_tp(self):
         locator = cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower())
         self.actions.click(locator)
-        res = self.actions.get_value(locator, retry=True)
+        res = self.actions.get_value(locator)
         logger.debug(f"- Edit TP: {res!r}")
         return res
 
@@ -157,7 +158,6 @@ class TradingModals(BaseTrade):
             return
 
         logger.debug(f"Input edit price: {value}")
-        self.actions.clear_field(self.__txt_edit_price)
         self.actions.send_keys(self.__txt_edit_price, value)
 
     def _input_edit_stp_price(self, value, order_type: OrderType | str = None):
@@ -165,7 +165,6 @@ class TradingModals(BaseTrade):
             return
 
         logger.debug(f"Input edit STP price: {value}")
-        self.actions.clear_field(self.__txt_edit_stp_price)
         self.actions.send_keys(self.__txt_edit_stp_price, value)
 
     def _select_fill_policy(self, fill_policy):

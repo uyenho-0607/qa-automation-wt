@@ -11,7 +11,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web):
+def test(web, disable_OCT):
 
     symbol_list = random.choices(SYMBOLS[ProjectConfig.client], k=5)
 
@@ -27,7 +27,7 @@ def test(web):
         logger.info(f"Step {3 + idx * 2}: Select symbol from watch list - {_symbol!r}")
         web.trade_page.watch_list.select_symbol(_symbol)
 
-        logger.info(f"Step {4 + idx * 2}: Place Market orders for symbol: {_symbol!r}")
+        logger.info(f"Step {4 + idx * 2}: Place Market orders")
         web.trade_page.place_order_panel.place_order(ObjectTrade(order_type=OrderType.MARKET, symbol=_symbol), submit=True)
         web.home_page.notifications.close_noti_banner()
         time.sleep(2)
