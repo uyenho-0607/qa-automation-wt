@@ -22,8 +22,7 @@ def test(web, symbol, create_order_data, sl_type, tp_type, close_edit_confirm_mo
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP)")
     create_order_data(trade_object)
 
-    logger.info(
-        f"Step 2: Update order with Stop Loss ({sl_type.capitalize()}), Take Profit ({tp_type.capitalize()})")
+    logger.info(f"Step 2: Update order with Stop Loss ({sl_type.capitalize()}), Take Profit ({tp_type.capitalize()})")
     web.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify edit confirmation info")
