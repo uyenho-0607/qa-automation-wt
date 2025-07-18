@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.decorators import handle_stale_element
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_screenshot
 from src.utils.assert_utils import soft_assert
@@ -18,7 +18,7 @@ class BaseActions:
     def __init__(self, driver):
         self._driver = driver
         self._wait = WebDriverWait(driver=self._driver, timeout=EXPLICIT_WAIT)
-        self._driver.implicitly_wait(IMPLICIT_WAIT)
+        self._driver.implicitly_wait(0)
 
     def find_element(
             self,
@@ -143,15 +143,14 @@ class BaseActions:
             self,
             locator: tuple[str, str],
             timeout=SHORT_WAIT,
-            retry=False,
             raise_exception=False,
             show_log=True,
     ) -> str:
         """Get text from element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
-        if retry and not element:
-            # get text of element again
-            element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
+        if not element:
+            logger.debug("- Retry getting text again")
+            element = self.find_element(locator, QUICK_WAIT, raise_exception=raise_exception, show_log=show_log)
 
         return element.text.strip() if element else ""
 
@@ -169,7 +168,6 @@ class BaseActions:
                 wait.until(EC.invisibility_of_element_located(locator))
             except Exception:
                 pass
-
 
     def wait_for_element_visible(
             self,

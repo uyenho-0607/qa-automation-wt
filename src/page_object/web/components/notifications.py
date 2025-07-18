@@ -20,7 +20,6 @@ class Notifications(BasePage):
     __noti_result = (By.CSS_SELECTOR, "*[data-testid='notification-dropdown-result']")
     __noti_des = (By.CSS_SELECTOR, "*[data-testid='notification-description']")
     __noti_title = (By.CSS_SELECTOR, "*[data-testid='notification-title']")
-    __noti_list = (By.CSS_SELECTOR, data_testid('notification-list-result'))
     __noti_list_items = (By.CSS_SELECTOR, data_testid('notification-list-result-item'))
     __noti_list_item_by_text = (
         By.XPATH,
@@ -42,7 +41,7 @@ class Notifications(BasePage):
 
     def close_noti_banner(self):
         if self.actions.is_element_displayed(self.__btn_close, timeout=SHORT_WAIT):
-            self.actions.click(self.__btn_close)
+            self.actions.click(self.__btn_close, raise_exception=False)
 
     def get_open_position_order_id(self, trade_object: DotDict, amount=1):
         self.toggle_notification(timeout=1)
@@ -60,16 +59,15 @@ class Notifications(BasePage):
     # ------------------------ VERIFY ------------------------ #
 
     def verify_notification_banner(self, expected_title, expected_des=None, close_banner=False):
-        """
-        Verify title and description of notification banner
-        Give trade_object in case load entr_price value from noti >> trade_object
-        """
-        actual_title = self.actions.get_text(self.__noti_title, timeout=EXPLICIT_WAIT)
+        """Verify title and description of notification banner"""
+
+        actual_title = self.actions.get_text(self.__noti_title, timeout=SHORT_WAIT)
+        actual_des = self.actions.get_text(self.__noti_des, timeout=SHORT_WAIT)
+
         logger.debug(f"- Check noti_title equal: {expected_title!r}")
         soft_assert(actual_title, expected_title)
 
         if expected_des:
-            actual_des = self.actions.get_text(self.__noti_des, timeout=EXPLICIT_WAIT)
             logger.debug(f"- Check noti_des equal: {expected_des!r}")
             compare_noti_with_tolerance(actual_des, expected_des)
 

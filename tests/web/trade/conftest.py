@@ -48,7 +48,7 @@ def setup_bulk_test(web, symbol):
 
             logger.info(f"- Place {create_amount} {order_type.upper()} orders")
             for _ in range(create_amount):
-                APIClient().trade.post_order(trade_object)
+                APIClient().trade.post_order(trade_object, update_price=False)
 
             web.trade_page.wait_for_spin_loader()
             web.trade_page.asset_tab.wait_for_tab_amount(asset_tab, expected_amount=create_amount)
