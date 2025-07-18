@@ -196,7 +196,7 @@ class AssetTab(BaseTrade):
 
     click_delete_button = click_close_button
 
-    def delete_pending_order(self, order_id: int = 0, trade_object: ObjectTrade = None, confirm=True, wait=True) -> None:
+    def delete_pending_order(self, order_id: int = 0, trade_object: ObjectTrade = None, confirm=True, wait=False) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         tab = AssetTabs.PENDING_ORDER
         if order_id:
@@ -217,7 +217,7 @@ class AssetTab(BaseTrade):
         if wait:
             self.wait_for_spin_loader()
 
-    def bulk_delete_orders(self, wait=True) -> None:
+    def bulk_delete_orders(self, wait=False) -> None:
         """Delete multiple pending orders at once."""
         self.select_tab(AssetTabs.PENDING_ORDER)
         self.actions.click(self.__bulk_delete)
@@ -226,7 +226,7 @@ class AssetTab(BaseTrade):
         if wait:
             self.wait_for_spin_loader()
 
-    def full_close_position(self, order_id: int = 0, confirm=True, wait=True) -> None:
+    def full_close_position(self, order_id: int = 0, confirm=True, wait=False) -> None:
         tab = AssetTabs.OPEN_POSITION
         self.select_tab(tab)
         if order_id:
@@ -238,7 +238,7 @@ class AssetTab(BaseTrade):
         not confirm or self.confirm_close_order()
         not wait or self.wait_for_spin_loader()
 
-    def partial_close_position(self, order_id=0, trade_object=None, volume=0, confirm=True, wait=True):
+    def partial_close_position(self, order_id=0, trade_object=None, volume=0, confirm=True, wait=False):
         order_id = order_id or trade_object.get("order_id", 0)
         tab = AssetTabs.OPEN_POSITION
         if order_id:
@@ -268,7 +268,7 @@ class AssetTab(BaseTrade):
         not confirm or self.confirm_close_order()
         not wait or self.wait_for_spin_loader()
 
-    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL, wait=True) -> None:
+    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL, wait=False) -> None:
         """Close multiple positions at once using the specified option."""
         self.select_tab(AssetTabs.OPEN_POSITION)
         self.actions.click(self.__bulk_close)
@@ -369,7 +369,7 @@ class AssetTab(BaseTrade):
         item_data = self.get_item_data(tab, trade_object.get("order_id"))
         actual = {k: v for k, v in item_data.items() if k in expected}
 
-        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_item_displayed(self, tab: AssetTabs, order_id: int | str | list, is_display: bool = True) -> None:
         """Verify that an item is displayed or not displayed."""

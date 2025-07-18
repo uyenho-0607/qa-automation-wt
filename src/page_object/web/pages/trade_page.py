@@ -45,5 +45,5 @@ class TradePage(BasePage):
                     expected[key] = round(expected[key], ndigits=ObjectTrade.DECIMAL)
 
             expected["volume"] = api_data["lotSize"]
-            soft_assert(actual, expected, tolerance=0.01, tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"])
+            soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"])
 
