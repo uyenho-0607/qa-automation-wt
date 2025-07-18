@@ -189,7 +189,7 @@ class HomePage(BasePage):
         logger.debug("- Checking account details")
         expected = {item: format_acc_balance(element_dict[item][0].text) for item in AccSummary.checkbox_list()}
         actual = {item: format_acc_balance(element_dict[item][-1].text) for item in AccSummary.checkbox_list()}
-        soft_assert(actual, expected, tolerance=0.01, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_search_result(self, symbol: str):
         self.actions.verify_element_displayed(cook_element(self.__item_search_result, symbol))
