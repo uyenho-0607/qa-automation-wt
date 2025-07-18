@@ -142,6 +142,7 @@ class TradingModals(BaseTrade):
         logger.debug(f"Input edit SL: {value} - type: {sl_type.lower()}")
         locator = cook_element(self.__txt_edit_sl, sl_type.lower())
         self.actions.clear_field(locator)
+        time.sleep(1)
         self.actions.send_keys(locator, value)
 
     def _input_edit_tp(self, value, tp_type: SLTPType = SLTPType.PRICE):
@@ -151,6 +152,7 @@ class TradingModals(BaseTrade):
         logger.debug(f"Input edit TP: {value} - type: {tp_type.lower()}")
         locator = cook_element(self.__txt_edit_tp, tp_type.lower())
         self.actions.clear_field(locator)
+        time.sleep(1)
         self.actions.send_keys(locator, value)
 
     def _input_edit_price(self, value, order_type: OrderType | str = None):
