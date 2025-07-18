@@ -93,10 +93,11 @@ class LoginPage(BasePage):
         actual = self.actions.get_text(self.__btn_login)
         soft_assert(actual, translate_sign_in(language))
 
-    def verify_alert_error_message(self, account_type=ProjectConfig.account):
+    def verify_alert_error_message(self, account_type=None):
 
+        account_type = account_type or ProjectConfig.account
         err_msg = UIMessages.LOGIN_INVALID
-        if account_type == AccountType.DEMO:
+        if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
         super().verify_alert_error_message(err_msg)

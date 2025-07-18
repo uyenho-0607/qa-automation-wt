@@ -258,6 +258,29 @@ def calculate_trade_parameters(
     )
 
 
+def calculate_sl_tp(live_price, trade_type, sl_type, tp_type):
+    """
+    Calculate updated stop loss and take profit based on live price, keeping other prices unchanged.
+    Args:
+        live_price: Current market price to base SL/TP calculations on
+        trade_type: TradeType (BUY or SELL)
+        sl_type: SLTPType (PRICE or POINTS) - determines if SL should be price or points
+        tp_type: SLTPType (PRICE or POINTS) - determines if TP should be price or points
+    Returns:
+        DotDict with stop_loss and take_profit only
+    """
+    # Calculate SL/TP prices based on live price
+    sl_tp_prices = calculate_sl_tp_price(live_price, trade_type)
+    
+    # Calculate SL/TP points based on live price
+    sl_tp_points = _random_sl_tp_points(live_price, trade_type)
+    
+    return DotDict(
+        stop_loss=(sl_tp_prices if sl_type == SLTPType.PRICE else sl_tp_points).stop_loss,
+        take_profit=(sl_tp_prices if tp_type == SLTPType.PRICE else sl_tp_points).take_profit,
+    )
+
+
 def calculate_partial_close(trade_object):
     volume, units = int(trade_object.volume), int(remove_comma(trade_object.units))
     close_volume = random.randint(1, volume - 1)

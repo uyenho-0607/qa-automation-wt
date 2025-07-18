@@ -16,7 +16,7 @@ from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import locator_format, is_integer
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_trade_parameters, calculate_price, calculate_stp_price, \
-    calculate_sl_tp_price
+    calculate_sl_tp_price, calculate_sl_tp
 
 
 class TradingModals(BaseTrade):
@@ -242,18 +242,21 @@ class TradingModals(BaseTrade):
         self.__asset_tab.click_edit_button(tab, trade_object.get("order_id"))
 
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        edit_price = self._get_edit_price()
+        edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self._get_edit_price()
 
-        params = calculate_trade_parameters(edit_price, trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
-        stop_loss, take_profit = params.stop_loss, params.take_profit
+        logger.debug(f"- edit price is {edit_price!r}")
+        stop_loss, take_profit = calculate_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
 
-        if order_type != OrderType.MARKET:
-            self._input_edit_price(params.entry_price, order_type)
-            trade_object.entry_price = params.entry_price
-
-        if order_type.is_stp_limit():
-            self._input_edit_stp_price(params.stop_limit_price, order_type)
-            trade_object.stop_limit_price = params.stop_limit_price
+        # params = calculate_trade_parameters(edit_price, trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
+        # stop_loss, take_profit = params.stop_loss, params.take_profit
+        #
+        # if order_type != OrderType.MARKET:
+        #     self._input_edit_price(params.entry_price, order_type)
+        #     trade_object.entry_price = params.entry_price
+        #
+        # if order_type.is_stp_limit():
+        #     self._input_edit_stp_price(params.stop_limit_price, order_type)
+        #     trade_object.stop_limit_price = params.stop_limit_price
 
         self._input_edit_sl(stop_loss, sl_type)
         if sl_type == SLTPType.POINTS:

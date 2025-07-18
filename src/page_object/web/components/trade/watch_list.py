@@ -97,6 +97,7 @@ class WatchList(BaseTrade):
     def _scroll_watchlist_container(self, scroll_step=0.5):
         self.actions.scroll_container_down(self.__watchlist_container, scroll_step=scroll_step)
 
+
     def get_all_symbols(self, tab: WatchListTab = None, expected_symbols = None):
         """Get all symbols by scrolling through the watchlist container"""
         if tab:
@@ -105,6 +106,7 @@ class WatchList(BaseTrade):
         all_symbols = set()  # Use set to avoid duplicates
         scroll_attempts = 0
         last_count = 0
+        not_found_time = 0
         max_scroll_attempts: int = int(len(expected_symbols) / 2)
         logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
@@ -124,9 +126,11 @@ class WatchList(BaseTrade):
             # Check if we're not finding new symbols (end of list)
             if len(all_symbols) == last_count:
                 logger.debug("No new symbols found in this scroll attempt")
-                if set(all_symbols) == set(expected_symbols):
+                not_found_time += 1
+                if set(all_symbols) == set(expected_symbols) or not_found_time == 5:
                     break
             else:
+                not_found_time = 0
                 last_count = len(all_symbols)
 
             # Scroll down in the container
