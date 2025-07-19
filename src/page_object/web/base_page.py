@@ -74,9 +74,9 @@ class BasePage:
         expected_url = Config.url_path(url_path)
         self.actions.verify_site_url(expected_url, timeout=timeout)
 
-    def verify_alert_error_message(self, expected_message: UIMessages):
+    def verify_alert_error_message(self, expected_message: UIMessages, timeout=EXPLICIT_WAIT):
         """Verify the error alert message."""
-        actual_err = self.actions.get_text(self.__alert_error)
+        actual_err = self.actions.get_text(self.__alert_error, timeout=timeout)
         soft_assert(actual_err, expected_message)
 
     def verify_alert_success_message(self, expected_message: UIMessages):

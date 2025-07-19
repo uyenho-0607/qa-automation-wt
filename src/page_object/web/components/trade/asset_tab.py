@@ -145,6 +145,7 @@ class AssetTab(BaseTrade):
             ele.get_attribute("data-testid").split("column-")[-1].replace("-", "_"): ele.text.strip() for ele in elements
         }
 
+        # reformat size vs volume column
         if "size" in res:
             res["volume"] = res.pop("size")
 
