@@ -1,5 +1,6 @@
 import re
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 from selenium.webdriver.common.by import By
 
@@ -57,22 +58,32 @@ class Notifications(BasePage):
         self.toggle_notification(timeout=1, close=True)
 
     # ------------------------ VERIFY ------------------------ #
-
-    def verify_notification_banner(self, expected_title, expected_des=None, close_banner=False):
+    def verify_notification_banner(self, expected_title, expected_des=None, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
 
-        # actual_title = self.actions.get_text(self.__noti_title, timeout=SHORT_WAIT)
-        actual_des = self.actions.get_text(self.__noti_des, timeout=EXPLICIT_WAIT)
+        def get_title():
+            logger.debug("- Fetching notification title")
+            return self.actions.get_text(self.__noti_title, timeout=timeout)
 
-        # logger.debug(f"- Check noti_title equal: {expected_title!r}")
-        # soft_assert(actual_title, expected_title)
+        def get_description():
+            logger.debug("- Fetching notification description")
+            return self.actions.get_text(self.__noti_des, timeout=timeout)
+
+        # Run in parallel
+        with ThreadPoolExecutor() as executor:
+            futures = {
+                'title': executor.submit(get_title),
+                'description': executor.submit(get_description)
+            }
+            actual_title = futures['title'].result()
+            actual_des = futures['description'].result()
+
+        logger.debug("- Check noti title")
+        soft_assert(actual_title, expected_title)
 
         if expected_des:
-            logger.debug(f"- Check noti_des equal: {expected_des!r}")
+            logger.debug("- Check noti des")
             compare_noti_with_tolerance(actual_des, expected_des)
-
-        if close_banner:
-            self.close_noti_banner()
 
     def verify_notification_result(self, expected_result: str | list, check_contains=False, is_system=False):
         # currently, we have 2 types of noti: open position and position closed in notification box

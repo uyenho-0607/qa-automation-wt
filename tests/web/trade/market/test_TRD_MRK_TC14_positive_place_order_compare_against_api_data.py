@@ -24,7 +24,6 @@ def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
     web.trade_page.asset_tab.get_last_order_id(trade_object)
 
     logger.info("Step 3: Get placed order API data")
-    time.sleep(2)
     api_data = APIClient().order.get_orders_details(
         symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
     )

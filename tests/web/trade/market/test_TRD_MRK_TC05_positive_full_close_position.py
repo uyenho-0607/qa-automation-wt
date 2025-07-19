@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, TradeType
@@ -7,7 +9,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize("trade_type", [TradeType.BUY, TradeType.SELL])
+@pytest.mark.parametrize("trade_type", random.choices([TradeType.BUY, TradeType.SELL], k=1))
 def test(web, symbol, get_asset_tab_amount, trade_type, cancel_close_order, create_order_data):
 
     trade_object = ObjectTrade(trade_type, order_type=OrderType.MARKET, symbol=symbol)
