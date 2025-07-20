@@ -1,8 +1,8 @@
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -20,7 +20,7 @@ from src.utils.logging_utils import logger
 )
 def test(android, symbol, edit_field, sl_type, tp_type, create_order_data, ):
     # -------------------
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol, stop_loss=0, take_profit=0)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, stop_loss=0, take_profit=0)
     tab = AssetTabs.OPEN_POSITION
     # -------------------
 
@@ -31,7 +31,7 @@ def test(android, symbol, edit_field, sl_type, tp_type, create_order_data, ):
     android.trade_screen.modals.modify_order(tab, trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify notification banner updated message")
-    android.home_screen.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner(**trade_object))
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
 
     logger.info(f"Verify {tab.title()} item details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

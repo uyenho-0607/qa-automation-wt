@@ -6,14 +6,15 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import BulkCloseOpts, OrderType, SLTPType, FillPolicy, Expiry, AssetTabs
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.components.trade.asset_tab import AssetTab
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id, cook_element
-from src.utils.format_utils import locator_format, add_commas
+from src.utils.format_utils import locator_format
 from src.utils.logging_utils import logger
-from src.utils.trading_utils import calculate_trade_parameters
+from src.utils.trading_utils import get_sl_tp, calculate_trading_params
 
 
 class TradingModals(BaseTrade):
@@ -31,33 +32,13 @@ class TradingModals(BaseTrade):
         "//*[@resource-id='trade-confirmation-label' and (@text='Size' or @text='Volume')]"
         "/following-sibling::*[2]"
     )
-    __confirm_units = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='trade-confirmation-label' and @text='Units']/following-sibling::*[2]"
-    )
-    __confirm_price = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='trade-confirmation-label' and @text='Price']/following-sibling::*[1]"
-    )
-    __confirm_stop_limit_price = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='trade-confirmation-label' and @text='Stop Limit Price']/following-sibling::*[1]"
-    )
-    __confirm_sl = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='trade-confirmation-label' and @text='Stop Loss']/following-sibling::*[2]"
-    )
-    __confirm_tp = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='trade-confirmation-label' and @text='Take Profit']/following-sibling::*[2]"
-    )
-    __confirm_expiry = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='trade-confirmation-label' and @text='Expiry']/following-sibling::*[@resource-id='trade-confirmation-value'][1]"
-    )
-    __confirm_fill_policy_by_text = (
-        AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-value' and @text='{}']"
-    )
+    __confirm_units = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Units']/following-sibling::*[2]")
+    __confirm_price = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Price']/following-sibling::*[1]")
+    __confirm_stop_limit_price = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Stop Limit Price']/following-sibling::*[1]")
+    __confirm_stop_loss = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Stop Loss']/following-sibling::*[2]")
+    __confirm_take_profit = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Take Profit']/following-sibling::*[2]")
+    __confirm_expiry = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Expiry']/following-sibling::*[@resource-id='trade-confirmation-value'][1]")
+    __confirm_fill_policy_by_text = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-value' and @text='{}']")
 
     ##### Edit Confirmation Modal #####
     __edit_symbol_price = (AppiumBy.XPATH, resource_id('edit-symbol-price'))
@@ -244,8 +225,7 @@ class TradingModals(BaseTrade):
 
     def modify_order(
             self,
-            tab: AssetTabs,
-            trade_object: DotDict,
+            trade_object: ObjTrade,
             sl_type: SLTPType = None,
             tp_type: SLTPType = None,
             fill_policy: FillPolicy = None,
@@ -257,24 +237,21 @@ class TradingModals(BaseTrade):
         sl_type: Price or Points
         tp_type: Price or Points
         fill_policy: None by default, give this value if modifying fill_policy
-        expiry: same with fill_policy
         """
-        self.__asset_tab.click_edit_button(tab, trade_object.get("order_id", 0))
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
+        self.__asset_tab.click_edit_button(AssetTabs.get_tab(order_type), trade_object.get("order_id", 0))
 
         # Get current price to re-calculate prices
         edit_price = self.get_edit_price(trade_object.order_type) or trade_object.entry_price
-        trade_params = calculate_trade_parameters(edit_price, trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
+        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type)
 
-        stop_loss, take_profit = trade_params.stop_loss, trade_params.take_profit
-
-        if order_type != OrderType.MARKET:
-            self.input_edit_price(trade_params.entry_price)
-            trade_object.entry_price = trade_params.entry_price
-
-        if order_type.is_stp_limit():
-            self.input_edit_stop_limit_price(trade_params.stop_limit_price)
-            trade_object.stop_limit_price = trade_params.stop_limit_price
+        # if order_type != OrderType.MARKET:
+        #     self.input_edit_price(trade_params.entry_price)
+        #     trade_object.entry_price = trade_params.entry_price
+        #
+        # if order_type.is_stp_limit():
+        #     self.input_edit_stop_limit_price(trade_params.stop_limit_price)
+        #     trade_object.stop_limit_price = trade_params.stop_limit_price
 
         if sl_type:
             self.input_edit_sl(stop_loss, sl_type)
@@ -285,7 +262,6 @@ class TradingModals(BaseTrade):
             time.sleep(0.5)
 
         if expiry:
-
             self.actions.click(self.__drp_expiry)
             self.actions.click(cook_element(self.__option_edit_expiry, locator_format(expiry)))
 
@@ -333,7 +309,7 @@ class TradingModals(BaseTrade):
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
 
         edit_price = self.get_edit_price(trade_object.order_type)
-        invalid_price = calculate_trade_parameters(edit_price, trade_type, order_type, invalid=True)
+        invalid_price = calculate_trading_params(edit_price, trade_type, order_type, is_invalid=True)
 
         if entry_price:
             price = invalid_price.entry_price
@@ -379,68 +355,39 @@ class TradingModals(BaseTrade):
         self.click_btn_edit_order()
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
-    def verify_trade_confirmation(self, trade_object: DotDict):
-        """
-        Verify the trade confirmation information.
-        Args:
-            trade_object: DotDict (trade_type, order_type, volume, entry_price, stop_limit_price, stop_loss, take_profit, fill_policy, expiry)
-        """
-        check_keys = ["order_type", "symbol", "volume", "units", "stop_loss", "take_profit", "fill_policy", "expiry"]
+    def verify_trade_confirmation(self, trade_object: ObjTrade):
+        """Verify the trade confirmation information."""
 
-        if trade_object.order_type != OrderType.MARKET:
-            check_keys.append("entry_price")
-
-        if trade_object.order_type == OrderType.STOP_LIMIT:
-            check_keys.append("stop_limit_price")
-
-        expected = {k: v for k, v in trade_object.items() if v and k in check_keys}
-        expected["order_type"] = trade_object.trade_type.upper() + (
-            f" {trade_object.order_type.upper()}" if trade_object.order_type != OrderType.MARKET else "")
+        expected = trade_object.trade_confirm_details()
 
         # Handle actual dict
-        actual = {
-            "order_type": self.actions.get_text(self.__confirm_order_type),
-            "symbol": self.actions.get_text(self.__confirm_symbol),
-            "volume": self.actions.get_text(self.__confirm_volume),
-            "units": self.actions.get_text(self.__confirm_units),
-            "stop_loss": self.actions.get_text(self.__confirm_sl),
-            "take_profit": self.actions.get_text(self.__confirm_tp),
-        }
+        locator_list = [
+            self.__confirm_order_type,
+            self.__confirm_symbol,
+            self.__confirm_volume,
+            self.__confirm_units,
+            self.__confirm_stop_loss,
+            self.__confirm_take_profit,
+        ]
 
-        if expected.get("fill_policy"):
-            locator = cook_element(self.__confirm_fill_policy_by_text, expected.get("fill_policy"))
-            # locator = self.__confirm_fill_policy
-            # if expected.get("expiry") in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-            #     locator = cook_element(self.__confirm_fill_policy_by_text, expected.get("fill_policy"))
-
-            actual["fill_policy"] = self.actions.get_text(locator)
-
-        if expected.get("expiry"):
-            actual["expiry"] = self.actions.get_text(self.__confirm_expiry)
-
-        if "entry_price" in check_keys:
-            actual["entry_price"] = self.actions.get_text(self.__confirm_price)
-
-        if "stop_limit_price" in check_keys:
-            actual["stop_limit_price"] = self.actions.get_text(self.__edit_confirm_stop_limit_price)
-
-        soft_assert(actual, expected)
-
-    def verify_edit_trade_confirmation(self, trade_object: DotDict = None):
-        ignore_keys = ["live_price", "order_id"]
-
-        trade_object.order_type != OrderType.MARKET or ignore_keys.append("entry_price")
-        trade_object.order_type == OrderType.STOP_LIMIT or ignore_keys.append("stop_limit_price")
-
-        # format price value with commas if any
-        expected = {k: v for k, v in trade_object.items() if v and k not in ignore_keys}
-
-        expected["stop_loss"] = add_commas(expected.get("stop_loss"))
-        expected["take_profit"] = add_commas(expected.get("take_profit"))
-        expected["order_type"] = expected.pop("trade_type")
+        not expected.get("fill_policy") or locator_list.append(cook_element(self.__confirm_fill_policy_by_text, expected["fill_policy"]))
+        not expected.get("expiry") or locator_list.append(self.__confirm_expiry)
 
         if trade_object.order_type != OrderType.MARKET:
-            expected["order_type"] = f"{expected['order_type']} {trade_object.order_type.upper()}"
+            locator_list.append(self.__confirm_price)
+
+        if trade_object.order_type.is_stp_limit():
+            locator_list.append(self.__confirm_stop_limit_price)
+
+        actual = {
+            k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
+        }
+
+        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
+
+    def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
+
+        expected = trade_object.trade_edit_confirm_details()
 
         actual = {
             "order_type": self.actions.get_text(self.__edit_confirm_order_type),

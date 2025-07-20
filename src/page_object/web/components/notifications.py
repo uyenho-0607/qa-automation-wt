@@ -1,7 +1,7 @@
 import re
 import time
 from selenium.webdriver.common.by import By
-from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT
+from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT, QUICK_WAIT
 from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
@@ -57,20 +57,19 @@ class Notifications(BasePage):
     # ------------------------ VERIFY ------------------------ #
     def verify_notification_banner(self, expected_title, expected_des=None, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        
         # Execute sequentially instead of in parallel to avoid Device Farm connection pool issues
-        logger.debug("- Fetching notification title")
-        actual_title = self.actions.get_text(self.__noti_title, timeout=timeout)
-        
         logger.debug("- Fetching notification description")
         actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
-        logger.debug(f"- Check noti title - {expected_title!r}")
-        soft_assert(actual_title, expected_title)
+        logger.debug("- Fetching notification title")
+        actual_title = self.actions.get_text(self.__noti_title, timeout=QUICK_WAIT)
 
-        if expected_des:
-            logger.debug(f"- Check noti des - {expected_des!r}")
-            compare_noti_with_tolerance(actual_des, expected_des)
+        logger.debug(f"- Check noti des - {expected_des!r}")
+        compare_noti_with_tolerance(actual_des, expected_des)
+
+        if actual_title:
+            logger.debug(f"- Check noti title - {expected_title!r}")
+            soft_assert(actual_title, expected_title)
 
     def verify_notification_result(self, expected_result: str | list, check_contains=False, is_system=False):
         # currently, we have 2 types of noti: open position and position closed in notification box

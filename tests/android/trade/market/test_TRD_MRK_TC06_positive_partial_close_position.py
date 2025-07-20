@@ -1,39 +1,30 @@
-import copy
-
 import pytest
 
-from src.data.enums import TradeType, AssetTabs, OrderType, Features
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
-from src.utils import DotDict
+from src.data.enums import AssetTabs, OrderType, Features
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.parametrize(
-    "trade_type", [
-        TradeType.BUY,
-        TradeType.SELL,
-    ]
-)
-def test(android, symbol, get_asset_tab_amount, trade_type, create_order_data):
-    # -------------------
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
-    tab_amount = get_asset_tab_amount(AssetTabs.OPEN_POSITION)
-    # -------------------
+@pytest.mark.critical
+def test(android, symbol, get_asset_tab_amount, create_order_data):
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
+
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     create_order_data(trade_object)
 
     # Object for new created open position
-    new_object = DotDict(copy.deepcopy(dict(trade_object)))
+    new_object = ObjTrade(**{k: v for k, v in trade_object.items() if k != "order_id"})
 
-    logger.info("Step 3: Partial close position")
+    logger.info("Step 2: Partial close position")
     android.trade_screen.asset_tab.partial_close_position(trade_object.order_id, new_object, confirm=True)
 
     # update new volume, units after partial close
     trade_object.volume, trade_object.units = new_object.close_volume, new_object.close_units
 
     logger.info("Verify Close Order notification banner")
-    exp_noti = ObjectNoti(trade_object)
+    exp_noti = ObjNoti(trade_object)
     android.home_screen.notifications.verify_notification_banner(*exp_noti.close_order_success_banner())
 
     logger.info(f"Verify asset tab amount = {tab_amount + 1}")

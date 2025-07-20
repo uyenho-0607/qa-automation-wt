@@ -4,7 +4,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import CountryDialCode, DepositAmount
-from src.data.objects.account_object import ObjectDemoAccount
+from src.data.objects.account_obj import ObjDemoAccount
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
 from src.utils import DotDict
@@ -65,7 +65,7 @@ class DemoAccountModal(BaseScreen):
     def tap_agree_and_continue(self):
         self.actions.click(self.__btn_agree_and_continue)
 
-    def fill_demo_account_creation_form(self, account_info: ObjectDemoAccount, default_deposit=False):
+    def fill_demo_account_creation_form(self, account_info: ObjDemoAccount, default_deposit=False):
         if account_info.name:
             self.input_name(account_info.name)
 

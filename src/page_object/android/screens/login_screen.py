@@ -51,7 +51,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=5):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=10):
             self.actions.click(self.__btn_skip)
 
         if language:

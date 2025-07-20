@@ -1,7 +1,7 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, LONG_WAIT
 from src.data.enums import Features
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
@@ -53,7 +53,7 @@ class BaseScreen:
     __alert_box_close = (AppiumBy.XPATH, "//*[@resource-id='notification-box-close']")
     __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
     __spin_loader = (AppiumBy.XPATH, resource_id('spin-loader'))
-    __home_nav_option = (AppiumBy.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
+    __home_nav_option = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']")
     __btn_confirm = (AppiumBy.XPATH, "//*[@content-desc='Confirm']")
     __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
 
@@ -64,10 +64,13 @@ class BaseScreen:
     def wait_for_spin_loader(self, timeout: int = EXPLICIT_WAIT):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
-        self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=SHORT_WAIT):
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
-    def navigate_to(self, feature: Features):
+    def navigate_to(self, feature: Features, wait=False):
         self.actions.click(cook_element(self.__home_nav_option, feature))
+        if wait:
+            self.wait_for_spin_loader(timeout=5)
 
     def click_confirm_btn(self):
         self.actions.click(self.__btn_confirm)
@@ -78,7 +81,7 @@ class BaseScreen:
 
     # ------------------------ VERIFY ------------------------ #
     def verify_alert_error_message(self, expected_message: UIMessages):
-        actual_err = self.actions.get_text(self.__alert_error)
+        actual_err = self.actions.get_text(self.__alert_error, timeout=LONG_WAIT)
         soft_assert(actual_err, expected_message)
 
     def verify_alert_success_message(self, expected_message: UIMessages):

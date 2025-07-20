@@ -46,8 +46,6 @@ class AppiumDriver:
         options.no_reset = False
         options.full_reset = False
         options.new_command_timeout = 30000
-        options.set_capability("unicodeKeyboard", True)
-        options.set_capability("resetKeyboard", True)
         options.set_capability("appium:dontStopAppOnReset", False)
         options.set_capability("appium:shouldTerminateApp", True)
 

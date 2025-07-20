@@ -1,6 +1,6 @@
 import builtins
+import time
 
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
 
@@ -21,13 +21,14 @@ class MobileActions(BaseActions):
             timeout=EXPLICIT_WAIT,
             raise_exception=True,
             show_log=True,
-            hide_keyboard=False
+            hide_keyboard=True
     ):
         """Send keys to an element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         if element and value is not None:
             element.clear()
             element.send_keys(str(value))
+
             if hide_keyboard:
                 self.hide_keyboard()
 
@@ -50,10 +51,6 @@ class MobileActions(BaseActions):
         """Press device back button."""
         self._driver.press_keycode(4)  # Android back button keycode
 
-    def press_home(self):
-        """Press device home button."""
-        self._driver.press_keycode(3)  # Android home button keycode
-
     def press_done(self):
         """Press the Done button on mobile keyboard."""
         try:
@@ -63,31 +60,67 @@ class MobileActions(BaseActions):
             # Fallback to hiding keyboard if Done action fails
             self.hide_keyboard()
 
-    def scroll_down(self, amount=2):
-        """Scroll down on the screen."""
-        self.scroll_direction(direction="down", amount=amount)
 
-    def scroll_direction(self, direction: str = "left", amount: int = 2):
+    def scroll_down(self, start_x_percent=0.85, scroll_step=0.4):
         """
-        Scroll on the screen in the specified direction.
-        :param direction: "down" for vertical, "left" for horizontal
-        :param amount: Number of times to scroll (only applies to "down")
+        Scroll down the viewport using W3C actions.
         """
         try:
-            if direction == "left":
-                ui_automator = 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollForward()'
-                self._driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, ui_automator)
+            # Get screen dimensions
+            screen_size = self._driver.get_window_size()
+            screen_width = screen_size['width']
+            screen_height = screen_size['height']
+            
+            # Always start near the bottom (e.g., 85% of the screen height)
+            start_x = screen_width // 2
+            start_y = int(screen_height * start_x_percent)
 
-            elif direction == "down":
-                ui_automator = 'new UiScrollable(new UiSelector().scrollable(true)).scrollForward()'
-                for _ in range(amount):
-                    self._driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, ui_automator)
-
-            else:
-                raise ValueError(f"Unsupported scroll direction: {direction}")
+            # Calculate end_y based on scroll_step, but don't go above 10% of the screen height
+            scroll_distance = int(screen_height * scroll_step)
+            end_y = max(int(screen_height * 0.1), start_y - scroll_distance)
+            end_x = start_x
+            
+            # Setup finger input for W3C actions
+            finger = PointerInput("touch", "finger1")
+            actions = ActionBuilder(self._driver, mouse=finger)
+            
+            # Perform the scroll gesture
+            actions.pointer_action.move_to_location(start_x, start_y)
+            actions.pointer_action.pointer_down()
+            actions.pointer_action.pause(0.1)
+            actions.pointer_action.move_to_location(end_x, end_y)
+            actions.pointer_action.pause(0.1)
+            actions.pointer_action.release()
+            
+            # Execute the action
+            actions.perform()
+            
+            logger.debug(f"Successfully scrolled down viewport from ({start_x}, {start_y}) to ({end_x}, {end_y}) with step {scroll_step}")
         except Exception as e:
-            logger.error(f"Failed to perform scroll {direction}: {str(e)}")
+            logger.error(f"Failed to scroll down viewport: {str(e)}")
             raise
+
+    # def scroll_direction(self, direction: str = "left", amount: int = 2):
+    #     """
+    #     Scroll on the screen in the specified direction.
+    #     :param direction: "down" for vertical, "left" for horizontal
+    #     :param amount: Number of times to scroll (only applies to "down")
+    #     """
+    #     try:
+    #         if direction == "left":
+    #             ui_automator = 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollForward()'
+    #             self._driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, ui_automator)
+    #
+    #         elif direction == "down":
+    #             ui_automator = 'new UiScrollable(new UiSelector().scrollable(true)).scrollForward()'
+    #             for _ in range(amount):
+    #                 self._driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, ui_automator)
+    #
+    #         else:
+    #             raise ValueError(f"Unsupported scroll direction: {direction}")
+    #     except Exception as e:
+    #         logger.error(f"Failed to perform scroll {direction}: {str(e)}")
+    #         raise
 
     def swipe_picker_wheel_down(self, locator, swipe_percent=0.3):
         element = self.find_element(locator)

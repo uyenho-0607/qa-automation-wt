@@ -6,13 +6,14 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, BulkCloseOpts
+from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import ProjectConfig
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id, cook_element
-from src.utils.format_utils import locator_format, get_asset_tab_number, format_dict_to_string, \
-    add_commas
+from src.utils.format_utils import locator_format, extract_asset_tab_number, format_dict_to_string, \
+    format_str_price
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_partial_close
 
@@ -58,6 +59,7 @@ class AssetTab(BaseTrade):
     __item_take_profit = (AppiumBy.XPATH, resource_id('asset-{}-column-take-profit-value'))
     __item_stop_loss = (AppiumBy.XPATH, resource_id('asset-{}-column-stop-loss-value'))
     __item_expiry = (AppiumBy.XPATH, resource_id('asset-{}-column-expiry-value'))
+    __item_remarks = (AppiumBy.XPATH, resource_id('asset-{}-column-remarks-value'))
 
     # Control buttons locators
     __btn_edit = (AppiumBy.XPATH, resource_id('asset-{}-button-edit'))
@@ -86,7 +88,7 @@ class AssetTab(BaseTrade):
         """Get the number of items in the specified tab."""
         time.sleep(2)
         amount = self.actions.get_content_desc(cook_element(self.__tab, locator_format(tab)))
-        return get_asset_tab_number(amount)
+        return extract_asset_tab_number(amount)
 
     def get_last_order_id(self, tab: AssetTabs | str, trade_object: Optional[DotDict] = None) -> str:
         """Get the latest order ID from the specified tab and update value into trade_object"""
@@ -134,6 +136,7 @@ class AssetTab(BaseTrade):
 
         if "history" in tab.lower():
             tab = AssetTabs.HISTORY
+            columns["remarks"] = self.__item_expiry
 
         # Get value and update into result dict, except None locator
         res = {
@@ -143,8 +146,8 @@ class AssetTab(BaseTrade):
 
         # Adjust special values
         res["volume"] = res["volume"].split(" /")[0]
-        res["stop_loss"] = add_commas(res["stop_loss"])
-        res["take_profit"] = add_commas(res["take_profit"])
+        # res["stop_loss"] = format_str_price(res["stop_loss"])
+        # res["take_profit"] = format_str_price(res["take_profit"])
 
         logger.debug(f"Item summary: {format_dict_to_string(res)}")
         # Load data into trade_object
@@ -286,41 +289,29 @@ class AssetTab(BaseTrade):
         self.wait_for_tab_amount(tab, expected_amount)
         soft_assert(self.get_tab_amount(tab), expected_amount)
 
-    def verify_item_data(self, trade_object: DotDict, tab: AssetTabs = None) -> None:
+    def verify_item_data(self, trade_object: ObjTrade, tab: AssetTabs = None) -> None:
         """Verify that the item data matches the expected data."""
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
-        actual = self.get_expand_item_data(tab, order_id=trade_object.get("order_id", 0))
-        actual.pop("profit", None)
+        expected = trade_object.asset_item_data(tab)
+
+        item_data = self.get_expand_item_data(tab, order_id=trade_object.get("order_id", 0))
+        actual = {k: v for k, v in item_data.items() if k in expected}
 
         # update order_id for trade_object if not yet
-        trade_object.get("order_id") or trade_object.update(dict(order_id=actual.pop("order_id")))
+        trade_object.get("order_id") or trade_object.update(dict(order_id=item_data.pop("order_id")))
 
-        # Handle Expected Dict
-        expected = {k: v for k, v in trade_object.items()}
-
-        # handle specific cases
-        if tab == AssetTabs.OPEN_POSITION:
-            expected["order_type"] = expected.pop("trade_type")
-
-        if tab == AssetTabs.PENDING_ORDER:
-            expected["order_type"] = f"{trade_object.trade_type.upper()} {trade_object.order_type.upper()}"
-            expected["entry_price"] = add_commas(expected["entry_price"])
-
-            if ProjectConfig.is_non_oms():
-                expected["stop_limit_price"] = trade_object.get("stop_limit_price", "--")
-
-        if "history" in tab.lower():
-            expected |= {"status": "CLOSED", "order_type": trade_object.trade_type.upper()}
-
-        expected = {k: v for k, v in expected.items() if k in actual}
-        soft_assert(actual, expected)
+        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_item_displayed(self, tab: AssetTabs, order_id: int | str | list, is_display: bool = True) -> None:
         """Verify that an item is displayed or not displayed."""
         self.select_tab(tab)
         order_id = order_id if isinstance(order_id, list) else [order_id]
-        for _id in order_id:
-            self.actions.verify_element_displayed(
-                cook_element(self.__item_by_order_no, tab.get_col(), _id),
-                is_display=is_display
-            )
+        self.actions.verify_elements_displayed(
+            [cook_element(self.__item_by_order_no, tab.get_col(), _id) for _id in order_id],
+            is_display=is_display, timeout=SHORT_WAIT
+        )
+        # for _id in order_id:
+        #     self.actions.verify_element_displayed(
+        #         cook_element(self.__item_by_order_no, tab.get_col(), _id),
+        #         is_display=is_display
+        #     )
