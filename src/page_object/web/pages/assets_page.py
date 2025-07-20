@@ -66,4 +66,4 @@ class AssetsPage(BasePage):
 
             logger.info(f"- Checking {item.value!r}")
             res = compare_with_tolerance(actual, expected, tolerance)
-            soft_assert(res, True, error_message=f"Actual: {actual}, Expected: {expected}, Tolerance: {tolerance * 100}%")
+            soft_assert(res, True, error_message=f"Actual: {actual}, Expected: {expected}, Tolerance: {tolerance}%")
