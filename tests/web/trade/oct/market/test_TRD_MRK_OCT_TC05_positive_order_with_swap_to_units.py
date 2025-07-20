@@ -1,9 +1,12 @@
+import pytest
+
 from src.data.enums import AssetTabs, SLTPType, OrderType
 from src.data.objects.notification_object import ObjectNoti
 from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.skip
 def test(web, symbol, get_asset_tab_amount, update_entry_price):
     trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)

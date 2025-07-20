@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import OrderType
@@ -6,14 +8,14 @@ from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 
 """
-Scenarios: - Place new order
+Scenarios: - Modify order
 - invalid stop loss
 - invalid take profit
+- invalid stop_loss and take_profit
 - invalid price (order_type != Market)
 """
 
 
-@pytest.mark.skip
 @pytest.mark.parametrize(
     "invalid_field, expected_message", [
         ("entry_price", UIMessages.INVALID_PRICE_BANNER_DES),
@@ -22,14 +24,22 @@ Scenarios: - Place new order
         ("stop_loss,take_profit", UIMessages.INVALID_SL_TP_BANNER_DES),
     ]
 )
-def test(web, invalid_field, expected_message):
-    order_type = OrderType.STOP_LIMIT
-    trade_object = ObjectTrade(order_type=order_type)
-
+def test(web, invalid_field, expected_message, close_edit_confirm_modal, setup_test):
+    trade_object = setup_test
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
-    logger.info(f"Step 1: Place order with invalid: {invalid_field}")
-    web.trade_page.place_order_panel.place_invalid_order(trade_object, **invalid_dict)
+    logger.info(f"Step 1: Update item with {invalid_field!r}")
+    web.trade_page.modals.modify_invalid_order(trade_object, **invalid_dict)
 
     logger.info("Verify invalid notification banner")
     web.home_page.notifications.verify_notification_banner(UIMessages.INVALID_ORDER_BANNER_TITLE, expected_message)
+
+
+@pytest.fixture(scope="package", autouse=True)
+def setup_test(create_order_data, symbol):
+    trade_object = ObjectTrade(order_type=random.choice(OrderType.pending()), symbol=symbol, stop_loss=0, take_profit=0)
+
+    logger.info(f"- Place {trade_object.trade_type} Order")
+    create_order_data(trade_object)
+
+    yield trade_object

@@ -1,3 +1,5 @@
+import random
+
 from src.data.enums import AssetTabs, OrderType
 from src.data.objects.notification_object import ObjectNoti
 from src.data.objects.trade_object import ObjectTrade
@@ -5,14 +7,14 @@ from src.utils.logging_utils import logger
 
 
 def test(web, symbol, get_asset_tab_amount, cancel_delete_order):
-    trade_object = ObjectTrade(order_type=OrderType.STOP, symbol=symbol)
+    trade_object = ObjectTrade(order_type=random.choice(OrderType.pending()), symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=None, tp_type=None)
     web.home_page.notifications.close_noti_banner()
 
-    logger.info(f"Verify amount: {tab_amount + 1}")
+    logger.info(f"Verify Asset Tab amount: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
     logger.info("Step 2: Delete pending order")
@@ -21,7 +23,7 @@ def test(web, symbol, get_asset_tab_amount, cancel_delete_order):
     logger.info("Verify delete order notification banner")
     web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).delete_order_banner())
 
-    logger.info(f"Verify amount = {tab_amount}")
+    logger.info(f"Verify Asset Tab amount = {tab_amount}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount)
 
     logger.info("Verify item is no longer displayed")

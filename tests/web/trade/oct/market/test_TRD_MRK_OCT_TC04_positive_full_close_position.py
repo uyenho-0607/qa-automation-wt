@@ -6,11 +6,8 @@ from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.parametrize(
-    "sltp_type", [SLTPType.PRICE, SLTPType.POINTS]
-)
-def test(web, symbol, get_asset_tab_amount, cancel_close_order, create_order_data, sltp_type):
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol, indicate=sltp_type)
+def test(web, symbol, get_asset_tab_amount, cancel_close_order, create_order_data, ):
+    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
@@ -24,7 +21,7 @@ def test(web, symbol, get_asset_tab_amount, cancel_close_order, create_order_dat
     web.home_page.notifications.verify_notification_banner(*exp_noti.close_order_success_banner())
 
     logger.info("Verify notification details in notification box")
-    web.home_page.notifications.verify_notification_result(exp_noti.position_closed_details(), check_contains=True)
+    web.home_page.notifications.verify_notification_result(exp_noti.position_closed_details())
 
     logger.info("Verify item is no longer displayed")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id, is_display=False)

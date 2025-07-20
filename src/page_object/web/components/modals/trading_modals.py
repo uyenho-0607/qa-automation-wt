@@ -245,7 +245,7 @@ class TradingModals(BaseTrade):
         edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self._get_edit_price()
 
         logger.debug(f"- Edit price is {edit_price!r}")
-        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type, is_modify=True).values()
+        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
 
         # params = calculate_trade_parameters(edit_price, trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
         # stop_loss, take_profit = params.stop_loss, params.take_profit
