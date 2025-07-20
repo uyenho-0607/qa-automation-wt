@@ -5,7 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.decorators import handle_stale_element
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_screenshot
 from src.utils.assert_utils import soft_assert
@@ -18,7 +18,7 @@ class BaseActions:
     def __init__(self, driver):
         self._driver = driver
         self._wait = WebDriverWait(driver=self._driver, timeout=EXPLICIT_WAIT)
-        self._driver.implicitly_wait(0)
+        self._driver.implicitly_wait(IMPLICIT_WAIT)
 
     def find_element(
             self,

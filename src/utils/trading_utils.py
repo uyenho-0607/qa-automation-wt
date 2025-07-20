@@ -1,284 +1,215 @@
 import random
-from typing import Any
 
-from src.data.enums import TradeType, OrderType
-from src.data.enums.trading import SLTPType
+from src.data.enums import OrderType, TradeType, SLTPType
 from src.data.objects.trade_object import ObjectTrade
 from src.utils import DotDict
-from src.utils.format_utils import format_with_decimal, format_str_price
-from src.utils.format_utils import remove_comma
+from src.utils.format_utils import remove_comma, get_decimal, format_str_price
+
+RR_RATIO = [1.0, 1.5, 2.0]
+"""SUMMARY PRICES LOGIC"""
 
 
-def count_leading_zeros_after_decimal(number):
-    # Convert to string in case of scientific notation
-    num_str = f"{number:.50f}".rstrip('0')  # long precision, remove trailing 0s
-    if '.' not in num_str:
-        return 0
+def _point_step(current_price):
+    """Get point step value"""
+    point_step = ObjectTrade.POINT_STEP
+    if not point_step:
+        # extract point step from current price
+        str_price = str(current_price)
+        if '.' not in str_price:
+            point_step = 1.0
 
-    decimal_part = num_str.split('.')[1]
-    count = 0
-    for ch in decimal_part:
-        if ch == '0':
-            count += 1
         else:
-            break
-    return count
+            decimal_part = str_price.split('.')[1]
+            point_step = 1.0 / (10 ** len(decimal_part))
+
+    return point_step
 
 
-def _random_min_point_distance(live_price: str | float) -> int:
+def _decimal(current_price):
+    """Get decimal places"""
+    decimal = ObjectTrade.DECIMAL
+    if not decimal:
+        # extract decimal from current price
+        decimal = get_decimal(current_price)
+
+    return decimal
+
+
+def _rr_ratio():
+    return random.choice(RR_RATIO)
+
+
+def _adjust_prices(price, diff_price, format_round=True):
+    result = [price + diff_price, price - diff_price]
+
+    if format_round:
+        decimal = _decimal(price)
+        result = [round(item, decimal) for item in result]
+
+    return result
+
+
+def random_points(current_price: float, min_pct_dis=0.05, max_pct_dis=0.2):
+    """Random points with safe range"""
+    stop_level = ObjectTrade.STOP_LEVEL
+    point_step = _point_step(current_price)
+
+    min_price_dist = max(current_price * min_pct_dis, 0.005)
+    max_price_dist = current_price * max_pct_dis
+
+    min_points = max(int(min_price_dist / point_step), stop_level + 2)
+    max_points = max(int(max_price_dist / point_step), stop_level + 5)
+
+    return random.randint(min_points, max_points)
+
+
+def get_sl_tp(current_price, trade_type: TradeType, sl_type: SLTPType = SLTPType.PRICE, tp_type: SLTPType = SLTPType.PRICE, is_invalid=False, is_modify=False):
+    """Calculate stop loss and take profit with configurable risk-reward ratio"""
+    current_price = remove_comma(current_price)
+    point_step = _point_step(current_price)
+
+    # Generate random points for stop loss
+    sl_points = random_points(current_price)
+
+    if is_modify:
+        # random points with other realistic min_pct_dis and max_pct_dis
+        increase_risk = random.randint(0, 1)
+        sl_points = random_points(
+            current_price,
+            min_pct_dis=0.05 if increase_risk else 0.02,
+            max_pct_dis=0.3 if increase_risk else 0.15
+        )
+
+    tp_points = int(sl_points * _rr_ratio())
+
+    # Calculate price differences
+    sl_diff, tp_diff = [points * point_step for points in [sl_points, tp_points]]
+
+    # Reverse logic for invalid orders
+    if is_invalid:
+        sl_diff = -sl_diff
+        tp_diff = -tp_diff
+
+    is_buy = trade_type == TradeType.BUY
+
+    inc_sl, dec_sl = _adjust_prices(current_price, sl_diff)
+    inc_tp, dec_tp = _adjust_prices(current_price, tp_diff)
+
+    price_map = {
+        "sl": {SLTPType.PRICE: dec_sl if is_buy else inc_sl, SLTPType.POINTS: sl_points},
+        "tp": {SLTPType.PRICE: inc_tp if is_buy else dec_tp, SLTPType.POINTS: tp_points}
+    }
+    return DotDict(sl=price_map["sl"].get(sl_type, None), tp=price_map["tp"].get(tp_type, None))
+
+
+def get_modified_sl_tp(current_price, trade_type: TradeType, increase_risk=False, is_invalid=False):
     """
-    Calculate random point distance based on live price.
-    Ensures the adjusted price will be valid for the given price level.
-    Args:
-        live_price: Current market price
+    Generate new modified SL/TP prices with a new RR ratio.
+    Optionally increases risk by using a wider stop distance.
     """
-    live_price = remove_comma(live_price)
-    # Get the decimal precision to calculate valid range
-    one_point = _get_decimal_precision(live_price)
-    if int(float(live_price)) >= 1:
-        max_point = int(float(live_price)) / one_point
+    point_step = _point_step(current_price)
+    is_buy = trade_type == TradeType.BUY
 
-    else:
-        zero_count = count_leading_zeros_after_decimal(live_price)
-        max_point = 1 / (one_point * 10 * int(f'1{'0' * zero_count}'))
-    res = random.randint(int(max_point * 0.6), int(max_point * 0.95))
+    # Use wider points if increasing risk (simulate wider SL)
+    sl_points = random_points(
+        current_price,
+        min_pct_dis=0.05 if increase_risk else 0.02,
+        max_pct_dis=0.3 if increase_risk else 0.15
+    )
+    tp_points = int(sl_points * _rr_ratio())
 
-    return res
-
-
-def _get_decimal_precision(number_str: str | float) -> float:
-    """
-    Extract the decimal precision from a number string. Input number string (e.g. "62.802", "62.80", "62.8") -> Output decimal precision (e.g. 0.001, 0.01, 0.1)
-    """
-    number_str = str(number_str)
-    if '.' not in number_str:
-        return 1.0
-
-    decimal_part = number_str.split('.')[1]
-    return 1.0 / (10 ** len(decimal_part))
-
-
-def _get_price_adjustment(live_price: str | float, is_invalid=False):
-    """
-    Get the price adjustment: add and subtract a random value from live price
-    live_price: str | float, input live price - in case order_type:
-        - MARKET: live_price
-        - LIMIT: entry_price
-        - STOP: entry_price
-        - STOP_LIMIT: stop_limit_price
-    is_invalid: bool, if True, return invalid price adjustment
-    """
-
-    one_point_value = _get_decimal_precision(live_price)
-    price_adjustment = one_point_value * _random_min_point_distance(live_price)
-    live_price = remove_comma(live_price)
+    sl_diff = sl_points * point_step
+    tp_diff = tp_points * point_step
 
     if is_invalid:
-        price_adjustment = -price_adjustment
+        sl_diff = -sl_diff
+        tp_diff = -tp_diff
 
-    increased_price = abs(live_price + price_adjustment)
-    decreased_price = abs(live_price - price_adjustment)
-
-    increased_price = format_with_decimal(increased_price, ObjectTrade.DECIMAL or one_point_value)
-    decreased_price = format_with_decimal(decreased_price, ObjectTrade.DECIMAL or one_point_value)
-
-    return increased_price, decreased_price
+    inc_sl, dec_sl = _adjust_prices(current_price, sl_diff)
+    inc_tp, dec_tp = _adjust_prices(current_price, tp_diff)
 
 
-def calculate_sl_tp_price(
-        live_price: str | float,
-        trade_type: TradeType = TradeType.BUY,
-        invalid: bool = False,
-) -> DotDict:
+    return {"stop_loss": dec_sl if is_buy else inc_sl, "take_profit": inc_tp if is_buy else dec_tp}
+
+
+def get_pending_price(current_price, trade_type: TradeType, order_type: OrderType, is_invalid=False):
+    """Calculate pending order price with crypto-optimized gap percentages"""
+    if order_type.is_market():
+        return None
+
+    current_price = remove_comma(current_price)
+    point_step = _point_step(current_price)
+    stop_level = ObjectTrade.STOP_LEVEL or 10
+
+    # safe price gap between pending and current price
+    gap_buffer = stop_level * point_step * random.randint(2, 5)
+
+    # Crypto-optimized gap percentages
+    gap_percent_range = (0.5, 2.0) if order_type.is_stp_limit() else (0.1, 0.5)
+    random_percent = round(random.uniform(*gap_percent_range), 5)
+
+    gap_price = gap_buffer + current_price * (random_percent / 100)
+
+    # Reverse logic for invalid orders
+    if is_invalid:
+        gap_price = -gap_price
+
+    inc_price, dec_price = _adjust_prices(current_price, gap_price)
+
+    # Price calculation based on order type and trade direction
+    price_map = {
+        OrderType.STOP: {TradeType.BUY: inc_price, TradeType.SELL: dec_price},
+        OrderType.LIMIT: {TradeType.BUY: dec_price, TradeType.SELL: inc_price}
+    }
+
+    return price_map.get(order_type, price_map[OrderType.STOP])[trade_type]
+
+
+def get_stop_price(current_price, trade_type, is_invalid=False):
+    """Get stop price using LIMIT order logic"""
+    price = get_pending_price(current_price, trade_type, OrderType.STOP_LIMIT, is_invalid=is_invalid)
+    return round(price, _decimal(current_price))
+
+
+def calculate_trading_params(
+        current_price: float | str,
+        trade_type: TradeType,
+        order_type: OrderType,
+        sl_type: SLTPType = SLTPType.PRICE,
+        tp_type: SLTPType = SLTPType.PRICE,
+        is_invalid=False
+):
     """
-    Calculate stop loss and take profit price based on live price.
-    Logic: stop loss less than live price, take profit greater than live price. Vice versa for SELL.
+    Main calculation function for trading parameters
     Args:
-        live_price (float):
-            - MARKET: live_price
-            - LIMIT: price
-            - STOP: price
-            - STOP_LIMIT: stop_limit_price
-        trade_type (TradeType): Type of order (BUY or SELL)
-        invalid (bool): Whether to reverse the calculation
-    Returns:
-        tuple[float, float]: stop loss and take profit price
+        current_price: Current market price
+        order_type: Type of order (MARKET, LIMIT, STOP)
+        trade_type: Trade direction (BUY, SELL)
+        sl_type: Stop loss type (PRICE or POINT)
+        tp_type: Take profit type (PRICE or POINT)
+        is_invalid: Generate invalid orders for testing
     """
-    increased_price, decreased_price = _get_price_adjustment(live_price, invalid)
-    res = {
-        TradeType.BUY: DotDict(stop_loss=decreased_price, take_profit=increased_price),
-        TradeType.SELL: DotDict(stop_loss=increased_price, take_profit=decreased_price)
-    }
+    current_price = remove_comma(current_price)
 
-    return res[trade_type]
-
-
-def _random_sl_tp_points(
-        live_price: str | float,
-        trade_type: TradeType = TradeType.BUY,
-) -> DotDict:
-    """
-    Generate random stop loss and take profit points based on trade type.
-    BUY:
-        SL = Entry - (points * one_point_value) -> must cap to avoid negative
-        TP = Entry + (points * one_point_value) -> always safe
-    SELL:
-        SL = Entry + (points * one_point_value) -> always safe
-        TP = Entry - (points * one_point_value) -> must cap to avoid negative
-    """
-    one_point_value = _get_decimal_precision(live_price)
-    live_price = remove_comma(live_price)
-    max_safe_points = round((live_price / one_point_value) * 0.9)
-
-    def get_points(is_limited: bool) -> int:
-        min_points = round(max_safe_points * 0.5)
-        if is_limited:
-            return random.randint(min_points, max_safe_points)
-
-        return random.randint(min_points, max_safe_points * 2)
-
-    # For BUY: SL is limited, TP is unlimited
-    # For SELL: SL is unlimited, TP is limited
-    is_buy = trade_type == TradeType.BUY
-    sl_points = get_points(is_buy)
-    tp_points = get_points(not is_buy)
-
-    return DotDict(stop_loss=sl_points, take_profit=tp_points)
-
-
-def calculate_price(
-        live_price: str | float,
-        trade_type: TradeType = TradeType.BUY,
-        order_type: OrderType = OrderType.LIMIT,
-        invalid: bool = False,
-) -> str:
-    """
-    Calculate entry price based on live price.
-    Logic:
-    - BUY: in case order_type:
-        - MARKET: entry_price = current_price
-        - LIMIT: price less than live_price -> price = live_price - price_adjustment
-        - STOP: price greater than live_price ->  = live_price + price_adjustment
-        - STOP_LIMIT: price = stop_limit_price + price_adjustment (live_price should input as stop_limit_price)
-
-    - SELL: vice versa
-    """
-    increased_price, decreased_price = _get_price_adjustment(live_price, invalid)
-    res = {
-        TradeType.BUY: {
-            OrderType.LIMIT: decreased_price,
-            OrderType.STOP: increased_price,
-            OrderType.STOP_LIMIT: increased_price
-        },
-        TradeType.SELL: {
-            OrderType.LIMIT: increased_price,
-            OrderType.STOP: decreased_price,
-            OrderType.STOP_LIMIT: decreased_price
-        }
-    }
-
-    return res[trade_type].get(order_type, live_price)
-
-
-def calculate_stp_price(
-        price: str | float,
-        trade_type: TradeType = TradeType.BUY,
-        invalid: bool = False,
-) -> str:
-    """
-    Calculate stop limit price based on price.
-    Logic:
-    - BUY: stop_limit_price = price + price_adjustment
-    - SELL: vice versa
-    """
-    # increased_price, decreased_price = _get_price_adjustment(price, invalid)
-    # return increased_price if trade_type == TradeType.BUY else decreased_price
-    return calculate_price(price, trade_type, OrderType.STOP_LIMIT, invalid)
-
-
-def _calculate_trade_price(
-        live_price: str | float,
-        trade_type: TradeType = TradeType.BUY,
-        order_type: OrderType = OrderType.MARKET,
-        invalid: bool = False,
-) -> DotDict[Any, Any]:
-    """
-    Calculate trade parameters based on current price, trade type, order type, invalid flag, and modification flag.
-    """
-    res = DotDict()
-
-    # Stop Limit Price:
-    valid_stp, invalid_stp = None, None
-
-    # Update value for stop limit price if order_type == STOP LIMIT
+    # Calculate stop price for stop limit orders
+    stop_price = None
     if order_type.is_stp_limit():
-        valid_stp = calculate_stp_price(live_price, trade_type)
-        invalid_stp = calculate_stp_price(live_price, trade_type, invalid=True)
+        stop_price = get_stop_price(current_price, trade_type, is_invalid)
 
-    # Price, in case order_type = MARKET >> price = entry_price = live price
-    # if stp_limit: price > stp_limit (BUY), < stp_limit (SELL)
-    valid_price = calculate_price(valid_stp or live_price, trade_type, order_type)
-    invalid_price = calculate_price(valid_stp or live_price, trade_type, order_type, invalid=True)
+    # Calculate pending price
+    pending_price = get_pending_price(stop_price or current_price, trade_type, order_type, is_invalid)
 
-    # stop_loss and take profit
-    stop_loss, take_profit = calculate_sl_tp_price(
-        valid_stp if order_type.is_stp_limit() else valid_price, trade_type, invalid=invalid
-    ).values()
+    # Calculate stop loss and take profit
+    sl, tp = get_sl_tp(stop_price or pending_price or current_price, trade_type, sl_type, tp_type, is_invalid).values()
 
-    # Update result dict:
-    res["entry_price"] = invalid_price if invalid else valid_price
-    res["stop_limit_price"] = invalid_stp if invalid else valid_stp
-    res["stop_loss"] = stop_loss
-    res["take_profit"] = take_profit
+    result = {
+        "stop_loss": sl,
+        "take_profit": tp,
+        "entry_price": current_price if order_type.is_market() else pending_price,
+        "stop_limit_price": stop_price,
+    }
 
-    return res
-
-
-def calculate_trade_parameters(
-        live_price: str | float,
-        trade_type: TradeType = TradeType.BUY,
-        order_type: OrderType = OrderType.MARKET,
-        sl_type: SLTPType | str = SLTPType.PRICE,
-        tp_type: SLTPType | str = SLTPType.PRICE,
-        invalid: bool = False,
-) -> DotDict[Any, Any]:
-    """
-    Calculate trade parameters based on current price, trade type, order type, invalid flag, sl_type, tp_type.
-    """
-    prices = _calculate_trade_price(live_price, trade_type, order_type, invalid)
-    sl_tp_points = _random_sl_tp_points(
-        prices.stop_limit_price if order_type.is_stp_limit() else prices.entry_price, trade_type
-    )
-
-    return DotDict(
-        entry_price=prices.entry_price,
-        stop_limit_price=prices.stop_limit_price,
-        stop_loss=(prices if sl_type == SLTPType.PRICE else sl_tp_points).stop_loss,
-        take_profit=(prices if tp_type == SLTPType.PRICE else sl_tp_points).take_profit,
-    )
-
-
-def calculate_sl_tp(live_price, trade_type, sl_type, tp_type):
-    """
-    Calculate updated stop loss and take profit based on live price, keeping other prices unchanged.
-    Args:
-        live_price: Current market price to base SL/TP calculations on
-        trade_type: TradeType (BUY or SELL)
-        sl_type: SLTPType (PRICE or POINTS) - determines if SL should be price or points
-        tp_type: SLTPType (PRICE or POINTS) - determines if TP should be price or points
-    Returns:
-        DotDict with stop_loss and take_profit only
-    """
-    # Calculate SL/TP prices based on live price
-    sl_tp_prices = calculate_sl_tp_price(live_price, trade_type)
-    
-    # Calculate SL/TP points based on live price
-    sl_tp_points = _random_sl_tp_points(live_price, trade_type)
-    
-    return DotDict(
-        stop_loss=(sl_tp_prices if sl_type == SLTPType.PRICE else sl_tp_points).stop_loss,
-        take_profit=(sl_tp_prices if tp_type == SLTPType.PRICE else sl_tp_points).take_profit,
-    )
+    return DotDict(result)
 
 
 def calculate_partial_close(trade_object):
@@ -294,3 +225,8 @@ def calculate_partial_close(trade_object):
         left_units=format_str_price(left_units, 0),
         close_units=format_str_price(close_units, 0),
     )
+
+
+if __name__ == '__main__':
+    res = calculate_trading_params(23.70, TradeType.SELL, OrderType.MARKET)
+    print(res)

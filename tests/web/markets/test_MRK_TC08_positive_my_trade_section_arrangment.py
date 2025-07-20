@@ -3,17 +3,15 @@ import time
 
 import pytest
 
-from src.data.consts import SYMBOLS
+from src.data.consts import get_symbols
 from src.data.enums import OrderType, Features, WatchListTab, MarketsSection
 from src.data.objects.trade_object import ObjectTrade
-from src.data.project_info import ProjectConfig
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
 def test(web, disable_OCT):
-
-    symbol_list = random.choices(SYMBOLS[ProjectConfig.client], k=5)
+    symbol_list = random.choices(get_symbols(), k=5)
 
     logger.info("Step 1: Navigate to Trade Page")
     time.sleep(1)
@@ -23,7 +21,6 @@ def test(web, disable_OCT):
     web.trade_page.watch_list.select_tab(WatchListTab.CRYPTO)
 
     for idx, _symbol in enumerate(symbol_list):
-
         logger.info(f"Step {3 + idx * 2}: Select symbol from watch list - {_symbol!r}")
         web.trade_page.watch_list.select_symbol(_symbol)
 

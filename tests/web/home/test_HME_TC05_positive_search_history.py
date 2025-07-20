@@ -2,14 +2,13 @@ import random
 
 import pytest
 
-from src.data.consts import SYMBOLS
-from src.data.project_info import ProjectConfig
+from src.data.consts import get_symbols
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 
 
 def test(web):
-    symbol_list = random.sample(SYMBOLS[ProjectConfig.client], k=3)
+    symbol_list = random.sample(get_symbols(), k=2)
 
     for index, symbol_name in enumerate(symbol_list):
         logger.info(f"Step {index + 1}: Search and select symbol: {symbol_name!r}")

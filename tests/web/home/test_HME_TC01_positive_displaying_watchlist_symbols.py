@@ -3,9 +3,8 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import SYMBOLS
+from src.data.consts import get_symbols
 from src.data.enums import WatchListTab
-from src.data.project_info import ProjectConfig
 from src.utils.logging_utils import logger
 
 
@@ -40,11 +39,12 @@ def setup_test():
         symbols = APIClient().market.get_watchlist_items(tab, get_symbols=True)
 
         if not symbols and tab == WatchListTab.FAVOURITES:
-            for symbol in SYMBOLS[ProjectConfig.client][:3]:
+            _list_symbol = get_symbols()[:3]
+            for symbol in _list_symbol:
                 logger.info(f"- Mark star symbol: {symbol!r}")
                 APIClient().market.post_starred_symbol(symbol)
 
-            symbols = SYMBOLS[ProjectConfig.client][:3]
+            symbols = _list_symbol
 
         return symbols
 

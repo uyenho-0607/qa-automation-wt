@@ -78,11 +78,11 @@ class Notifications(BasePage):
             actual_title = futures['title'].result()
             actual_des = futures['description'].result()
 
-        logger.debug("- Check noti title")
+        logger.debug(f"- Check noti title - {expected_title!r}")
         soft_assert(actual_title, expected_title)
 
         if expected_des:
-            logger.debug("- Check noti des")
+            logger.debug(f"- Check noti des - {expected_des!r}")
             compare_noti_with_tolerance(actual_des, expected_des)
 
     def verify_notification_result(self, expected_result: str | list, check_contains=False, is_system=False):

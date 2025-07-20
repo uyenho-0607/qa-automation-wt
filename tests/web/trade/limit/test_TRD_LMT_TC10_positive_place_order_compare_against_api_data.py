@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from src.apis.api_client import APIClient
@@ -12,7 +14,10 @@ def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} order")
-    web.trade_page.place_order_panel.place_order(trade_object, submit=True)
+    # web.trade_page.place_order_panel.place_order(trade_object, submit=True)
+    web.trade_page.place_order_panel.place_order(trade_object, submit=False)
+    time.sleep(0.5)
+    web.trade_page.place_order_panel.confirm_trade()
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)

@@ -1,7 +1,6 @@
 import random
 import time
 
-from dotenv.variables import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -13,10 +12,9 @@ from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
-from src.utils.format_utils import locator_format, is_integer
+from src.utils.format_utils import locator_format
 from src.utils.logging_utils import logger
-from src.utils.trading_utils import calculate_trade_parameters, calculate_price, calculate_stp_price, \
-    calculate_sl_tp_price, calculate_sl_tp
+from src.utils.trading_utils import get_sl_tp, get_pending_price, get_stop_price
 
 
 class TradingModals(BaseTrade):
@@ -246,8 +244,8 @@ class TradingModals(BaseTrade):
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
         edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self._get_edit_price()
 
-        logger.debug(f"- edit price is {edit_price!r}")
-        stop_loss, take_profit = calculate_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
+        logger.debug(f"- Edit price is {edit_price!r}")
+        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type, is_modify=True).values()
 
         # params = calculate_trade_parameters(edit_price, trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
         # stop_loss, take_profit = params.stop_loss, params.take_profit
@@ -312,22 +310,22 @@ class TradingModals(BaseTrade):
         self.__asset_tab.click_edit_button(AssetTabs.get_tab(order_type), trade_object.get("order_id"))
 
         if entry_price:
-            price = calculate_price(self._get_edit_price(), trade_type, order_type, True)
+            price = get_pending_price(self._get_edit_price(), trade_type, order_type, True)
             self._input_edit_price(price, order_type)
 
         if stop_limit_price:
-            stp_price = calculate_stp_price(self._get_edit_price(order_type), trade_type, invalid=True)
+            stp_price = get_stop_price(self._get_edit_price(order_type), trade_type, True)
             self._input_edit_stp_price(stp_price, order_type)
 
-        invalid_sl_tp = calculate_sl_tp_price(
-            self._get_edit_price(order_type), trade_type, invalid=True
+        invalid_sl_tp = get_sl_tp(
+            self._get_edit_price(order_type), trade_type, True
         )
         if stop_loss:
-            sl = invalid_sl_tp.stop_loss
+            sl = invalid_sl_tp.sl.price
             self._input_edit_sl(sl)
 
         if take_profit:
-            tp = invalid_sl_tp.take_profit
+            tp = invalid_sl_tp.tp.price
             self._input_edit_tp(tp)
 
         self.click_edit_order_btn()

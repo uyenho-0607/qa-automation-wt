@@ -55,10 +55,10 @@ class BasePage:
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
         self.actions.goto(Config.urls(site))
 
-    def wait_for_spin_loader(self, timeout: int = EXPLICIT_WAIT):
+    def wait_for_spin_loader(self, timeout: int = 5):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
-        if self.actions.is_element_displayed(self.__spin_loader, timeout=SHORT_WAIT):
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def refresh_page(self):

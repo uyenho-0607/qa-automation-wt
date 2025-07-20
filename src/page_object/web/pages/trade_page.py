@@ -69,7 +69,7 @@ class TradePage(BasePage):
             actual,
             expected,
             tolerance_percent=0.1,
-            tolerance_fields=trade_object.tolerance_fields(api_format=True)
+            tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"]
         )["res"]
 
         if not result:

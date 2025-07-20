@@ -4,18 +4,18 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import SYMBOLS
+from src.data.consts import get_symbols
 from src.data.enums import OrderType, BulkCloseOpts
 from src.data.objects.trade_object import ObjectTrade
-from src.data.project_info import ProjectConfig
 from src.utils.format_utils import format_str_prices
 from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package")
 def symbol():
-    selected_symbol = random.choice(SYMBOLS[ProjectConfig.client])
+    selected_symbol = random.choice(get_symbols())
     return selected_symbol
+
 
 @pytest.fixture
 def get_order_id_list(symbol):
@@ -29,7 +29,6 @@ def get_order_id_list(symbol):
         return [item["orderId"] for item in resp if cond(item["profit"], 0)]
 
     return _handler
-
 
 
 @pytest.fixture(scope="package")

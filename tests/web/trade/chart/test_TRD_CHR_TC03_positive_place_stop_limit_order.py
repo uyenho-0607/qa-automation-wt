@@ -17,7 +17,7 @@ def test(web, symbol, get_asset_tab_amount, disable_OCT):
     web.trade_page.chart.open_trade_tab()
 
     logger.info("Step 2: Place order")
-    web.trade_page.place_order_panel.place_order(trade_object, is_chart=True)
+    web.trade_page.place_order_panel.place_order(trade_object)
 
     logger.info("Verify trade confirmation modal information is correct")
     web.trade_page.modals.verify_trade_confirmation(trade_object)

@@ -25,16 +25,14 @@ lirunex:
 
   credentials:
     mt4:
-
-      user_live: ...
-      user_crm: mt4_automation@mailinator.com
+#      user_live: ...
+      user_crm: mt4_automation28@mailinator.com
       user_demo: 2092010247
 
     mt5:
-
-      user_live: 569200612
-      user_crm: mt5_automation19@mailinator.com
-      user_demo: 569200612
+#      user_live: 569200612
+      user_crm: mt5_automation28@mailinator.com
+      user_demo: 569202036
 
   mobile:
     app_package: com.aquariux.wt.sit.lirunex

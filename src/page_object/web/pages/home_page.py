@@ -66,11 +66,6 @@ class HomePage(BasePage):
         if open != is_open:
             self.actions.click_by_offset(self.__account_name, -100, 5)
 
-    def is_account_traded(self):
-        """Check if account did any trades"""
-        res = self.actions.is_element_displayed(cook_element(self.__acc_balance_items, AccSummary.MARGIN_LEVEL))
-        return res
-
     def check_uncheck_balance_items(self, account_item: AccSummary | list[AccSummary], check=True):
         self.toggle_balance_summary()
         account_item = account_item if isinstance(account_item, list) else [account_item]
@@ -89,7 +84,7 @@ class HomePage(BasePage):
     def navigate_to(self, feature: Features, wait=False):
         """Navigate to a specific feature using the sidebar"""
         self.actions.click(cook_element(self.__side_bar_option, feature.lower()))
-        not wait or self.wait_for_spin_loader()
+        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
 
     def clear_search_field(self):
         self.actions.clear_field(self.__txt_symbol_search)
@@ -209,8 +204,9 @@ class HomePage(BasePage):
         self.verify_empty_message(self.__empty_message, UIMessages.TYPE_SOMETHING_TO_SEARCH)
 
     def verify_search_result_deleted(self):
-        self.actions.verify_element_displayed(self.__item_search_history, is_display=False)
-        self.actions.verify_element_displayed(self.__search_history, is_display=False)
+        self.actions.verify_elements_displayed(
+            [self.__item_search_history, self.__search_history], is_display=False, timeout=5
+        )
 
     def verify_search_history_items(self, symbols: str | list[str]):
         symbols = symbols if isinstance(symbols, list) else [symbols]

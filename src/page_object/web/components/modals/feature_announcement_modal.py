@@ -6,6 +6,7 @@ from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.page_object.web.base_page import BasePage
 from src.utils.common_utils import data_testid
+from src.utils.logging_utils import logger
 
 
 class FeatureAnnouncementModal(BasePage):
@@ -22,7 +23,7 @@ class FeatureAnnouncementModal(BasePage):
         Clicks the 'Got it' button on the feature announcement modal.
         Will continue clicking if multiple announcements are present.
         """
-        # self.wait_for_spin_loader()
+        logger.debug("- Checking feature anm modal")
         while self.actions.is_element_displayed(self.__btn_got_it_feature_ann, timeout=5):
             self.actions.click(self.__btn_got_it_feature_ann)
 
