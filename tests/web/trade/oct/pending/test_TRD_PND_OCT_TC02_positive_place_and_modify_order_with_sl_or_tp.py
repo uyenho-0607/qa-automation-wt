@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType, Expiry
@@ -6,25 +8,25 @@ from src.data.objects.trade_object import ObjectTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.parametrize("order_type", [random.choice([OrderType.LIMIT, OrderType.STOP_LIMIT]), OrderType.STOP_LIMIT])
 @pytest.mark.parametrize(
-    "field, place_type, edit_type",
+    "update_field",
     [
-        ("stop_loss", SLTPType.random_values(), SLTPType.random_values()),
-        ("stop_loss", *SLTPType.random_values(amount=2)),
-        ("take_profit", SLTPType.random_values(), SLTPType.random_values()),
-        ("take_profit", *SLTPType.random_values(amount=2)),
+        "SL",
+        "TP",
+        "SL,TP",
     ]
 )
-def test(web, symbol, get_asset_tab_amount, field, place_type, edit_type, close_edit_confirm_modal):
-    trade_object = ObjectTrade(order_type=OrderType.LIMIT, symbol=symbol)
-    tab_amount = get_asset_tab_amount(trade_object.order_type)
+def test(web, symbol, get_asset_tab_amount, update_field, close_edit_confirm_modal, order_type):
 
-    # handle parameters
-    sl_type, tp_type = (place_type, None) if field == "stop_loss" else (None, place_type)
-    update_sl_type, update_tp_type = (edit_type, None) if field == "stop_loss" else (None, edit_type)
+    trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
+    sl_type, tp_type = random.sample([None, SLTPType.random_values()], k=2)
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
+    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
+
     # ------------------- #
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with {field!r}")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order, sl_type: {sl_type}, tp_type: {tp_type}")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify notification banner displays correct input trade information")
@@ -36,8 +38,8 @@ def test(web, symbol, get_asset_tab_amount, field, place_type, edit_type, close_
     logger.info(f"Verify Asset Tab item details")
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
-    logger.info(f" Step 2: Update Asset Tab item with {field!r} - type: {edit_type.capitalize()!r}")
-    web.trade_page.modals.modify_order(trade_object, sl_type=update_sl_type, tp_type=update_tp_type, expiry=Expiry.sample_values(trade_object.order_type))
+    logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
+    web.trade_page.modals.modify_order(trade_object, **update_info)
 
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner())

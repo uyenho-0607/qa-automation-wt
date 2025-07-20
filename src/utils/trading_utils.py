@@ -49,7 +49,7 @@ def _adjust_prices(price, diff_price, format_round=True):
     return result
 
 
-def random_points(current_price: float, min_pct_dis=0.05, max_pct_dis=0.2):
+def random_points(current_price: float, min_pct_dis=0.1, max_pct_dis=0.2):
     """Random points with safe range"""
     stop_level = ObjectTrade.STOP_LEVEL
     point_step = _point_step(current_price)
@@ -57,10 +57,12 @@ def random_points(current_price: float, min_pct_dis=0.05, max_pct_dis=0.2):
     min_price_dist = max(current_price * min_pct_dis, 0.005)
     max_price_dist = current_price * max_pct_dis
 
-    min_points = max(int(min_price_dist / point_step), stop_level + 2)
-    max_points = max(int(max_price_dist / point_step), stop_level + 5)
+    min_points = max(int(min_price_dist / point_step), stop_level + 10)
+    max_points = max(int(max_price_dist / point_step), stop_level + 20)
 
-    return random.randint(min_points, max_points)
+    points = random.randint(min_points, max_points)
+
+    return points
 
 
 def get_sl_tp(current_price, trade_type: TradeType, sl_type: SLTPType = SLTPType.PRICE, tp_type: SLTPType = SLTPType.PRICE, is_invalid=False, is_modify=False):
@@ -228,5 +230,5 @@ def calculate_partial_close(trade_object):
 
 
 if __name__ == '__main__':
-    res = calculate_trading_params(23.70, TradeType.SELL, OrderType.MARKET)
+    res = calculate_trading_params(26.26, TradeType.BUY, OrderType.MARKET)
     print(res)

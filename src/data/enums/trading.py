@@ -45,6 +45,13 @@ class OrderType(BaseEnum):
     def is_stp_limit(self):
         return self == self.STOP_LIMIT
 
+    @classmethod
+    def pending(cls):
+        pending_orders = [cls.LIMIT, cls.STOP]
+        if ProjectConfig.is_non_oms():
+            pending_orders += [cls.STOP_LIMIT]
+        return pending_orders
+
 
 class Expiry(BaseEnum):
     """Enum representing order expiry types."""

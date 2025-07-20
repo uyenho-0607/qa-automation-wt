@@ -1,5 +1,6 @@
 import pytest
 
+from src.apis.api_client import APIClient
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
 from src.data.enums import Features
@@ -28,6 +29,7 @@ def setup_trade_test(web, symbol):
     web.home_page.search_symbol(symbol)
     web.home_page.select_item_from_search_result(symbol)
 
-@pytest.fixture(autouse=True, scope="package")
-def enable_OCT(enable_OCT):
-    pass
+
+@pytest.fixture(scope="package", autouse=True)
+def enable_OCT():
+    APIClient().user.patch_oct(enable=True)

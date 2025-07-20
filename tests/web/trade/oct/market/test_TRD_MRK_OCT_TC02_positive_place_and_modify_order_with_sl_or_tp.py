@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType
@@ -7,23 +9,23 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.parametrize(
-    "edit_field, sl_type, tp_type",
+    "update_field",
     [
-        ("stop_loss", SLTPType.PRICE, None),
-        ("stop_loss", SLTPType.POINTS, None),
-        ("take_profit", None, SLTPType.PRICE),
-        ("take_profit", None, SLTPType.POINTS),
-        ("stop_loss, take_profit", SLTPType.PRICE, SLTPType.PRICE),
-        ("stop_loss, take_profit", SLTPType.POINTS, SLTPType.POINTS),
-        ("stop_loss, take_profit", *SLTPType.sample_values(amount=2)),
+        "SL",
+        "TP",
+        "SL,TP",
     ]
 )
-def test(web, symbol, get_asset_tab_amount, edit_field, sl_type, tp_type, close_edit_confirm_modal, update_entry_price):
+def test(web, symbol, get_asset_tab_amount, update_field, close_edit_confirm_modal, update_entry_price):
+
     trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
+    sl_type, tp_type = random.sample([None, SLTPType.random_values()], k=2)
+    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
+
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
-    web.trade_page.place_order_panel.place_order(trade_object, sl_type=None, tp_type=None)
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order, sl_type: {sl_type}, tp_type: {tp_type}")
+    web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify notification banner displays correct input trade information")
     web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_submitted_banner())
@@ -38,8 +40,8 @@ def test(web, symbol, get_asset_tab_amount, edit_field, sl_type, tp_type, close_
     logger.info("Verify Open Position noti in Notification Box")
     web.home_page.notifications.verify_notification_result(ObjectNoti(trade_object).open_position_details(trade_object.order_id))
 
-    logger.info(f"Step 2: Update order with {edit_field!r}")
-    web.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
+    web.trade_page.modals.modify_order(trade_object, **update_info)
 
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner(**trade_object))
