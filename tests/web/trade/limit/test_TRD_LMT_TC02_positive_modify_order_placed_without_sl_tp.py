@@ -1,8 +1,8 @@
 import pytest
 
 from src.data.enums import SLTPType, OrderType, Expiry
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -18,7 +18,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web, symbol, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data):
-    trade_object = ObjectTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
+    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
     create_order_data(trade_object)
@@ -33,7 +33,7 @@ def test(web, symbol, edit_field, sl_type, tp_type, close_edit_confirm_modal, cr
     web.trade_page.modals.confirm_update_order()
 
     logger.info("Verify notification banner updated message")
-    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify item details after update")
     web.trade_page.asset_tab.verify_item_data(trade_object)

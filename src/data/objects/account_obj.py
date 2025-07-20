@@ -1,10 +1,10 @@
 from src.data.enums import CountryDialCode, DepositAmount
-from src.data.objects.base_object import BaseObject
+from src.data.objects.base_obj import BaseObj
 from src.utils.random_utils import random_username, random_email, random_phone_number, random_invalid_email, \
     random_number_by_length
 
 
-class ObjectDemoAccount(BaseObject):
+class ObjDemoAccount(BaseObj):
     """A class representing a demo account with user information.
 
     Attributes:

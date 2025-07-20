@@ -1,14 +1,14 @@
 import pytest
 
 from src.data.enums import TradeType, OrderType, AssetTabs
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.parametrize("trade_type", [TradeType.BUY, TradeType.SELL])
 def test(web, symbol, get_asset_tab_amount, trade_type, sl_type, tp_type, disable_OCT):
-    trade_object = ObjectTrade(trade_type, OrderType.MARKET, symbol=symbol)
+    trade_object = ObjTrade(trade_type, OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(OrderType.MARKET)
 
     logger.info("Step 1: Enter Chart fullscreen and open trade tab")
@@ -25,7 +25,7 @@ def test(web, symbol, get_asset_tab_amount, trade_type, sl_type, tp_type, disabl
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")
-    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_submitted_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
     logger.info(f"Step 4: Exit Chart fullscreen")
     web.trade_page.chart.close_trade_tab()
@@ -38,4 +38,4 @@ def test(web, symbol, get_asset_tab_amount, trade_type, sl_type, tp_type, disabl
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
     logger.info(f"Verify notification in Notification Box")
-    web.home_page.notifications.verify_notification_result(ObjectNoti(trade_object).open_position_details(trade_object.order_id))
+    web.home_page.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(trade_object.order_id))

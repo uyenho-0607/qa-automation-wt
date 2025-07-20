@@ -1,14 +1,14 @@
 import pytest
 
 from src.data.enums import AccountType
-from src.data.objects.account_object import ObjectDemoAccount
+from src.data.objects.account_obj import ObjDemoAccount
 from src.utils.logging_utils import logger
 
 pytestmark = [pytest.mark.not_live, pytest.mark.not_crm]
 
 
 def test(web):
-    account_info = ObjectDemoAccount().full_params()
+    account_info = ObjDemoAccount().full_params()
     use_default_deposit = 0  # random.randint(0, 1)
 
     logger.info("Step 1: Click on open demo account")

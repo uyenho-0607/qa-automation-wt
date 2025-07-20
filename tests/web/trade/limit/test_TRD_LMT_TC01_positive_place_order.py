@@ -1,8 +1,8 @@
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -19,7 +19,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web, symbol, get_asset_tab_amount, sl_type, tp_type, ):
-    trade_object = ObjectTrade(order_type=OrderType.LIMIT, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} order with sl_type: {sl_type!r}, tp_type: {tp_type!r}")
@@ -32,7 +32,7 @@ def test(web, symbol, get_asset_tab_amount, sl_type, tp_type, ):
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")
-    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_submitted_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)

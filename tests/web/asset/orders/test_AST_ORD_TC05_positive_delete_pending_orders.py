@@ -3,8 +3,8 @@ import random
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, Features
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -15,7 +15,7 @@ from src.utils.logging_utils import logger
         ]
 ))
 def test(web, symbol, search_symbol, order_type):
-    trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
+    trade_object = ObjTrade(order_type=order_type, symbol=symbol)
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
@@ -32,7 +32,7 @@ def test(web, symbol, search_symbol, order_type):
     web.assets_page.asset_tab.delete_pending_order(order_id=trade_object.order_id)
 
     logger.info(f"Verify notification banner deleted message")
-    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).delete_order_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).delete_order_banner())
 
     logger.info("Verify item is no longer displayed")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id, is_display=False)

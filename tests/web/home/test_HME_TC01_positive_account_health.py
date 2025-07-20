@@ -2,7 +2,7 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AccSummary, OrderType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -39,10 +39,10 @@ def test(web, setup_teardown):
 
 
 @pytest.fixture
-def setup_teardown(web):
+def setup_teardown(web, symbol):
 
     logger.info("- Place order to make sure account has Margin Level")
-    trade_object = ObjectTrade(order_type=OrderType.MARKET)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     APIClient().trade.post_order(trade_object)
 
     logger.info("- Refresh Page to load data")

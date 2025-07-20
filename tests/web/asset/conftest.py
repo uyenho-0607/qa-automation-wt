@@ -6,7 +6,7 @@ from src.apis.api_client import APIClient
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
 from src.data.enums import AssetTabs, OrderType, Features
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -48,7 +48,7 @@ def setup_bulk_asset_test(web, symbol):
         tab_amount = APIClient().order.get_counts(order_type=order_type)
 
         if not tab_amount:
-            trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
+            trade_object = ObjTrade(order_type=order_type, symbol=symbol)
             logger.info(f"- Place {create_amount} {trade_object.trade_type.upper()} {trade_object.order_type.upper()}")
             for _ in range(create_amount):
                 APIClient().trade.post_order(trade_object, update_price=False)

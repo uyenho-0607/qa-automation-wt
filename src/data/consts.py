@@ -24,7 +24,6 @@ FAILED_ICON = "✘"
 
 SYMBOLS = {
     Client.TRANSACT_CLOUD: {
-        # Server.MT5: ["BAKE.USD", "AXS.USD", "ICP.USD", "DOGE.USD"]
         Server.MT5: ["BAKE.USD", "AXS.USD", "DASH.USD"]
     },
     Client.LIRUNEX: {
@@ -36,3 +35,13 @@ SYMBOLS = {
 # supporting methods
 def get_symbols():
     return SYMBOLS[ProjectConfig.client][ProjectConfig.server]
+
+def get_symbol_details(symbol):
+    details = {
+        "AXS.USD": dict(point_step=0.01, decimal=2),
+        "BAKE.USD": dict(point_step=0.0001, decimal=4),
+        "DASH.USD": dict(point_step=0.01, decimal=2),
+        "DASHUSD.std": dict(point_step=0.01, decimal=2),
+        "XRPUSD.std": dict(point_step=0.01, decimal=2),
+    }
+    return details.get(symbol)

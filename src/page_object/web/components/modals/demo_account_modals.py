@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.enums import CountryDialCode, DepositAmount
-from src.data.objects.account_object import ObjectDemoAccount
+from src.data.objects.account_obj import ObjDemoAccount
 from src.data.ui_messages import UIMessages
 from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
@@ -77,7 +77,7 @@ class DemoAccountModal(BasePage):
     def click_next_button(self):
         self.actions.click(self.__btn_next)
 
-    def fill_demo_account_creation_form(self, account_info: ObjectDemoAccount, default_deposit=True, submit=True):
+    def fill_demo_account_creation_form(self, account_info: ObjDemoAccount, default_deposit=True, submit=True):
         time.sleep(1)  # wait a bit for loading default deposit value
         if account_info.name:
             self.input_name(account_info.name)

@@ -6,7 +6,7 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import OrderType, SLTPType, FillPolicy, Expiry, AssetTabs
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.trade.asset_tab import AssetTab
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
@@ -222,7 +222,7 @@ class TradingModals(BaseTrade):
 
     def modify_order(
             self,
-            trade_object: ObjectTrade,
+            trade_object: ObjTrade,
             tab: AssetTabs = None,
             sl_type: SLTPType = None,
             tp_type: SLTPType = None,
@@ -359,7 +359,7 @@ class TradingModals(BaseTrade):
         self.confirm_update_order()
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
-    def verify_trade_confirmation(self, trade_object: ObjectTrade):
+    def verify_trade_confirmation(self, trade_object: ObjTrade):
         """Verify the trade confirmation information."""
         expected = trade_object.trade_confirm_details()
 
@@ -387,7 +387,7 @@ class TradingModals(BaseTrade):
 
         soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
 
-    def verify_edit_trade_confirmation(self, trade_object: ObjectTrade):
+    def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
         expected = trade_object.trade_edit_confirm_details()
         actual_locators = [
             self.__edit_confirm_order_id,

@@ -1,13 +1,13 @@
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, SLTPType, Features
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 def test(web, symbol, search_symbol):
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     web.trade_page.place_order_panel.place_order(trade_object, submit=True)
@@ -19,7 +19,7 @@ def test(web, symbol, search_symbol):
     web.home_page.notifications.get_open_position_order_id(trade_object)
 
     # Object for new created open position
-    new_object = ObjectTrade(**{k: v for k, v in trade_object.items() if k != "order_id"})
+    new_object = ObjTrade(**{k: v for k, v in trade_object.items() if k != "order_id"})
 
     logger.info("Step 4: Navigate to Asset Page")
     web.home_page.navigate_to(Features.ASSETS)
@@ -31,7 +31,7 @@ def test(web, symbol, search_symbol):
     trade_object.volume, trade_object.units = new_object.close_volume, new_object.close_units
 
     logger.info("Verify Close order notification banner")
-    exp_noti = ObjectNoti(trade_object)
+    exp_noti = ObjNoti(trade_object)
     web.home_page.notifications.verify_notification_banner(*exp_noti.close_order_success_banner())
 
     logger.info("Verify Close Position noti in notification box")

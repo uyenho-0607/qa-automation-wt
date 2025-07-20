@@ -1,9 +1,6 @@
 import re
 import time
-from concurrent.futures import ThreadPoolExecutor
-
 from selenium.webdriver.common.by import By
-
 from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT
 from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
@@ -60,23 +57,13 @@ class Notifications(BasePage):
     # ------------------------ VERIFY ------------------------ #
     def verify_notification_banner(self, expected_title, expected_des=None, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-
-        def get_title():
-            logger.debug("- Fetching notification title")
-            return self.actions.get_text(self.__noti_title, timeout=timeout)
-
-        def get_description():
-            logger.debug("- Fetching notification description")
-            return self.actions.get_text(self.__noti_des, timeout=timeout)
-
-        # Run in parallel
-        with ThreadPoolExecutor() as executor:
-            futures = {
-                'title': executor.submit(get_title),
-                'description': executor.submit(get_description)
-            }
-            actual_title = futures['title'].result()
-            actual_des = futures['description'].result()
+        
+        # Execute sequentially instead of in parallel to avoid Device Farm connection pool issues
+        logger.debug("- Fetching notification title")
+        actual_title = self.actions.get_text(self.__noti_title, timeout=timeout)
+        
+        logger.debug("- Fetching notification description")
+        actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
         logger.debug(f"- Check noti title - {expected_title!r}")
         soft_assert(actual_title, expected_title)

@@ -3,8 +3,8 @@ import random
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, TradeType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -12,7 +12,7 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize("trade_type", random.choices([TradeType.BUY, TradeType.SELL], k=1))
 def test(web, symbol, get_asset_tab_amount, trade_type, cancel_close_order, create_order_data):
 
-    trade_object = ObjectTrade(trade_type, order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = ObjTrade(trade_type, order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_type.value.upper()} {trade_object.trade_type} Order")
@@ -22,10 +22,10 @@ def test(web, symbol, get_asset_tab_amount, trade_type, cancel_close_order, crea
     web.trade_page.asset_tab.full_close_position(trade_object.order_id)
 
     logger.info("Verify Close order notification banner")
-    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).close_order_success_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).close_order_success_banner())
 
     logger.info("Verify Close Position noti in notification box")
-    web.home_page.notifications.verify_notification_result(ObjectNoti(trade_object).position_closed_details(), check_contains=True)
+    web.home_page.notifications.verify_notification_result(ObjNoti(trade_object).position_closed_details(), check_contains=True)
 
     logger.info(f"Verify item is no longer displayed in Open Positions tab")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id, is_display=False)

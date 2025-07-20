@@ -2,7 +2,7 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import OrderType, SLTPType, Features, AccInfo
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -52,7 +52,7 @@ def setup_teardown(web, symbol):
 
     if not cur_orders:
         for _ in range(close_amount):
-            trade_object = ObjectTrade(order_type=OrderType.MARKET, indicate=SLTPType.POINTS, symbol=symbol)
+            trade_object = ObjTrade(order_type=OrderType.MARKET, indicate=SLTPType.POINTS, symbol=symbol)
             APIClient().trade.post_order(trade_object)
 
         cur_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)

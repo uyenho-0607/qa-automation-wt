@@ -2,13 +2,13 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import SLTPType, OrderType, Expiry
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
 def test(web, symbol, close_edit_confirm_modal, create_order_data):
-    trade_object = ObjectTrade(order_type=OrderType.STOP, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
     create_order_data(trade_object)

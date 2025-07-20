@@ -3,13 +3,13 @@ import random
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, SLTPType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
 def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
-    trade_object = ObjectTrade(order_type=random.choice([OrderType.LIMIT, OrderType.STOP]), symbol=symbol)
+    trade_object = ObjTrade(order_type=random.choice([OrderType.LIMIT, OrderType.STOP]), symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} order")

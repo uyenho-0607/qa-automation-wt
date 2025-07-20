@@ -1,6 +1,6 @@
 from src.data.enums import OrderType
-from src.data.objects.base_object import BaseObject
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.base_obj import BaseObj
+from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import ProjectConfig
 from src.data.ui_messages import UIMessages
 from src.utils.format_utils import remove_comma, format_str_price
@@ -19,10 +19,10 @@ Notification Sample
 """
 
 
-class ObjectNoti(BaseObject):
+class ObjNoti(BaseObj):
     """A class representing a notification with trade information."""
 
-    def __init__(self, trade_object: ObjectTrade):
+    def __init__(self, trade_object: ObjTrade):
         super().__init__()
         self.trade_object = trade_object
 
@@ -57,7 +57,7 @@ class ObjectNoti(BaseObject):
     @staticmethod
     def __banner_prices(value):
         """Add comma, enough decimal places"""
-        return format_str_price(value, ObjectTrade.DECIMAL)
+        return format_str_price(value, ObjTrade.DECIMAL)
 
     @staticmethod
     def __detail_prices(value):

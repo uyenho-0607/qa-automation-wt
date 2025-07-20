@@ -4,7 +4,7 @@ from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
 from src.data.enums import AssetTabs, OrderType
 from src.data.enums import Features
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
 from src.utils.logging_utils import logger
 
@@ -40,7 +40,7 @@ def disable_OCT(disable_OCT):
 @pytest.fixture
 def setup_close_position_test(web, get_asset_tab_amount, symbol):
     tab_amount = get_asset_tab_amount(OrderType.MARKET)
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
 
     logger.info("- Get Min volume value")
     min_vol = web.trade_page.place_order_panel.get_min_volume()

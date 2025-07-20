@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import ProjectConfig
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
@@ -267,7 +267,7 @@ class PlaceOrderPanel(BaseTrade):
 
     def place_order(
             self,
-            trade_object: ObjectTrade,
+            trade_object: ObjTrade,
             sl_type: SLTPType = SLTPType.PRICE,
             tp_type: SLTPType = SLTPType.PRICE,
             swap_to_units: bool = False,

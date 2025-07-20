@@ -4,12 +4,12 @@ from typing import Dict, Any, Optional, Tuple
 from src.data.consts import get_symbols
 from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
-from src.data.objects.base_object import BaseObject
+from src.data.objects.base_obj import BaseObj
 from src.data.project_info import ProjectConfig
 from src.utils.format_utils import format_str_prices, remove_comma, get_decimal, is_integer
 
 
-class ObjectTrade(BaseObject):
+class ObjTrade(BaseObj):
     """A class representing a trade order with basic information.
     
     Attributes:

@@ -1,7 +1,7 @@
 import pytest
 
 from src.data.enums import OrderType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 
@@ -23,7 +23,7 @@ Scenarios: - Place new order
 )
 def test(web, invalid_field, expected_message):
     order_type = OrderType.STOP_LIMIT
-    trade_object = ObjectTrade(order_type=order_type)
+    trade_object = ObjTrade(order_type=order_type)
 
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
