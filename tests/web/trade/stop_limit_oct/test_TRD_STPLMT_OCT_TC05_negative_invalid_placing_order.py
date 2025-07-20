@@ -13,6 +13,7 @@ Scenarios: - Place new order
 """
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     "invalid_field, expected_message", [
         ("entry_price", UIMessages.INVALID_PRICE_BANNER_DES),

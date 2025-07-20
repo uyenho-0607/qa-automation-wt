@@ -5,6 +5,7 @@ from typing import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
+from src.data.consts import QUICK_WAIT
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
 from src.data.objects.trade_object import ObjectTrade
 from src.data.project_info import ProjectConfig
@@ -13,7 +14,7 @@ from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import locator_format, format_dict_to_string
 from src.utils.logging_utils import logger
-from src.utils.trading_utils import calculate_trade_parameters
+from src.utils.trading_utils import calculate_trading_params
 
 
 class PlaceOrderPanel(BaseTrade):
@@ -117,7 +118,9 @@ class PlaceOrderPanel(BaseTrade):
             self.agree_and_continue()
 
     def select_tab(self, tab: TradeTab):
-        self.actions.click(cook_element(self.__trade_tab, tab))
+        locator = cook_element(self.__trade_tab, tab)
+        if self.actions.is_element_displayed(locator, timeout=QUICK_WAIT):
+            self.actions.click(locator)
 
     # UI Control Buttons
     def _control_inc_dec_btn(
@@ -270,13 +273,14 @@ class PlaceOrderPanel(BaseTrade):
             swap_to_units: bool = False,
             swap_to_volume: bool = True,
             submit: bool = False,
-            is_chart: bool = False
     ) -> None:
+
         """Place a valid order and load input data into trade_object."""
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
+        stop_loss, take_profit = "--", "--"
+
         # select trade tab
-        if not is_chart:
-            self.select_tab(TradeTab.TRADE)
+        self.select_tab(TradeTab.TRADE)
 
         # select trade_type and order_type
         self._select_trade_type(trade_type)
@@ -290,10 +294,7 @@ class PlaceOrderPanel(BaseTrade):
         units = self._get_volume_info_value()
 
         # calculate price params
-        trade_params = calculate_trade_parameters(
-            self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type, tp_type=tp_type
-        )
-        stop_loss, take_profit = "--", "--"
+        trade_params = calculate_trading_params(self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
 
         # input price values
         self._input_price(trade_params.entry_price, order_type)
@@ -338,6 +339,7 @@ class PlaceOrderPanel(BaseTrade):
         self._click_place_order_btn()
 
         if submit:
+            # time.sleep(0.5)
             self.confirm_trade()
 
         trade_object |= {k: v for k, v in trade_details.items() if v}
@@ -349,7 +351,6 @@ class PlaceOrderPanel(BaseTrade):
             take_profit=False,
             entry_price=False,
             stop_limit_price=False,
-            is_chart=False,
             submit=False
     ):
         """
@@ -362,7 +363,7 @@ class PlaceOrderPanel(BaseTrade):
         NOTE: whether stop_loss/ take_profit is invalid or entry_price is invalid
         """
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        is_chart or self.select_tab(TradeTab.TRADE)
+        self.select_tab(TradeTab.TRADE)
 
         self._select_trade_type(trade_type)
         self._select_order_type(order_type)
@@ -370,12 +371,14 @@ class PlaceOrderPanel(BaseTrade):
 
         # Calculate valid and invalid prices
         live_price = self.get_live_price(trade_type)
-        valid_price = calculate_trade_parameters(live_price, trade_type, order_type)
-        invalid_price = calculate_trade_parameters(live_price, trade_type, order_type, invalid=True)
+
+        valid_price = calculate_trading_params(live_price, trade_type, order_type)
+        invalid_price = calculate_trading_params(live_price, trade_type, order_type, is_invalid=True)
 
         # Determine which prices to use
         price = invalid_price.entry_price if entry_price else valid_price.entry_price
         stp_price = invalid_price.stop_limit_price if stop_limit_price else valid_price.stop_limit_price
+
         sl = invalid_price.stop_loss if stop_loss else valid_price.stop_loss
         tp = invalid_price.take_profit if take_profit else valid_price.take_profit
 
@@ -383,8 +386,8 @@ class PlaceOrderPanel(BaseTrade):
         self._input_price(price, order_type)
         self._input_stop_limit_price(stp_price, order_type)
 
-        not stop_loss or self._input_stop_loss(sl)
-        not take_profit or self._input_take_profit(tp)
+        self._input_stop_loss(sl)
+        self._input_take_profit(tp)
 
         self._click_place_order_btn()
         not submit or self.confirm_trade()
@@ -427,7 +430,6 @@ class PlaceOrderPanel(BaseTrade):
             sl_type: SLTPType = SLTPType.PRICE,
             tp_type: SLTPType = SLTPType.PRICE,
             submit: bool = False,
-            is_chart: bool = False,
             input_value: bool = False,
     ) -> None:
         """
@@ -437,27 +439,26 @@ class PlaceOrderPanel(BaseTrade):
             sl_type: Type of stop loss (PRICE/POINTS)
             tp_type: Type of take profit (PRICE/POINTS)
             submit: Whether to submit trade confirmation modal
-            is_chart: Whether placing order using chart
             input_value: Whether to input initial values before using control buttons
         """
-        is_chart or self.select_tab(TradeTab.TRADE)
+        self.select_tab(TradeTab.TRADE)
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
 
         self._select_trade_type(trade_type)
         self._select_order_type(order_type)
 
         # Calculate price parameters
-        params = calculate_trade_parameters(
+        prices = calculate_trading_params(
             self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type, tp_type=tp_type
         )
 
         if input_value:
             logger.debug("- Input value before using control buttons")
             self._input_volume(random.randint(1, 10))
-            self._input_stop_limit_price(params.stop_limit_price, trade_object.order_type)
-            self._input_price(params.entry_price, trade_object.order_type)
-            self._input_stop_loss(params.stop_loss)
-            self._input_take_profit(params.take_profit)
+            self._input_stop_limit_price(prices.stop_limit_price, trade_object.order_type)
+            self._input_price(prices.entry_price, trade_object.order_type)
+            self._input_stop_loss(prices.stop_loss)
+            self._input_take_profit(prices.take_profit)
 
         logger.debug("- Adjust price using increase and decrease button")
         self.control_volume()
@@ -471,7 +472,7 @@ class PlaceOrderPanel(BaseTrade):
 
         # Get final values after adjustment
         volume = self.actions.get_value(self.__txt_volume)
-        entry_price = params.entry_price if order_type == OrderType.MARKET else self._get_input_price()
+        entry_price = prices.entry_price if order_type == OrderType.MARKET else self._get_input_price()
 
         trade_details = {
             'volume': volume,

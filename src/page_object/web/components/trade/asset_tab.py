@@ -103,35 +103,11 @@ class AssetTab(BaseTrade):
 
         return order_id
 
-    def _get_col_value(
-            self,
-            tab: AssetTabs,
-            col_name: Literal["order-id", "open-date", "close-date", "profit", "symbol"]
-    ) -> List[str]:
-        """Get values from a specific column in the table."""
-        self.select_tab(tab)
-        elements = self.actions.find_elements(cook_element(self.__cols, tab.get_col(), locator_format(col_name)))
-        return [ele.text.strip() for ele in elements] if elements else []
-
     def get_order_id_list(self, tab: AssetTabs) -> List[str]:
         """Get a list of all order IDs in the specified tab."""
-        return self._get_col_value(tab, "order-id")
-
-    def _get_open_date_list(self, tab: AssetTabs) -> List[str]:
-        """Get a list of all open dates in the specified tab."""
-        return self._get_col_value(tab, "open-date")
-
-    def _get_close_date_list(self, tab: AssetTabs) -> List[str]:
-        """Get a list of all close dates in the specified tab."""
-        return self._get_col_value(tab, "close-date")
-
-    def _get_profit_list(self, tab: AssetTabs) -> List[str]:
-        """Get a list of all profits in the specified tab."""
-        return self._get_col_value(tab, "profit")
-
-    def _get_symbol_list(self, tab: AssetTabs) -> List[str]:
-        """Get a list of all symbols in the specified tab."""
-        return self._get_col_value(tab, "symbol")
+        elements = self.actions.find_elements(cook_element(self.__col_order_ids, tab.get_col()))
+        res = [ele.text.strip() for ele in elements] if elements else []
+        return res
 
     def get_item_data(self, tab: AssetTabs = None, order_id=None, trade_object: ObjectTrade = None):
         """Get item data based on order_id or last item, DO NOT leave tab & trade_object = None at the same time"""
@@ -164,9 +140,9 @@ class AssetTab(BaseTrade):
     # ------------------------ ACTIONS ------------------------ #
     def select_tab(self, tab: AssetTabs) -> None:
         """Select the specified asset tab."""
-        tab_locator = cook_element(self.__tab, locator_format(tab))
-        self.actions.click(tab_locator)
-        self.wait_for_spin_loader()
+        logger.debug(f"- Select asset tab: {tab.capitalize()}")
+        self.actions.click(cook_element(self.__tab, locator_format(tab)))
+        self.wait_for_spin_loader(timeout=SHORT_WAIT)
 
     def select_last_symbol(self, tab: AssetTabs) -> None:
         """Select the last symbol in the specified tab."""

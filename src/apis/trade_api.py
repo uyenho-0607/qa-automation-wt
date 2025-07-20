@@ -1,14 +1,15 @@
 import random
 from datetime import datetime, timedelta
+
 from src.apis.api_base import BaseAPI
 from src.apis.market_api import MarketAPI
 from src.apis.order_api import OrderAPI
-from src.data.enums import FillPolicy, Expiry, TradeType, OrderType, SLTPType
+from src.data.enums import Expiry, TradeType, OrderType, SLTPType
 from src.data.objects.trade_object import ObjectTrade
 from src.utils import DotDict
-from src.utils.format_utils import format_with_decimal, format_str_price
+from src.utils.format_utils import format_with_decimal
 from src.utils.logging_utils import logger
-from src.utils.trading_utils import calculate_trade_parameters
+from src.utils.trading_utils import calculate_trading_params
 
 
 class TradeAPI(BaseAPI):
@@ -39,7 +40,8 @@ class TradeAPI(BaseAPI):
         
         return self._symbol_details[symbol]
 
-    def _get_order_type_code(self, order_type: OrderType, trade_type: TradeType) -> int:
+    @staticmethod
+    def _get_order_type_code(order_type: OrderType, trade_type: TradeType) -> int:
         """Get the order type code for the API."""
         return ObjectTrade.get_order_type_map(order_type, trade_type)
 
@@ -65,10 +67,7 @@ class TradeAPI(BaseAPI):
         
         # Calculate trade parameters
         indicate = trade_object.get("indicate", SLTPType.PRICE)
-        trade_params = calculate_trade_parameters(
-            current_price, trade_type, order_type, 
-            sl_type=indicate.lower(), tp_type=indicate.lower()
-        )
+        trade_params = calculate_trading_params(current_price, trade_type, order_type, sl_type=indicate.lower(), tp_type=indicate.lower())
         
         # Build base payload
         payload = {
@@ -80,7 +79,7 @@ class TradeAPI(BaseAPI):
             "takeProfit": float(trade_params.take_profit),
             "fillPolicy": ObjectTrade.get_fill_policy_map(trade_object.get("fill_policy")),
             "tradeExpiry": ObjectTrade.get_expiry_map(trade_object.get("expiry")),
-            "price": float(trade_params.entry_price) if not order_type == OrderType.MARKET else None,
+            "price": float(trade_params.entry_price) if not order_type.is_market() else None,
             "priceTrigger": float(trade_params.stop_limit_price) if order_type.is_stp_limit() else None,
             "expiration": self._get_expiration_timestamp(trade_object.get("expiry"))
         }

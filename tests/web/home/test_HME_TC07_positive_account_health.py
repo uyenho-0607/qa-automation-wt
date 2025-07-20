@@ -1,12 +1,8 @@
-import random
-
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import SYMBOLS
 from src.data.enums import AccSummary, OrderType
 from src.data.objects.trade_object import ObjectTrade
-from src.data.project_info import ProjectConfig
 from src.utils.logging_utils import logger
 
 
@@ -45,14 +41,14 @@ def test(web, setup_teardown):
 @pytest.fixture
 def setup_teardown(web):
 
-    if not web.home_page.is_account_traded():
-        logger.info("- Place order to make sure account has Margin Level")
-        trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=random.choice(SYMBOLS[ProjectConfig.client]))
-        APIClient().trade.post_order(trade_object)
+    logger.info("- Place order to make sure account has Margin Level")
+    trade_object = ObjectTrade(order_type=OrderType.MARKET)
+    APIClient().trade.post_order(trade_object)
 
-        logger.info("- Refresh Page to load data")
-        web.home_page.refresh_page()
+    logger.info("- Refresh Page to load data")
+    web.home_page.refresh_page()
 
+    logger.info("- Get account details API details")
     account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     account_details = APIClient().user.get_user_account()
 

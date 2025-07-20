@@ -1,10 +1,12 @@
+import random
 from typing import Dict, Any, Optional, Tuple
 
+from src.data.consts import get_symbols
 from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_object import BaseObject
 from src.data.project_info import ProjectConfig
-from src.utils.format_utils import format_str_prices, remove_comma
+from src.utils.format_utils import format_str_prices, remove_comma, get_decimal, is_integer
 
 
 class ObjectTrade(BaseObject):
@@ -19,6 +21,7 @@ class ObjectTrade(BaseObject):
     POINT_STEP = None
     CONTRACT_SIZE = None
     DECIMAL = None
+    STOP_LEVEL = 10
 
     def __init__(
             self,
@@ -33,7 +36,7 @@ class ObjectTrade(BaseObject):
 
         self.trade_type = trade_type
         self.order_type = order_type
-        self.symbol = symbol
+        self.symbol = symbol or random.choice(get_symbols())
         self.expiry = expiry or Expiry.sample_values(self.order_type)
         self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)
 
@@ -91,16 +94,33 @@ class ObjectTrade(BaseObject):
 
     def _format_volume_units(self) -> None:
         """Format volume and units to correct string format."""
-        volume, units = format_str_prices([self.volume, self.units], 0)
+        vol_decimal = 0
+        units_decimal = 0
+
+        if not is_integer(self.units) or int(self.units) < float(self.units):
+            # remain volume unchanged as volume is float value
+            units_decimal = get_decimal(self.units)
+
+        if not is_integer(self.volume) or int(self.volume) < float(self.volume):
+            # remain volume unchanged as volume is float value
+            vol_decimal = get_decimal(self.volume)
+
+        units = format_str_prices(self.units, units_decimal)
+        volume = format_str_prices(self.volume, vol_decimal)
+
         self._update_attributes(units=units, volume=volume)
 
     def tolerance_fields(self, api_format=False) -> list:
         """Get fields that require tolerance checking."""
         tolerance_fields = []
         if self.get("sl_type") == SLTPType.POINTS:
-            tolerance_fields.append("stop_loss" if not api_format else "stopLoss")
+            tolerance_fields += ["stop_loss" if not api_format else "stopLoss"]
+
         if self.get("tp_type") == SLTPType.POINTS:
-            tolerance_fields.append("take_profit" if not api_format else "takeProfit")
+            tolerance_fields += ["take_profit" if not api_format else "takeProfit"]
+
+        if self.order_type.is_market():
+            tolerance_fields += ["entry_price"]
 
         return tolerance_fields
 

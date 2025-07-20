@@ -58,6 +58,9 @@ def pytest_sessionstart(session: pytest.Session):
     if account == AccountType.LIVE and client == Client.LIRUNEX:
         account = "crm"
 
+    if client == Client.TRANSACT_CLOUD:
+        server = Server.MT5
+
     user = session.config.getoption("user")
     browser = session.config.getoption("browser")
     headless = session.config.getoption("headless")
@@ -70,34 +73,28 @@ def pytest_sessionstart(session: pytest.Session):
     # Save options config to Config
     Config.config.argo_cd = argo_cd
     Config.config.env = env
-    Config.config.client = client
-    ProjectConfig.client = client
-    Config.config.server = Server.MT5 if client == Client.TRANSACT_CLOUD else server
-    ProjectConfig.server = server
-    Config.config.account = account
-    ProjectConfig.account = account
-    Config.config.platform = platform
-    ProjectConfig.platform = platform
     Config.config.browser = browser
     Config.config.user = user
     Config.config.headless = headless
     Config.config.allure_dir = allure_dir
+
+    Config.config.client = client
+    ProjectConfig.client = client
+
+    Config.config.server = server
+    ProjectConfig.server = server
+
+    Config.config.account = account
+    ProjectConfig.account = account
+
+    Config.config.platform = platform
+    ProjectConfig.platform = platform
 
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
         if any(value in item.nodeid for value in ["stop_limit", "stop limit"]):
             item.add_marker("non_oms")
-            item.add_marker("stop_limit_suite")
-
-        if "market" in item.nodeid:
-            item.add_marker("market_suite")
-
-        if "limit" in item.nodeid:
-            item.add_marker("limit_suite")
-
-        if "stop" in item.nodeid and "stop_limit" not in item.nodeid:
-            item.add_marker("stop_suite")
 
 
 def pytest_runtest_setup(item: pytest.Item):
@@ -110,12 +107,11 @@ def pytest_runtest_setup(item: pytest.Item):
     sub_suite = " - ".join(item.capitalize() for item in module)
     sub_suite = sub_suite.replace("_", " ").title()
 
-
     # Set allure labels
     allure.dynamic.parent_suite(ProjectConfig.client.upper())
     allure.dynamic.suite(server.upper())
     allure.dynamic.sub_suite(sub_suite)
-    
+
     if item.get_closest_marker("uat") and Config.config.env != "uat":
         pytest.skip("This test is for UAT environment only !")
 
@@ -154,7 +150,7 @@ def pytest_sessionfinish(session: pytest.Session):
         env_data = {
             "Platform": platform,
             "Environment": Config.config.env.capitalize(),
-            "Account": Config.config.account.capitalize(),
+            "Account": "Live/Crm" if ProjectConfig.account != AccountType.DEMO else AccountType.DEMO.capitalize(),
         }
 
         with open(f"{allure_dir}/environment.properties", "w") as f:

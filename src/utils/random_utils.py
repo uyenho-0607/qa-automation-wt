@@ -13,16 +13,12 @@ THAI_MOBILE_PREFIXES = [
 
 
 def random_userid() -> str:
-    """
-    Format: 10 digits number
-    """
+    """Format: 10 digits number"""
     return ''.join(random.choices(string.digits, k=10))
 
 
 def random_password() -> str:
-    """
-    Format: 12 characters including uppercase, lowercase, numbers, and special characters
-    """
+    """Format: 12 characters including uppercase, lowercase, numbers, and special characters"""
     # Define character sets
     uppercase = string.ascii_uppercase
     lowercase = string.ascii_lowercase
@@ -47,9 +43,7 @@ def random_password() -> str:
 
 
 def random_email() -> str:
-    """
-    Generate a random email address with some popular domain.
-    """
+    """Generate a random email address with some popular domain."""
     # Generate random username (8-12 characters)
     domains = [
         "gmail.com",
@@ -67,10 +61,7 @@ def random_email() -> str:
 
 
 def random_phone_number(country_code: int | str) -> str:
-    """
-    Generate a random realistic phone number based on the country code.
-    Focuses on common patterns only.
-    """
+    """Generate a random realistic phone number based on the country code. Focuses on common patterns only."""
     match str(country_code):
         case '84':  # Vietnam - most common is 09x
             number = '09' + ''.join(random.choices(string.digits, k=8))
@@ -98,25 +89,18 @@ def random_phone_number(country_code: int | str) -> str:
 
 
 def random_username() -> str:
-    """
-    Generate a random username with prefix 'Auto'.
-    Format: Auto + random string of 8 characters (letters and numbers)
-    """
+    """Generate a random username with prefix 'Auto'. Format: Auto + random string of 8 characters (letters and numbers)"""
     random_suffix = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
     return f"Auto {random_suffix}"
 
 
 def random_invalid_email() -> str:
-    """
-    Generate an invalid email address randomly.
-    """
+    """Generate an invalid email address randomly."""
     return ''.join(random.choices(string.ascii_lowercase + string.digits, k=10))
 
 
 def random_number_by_length(length: int = 20) -> str:
-    """
-    Generate a random number with specified length.
-    """
+    """Generate a random number with specified length."""
     if length <= 0:
         return ""
     return ''.join(random.choices(string.digits, k=length))

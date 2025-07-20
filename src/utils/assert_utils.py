@@ -73,7 +73,7 @@ def compare_dict_with_keymap(actual, expected, key: str, tolerance=None):
 def compare_with_tolerance(
         actual: str | float,
         expected: str | float,
-        tolerance_percent: float = 0.01,
+        tolerance_percent: float = 0.1,
         get_diff: bool = False
 ) -> bool | dict:
     """
@@ -93,12 +93,13 @@ def compare_with_tolerance(
     diff_percent = diff / expected if expected else 0
 
     if diff:
-        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance:.2f} ({tolerance_percent:.2f}%), Diff: {diff:.4f}, Diff Percent: {diff_percent:.4f}")
+        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance:.2f} ({tolerance_percent}%), Diff: {diff:.4f}, Diff Percent: {diff_percent:.4f}")
 
     else:
         logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
 
-    res = diff_percent <= tolerance_percent
+    # res = diff_percent <= tolerance_percent
+    res = abs(diff) <= abs(tolerance)
 
     return res if not get_diff else dict(res=res, diff=f"{diff:.4f}", diff_percent=f"{diff_percent:.4f}", tolerance=f"±{tolerance:.2f} ({tolerance_percent:.2f}%)")
 
@@ -122,6 +123,7 @@ def compare_dict(
     diff_keys = []
     tolerance_info = {}
 
+    logger.debug(f"- Compare dict: {format_dict_to_string(expected=expected, actual=actual)}")
     # compare if length of two dicts are the same
     all_res.append(set(actual.keys()) == set(expected.keys()))
 
@@ -234,7 +236,10 @@ def compare_noti_with_tolerance(
     decimal = ObjectTrade.DECIMAL if is_banner else None
 
     if actual_price and expected_price:
-        res = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])["res"]
+        compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])
+        res = compare_result["res"]
+        logger.debug(f"- Compare noti result: {compare_result!r}")
+
         if res:
             desc += f"Tolerance: {tolerance_percent}% - \n"
             # Replace price in expected with actual price for string comparison

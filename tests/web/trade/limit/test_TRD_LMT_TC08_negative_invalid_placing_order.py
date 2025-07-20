@@ -30,3 +30,9 @@ def test(web, invalid_field, expected_message):
 
     logger.info("Verify invalid notification banner")
     web.home_page.notifications.verify_notification_banner(UIMessages.INVALID_ORDER_BANNER_TITLE, expected_message)
+
+
+@pytest.fixture(autouse=True)
+def cleanup(web):
+    yield
+    web.home_page.notifications.close_noti_banner()

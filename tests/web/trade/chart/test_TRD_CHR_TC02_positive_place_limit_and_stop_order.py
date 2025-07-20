@@ -22,7 +22,7 @@ def test(web, symbol, get_asset_tab_amount, trade_type, order_type, sl_type, tp_
     web.trade_page.chart.open_trade_tab()
 
     logger.info(f"Step 2: Place order")
-    web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, is_chart=True)
+    web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify trade confirmation modal information is correct")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
