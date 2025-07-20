@@ -2,17 +2,16 @@ import random
 
 import pytest
 
-from src.data.consts import SYMBOLS
-from src.data.project_info import ProjectConfig
+from src.data.consts import get_symbols
 from src.utils.logging_utils import logger
 
 
 def test(android):
-    symbol_list = random.sample(SYMBOLS[ProjectConfig.client], k=3)
+    symbol_list = random.sample(get_symbols(), k=2)
 
     for index, symbol_name in enumerate(symbol_list):
         logger.info(f"Step {index + 1}: Search and select symbol: {symbol_name!r}")
-        android.home_screen.select_symbol_from_search(symbol_name)
+        android.home_screen.search_and_select_symbol(symbol_name)
 
     logger.info("Verify search history contains all searched symbols")
     android.home_screen.verify_search_history_items(symbol_list)

@@ -42,6 +42,6 @@ def get_symbol_details(symbol):
         "BAKE.USD": dict(point_step=0.0001, decimal=4),
         "DASH.USD": dict(point_step=0.01, decimal=2),
         "DASHUSD.std": dict(point_step=0.01, decimal=2),
-        "XRPUSD.std": dict(point_step=0.01, decimal=2),
+        "XRPUSD.std": dict(point_step=0.0001, decimal=4),
     }
     return details.get(symbol)
