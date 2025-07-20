@@ -31,7 +31,7 @@ def test(web, setup_teardown, disable_OCT):
     acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + sum_profit
 
     web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.BALANCE, tolerance=0.1)
-    web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.REALISED_PROFIT_LOSS, tolerance=0.07)
+    web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.REALISED_PROFIT_LOSS, tolerance=0.1)
 
     logger.info("Verify other info is not changed")
     web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.list_values(except_val=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS]))

@@ -1,3 +1,4 @@
+import allure
 import pytest
 
 from src.data.enums import Features, MarketsSection, WatchListTab
@@ -5,6 +6,7 @@ from src.utils import DotDict
 from src.utils.logging_utils import logger
 
 
+@allure.issue("https://aquariux.atlassian.net/browse/WT-8765", "WT-8765")
 @pytest.mark.critical
 def test(web, setup_test):
     section_symbol = setup_test
