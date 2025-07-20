@@ -1,7 +1,7 @@
 import random
 
 from src.data.enums import OrderType, TradeType, SLTPType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
 from src.utils.format_utils import remove_comma, get_decimal, format_str_price
 
@@ -11,7 +11,7 @@ RR_RATIO = [1.0, 1.5, 2.0]
 
 def _point_step(current_price):
     """Get point step value"""
-    point_step = ObjectTrade.POINT_STEP
+    point_step = ObjTrade.POINT_STEP
     if not point_step:
         # extract point step from current price
         str_price = str(current_price)
@@ -27,7 +27,7 @@ def _point_step(current_price):
 
 def _decimal(current_price):
     """Get decimal places"""
-    decimal = ObjectTrade.DECIMAL
+    decimal = ObjTrade.DECIMAL
     if not decimal:
         # extract decimal from current price
         decimal = get_decimal(current_price)
@@ -51,7 +51,7 @@ def _adjust_prices(price, diff_price, format_round=True):
 
 def random_points(current_price: float, min_pct_dis=0.1, max_pct_dis=0.2):
     """Random points with safe range"""
-    stop_level = ObjectTrade.STOP_LEVEL
+    stop_level = ObjTrade.STOP_LEVEL
     point_step = _point_step(current_price)
 
     min_price_dist = max(current_price * min_pct_dis, 0.005)
@@ -141,13 +141,13 @@ def get_pending_price(current_price, trade_type: TradeType, order_type: OrderTyp
 
     current_price = remove_comma(current_price)
     point_step = _point_step(current_price)
-    stop_level = ObjectTrade.STOP_LEVEL or 10
+    stop_level = ObjTrade.STOP_LEVEL or 10
 
     # safe price gap between pending and current price
     gap_buffer = stop_level * point_step * random.randint(2, 5)
 
     # Crypto-optimized gap percentages
-    gap_percent_range = (0.5, 2.0) if order_type.is_stp_limit() else (0.1, 0.5)
+    gap_percent_range = (0.5, 2.0)
     random_percent = round(random.uniform(*gap_percent_range), 5)
 
     gap_price = gap_buffer + current_price * (random_percent / 100)
@@ -230,5 +230,5 @@ def calculate_partial_close(trade_object):
 
 
 if __name__ == '__main__':
-    res = calculate_trading_params(26.26, TradeType.BUY, OrderType.MARKET)
+    res = calculate_trading_params(26.19, TradeType.BUY, OrderType.LIMIT)
     print(res)

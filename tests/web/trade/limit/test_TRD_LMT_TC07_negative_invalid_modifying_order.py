@@ -1,7 +1,7 @@
 import pytest
 
 from src.data.enums import OrderType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 
@@ -37,7 +37,7 @@ def test(web, invalid_field, expected_message, close_edit_confirm_modal, setup_t
 @pytest.fixture(scope="package", autouse=True)
 def setup_test(create_order_data, symbol):
 
-    trade_object = ObjectTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
+    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
 
     logger.info(f"- Place {trade_object.trade_type} Order")
     create_order_data(trade_object)

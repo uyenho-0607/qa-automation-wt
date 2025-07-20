@@ -4,19 +4,19 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.fixture(autouse=True, scope="package")
-def get_symbol_details(symbol):
-    logger.debug(f"- Getting details of symbol {symbol!r}")
-    market_details = APIClient().market.get_symbol_details(symbol)
-
-    ObjectTrade.POINT_STEP = market_details.get("pointStep")
-    ObjectTrade.DECIMAL = market_details.get("decimal")
-    ObjectTrade.CONTRACT_SIZE = market_details.get("contractSize")
-    ObjectTrade.STOP_LEVEL = market_details.get("stopsLevel")
+# @pytest.fixture(autouse=True, scope="package")
+# def get_symbol_details(symbol):
+#     logger.debug(f"- Getting details of symbol {symbol!r}")
+#     market_details = APIClient().market.get_symbol_details(symbol)
+#
+#     ObjectTrade.POINT_STEP = market_details.get("pointStep")
+#     ObjectTrade.DECIMAL = market_details.get("decimal")
+#     ObjectTrade.CONTRACT_SIZE = market_details.get("contractSize")
+#     ObjectTrade.STOP_LEVEL = market_details.get("stopsLevel")
 
 
 @pytest.fixture(scope="package")
@@ -45,7 +45,7 @@ def setup_bulk_test(web, symbol):
         order_ids = APIClient().order.get_order_id_list(symbol, order_type)
 
         if not order_ids:
-            trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
+            trade_object = ObjTrade(order_type=order_type, symbol=symbol)
 
             logger.info(f"- Place {create_amount} {order_type.upper()} orders")
             for _ in range(create_amount):

@@ -5,7 +5,7 @@ import pytest
 
 from src.data.consts import get_symbols
 from src.data.enums import OrderType, Features, WatchListTab, MarketsSection
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -25,7 +25,7 @@ def test(web, disable_OCT):
         web.trade_page.watch_list.select_symbol(_symbol)
 
         logger.info(f"Step {4 + idx * 2}: Place Market orders")
-        web.trade_page.place_order_panel.place_order(ObjectTrade(order_type=OrderType.MARKET, symbol=_symbol), submit=True)
+        web.trade_page.place_order_panel.place_order(ObjTrade(order_type=OrderType.MARKET, symbol=_symbol), submit=True)
         web.home_page.notifications.close_noti_banner()
         time.sleep(2)
 
@@ -38,7 +38,7 @@ def test(web, disable_OCT):
     logger.info(f"Step 14: Place Pending Order for symbol: {symbol_list[-1]}")
     web.markets_page.select_symbol(MarketsSection.MY_TRADE)
 
-    trade_obj = ObjectTrade(symbol=symbol_list[-1], order_type=OrderType.LIMIT)
+    trade_obj = ObjTrade(symbol=symbol_list[-1], order_type=OrderType.LIMIT)
     web.trade_page.place_order_panel.place_order(trade_obj, submit=True)
 
     logger.info("Step 15: Navigate to Market Page")

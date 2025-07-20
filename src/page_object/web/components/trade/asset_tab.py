@@ -7,7 +7,7 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
@@ -90,7 +90,7 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, trade_object: ObjectTrade, tab: AssetTabs = None) -> str:
+    def get_last_order_id(self, trade_object: ObjTrade, tab: AssetTabs = None) -> str:
         """Get the latest order ID from the specified tab and update value into trade_object."""
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
 
@@ -109,7 +109,7 @@ class AssetTab(BaseTrade):
         res = [ele.text.strip() for ele in elements] if elements else []
         return res
 
-    def get_item_data(self, tab: AssetTabs = None, order_id=None, trade_object: ObjectTrade = None):
+    def get_item_data(self, tab: AssetTabs = None, order_id=None, trade_object: ObjTrade = None):
         """Get item data based on order_id or last item, DO NOT leave tab & trade_object = None at the same time"""
 
         if not tab and trade_object is not None:
@@ -173,7 +173,7 @@ class AssetTab(BaseTrade):
 
     click_delete_button = click_close_button
 
-    def delete_pending_order(self, order_id: int = 0, trade_object: ObjectTrade = None, confirm=True, wait=False) -> None:
+    def delete_pending_order(self, order_id: int = 0, trade_object: ObjTrade = None, confirm=True, wait=False) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         tab = AssetTabs.PENDING_ORDER
         if order_id:
@@ -335,7 +335,7 @@ class AssetTab(BaseTrade):
         soft_assert(is_select, True, error_message=f"Tab {tab.value!r} is not selected")
 
 
-    def verify_item_data(self, trade_object: ObjectTrade, tab: AssetTabs = None) -> None:
+    def verify_item_data(self, trade_object: ObjTrade, tab: AssetTabs = None) -> None:
         """Verify item data in asset tab"""
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
         self.select_tab(tab)

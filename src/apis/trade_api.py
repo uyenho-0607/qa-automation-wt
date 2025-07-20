@@ -5,7 +5,7 @@ from src.apis.api_base import BaseAPI
 from src.apis.market_api import MarketAPI
 from src.apis.order_api import OrderAPI
 from src.data.enums import Expiry, TradeType, OrderType, SLTPType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
 from src.utils.format_utils import format_with_decimal
 from src.utils.logging_utils import logger
@@ -43,7 +43,7 @@ class TradeAPI(BaseAPI):
     @staticmethod
     def _get_order_type_code(order_type: OrderType, trade_type: TradeType) -> int:
         """Get the order type code for the API."""
-        return ObjectTrade.get_order_type_map(order_type, trade_type)
+        return ObjTrade.get_order_type_map(order_type, trade_type)
 
     @staticmethod
     def _get_expiration_timestamp(expiry, move_days: int = 1) -> int | None:
@@ -55,7 +55,7 @@ class TradeAPI(BaseAPI):
         tomorrow_9pm = now.replace(hour=21, minute=0, second=0, microsecond=0) + timedelta(days=move_days)
         return int(tomorrow_9pm.timestamp() * 1000)
 
-    def _build_payload(self, trade_object: ObjectTrade) -> dict:
+    def _build_payload(self, trade_object: ObjTrade) -> dict:
         """Build the API payload for placing an order."""
         symbol = trade_object.symbol
         trade_type = trade_object.trade_type
@@ -77,8 +77,8 @@ class TradeAPI(BaseAPI):
             "indicate": indicate.upper(),
             "stopLoss": float(trade_params.stop_loss),
             "takeProfit": float(trade_params.take_profit),
-            "fillPolicy": ObjectTrade.get_fill_policy_map(trade_object.get("fill_policy")),
-            "tradeExpiry": ObjectTrade.get_expiry_map(trade_object.get("expiry")),
+            "fillPolicy": ObjTrade.get_fill_policy_map(trade_object.get("fill_policy")),
+            "tradeExpiry": ObjTrade.get_expiry_map(trade_object.get("expiry")),
             "price": float(trade_params.entry_price) if not order_type.is_market() else None,
             "priceTrigger": float(trade_params.stop_limit_price) if order_type.is_stp_limit() else None,
             "expiration": self._get_expiration_timestamp(trade_object.get("expiry"))
@@ -121,7 +121,7 @@ class TradeAPI(BaseAPI):
             )
             
             # Update entry price with actual executed price
-            payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjectTrade.DECIMAL)
+            payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjTrade.DECIMAL)
             
             # Update SL/TP if using points
             if payload.pop("indicate", "").lower() == SLTPType.POINTS.lower():
@@ -136,7 +136,7 @@ class TradeAPI(BaseAPI):
         trade_object.update(payload)
         trade_object.pop("indicate", None)
 
-    def post_order(self, trade_object: ObjectTrade, update_price=True):
+    def post_order(self, trade_object: ObjTrade, update_price=True):
         """Place a trading order."""
         max_retries = 3
         

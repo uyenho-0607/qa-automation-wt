@@ -1,7 +1,7 @@
 from src.apis.api_client import APIClient
 from src.core.actions.web_actions import WebActions
 from src.data.enums import URLPaths
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.trading_modals import TradingModals
 from src.page_object.web.components.trade.asset_tab import AssetTab
@@ -30,7 +30,7 @@ class TradePage(BasePage):
     # ------------------------ VERIFY ------------------------ #
 
     @staticmethod
-    def verify_placed_order_data(trade_object: ObjectTrade, api_data: dict):
+    def verify_placed_order_data(trade_object: ObjTrade, api_data: dict):
         """Verify placed order against API data"""
 
         def _get_api_data():
@@ -46,7 +46,7 @@ class TradePage(BasePage):
             # Round floats for comparison
             for key in _expected:
                 if isinstance(_expected[key], float):
-                    _expected[key] = round(_expected[key], ndigits=ObjectTrade.DECIMAL)
+                    _expected[key] = round(_expected[key], ndigits=ObjTrade.DECIMAL)
             _expected["volume"] = _api_data.get("lotSize")
             return _expected
 

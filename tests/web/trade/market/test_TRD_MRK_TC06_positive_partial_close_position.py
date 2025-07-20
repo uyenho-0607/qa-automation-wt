@@ -3,22 +3,22 @@ import time
 
 import pytest
 from src.data.enums import AssetTabs, OrderType, TradeType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
 @pytest.mark.parametrize("trade_type", random.choices([TradeType.BUY, TradeType.SELL], k=1))
 def test(web, symbol, get_asset_tab_amount, cancel_close_order, trade_type, create_order_data):
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_type.value.upper()} {trade_object.trade_type} Order")
     create_order_data(trade_object)
 
     # Object for new created open position
-    new_object = ObjectTrade(**{k: v for k, v in trade_object.items() if k != "order_id"})
+    new_object = ObjTrade(**{k: v for k, v in trade_object.items() if k != "order_id"})
 
     logger.info("Step 2: Close Position")
     time.sleep(1)
@@ -28,13 +28,13 @@ def test(web, symbol, get_asset_tab_amount, cancel_close_order, trade_type, crea
     trade_object.volume, trade_object.units = new_object.close_volume, new_object.close_units
 
     logger.info("Verify Close order notification banner")
-    web.home_page.notifications.verify_notification_banner(*ObjectNoti(trade_object).close_order_success_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).close_order_success_banner())
 
     logger.info(f"Verify new open position created, asset tab amount = {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
     logger.info("Verify Close Position noti in notification box")
-    web.home_page.notifications.verify_notification_result(ObjectNoti(trade_object).position_closed_details(), check_contains=True)
+    web.home_page.notifications.verify_notification_result(ObjNoti(trade_object).position_closed_details(), check_contains=True)
 
     logger.info("Verify Open Position details in asset tab")
     web.trade_page.asset_tab.verify_item_data(new_object)

@@ -4,16 +4,21 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
+from src.data.consts import get_symbols, get_symbol_details
 from src.data.enums import OrderType, BulkCloseOpts
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.format_utils import format_str_prices
 from src.utils.logging_utils import logger
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="package", autouse=True)
 def symbol():
     selected_symbol = random.choice(get_symbols())
+
+    symbol_details = get_symbol_details(selected_symbol)
+    ObjTrade.POINT_STEP = symbol_details["point_step"]
+    ObjTrade.DECIMAL = symbol_details["decimal"]
+
     return selected_symbol
 
 
@@ -55,7 +60,7 @@ def update_entry_price(web):
 
             if resp.get("openPrice"):
                 logger.debug(f"- Update entry price from {trade_object.entry_price} to {resp["openPrice"]}")
-                trade_object["entry_price"] = format_str_prices(round(resp["openPrice"], ndigits=ObjectTrade.DECIMAL), ObjectTrade.DECIMAL)
+                trade_object["entry_price"] = format_str_prices(round(resp["openPrice"], ndigits=ObjTrade.DECIMAL), ObjTrade.DECIMAL)
 
         return None
 

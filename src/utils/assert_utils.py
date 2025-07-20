@@ -4,7 +4,7 @@ from typing import Any
 import pytest_check as check
 
 from src.core.decorators import attach_table_details
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import DriverList, StepLogs
 from src.utils import DotDict
 from src.utils.allure_utils import attach_screenshot
@@ -233,7 +233,7 @@ def compare_noti_with_tolerance(
     actual_price = extract_noti_prices(actual)
     expected_price = extract_noti_prices(expected)
     desc = ""
-    decimal = ObjectTrade.DECIMAL if is_banner else None
+    decimal = ObjTrade.DECIMAL if is_banner else None
 
     if actual_price and expected_price:
         compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])

@@ -2,7 +2,7 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -12,7 +12,7 @@ def pre_setup_order(symbol, web):
     tab = AssetTabs.get_tab(order_type)
 
     tab_amount = APIClient().order.get_counts(order_type=order_type)
-    trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
+    trade_object = ObjTrade(order_type=order_type, symbol=symbol)
 
     if not tab_amount:
         logger.info("- Place new order")

@@ -1,7 +1,7 @@
 from src.utils import DotDict
 
 
-class BaseObject(DotDict):
+class BaseObj(DotDict):
     """Base class for all objects with common functionality."""
 
     def __init__(self, **kwargs):

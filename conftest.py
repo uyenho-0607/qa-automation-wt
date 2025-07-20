@@ -2,6 +2,8 @@ import os.path
 import shutil
 import allure
 import pytest
+from allure_commons.types import Severity
+
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR
@@ -111,6 +113,12 @@ def pytest_runtest_setup(item: pytest.Item):
     allure.dynamic.parent_suite(ProjectConfig.client.upper())
     allure.dynamic.suite(server.upper())
     allure.dynamic.sub_suite(sub_suite)
+
+    if item.get_closest_marker("critical"):
+        allure.dynamic.severity(Severity.CRITICAL)
+
+    if Config.config.user:
+        item.add_marker(f"user: {Config.config.user}")
 
     if item.get_closest_marker("uat") and Config.config.env != "uat":
         pytest.skip("This test is for UAT environment only !")

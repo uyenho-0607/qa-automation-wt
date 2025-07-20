@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.data.enums import SettingOptions, Language, ThemeOptions
 from src.data.enums.home import NotiSettingsOpts
-from src.data.objects.account_object import ObjectDemoAccount
+from src.data.objects.account_obj import ObjDemoAccount
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.demo_account_modals import DemoAccountModal
 from src.page_object.web.components.modals.notification_settings import NotificationSettingsModal
@@ -37,7 +37,7 @@ class Settings(BasePage):
         self.__open_setting()
         self.actions.click(cook_element(self.__opt_setting, locator_format(account)))
 
-    def open_demo_account(self, account_info: ObjectDemoAccount):
+    def open_demo_account(self, account_info: ObjDemoAccount):
         self.__open_setting()
         self.actions.click(cook_element(self.__opt_setting, locator_format(SettingOptions.OPEN_DEMO_ACCOUNT)))
         self.demo_account_modal.fill_demo_account_creation_form(account_info)

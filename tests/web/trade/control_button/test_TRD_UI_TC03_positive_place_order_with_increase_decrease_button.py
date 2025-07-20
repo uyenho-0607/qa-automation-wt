@@ -3,8 +3,8 @@ import random
 import pytest
 
 from src.data.enums import AssetTabs, OrderType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -20,7 +20,7 @@ def test(web, symbol, get_asset_tab_amount, order_type):
 
     tab = AssetTabs.get_tab(order_type)
 
-    trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
+    trade_object = ObjTrade(order_type=order_type, symbol=symbol)
     tab_amount = get_asset_tab_amount(order_type)
     # -------------------
 
@@ -34,7 +34,7 @@ def test(web, symbol, get_asset_tab_amount, order_type):
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")
-    exp_noti = ObjectNoti(trade_object)
+    exp_noti = ObjNoti(trade_object)
     web.home_page.notifications.verify_notification_banner(*exp_noti.order_submitted_banner())
 
     logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")

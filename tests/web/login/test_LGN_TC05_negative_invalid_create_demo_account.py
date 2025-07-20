@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from src.data.objects.account_object import ObjectDemoAccount
+from src.data.objects.account_obj import ObjDemoAccount
 from src.page_object.web.components.modals.demo_account_modals import DemoAccountModal
 from src.utils.logging_utils import logger
 
@@ -10,7 +10,7 @@ pytestmark = [pytest.mark.not_live, pytest.mark.not_crm]
 
 
 def test_missing_all_required_fields(web):
-    account_info = ObjectDemoAccount(agreement=False)
+    account_info = ObjDemoAccount(agreement=False)
     validation_fields = list(DemoAccountModal.validation_fields.values())
 
     logger.info("Step 1: Open demo account modal")
@@ -24,7 +24,7 @@ def test_missing_all_required_fields(web):
 
 
 def test_invalid_email_and_phone_number_format(web):
-    account_info = ObjectDemoAccount().invalid_format()
+    account_info = ObjDemoAccount().invalid_format()
     validation_fields = [DemoAccountModal.validation_fields.email, DemoAccountModal.validation_fields.phone_number]
 
     logger.info("Step 1: Open demo account modal")
@@ -39,7 +39,7 @@ def test_invalid_email_and_phone_number_format(web):
 
 @pytest.mark.parametrize("missing_field", random.choices(list(DemoAccountModal.validation_fields.keys())))
 def test_single_missing_field(web, missing_field):
-    account_info = ObjectDemoAccount().full_params()
+    account_info = ObjDemoAccount().full_params()
     account_info[missing_field] = None
 
     logger.info("Step 1: Open demo account modal")
