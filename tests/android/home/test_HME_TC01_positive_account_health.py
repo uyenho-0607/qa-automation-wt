@@ -28,9 +28,9 @@ def test(android, setup):
 
 
 @pytest.fixture
-def setup(android):
+def setup(android, symbol):
     logger.info("- Place order to make sure account has Margin Level")
-    trade_object = ObjTrade(order_type=OrderType.MARKET)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     APIClient().trade.post_order(trade_object)
 
     account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)

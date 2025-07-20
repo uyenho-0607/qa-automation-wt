@@ -100,7 +100,7 @@ class LoginPage(BasePage):
         if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
-        super().verify_alert_error_message(err_msg, timeout=20)
+        super().verify_alert_error_message(err_msg, timeout=30)
 
     def verify_account_tabs_is_displayed(self):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)

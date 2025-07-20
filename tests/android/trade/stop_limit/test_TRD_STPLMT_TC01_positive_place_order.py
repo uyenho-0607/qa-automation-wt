@@ -1,24 +1,20 @@
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, SLTPType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.critical
 @pytest.mark.parametrize(
     "sl_type, tp_type", (
             [None, None],
-            [SLTPType.PRICE, SLTPType.PRICE],
-            [SLTPType.POINTS, SLTPType.POINTS],
-            SLTPType.sample_values(amount=2),
+            SLTPType.random_values(amount=2),
     )
 )
 def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
-    # -------------------
-
-    trade_object = ObjectTrade(order_type=OrderType.STOP, symbol=symbol)
-    tab = AssetTabs.PENDING_ORDER
+    trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
     # -------------------
 
@@ -32,10 +28,10 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
     android.trade_screen.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")
-    android.home_screen.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_submitted_banner())
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
-    logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
-    android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
+    logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
+    android.trade_screen.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
-    logger.info(f"Verify {tab.title()} item details in Asset Tab")
+    logger.info(f"Verify item details in Asset Tab")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

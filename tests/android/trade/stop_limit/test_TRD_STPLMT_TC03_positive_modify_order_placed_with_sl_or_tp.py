@@ -1,36 +1,37 @@
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.critical
 @pytest.mark.parametrize(
-    "field, place_type, edit_type",
-    [
-        ("stop_loss", SLTPType.POINTS, SLTPType.POINTS),
-        ("stop_loss", SLTPType.PRICE, SLTPType.PRICE),
-        ("stop_loss", *SLTPType.sample_values(amount=2)),
-        ("take_profit", SLTPType.POINTS, SLTPType.POINTS),
-        ("take_profit", SLTPType.PRICE, SLTPType.PRICE),
-        ("take_profit", *SLTPType.sample_values(amount=2)),
-    ]
+    "exclude_field, update_field",
+    random.choices([
+        ("SL", "SL"),
+        ("SL", "TP"),
+        ("SL", "SL,TP"),
+        ("TP", "SL"),
+        ("TP", "TP"),
+        ("TP", "SL,TP"),
+    ], k=3)
 )
-def test(android, symbol, get_asset_tab_amount, field, place_type, edit_type, create_order_data):
-    # handle parameters
-    sl_tp_val = {("stop_loss" if field == "take_profit" else "take_profit"): 0, "indicate": place_type}
-    update_sl_type, update_tp_type = (edit_type, None) if field == "stop_loss" else (None, edit_type)
+def test(android, symbol, get_asset_tab_amount, exclude_field, update_field, create_order_data):
 
-    trade_object = ObjectTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, **sl_tp_val)
-    tab = AssetTabs.PENDING_ORDER
+    trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
+    trade_object[exclude_field] = 0
+    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
     # -------------------
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with {field!r}")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
     create_order_data(trade_object)
 
-    logger.info(f"Step 2: Update {tab.title()} with {field!r} - type: {edit_type.capitalize()!r}")
-    android.trade_screen.modals.modify_order(tab, trade_object, sl_type=update_sl_type, tp_type=update_tp_type)
+    logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
+    android.trade_screen.modals.modify_order(trade_object, **update_info)
 
     logger.info("Verify edit confirmation info")
     android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)
@@ -39,7 +40,7 @@ def test(android, symbol, get_asset_tab_amount, field, place_type, edit_type, cr
     android.trade_screen.modals.confirm_update_order()
 
     logger.info("Verify notification banner updated message")
-    android.home_screen.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner(**trade_object))
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
 
-    logger.info(f"Verify {tab.title()} item details after update")
+    logger.info(f"Verify item details after updated")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

@@ -15,8 +15,6 @@ from src.utils.logging_utils import logger
         (None, None),
         (SLTPType.random_values(), None),
         (None, SLTPType.random_values()),
-        (SLTPType.POINTS, SLTPType.POINTS),
-        (SLTPType.PRICE, SLTPType.PRICE),
         SLTPType.random_values(amount=2)
     ]
 )

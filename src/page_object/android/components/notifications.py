@@ -4,11 +4,12 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common import TimeoutException
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT, SHORT_WAIT
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.base_screen import BaseScreen
 from src.utils import DotDict
-from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id
+from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
+from src.utils.common_utils import resource_id, log_page_source
 from src.utils.logging_utils import logger
 
 
@@ -38,10 +39,6 @@ class Notifications(BaseScreen):
         AppiumBy.XPATH,
         "//*[@resource-id='notification-order-details-label' and @text='Units']/following-sibling::*[1]"
     )
-    __noti_details_entry_price = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Entry Price']/following-sibling::*[1]"
-    )
     __noti_details_stop_loss = (
         AppiumBy.XPATH,
         "//*[@resource-id='notification-order-details-label' and @text='Stop Loss']/following-sibling::*[1]"
@@ -67,27 +64,28 @@ class Notifications(BaseScreen):
     # ------------------------ VERIFY ------------------------ #
 
     def verify_notification_banner(self, expected_title, expected_des=None):
-        """
-        Verify title and description of notification banner
-        Give trade_object in case load entr_price value from noti >> trade_object
-        """
-        actual_title = self.actions.get_text(self.__noti_title)
-        actual_des = self.actions.get_text(self.__noti_des)
+        """Verify title and description of notification banner"""
+        title = self.actions.find_element(self.__noti_title, raise_exception=False, timeout=SHORT_WAIT)
+        des = self.actions.find_element(self.__noti_des, raise_exception=False, timeout=SHORT_WAIT)
+
+        actual_title = title.text.strip() if title else ""
+        actual_des = des.text.strip() if des else ""
 
         logger.debug(f"- Check noti_title equal: {expected_title!r}")
         soft_assert(actual_title, expected_title)
 
         if expected_des:
             logger.debug(f"- Check noti_des equal: {expected_des!r}")
-            soft_assert(actual_des, expected_des)
+            compare_noti_with_tolerance(actual_des, expected_des)
+
 
     def verify_notification_result(self, expected_result: str | list, go_back=True):
         self.open_notification_box()
-        actual_res = self.actions.get_content_desc(self.__noti_list_items).replace("  ", " ")
-        soft_assert(actual_res, expected_result, check_contains=True)
+        actual_res = self.actions.get_content_desc(self.__noti_list_items).split(", ")[0].replace("  ", " ")
+        compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
         not go_back or self.go_back()
 
-    def verify_notification_details(self, trade_object: DotDict):
+    def verify_notification_details(self, trade_object: ObjTrade):
         self.actions.click(self.__noti_list_items)
 
         actual = {

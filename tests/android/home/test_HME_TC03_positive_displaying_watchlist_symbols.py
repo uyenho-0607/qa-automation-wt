@@ -1,9 +1,8 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import SYMBOLS, get_symbols
+from src.data.consts import get_symbols
 from src.data.enums import WatchListTab, Features
-from src.data.project_info import ProjectConfig
 from src.utils.logging_utils import logger
 
 

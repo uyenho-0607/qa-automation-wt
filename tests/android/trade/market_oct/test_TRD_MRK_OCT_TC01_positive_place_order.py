@@ -1,8 +1,8 @@
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, Features, SLTPType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
 )
 def test(android, symbol, get_asset_tab_amount, sl_type, tp_type, ):
     # -------------------
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab = AssetTabs.OPEN_POSITION
     tab_amount = get_asset_tab_amount(trade_object.order_type)
     # -------------------
@@ -26,7 +26,7 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type, ):
     android.trade_screen.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=sl_type)
 
     logger.info("Verify notification banner displays correct input trade information")
-    android.home_screen.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_submitted_banner())
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
     logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
@@ -35,7 +35,7 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type, ):
     logger.info("Verify Open Position noti in Notification Box")
     android.home_screen.navigate_to(Features.HOME)
     android.home_screen.notifications.verify_notification_result(
-        ObjectNoti(trade_object).open_position_details(trade_object.order_id), go_back=False
+        ObjNoti(trade_object).open_position_details(trade_object.order_id), go_back=False
     )
 
     logger.info("Verify noti item details")

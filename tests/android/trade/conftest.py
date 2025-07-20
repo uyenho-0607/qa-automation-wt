@@ -7,8 +7,8 @@ from src.apis.user_api import UserAPI
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.android_container import AndroidContainer
-from src.data.enums import AssetTabs, Features, OrderType
-from src.data.objects.trade_object import ObjectTrade
+from src.data.enums import AssetTabs, Features, OrderType, WatchListTab
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -16,7 +16,6 @@ from src.utils.logging_utils import logger
 def android():
     logger.info("- Init Android driver")
     DriverManager.get_driver()
-    # actions = MobileActions()
 
     yield AndroidContainer()
 
@@ -33,14 +32,21 @@ def setup_trade_test(android, symbol):
     android.login_screen.login()
     android.home_screen.feature_anm_modal.got_it()
 
-    logger.info(f"- Search & select symbol {symbol!r}")
-    android.home_screen.navigate_to(Features.HOME)
-    android.home_screen.select_symbol_from_search(symbol)
+    logger.info("- Select watchlist tab ALL")
+    android.home_screen.watch_list.select_tab(WatchListTab.CRYPTO)
+
+    logger.info(f"- Select symbol: {symbol!r}")
+    android.home_screen.watch_list.select_symbol(symbol)
+
+    # logger.info(f"- Search & select symbol {symbol!r}")
+    # android.home_screen.navigate_to(Features.HOME)
+    # android.home_screen.search_and_select_symbol(symbol)
 
 
 @pytest.fixture
 def create_order_data(android):
     def _handler(trade_object):
+
         logger.info(f"- POST {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order")
         res = APIClient().trade.post_order(trade_object)
 
@@ -55,14 +61,12 @@ def create_order_data(android):
 @pytest.fixture
 def enabl_OCT(android):
     logger.info("- Send API to enable OCT")
-    UserAPI().patch_oct()
-    # android.trade_screen.place_order_panel.toggle_oct(enable=True)
+    APIClient().user.patch_oct()
 
 
 @pytest.fixture
 def disable_OCT(android):
-    UserAPI().patch_oct(enable=False)
-    # android.trade_screen.place_order_panel.toggle_oct(enable=False)
+    APIClient().user.patch_oct(enable=False)
 
 
 @pytest.fixture
@@ -76,8 +80,7 @@ def setup_bulk_test(android, symbol):
         if not order_ids:
             logger.info(f"- Place {create_amount} {order_type.upper()} orders")
             for _ in range(create_amount):
-                trade_object = ObjectTrade(order_type=order_type, symbol=symbol)
-                APIClient().trade.post_order(trade_object)
+                APIClient().trade.post_order(ObjTrade(order_type=order_type, symbol=symbol), update_price=False)
 
         android.trade_screen.navigate_to(Features.HOME)
         android.home_screen.navigate_to(Features.TRADE)

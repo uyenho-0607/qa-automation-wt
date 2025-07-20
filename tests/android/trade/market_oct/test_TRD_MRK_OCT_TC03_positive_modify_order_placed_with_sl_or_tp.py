@@ -1,8 +1,8 @@
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType, OrderType
-from src.data.objects.notification_object import ObjectNoti
-from src.data.objects.trade_object import ObjectTrade
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -22,7 +22,7 @@ def test(android, symbol, field, place_type, edit_type, create_order_data, cance
     sl_tp_val = {("stop_loss" if field == "take_profit" else "take_profit"): 0, "indicate": place_type}
     update_sl_type, update_tp_type = (edit_type, None) if field == "stop_loss" else (None, edit_type)
 
-    trade_object = ObjectTrade(order_type=OrderType.MARKET, symbol=symbol, **sl_tp_val)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, **sl_tp_val)
     tab = AssetTabs.OPEN_POSITION
     # -------------------
 
@@ -33,7 +33,7 @@ def test(android, symbol, field, place_type, edit_type, create_order_data, cance
     android.trade_screen.modals.modify_order(tab, trade_object, sl_type=update_sl_type, tp_type=update_tp_type)
 
     logger.info("Verify notification banner updated message")
-    android.home_screen.notifications.verify_notification_banner(*ObjectNoti(trade_object).order_updated_banner(**trade_object))
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
 
     logger.info(f"Verify {tab.title()} item details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

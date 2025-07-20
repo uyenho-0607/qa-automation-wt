@@ -1,8 +1,11 @@
+import pytest
+
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 from src.utils.random_utils import random_password, random_userid
 
 
+@pytest.mark.critical
 def test(android):
     logger.info("Step 1: Login with valid userid and invalid password")
     android.login_screen.login(password=random_password())
