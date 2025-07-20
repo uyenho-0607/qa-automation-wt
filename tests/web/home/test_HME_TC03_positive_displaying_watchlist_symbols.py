@@ -46,7 +46,7 @@ def setup_test():
 
             symbols = _list_symbol
 
-        return symbols[:150]
+        return symbols
 
     return _handler
 
