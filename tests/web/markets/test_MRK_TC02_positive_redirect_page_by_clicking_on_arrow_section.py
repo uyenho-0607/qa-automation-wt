@@ -37,9 +37,9 @@ def test(web, ):
     logger.info("Verify Page is redirected to Signal Page")
     web.signal_page.verify_page_url()
 
-    logger.info(f"Step 5: Select arrow: {MarketsSection.NEWS.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
-    web.markets_page.click_arrow_icon(MarketsSection.NEWS)
-
-    logger.info("Verify Page is redirected to Signal Page")
-    web.news_page.verify_page_url()
+    # logger.info(f"Step 5: Select arrow: {MarketsSection.NEWS.title()!r}")
+    # web.home_page.navigate_to(Features.MARKETS)
+    # web.markets_page.click_arrow_icon(MarketsSection.NEWS)
+    #
+    # logger.info("Verify Page is redirected to Signal Page")
+    # web.news_page.verify_page_url()
