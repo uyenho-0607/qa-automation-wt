@@ -2,7 +2,7 @@ import random
 
 import pytest
 
-from apis.api_client import APIClient
+from src.apis.api_client import APIClient
 from src.data.enums import WatchListTab
 from src.utils.logging_utils import logger
 
