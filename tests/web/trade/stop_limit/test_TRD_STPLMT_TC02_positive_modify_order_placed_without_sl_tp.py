@@ -6,13 +6,12 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
     [
         ("stop_loss", SLTPType.sample_values(), None),
         ("take_profit", None, SLTPType.sample_values()),
-        ("stop_loss, take_profit", *SLTPType.random_values(amount=2)),
+        pytest.param("stop_loss, take_profit", *SLTPType.random_values(amount=2), marks=pytest.mark.critical),
     ]
 )
 def test(web, symbol, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data):

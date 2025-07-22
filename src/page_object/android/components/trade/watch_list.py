@@ -18,6 +18,7 @@ class WatchList(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
+    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
     __items = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
     __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
     __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
@@ -27,17 +28,28 @@ class WatchList(BaseTrade):
     # ------------------------ ACTIONS ------------------------ 
 
     def select_tab(self, tab: WatchListTab):
+        """Handle selecting tab for home & markets screen"""
         locator = cook_element(self.__tab, tab)
-        if tab in WatchListTab.sub_tabs():
-            self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
 
-        if tab == WatchListTab.FAVOURITES and self.actions.is_element_displayed(locator):
+        logger.info(f"- Select tab: {tab.value.capitalize()!r}")
+        # if tab is represent, select tab immediately
+        if self.actions.is_element_displayed(locator):
             self.actions.click(locator)
             return
 
-        # If not visible, attempt to scroll horizontally to reveal it
-        # if not self.actions.is_element_displayed(locator):
-        #     self.actions.scroll_direction()
+        # Handle swipe scroll tab for markets screen
+        if self.actions.is_element_enabled(self.__horizontal_scroll_tab):
+            # If not visible, attempt to scroll horizontally to reveal it
+            for direction in ["left", "right"]:
+                logger.debug(f"- Swipe {direction} to show tab")
+                self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
+                if self.actions.is_element_displayed(locator):
+                    self.actions.click(locator)
+                    return
+
+        # For home screen, in case tab is sub-tab
+        logger.debug(f"- Tab is sub-tab, select tab {WatchListTab.ALL.value!r} first")
+        self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
         self.actions.click(locator)
 
     def get_current_symbols(self, tab: WatchListTab = None, random_symbol=False):
@@ -181,7 +193,7 @@ class WatchList(BaseTrade):
             self.go_back()
 
         else:
-            self.actions.swipe_left_on_element(locator)  # swipe left action
+            self.actions.swipe_element_horizontal(locator)  # swipe left action
             self.actions.click(self.__btn_symbol_remove)
 
         return selected_symbol

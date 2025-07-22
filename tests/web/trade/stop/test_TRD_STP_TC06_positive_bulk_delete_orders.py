@@ -6,7 +6,6 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-# @pytest.mark.critical
 def test(web, setup_bulk_test, cancel_bulk_delete):
     order_ids = setup_bulk_test(order_type=OrderType.STOP)
     expected_amount = 0 if len(order_ids) <= 30 else len(order_ids) - 30

@@ -1,7 +1,8 @@
+import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
 from src.data.enums import TradeType
 from src.page_object.android.base_screen import BaseScreen
 from src.utils import DotDict
@@ -25,6 +26,7 @@ class BaseTrade(BaseScreen):
     __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))
     __btn_confirm_close_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
     __btn_confirm_delete_order = (AppiumBy.XPATH, resource_id('confirmation-modal-button-submit'))  # delete order
+    __btn_cancel_trade = (AppiumBy.XPATH, "//android.widget.TextView[@text='Cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
     def get_live_price(
@@ -54,6 +56,11 @@ class BaseTrade(BaseScreen):
     def confirm_trade(self):
         """Confirm the trade in the trade confirmation modal, give trade_object to update the current price for more precise"""
         self.actions.click(self.__btn_trade_confirm)
+
+    def close_trade_confirm_modal(self, timeout=EXPLICIT_WAIT):
+        time.sleep(1)
+        self.actions.click(self.__btn_cancel_trade, timeout=timeout, raise_exception=False, show_log=False)
+
 
     def confirm_close_order(self, force=False):
         """Confirm close order action."""
