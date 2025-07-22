@@ -10,8 +10,8 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize(
     "sl_type, tp_type", (
             [None, None],
-            # [SLTPType.PRICE, SLTPType.PRICE],
-            # [SLTPType.POINTS, SLTPType.POINTS],
+            [SLTPType.PRICE, SLTPType.PRICE],
+            [SLTPType.POINTS, SLTPType.POINTS],
             SLTPType.sample_values(amount=2),
     )
 )
