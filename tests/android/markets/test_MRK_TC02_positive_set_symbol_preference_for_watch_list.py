@@ -1,4 +1,3 @@
-import random
 import pytest
 
 from src.data.enums import Features, WatchListTab
@@ -29,8 +28,6 @@ def test(android, setup_test):
 
 @pytest.fixture(autouse=True)
 def setup_test(android):
-    # sub_tabs = [tab for tab in WatchListTab.sub_tabs() if tab != WatchListTab.FOREX]
-    # tab = random.choice(sub_tabs)
     tab = WatchListTab.CRYPTO
     yield tab
 

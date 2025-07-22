@@ -2,8 +2,10 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
+from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import ProjectConfig
+from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.modals.demo_account_modals import DemoAccountModal
 from src.page_object.android.components.modals.password_modals import PasswordModal
@@ -44,14 +46,14 @@ class LoginScreen(BaseScreen):
     def click_forgot_password(self):
         self.actions.click(self.__lnk_reset_password)
 
-    def login(self, userid="", password="", account_type: AccountType = None, language: Language = None):
+    def login(self, userid="", password="", account_type: AccountType = None, language: Language = None, wait=False):
 
         credentials = Config.credentials()
         userid = userid or credentials.username
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=10):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=EXPLICIT_WAIT):
             self.actions.click(self.__btn_skip)
 
         if language:
@@ -62,13 +64,16 @@ class LoginScreen(BaseScreen):
         self.actions.send_keys(self.__txt_password, str(password))
         self.actions.click(self.__btn_sign_in)
 
+        if wait:
+            self.wait_for_spin_loader()
+
     def select_open_demo_account(self):
         self.select_account_tab(AccountType.DEMO)
         self.actions.click(self.__btn_sign_up)
 
     # ------------------------ VERIFY ------------------------ #
     def verify_language(self, language: Language):
-        actual = self.actions.get_text(self.__btn_sign_in)
+        actual = self.actions.get_content_desc(self.__btn_sign_in)
         soft_assert(actual, translate_sign_in(language))
 
     def verify_account_tab_is_displayed(self):
@@ -91,7 +96,12 @@ class LoginScreen(BaseScreen):
 
         actual_password = self.actions.get_attribute(self.__txt_password, "value")
         soft_assert(actual_password, password)
+    
+    def verify_alert_error_message(self, account_type=None):
+        account_type = account_type or ProjectConfig.account
 
-    def verify_alert_error_message(self, expected_message):
-        actual_err = self.actions.get_text(self.__alert_error)
-        soft_assert(actual_err, expected_message, error_message="Error message validation failed!")
+        err_msg = UIMessages.LOGIN_INVALID
+        if account_type == AccountType.DEMO:
+            err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
+
+        super().verify_alert_error_message(err_msg)

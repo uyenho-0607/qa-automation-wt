@@ -3,6 +3,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
+from src.data.consts import SHORT_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
@@ -32,10 +33,7 @@ class HomeScreen(BaseScreen):
 
     __available_balance_dropdown = (AppiumBy.XPATH, resource_id("available-balance-dropdown"))
     __available_account_amount = (AppiumBy.XPATH, resource_id('available-balance-amount'))
-
-
     __available_balance_title = (AppiumBy.XPATH, resource_id("available-balance-title"))
-
 
     __symbol_search_selector = (AppiumBy.XPATH, resource_id("symbol-search-selector"))
     __txt_symbol_search = (AppiumBy.XPATH, resource_id("symbol-input-search"))
@@ -43,9 +41,9 @@ class HomeScreen(BaseScreen):
     __items_search_result = (AppiumBy.XPATH, resource_id('symbol-input-search-items'))
     __search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']")
     __btn_delete_search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']/following-sibling::android.widget.TextView")
+    __btn_search_cancel = (AppiumBy.XPATH, resource_id("symbol-input-search-cancel"))
     __item_search_history = (AppiumBy.XPATH, "//android.view.ViewGroup[2]/android.view.ViewGroup[@content-desc]")
     __item_search_history_by_text = (AppiumBy.XPATH, "//android.view.ViewGroup[2]/android.view.ViewGroup[@content-desc='{}']")
-    __btn_search_cancel = (AppiumBy.XPATH, resource_id("symbol-input-search-cancel"))
     __notification_selector = (AppiumBy.XPATH, resource_id("notification-selector"))
     __empty_search_result = (AppiumBy.XPATH, "//android.widget.TextView[@text='No items available']")
 
@@ -64,19 +62,21 @@ class HomeScreen(BaseScreen):
         """Search symbol"""
         self.search_selector()
         self.actions.send_keys(self.__txt_symbol_search, symbol)
-        self.actions.press_done()
+        # self.actions.press_done()
 
     def search_and_select_symbol(self, symbol: str):
         """Search and select the found symbol"""
         self.search_symbol(symbol)
         self.actions.click(cook_element(self.__item_search_result, symbol))
-        # self.go_back()
 
     def delete_search_history(self):
         self.search_selector()
         self.actions.click(self.__txt_symbol_search)
         if self.actions.is_element_displayed(self.__btn_delete_search_history):
             self.actions.click(self.__btn_delete_search_history)
+
+    def cancel_search(self):
+        self.actions.click(self.__btn_search_cancel, raise_exception=False, show_log=False, timeout=SHORT_WAIT)
 
     # ------------------------ VERIFY ------------------------ #
     def verify_account_info_displayed(self):
@@ -103,7 +103,6 @@ class HomeScreen(BaseScreen):
     def verify_search_history_deleted(self):
         self.actions.verify_element_displayed(self.__item_search_history, is_display=False)
         self.actions.verify_element_displayed(self.__search_history, is_display=False)
-        self.actions.click(self.__btn_search_cancel)
 
     def verify_search_history_items(self, symbols: str | list[str]):
         symbols = symbols if isinstance(symbols, list) else [symbols]

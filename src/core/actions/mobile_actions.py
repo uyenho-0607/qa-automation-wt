@@ -1,5 +1,4 @@
 import builtins
-import time
 
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
@@ -7,7 +6,6 @@ from selenium.webdriver.common.actions.pointer_input import PointerInput
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
 from src.data.consts import EXPLICIT_WAIT
-from src.utils.logging_utils import logger
 
 
 class MobileActions(BaseActions):
@@ -60,69 +58,38 @@ class MobileActions(BaseActions):
             # Fallback to hiding keyboard if Done action fails
             self.hide_keyboard()
 
-
     def scroll_down(self, start_x_percent=0.85, scroll_step=0.4):
-        """
-        Scroll down the viewport using W3C actions.
-        """
-        try:
-            # Get screen dimensions
-            screen_size = self._driver.get_window_size()
-            screen_width = screen_size['width']
-            screen_height = screen_size['height']
-            
-            # Always start near the bottom (e.g., 85% of the screen height)
-            start_x = screen_width // 2
-            start_y = int(screen_height * start_x_percent)
+        """Scroll down the viewport using W3C actions."""
+        # Get screen dimensions
+        screen_size = self._driver.get_window_size()
+        screen_width = screen_size['width']
+        screen_height = screen_size['height']
 
-            # Calculate end_y based on scroll_step, but don't go above 10% of the screen height
-            scroll_distance = int(screen_height * scroll_step)
-            end_y = max(int(screen_height * 0.1), start_y - scroll_distance)
-            end_x = start_x
-            
-            # Setup finger input for W3C actions
-            finger = PointerInput("touch", "finger1")
-            actions = ActionBuilder(self._driver, mouse=finger)
-            
-            # Perform the scroll gesture
-            actions.pointer_action.move_to_location(start_x, start_y)
-            actions.pointer_action.pointer_down()
-            actions.pointer_action.pause(0.1)
-            actions.pointer_action.move_to_location(end_x, end_y)
-            actions.pointer_action.pause(0.1)
-            actions.pointer_action.release()
-            
-            # Execute the action
-            actions.perform()
-            
-            logger.debug(f"Successfully scrolled down viewport from ({start_x}, {start_y}) to ({end_x}, {end_y}) with step {scroll_step}")
-        except Exception as e:
-            logger.error(f"Failed to scroll down viewport: {str(e)}")
-            raise
+        # Always start near the bottom (e.g., 85% of the screen height)
+        start_x = screen_width // 2
+        start_y = int(screen_height * start_x_percent)
 
-    # def scroll_direction(self, direction: str = "left", amount: int = 2):
-    #     """
-    #     Scroll on the screen in the specified direction.
-    #     :param direction: "down" for vertical, "left" for horizontal
-    #     :param amount: Number of times to scroll (only applies to "down")
-    #     """
-    #     try:
-    #         if direction == "left":
-    #             ui_automator = 'new UiScrollable(new UiSelector().scrollable(true).className("android.widget.HorizontalScrollView")).setAsHorizontalList().scrollForward()'
-    #             self._driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, ui_automator)
-    #
-    #         elif direction == "down":
-    #             ui_automator = 'new UiScrollable(new UiSelector().scrollable(true)).scrollForward()'
-    #             for _ in range(amount):
-    #                 self._driver.find_element(AppiumBy.ANDROID_UIAUTOMATOR, ui_automator)
-    #
-    #         else:
-    #             raise ValueError(f"Unsupported scroll direction: {direction}")
-    #     except Exception as e:
-    #         logger.error(f"Failed to perform scroll {direction}: {str(e)}")
-    #         raise
+        # Calculate end_y based on scroll_step, but don't go above 10% of the screen height
+        scroll_distance = int(screen_height * scroll_step)
+        end_y = max(int(screen_height * 0.1), start_y - scroll_distance)
+        end_x = start_x
 
-    def swipe_picker_wheel_down(self, locator, swipe_percent=0.3):
+        # Setup finger input for W3C actions
+        finger = PointerInput("touch", "finger1")
+        actions = ActionBuilder(self._driver, mouse=finger)
+
+        # Perform the scroll gesture
+        actions.pointer_action.move_to_location(start_x, start_y)
+        actions.pointer_action.pointer_down()
+        actions.pointer_action.pause(0.1)
+        actions.pointer_action.move_to_location(end_x, end_y)
+        actions.pointer_action.pause(0.1)
+        actions.pointer_action.release()
+
+        # Execute the action
+        actions.perform()
+
+    def swipe_picker_wheel_down(self, locator):
         element = self.find_element(locator)
         rect = element.rect
         center_x = rect['x'] + rect['width'] // 2
@@ -140,18 +107,26 @@ class MobileActions(BaseActions):
         actions.pointer_action.release()
         actions.perform()
 
-    def swipe_left_on_element(self, locator):
+    def swipe_element_horizontal(self, locator, direction: str = "left"):
+        """Perform swipe actions on a screen in the specified direction."""
         element = self.find_element(locator)
         rect = element.rect
 
-        # Setup finger input
+        # Setup finger input for swipe action
         finger = PointerInput("touch", "finger1")
         actions = ActionBuilder(self._driver, mouse=finger)
 
-        start_x = rect['x'] + rect['width'] * 0.95
-        end_x = rect['x'] + rect['width'] * 0.25
+        # Horizontal scroll (left or right)
+        if direction == "left":
+            start_x = rect['x'] + rect['width'] * 0.95
+            end_x = rect['x'] + rect['width'] * 0.25
+        else:
+            start_x = rect['x'] + rect['width'] * 0.25
+            end_x = rect['x'] + rect['width'] * 0.95
+
         y = rect['y'] + rect['height'] / 2
 
+        # Perform swipe action
         actions.pointer_action.move_to_location(start_x, y)
         actions.pointer_action.pointer_down()
         actions.pointer_action.move_to_location(end_x, y)

@@ -1,14 +1,14 @@
 import random
 import time
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
-
+from src.data.enums import WatchListTab
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.trade.watch_list import WatchList
-from src.data.enums import WatchListTab
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
 
@@ -29,22 +29,14 @@ class MarketsScreen(BaseScreen):
     # ------------------------ ACTIONS ------------------------ #
 
     def set_symbol_preference(self, tab: WatchListTab, unchecked=True, show_all=None, store_dict=None):
-        """
-        Show/Hide Symbols with accurate state detection
-
-        Args:
-            unchecked: If True, will uncheck visible symbols. If False, will check hidden symbols
-            store_dict: Optional dictionary to store the results
-        """
+        """Show/Hide Symbols with accurate state detection"""
 
         logger.debug("Opening symbol preference setting")
-        self.actions.wait_for_element_visible(self.__btn_symbol_preference) # wait for the filter button to be visible
+        self.actions.wait_for_element_visible(self.__btn_symbol_preference)  # wait for the filter button to be visible
         self.actions.click(self.__btn_symbol_preference)
 
         time.sleep(1)  # Wait a bit to allow the tab to display
-
         self.watch_list.select_tab(tab)
-
         time.sleep(3)  # Wait a bit for symbol list to load
 
         elements = self.actions.find_elements(self.__symbol_preference)
@@ -59,11 +51,11 @@ class MarketsScreen(BaseScreen):
         if show_all is not None:
             locator = self.__unchb_show_all if show_all else self.__chb_show_all
             self.actions.click(locator)
-            
+
         else:
             # Randomly select number of symbols to modify
             random_amount = random.randint(1, len(symbol_list) - 1) if symbol_list else 0
-            
+
             for symbol in symbol_list[:random_amount]:
                 checked_locator = cook_element(self.__chb_symbol_preference, symbol)
                 is_checked = self.actions.is_element_displayed(checked_locator)
