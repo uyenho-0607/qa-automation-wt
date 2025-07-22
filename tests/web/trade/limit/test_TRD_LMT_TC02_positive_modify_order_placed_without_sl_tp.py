@@ -6,14 +6,13 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
     [
         ("stop_loss", SLTPType.random_values(), None),
         ("take_profit", None, SLTPType.random_values()),
-        ("stop_loss, take_profit", SLTPType.PRICE, SLTPType.PRICE),
-        ("stop_loss, take_profit", SLTPType.POINTS, SLTPType.POINTS),
+        pytest.param("stop_loss, take_profit", SLTPType.PRICE, SLTPType.PRICE, marks=pytest.mark.critical),
+        pytest.param("stop_loss, take_profit", SLTPType.POINTS, SLTPType.POINTS, marks=pytest.mark.critical),
         ("stop_loss, take_profit", *SLTPType.random_values(amount=2)),
     ]
 )
