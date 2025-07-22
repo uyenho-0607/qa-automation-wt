@@ -27,4 +27,8 @@ def test(android):
 def clear_search_history(android):
     logger.info("- Delete existing search history")
     android.home_screen.delete_search_history()
+
     yield
+
+    logger.info("- Close search box")
+    android.home_screen.cancel_search()

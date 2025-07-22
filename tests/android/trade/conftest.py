@@ -12,19 +12,19 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.fixture(scope="package")
-def android():
-    logger.info("- Init Android driver")
-    DriverManager.get_driver()
-
-    yield AndroidContainer()
-
-    logger.info("- Clean up Android driver")
-    DriverManager.quit_driver()
-
-    logger.info("- Stop Appium service")
-    AppiumDriver.stop_appium_service()
-
+# @pytest.fixture(scope="package")
+# def android():
+#     logger.info("- Init Android driver")
+#     DriverManager.get_driver()
+#
+#     yield AndroidContainer()
+#
+#     logger.info("- Clean up Android driver")
+#     DriverManager.quit_driver()
+#
+#     logger.info("- Stop Appium service")
+#     AppiumDriver.stop_appium_service()
+#
 
 @pytest.fixture(scope="package", autouse=True)
 def setup_trade_test(android, symbol):

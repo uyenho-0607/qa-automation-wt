@@ -3,6 +3,7 @@ import pytest
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.critical
 def test(android, teardown):
     logger.info("Step 1: Open My Account modal")
     android.home_screen.open_my_account()

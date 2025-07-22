@@ -14,7 +14,6 @@ def android():
     """
     logger.info("Initializing Android driver")
     DriverManager.get_driver()
-    # actions = MobileActions()
 
     yield AndroidContainer()
 
