@@ -7,7 +7,6 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize('order_type', (
         [
             OrderType.STOP_LIMIT,

@@ -11,9 +11,9 @@ from src.utils.logging_utils import logger
     "exclude_field, update_field",
     [
         ("SL", "SL"),
-        ("SL", "TP"),
+        pytest.param("SL", "TP", marks=pytest.mark.critical),
         ("SL", "SL,TP"),
-        ("TP", "SL"),
+        pytest.param("TP", "SL", marks=pytest.mark.critical),
         ("TP", "TP"),
         ("TP", "SL,TP"),
     ]
