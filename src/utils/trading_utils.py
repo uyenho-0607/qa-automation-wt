@@ -147,7 +147,7 @@ def get_pending_price(current_price, trade_type: TradeType, order_type: OrderTyp
     gap_buffer = stop_level * point_step * random.randint(2, 5)
 
     # Crypto-optimized gap percentages
-    gap_percent_range = (0.5, 2.0)
+    gap_percent_range = (2.0, 3.0)
     random_percent = round(random.uniform(*gap_percent_range), 5)
 
     gap_price = gap_buffer + current_price * (random_percent / 100)
@@ -230,5 +230,6 @@ def calculate_partial_close(trade_object):
 
 
 if __name__ == '__main__':
-    res = calculate_trading_params(2.75, TradeType.BUY, OrderType.MARKET)
+    ObjTrade(symbol="XRPUSD.std")
+    res = calculate_trading_params(3.319, TradeType.BUY, OrderType.STOP)
     print(res)
