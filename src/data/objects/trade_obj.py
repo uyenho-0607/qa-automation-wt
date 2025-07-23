@@ -1,12 +1,13 @@
 import random
 from typing import Dict, Any, Optional, Tuple
 
-from src.data.consts import get_symbols
+from src.data.consts import get_symbols, get_symbol_details
 from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_obj import BaseObj
 from src.data.project_info import ProjectConfig
 from src.utils.format_utils import format_str_prices, remove_comma, get_decimal, is_integer
+from src.utils.logging_utils import logger
 
 
 class ObjTrade(BaseObj):
@@ -39,8 +40,15 @@ class ObjTrade(BaseObj):
         self.symbol = symbol or random.choice(get_symbols())
         self.expiry = expiry or Expiry.sample_values(self.order_type)
         self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)
-
+        self.update_symbol_details(self.symbol)
         self._update_attributes(**kwargs)
+
+
+    def update_symbol_details(self, symbol):
+        symbol_details = get_symbol_details(symbol)
+        ObjTrade.POINT_STEP = symbol_details["point_step"]
+        ObjTrade.DECIMAL = symbol_details["decimal"]
+
 
     @classmethod
     def get_expiry_map(cls, expiry: Expiry | str) -> str:

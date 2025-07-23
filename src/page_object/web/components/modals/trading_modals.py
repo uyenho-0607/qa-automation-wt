@@ -99,6 +99,7 @@ class TradingModals(BaseTrade):
 
     # Edit Confirmation Modal Actions
     def close_edit_confirm_modal(self, timeout=QUICK_WAIT):
+        self.actions.click_by_offset(self.__edit_confirm_order_id, x_offset=173, y_offset=-12, timeout=timeout, raise_exception=False)
         self.actions.click_by_offset(
             self.__edit_confirm_order_type, 300, 20, timeout=timeout, raise_exception=False
         )
@@ -122,14 +123,14 @@ class TradingModals(BaseTrade):
     def _get_edit_sl(self):
         locator = cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower())
         self.actions.click(locator)
-        res = self.actions.get_value(locator)
+        res = self.actions.get_value(locator, retry=True)
         logger.debug(f"- Edit SL: {res!r}")
         return res
 
     def _get_edit_tp(self):
         locator = cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower())
         self.actions.click(locator)
-        res = self.actions.get_value(locator)
+        res = self.actions.get_value(locator, retry=True)
         logger.debug(f"- Edit TP: {res!r}")
         return res
 
@@ -261,10 +262,18 @@ class TradingModals(BaseTrade):
         self._input_edit_sl(stop_loss, sl_type)
         if sl_type == SLTPType.POINTS:
             stop_loss = self._get_edit_sl()
+            if "-" in stop_loss:
+                logger.debug("- Fall back - stop loss is negative, re-input")
+                self._input_edit_sl(stop_loss)
+                stop_loss = self._get_edit_sl()
 
         self._input_edit_tp(take_profit, tp_type)
         if tp_type == SLTPType.POINTS:
             take_profit = self._get_edit_tp()
+            if "-" in take_profit:
+                logger.debug("- Fall back - take profit is negative, re-input")
+                self._input_edit_tp(take_profit)
+                take_profit = self._get_edit_tp()
 
         if expiry:
             self._select_expiry(expiry)

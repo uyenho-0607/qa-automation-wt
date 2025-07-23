@@ -1,4 +1,5 @@
 import functools
+import inspect
 import json
 import time
 
@@ -57,7 +58,18 @@ def handle_stale_element(func):
     def wrapper(self, *args, **kwargs):
         __tradebackhide__ = True
 
-        max_retries = 5
+        # Use inspect to get all function parameters including defaults
+        sig = inspect.signature(func)
+        bound_args = sig.bind(self, *args, **kwargs)
+        bound_args.apply_defaults()  # This applies default values
+        all_args = bound_args.arguments
+        
+        max_retries = 3
+        raise_exception = all_args.get("raise_exception")
+        # print("args:", args)
+        # print("kwargs:", kwargs)
+        # print("all_args:", all_args)
+        # print("func name:", func.__name__)
 
         for attempt in range(max_retries + 1):  # +1 for initial attempt
             try:
@@ -76,6 +88,12 @@ def handle_stale_element(func):
                 else:
                     # Final attempt failed, re-raise the exception
                     logger.error(f"{type(e).__name__} for locator {args[0]} after {max_retries + 1} attempts")
+                    # logger.debug(f"raise exception: {raise_exception}")
+                    if raise_exception and StepLogs.test_steps:
+                        logger.debug("- Capture broken info")
+                        StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                        attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
+
                     raise e
 
         return None

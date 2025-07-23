@@ -8,7 +8,7 @@ from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import DriverList, StepLogs
 from src.utils import DotDict
 from src.utils.allure_utils import attach_screenshot
-from src.utils.format_utils import format_dict_to_string, remove_comma, format_str_price
+from src.utils.format_utils import format_dict_to_string, remove_comma, format_str_price, is_integer, is_float
 from src.utils.logging_utils import logger
 
 """Utilities"""
@@ -84,22 +84,27 @@ def compare_with_tolerance(
         tolerance_percent: Tolerance as percentage (default 1%)
         get_diff: Get full dict result of different information
     """
-
     actual = remove_comma(actual)
     expected = remove_comma(expected)
-    tolerance = tolerance_percent * expected
 
-    diff = abs(actual - expected)
-    diff_percent = diff / expected if expected else 0
-
-    if diff:
-        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance:.2f} ({tolerance_percent}%), Diff: {diff:.4f}, Diff Percent: {diff_percent:.4f}")
+    if not is_float(expected) or not is_float(actual):
+        logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected}, actual: {actual}")
+        res = False
+        return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
 
     else:
-        logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
+        tolerance = tolerance_percent * expected
+        diff = abs(actual - expected)
+        diff_percent = diff / expected if expected else 0
 
-    # res = diff_percent <= tolerance_percent
-    res = abs(diff) <= abs(tolerance)
+        if diff:
+            logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance:.2f} ({tolerance_percent}%), Diff: {diff:.4f}, Diff Percent: {diff_percent:.4f}")
+
+        else:
+            logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
+
+        # res = diff_percent <= tolerance_percent
+        res = abs(diff) <= abs(tolerance)
 
     return res if not get_diff else dict(res=res, diff=f"{diff:.4f}", diff_percent=f"{diff_percent:.4f}", tolerance=f"±{tolerance:.2f} ({tolerance_percent:.2f}%)")
 

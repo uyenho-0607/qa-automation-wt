@@ -1,6 +1,6 @@
 import random
 import time
-from typing import Optional, List, Literal
+from typing import Optional, List
 
 from selenium.webdriver.common.by import By
 
@@ -344,6 +344,9 @@ class AssetTab(BaseTrade):
 
         # actual
         item_data = self.get_item_data(tab, trade_object.get("order_id"))
+        if not trade_object.get("order_id"):
+            trade_object.order_id = item_data.get("order_id", 0)
+
         actual = {k: v for k, v in item_data.items() if k in expected}
 
         soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
