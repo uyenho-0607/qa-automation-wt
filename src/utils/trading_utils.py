@@ -49,7 +49,7 @@ def _adjust_prices(price, diff_price, format_round=True):
     return result
 
 
-def random_points(current_price: float, min_pct_dis=0.1, max_pct_dis=0.2):
+def random_points(current_price: float, min_pct_dis=0.2, max_pct_dis=0.3):
     """Random points with safe range"""
     stop_level = ObjTrade.STOP_LEVEL
     point_step = _point_step(current_price)
@@ -230,5 +230,5 @@ def calculate_partial_close(trade_object):
 
 
 if __name__ == '__main__':
-    res = calculate_trading_params(26.19, TradeType.BUY, OrderType.LIMIT)
+    res = calculate_trading_params(2.75, TradeType.BUY, OrderType.MARKET)
     print(res)

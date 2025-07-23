@@ -14,7 +14,7 @@ def test(web, symbol, get_asset_tab_amount, cancel_close_order, trade_type, crea
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_type.value.upper()} {trade_object.trade_type} Order")
+    logger.info(f"Step 1: Place {trade_type.value.upper()} {trade_object.order_type} Order")
     create_order_data(trade_object)
 
     # Object for new created open position
