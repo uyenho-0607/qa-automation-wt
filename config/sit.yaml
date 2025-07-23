@@ -36,7 +36,7 @@ lirunex:
 
   mobile:
     app_package: com.aquariux.wt.sit.lirunex
-    app_bundle: ...
+    app_bundle: com.aquariux.wt.sit.lirunex
 
 transactCloud:
   base_url: https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/web
@@ -50,4 +50,4 @@ transactCloud:
 
   mobile:
     app_package: com.aquariux.wt.sit.transactcloudmt5
-    app_bundle: ...
+    app_bundle: com.aquariux.wt.sit.transactcloudmt5
