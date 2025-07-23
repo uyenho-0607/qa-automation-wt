@@ -55,12 +55,15 @@ class WebActions(BaseActions):
     ) -> str:
         """Get value from an element."""
         element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
-        if retry:
+        res = element.get_attribute("value") if element else ""
+
+        if retry and not res:
             logger.debug("- Retry getting value")
             time.sleep(1)
             element = self.find_element(locator, QUICK_WAIT, raise_exception=False, show_log=False)
+            res = element.get_attribute("value") if element else ""
 
-        return element.get_attribute("value") if element else ""
+        return res
 
     def goto(self, url):
         """Navigate to a URL and wait for the page to be fully loaded."""
