@@ -31,11 +31,6 @@ class BaseTrade(BasePage):
     __btn_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-confirm'))
 
     ##### Asset Tab #####
-    __btn_edit = (By.CSS_SELECTOR, data_testid('asset-{}-button-edit'))
-    __btn_edit_by_id = (
-        By.XPATH,
-        "//th[text()='{}']/ancestor::*[@data-testid='asset-{}-list-item']//div[@data-testid='asset-{}-button-edit']"
-    )
     __btn_confirm_delete_order = (By.CSS_SELECTOR, data_testid('confirmation-modal-button-submit'))  # delete order
     __btn_confirm_close_order = (By.CSS_SELECTOR, data_testid('close-order-button-submit'))
     __btn_cancel_close_order = (By.CSS_SELECTOR, data_testid('close-order-button-cancel'))

@@ -25,10 +25,14 @@ def test(web, disable_OCT):
         web.trade_page.watch_list.select_symbol(_symbol)
         time.sleep(1)
 
-        logger.info(f"Step {4 + idx * 2}: Place Market orders")
-        web.trade_page.place_order_panel.place_order(ObjTrade(order_type=OrderType.MARKET, symbol=_symbol), submit=True)
+        trade_obj = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)
+
+        logger.info(f"Step {4 + idx * 2}: Place {trade_obj.trade_type.upper()} Market orders")
+        web.trade_page.place_order_panel.place_order(trade_obj, submit=True)
         web.home_page.notifications.close_noti_banner()
-        time.sleep(1)
+
+        logger.info("Verify order placed successfully")
+        web.trade_page.asset_tab.verify_item_data(trade_object=trade_obj)
 
     logger.info("Step 13: Navigate to Market Page and check My Trade Section")
     web.home_page.navigate_to(Features.MARKETS, wait=True)

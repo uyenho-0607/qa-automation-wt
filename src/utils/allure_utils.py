@@ -372,7 +372,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
             expected_val = "REDUNDANT"
         elif has_tolerance:
             tolerance_data = tolerance_info[key]
-            diff_percent = float(tolerance_data["diff_percent"])
+            diff_percent = float(tolerance_data["diff_percent"]) if tolerance_data["diff_percent"] else 0
             
             # Only highlight if there's an actual difference (diff > 0)
             if diff_percent > 0:
