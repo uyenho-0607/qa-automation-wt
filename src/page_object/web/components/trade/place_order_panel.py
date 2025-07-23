@@ -187,10 +187,6 @@ class PlaceOrderPanel(BaseTrade):
     def _select_trade_type(self, trade_type: TradeType) -> None:
         """Select trade type (BUY/SELL)."""
         locator = cook_element(self.__btn_trade, trade_type.lower())
-        if "selected" in self.actions.get_attribute(locator, "class"):
-            logger.debug(f"- Trade Type {trade_type.value!r} already correct")
-            return
-
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         self.actions.click(locator)
 

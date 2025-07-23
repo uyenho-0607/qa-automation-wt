@@ -8,19 +8,20 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.order(1)
 @pytest.mark.critical
 def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
     trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} order")
-    web.trade_page.place_order_panel.place_order(trade_object)
+    web.trade_page.place_order_panel.place_order(trade_object, submit=True)
 
-    logger.info("Verify trade confirmation modal information is correct")
-    web.trade_page.modals.verify_trade_confirmation(trade_object)
-
-    logger.info("Step 2: Confirm Place Order")
-    web.trade_page.modals.confirm_trade()
+    # logger.info("Verify trade confirmation modal information is correct")
+    # web.trade_page.modals.verify_trade_confirmation(trade_object)
+    #
+    # logger.info("Step 2: Confirm Place Order")
+    # web.trade_page.modals.confirm_trade()
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)

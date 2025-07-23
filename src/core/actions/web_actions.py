@@ -8,7 +8,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, QUICK_WAIT
 from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
 
@@ -56,9 +56,9 @@ class WebActions(BaseActions):
         """Get value from an element."""
         element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
         if retry:
-            # find element again
+            logger.debug("- Retry getting value")
             time.sleep(1)
-            element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
+            element = self.find_element(locator, QUICK_WAIT, raise_exception=False, show_log=False)
 
         return element.get_attribute("value") if element else ""
 
