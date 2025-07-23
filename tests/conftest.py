@@ -14,10 +14,9 @@ from src.utils.logging_utils import logger
 @pytest.fixture(scope="package", autouse=True)
 def symbol():
     selected_symbol = random.choice(get_symbols())
-
-    symbol_details = get_symbol_details(selected_symbol)
-    ObjTrade.POINT_STEP = symbol_details["point_step"]
-    ObjTrade.DECIMAL = symbol_details["decimal"]
+    # symbol_details = get_symbol_details(selected_symbol)
+    # ObjTrade.POINT_STEP = symbol_details["point_step"]
+    # ObjTrade.DECIMAL = symbol_details["decimal"]
 
     return selected_symbol
 

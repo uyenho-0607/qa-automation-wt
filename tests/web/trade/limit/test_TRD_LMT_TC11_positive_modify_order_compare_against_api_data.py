@@ -6,6 +6,7 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.order(2)
 @pytest.mark.critical
 def test(web, symbol, close_edit_confirm_modal, create_order_data):
     trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
