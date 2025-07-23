@@ -261,19 +261,19 @@ class TradingModals(BaseTrade):
 
         self._input_edit_sl(stop_loss, sl_type)
         if sl_type == SLTPType.POINTS:
-            stop_loss = self._get_edit_sl()
-            if "-" in stop_loss:
+            sl = self._get_edit_sl()
+            if "-" in sl:
                 logger.debug("- Fall back - stop loss is negative, re-input")
-                self._input_edit_sl(stop_loss)
-                stop_loss = self._get_edit_sl()
+                self._input_edit_sl(stop_loss, sl_type)
+            stop_loss = self._get_edit_sl()
 
         self._input_edit_tp(take_profit, tp_type)
         if tp_type == SLTPType.POINTS:
-            take_profit = self._get_edit_tp()
-            if "-" in take_profit:
+            tp = self._get_edit_tp()
+            if "-" in tp:
                 logger.debug("- Fall back - take profit is negative, re-input")
-                self._input_edit_tp(take_profit)
-                take_profit = self._get_edit_tp()
+                self._input_edit_tp(take_profit, tp_type)
+            take_profit = self._get_edit_tp()
 
         if expiry:
             self._select_expiry(expiry)
