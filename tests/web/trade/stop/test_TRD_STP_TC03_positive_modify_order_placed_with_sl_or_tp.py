@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import OrderType, SLTPType
+from src.data.enums import OrderType, SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
@@ -24,6 +24,9 @@ def test(web, symbol, create_order_data, exclude_field, update_field, close_edit
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
     create_order_data(trade_object)
+
+    logger.info("Verify order placed successfully")
+    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
     logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
     web.trade_page.modals.modify_order(trade_object, **update_info)
