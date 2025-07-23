@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import OrderType, SLTPType
+from src.data.enums import OrderType, SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
