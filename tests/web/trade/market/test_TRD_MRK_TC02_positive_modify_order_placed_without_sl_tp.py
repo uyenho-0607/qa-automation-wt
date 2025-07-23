@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import SLTPType, OrderType
+from src.data.enums import SLTPType, OrderType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
@@ -23,6 +23,9 @@ def test(web, symbol, edit_field, sl_type, tp_type, close_edit_confirm_modal, cr
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
     create_order_data(trade_object)
+
+    logger.info("Verify order placed successfully")
+    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
 
     logger.info(f"Step 2: Update order with {edit_field!r}")
     web.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)

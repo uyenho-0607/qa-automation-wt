@@ -247,6 +247,13 @@ class PlaceOrderPanel(BaseTrade):
         """Input volume value."""
         volume = value if value is not None else random.randint(2, 10)
         self._input_trade_value(self.__txt_volume, volume, "volume")
+
+        # fall back
+        input_volume = self.actions.get_value(self.__txt_volume)
+        if input_volume != str(volume):
+            logger.debug(f"- Current input volume: {input_volume} - re-input volume")
+            self._input_trade_value(self.__txt_volume, volume, "volume")
+
         return volume
 
     def _input_price(self, value: any, order_type: OrderType | None = None) -> None:
