@@ -10,6 +10,7 @@ VIDEO_DIR = ROOTDIR / ".videos"
 SRC_DIR = ROOTDIR / "src"
 DATA_DIR = SRC_DIR / "data"
 GRID_SERVER = "http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub"
+GRID_VIDEO_URL = "https://qa-webtrader.devops.k8ns.net/"
 
 # Timeouts (in seconds)
 EXPLICIT_WAIT = 10

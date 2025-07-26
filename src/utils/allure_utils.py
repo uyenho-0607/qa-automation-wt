@@ -8,9 +8,20 @@ from typing import Dict, Any
 
 import allure
 
+from src.core.config_manager import Config
+from src.data.consts import GRID_VIDEO_URL
+from src.data.project_info import DriverList
 from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
 from src.data.project_info import StepLogs, ProjectConfig
 from src.utils.logging_utils import logger
+
+
+
+def attach_session_video():
+    driver = DriverList.all_drivers.get("web")
+    if driver:
+        s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
+        allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
 
 
 def save_recorded_video(video_raw):
@@ -165,7 +176,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     if data.get("attachments"):
 
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Chart Comparison Summary" , "setup"]]
+        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary" , "setup"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
@@ -425,24 +436,3 @@ def log_verification_result(actual: any, expected: any, res: bool, desc: str = "
         name=name,
         attachment_type=allure.attachment_type.TEXT
     )
-
-#
-# def split_by_separator(data, separator=('end_test', '')):
-#     chunks = []
-#     current = []
-#     for item in data:
-#         if item == separator:
-#             if current:
-#                 chunks.append(current)
-#                 current = []
-#         else:
-#             current.append(item)
-#
-#     if current:
-#         chunks.append(current)
-#
-#     return chunks
-if __name__ == '__main__':
-    StepLogs.all_failed_logs = [('verify close position noti in notification box', ''), ('end_test', ''), ('verify close position noti in notification box', ''), ('end_test', ''), ('verify close position noti in notification box', ''), ('end_test', ''), ('verify close position noti in notification box', ''), ('end_test', '')]
-    allure_dir = "/Users/ngocuyen.ho/wt/qa-automation-wt/a"
-    custom_allure_report(allure_dir)
