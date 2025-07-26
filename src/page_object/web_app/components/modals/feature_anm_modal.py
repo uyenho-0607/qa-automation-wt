@@ -1,9 +1,10 @@
-from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
 from src.page_object.web_app.base_page import BasePage
 from src.utils.logging_utils import logger
+from utils.common_utils import data_testid
 
 
 class FeatureAnnouncementModal(BasePage):
@@ -11,8 +12,9 @@ class FeatureAnnouncementModal(BasePage):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __btn_got_it = (AppiumBy.XPATH, "//*[@resource-id='feature-announcement-modal-got-it-button']")
-    __btn_try_now = (AppiumBy.XPATH, "//*[@resource-id='feature-announcement-modal-try-it-now-button']")
+    # ------------------------ LOCATORS ------------------------ #
+    __btn_got_it = (By.CSS_SELECTOR, data_testid('feature-announcement-modal-got-it-button'))
+    __btn_try_now = (By.CSS_SELECTOR, data_testid('feature-announcement-modal-try-it-now-button'))
 
     # ------------------------ ACTIONS ------------------------ #
     def got_it(self):

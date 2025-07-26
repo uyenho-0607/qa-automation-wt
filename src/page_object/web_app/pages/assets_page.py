@@ -3,7 +3,6 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.web_actions import WebActions
 from src.data.enums import AccInfo
 from src.page_object.web_app.base_page import BasePage
-from src.page_object.web_app.components.modals.trading_modals import TradingModals
 from src.page_object.web_app.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id
@@ -67,7 +66,7 @@ class AssetsPage(BasePage):
 
         soft_assert(actual, expected)
 
-    def verify_account_balance_summary(self, exp_data, tolerance_percent = None, tolerance_fields = None):
+    def verify_account_balance_summary(self, exp_data, tolerance_percent=None, tolerance_fields=None):
         """Verify the asset account dashboard details"""
         actual = self._get_acc_balance_info()
 

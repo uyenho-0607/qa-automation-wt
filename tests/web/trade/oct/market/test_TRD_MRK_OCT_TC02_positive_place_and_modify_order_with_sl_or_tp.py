@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
         "SL,TP",
     ]
 )
-def test(web, symbol, get_asset_tab_amount, update_field, close_edit_confirm_modal, update_entry_price):
+def test(web, symbol, get_asset_tab_amount, update_field, close_edit_confirm_modal, ):
 
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     sl_type, tp_type = random.sample([None, SLTPType.random_values()], k=2)
@@ -34,7 +34,6 @@ def test(web, symbol, get_asset_tab_amount, update_field, close_edit_confirm_mod
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
     logger.info(f"Verify item details in Asset Tab")
-    update_entry_price(trade_object)
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
     logger.info("Verify Open Position noti in Notification Box")

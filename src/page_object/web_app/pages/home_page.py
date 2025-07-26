@@ -1,5 +1,3 @@
-import time
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.web_actions import WebActions
@@ -7,8 +5,8 @@ from src.data.consts import SHORT_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.web_app.base_page import BasePage
-from src.page_object.web_app.components.modals.feature_announcement_modal import FeatureAnnouncementModal
-from src.page_object.web_app.components.modals.my_account_modal import MyAccountModal
+from src.page_object.web_app.components.modals.feature_anm_modal import FeatureAnnouncementModal
+from src.page_object.web_app.components.modals.my_acc_modal import MyAccountModal
 from src.page_object.web_app.components.notifications import Notifications
 from src.page_object.web_app.components.settings import Settings
 from src.page_object.web_app.components.trade.watch_list import WatchList
@@ -62,7 +60,6 @@ class HomePage(BasePage):
         """Search symbol"""
         self.search_selector()
         self.actions.send_keys(self.__txt_symbol_search, symbol)
-        # self.actions.press_done()
 
     def search_and_select_symbol(self, symbol: str):
         """Search and select the found symbol"""

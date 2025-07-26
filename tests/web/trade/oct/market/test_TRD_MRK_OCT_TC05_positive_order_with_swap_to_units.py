@@ -7,7 +7,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.skip
-def test(web, symbol, get_asset_tab_amount, update_entry_price):
+def test(web, symbol, get_asset_tab_amount, ):
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
@@ -23,7 +23,6 @@ def test(web, symbol, get_asset_tab_amount, update_entry_price):
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
     logger.info(f"Verify order details in Asset Tab")
-    update_entry_price(trade_object)
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
     logger.info("Verify Open Position noti in Notification Box")

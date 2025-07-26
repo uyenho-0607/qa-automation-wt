@@ -1,14 +1,14 @@
-from src.data.objects.trade_obj import ObjTrade
+from src.apis.api_client import APIClient
 from src.core.actions.web_actions import WebActions
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
 from src.page_object.web_app.components.modals.trading_modals import TradingModals
 from src.page_object.web_app.components.trade.asset_tab import AssetTab
 from src.page_object.web_app.components.trade.chart import Chart
 from src.page_object.web_app.components.trade.place_order_panel import PlaceOrderPanel
 from src.page_object.web_app.components.trade.watch_list import WatchList
-from src.utils.logging_utils import logger
-from src.apis.api_client import APIClient
 from src.utils.assert_utils import soft_assert, compare_dict
+from src.utils.logging_utils import logger
 
 
 class TradePage(BasePage):

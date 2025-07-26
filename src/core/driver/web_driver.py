@@ -1,12 +1,13 @@
 import builtins
-from src.core.config_manager import Config as prj_config
-from selenium import webdriver
-from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
-from src.data.consts import GRID_SERVER
-from src.data.project_info import DriverList
 import os
+
 import boto3
 from botocore.config import Config
+from selenium import webdriver
+from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
+from src.core.config_manager import Config as prj_config
+from src.data.consts import GRID_SERVER
+from src.data.project_info import DriverList
 
 proxy_server = os.getenv('PROXY_SERVER')
 project_arn = os.getenv('DF_PROJECT_ARN')
@@ -20,9 +21,12 @@ class WebDriver:
         match browser.lower():
             case "chrome":
                 # service = Service(ChromeDriverManager().install())
-
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
+
+                if prj_config.config.platform == 'web_app':
+                    options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 14 Pro Max"})
+
                 options.add_argument("--incognito")
                 prefs = {
                     "credentials_enable_service": False,
@@ -57,8 +61,8 @@ class WebDriver:
                     driver = webdriver.Remote(testgrid_url, options=options)
 
                 else:
-                    # driver = webdriver.Chrome(options=options)
-                    driver = webdriver.Remote(GRID_SERVER, options=options)
+                    driver = webdriver.Chrome(options=options)
+                    # driver = webdriver.Remote(GRID_SERVER, options=options)
 
             case "firefox":
                 options = FirefoxOptions()

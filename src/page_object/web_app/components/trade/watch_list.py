@@ -133,7 +133,6 @@ class WatchList(BaseTrade):
 
         logger.debug(f"Attempting to select symbol: {symbol!r}")
         locator = cook_element(self.__item_by_name, symbol)
-
         # First check if symbol is already visible
         if self.actions.is_element_displayed(locator):
             logger.debug(f"Symbol {symbol!r} is already visible, clicking immediately")
@@ -142,7 +141,6 @@ class WatchList(BaseTrade):
 
         # Scroll to find the symbol
         scroll_attempts = 0
-
         while scroll_attempts < max_scroll_attempts:
             logger.debug(f"Scroll attempt {scroll_attempts + 1}/{max_scroll_attempts} to find symbol: {symbol!r}")
 
@@ -153,13 +151,11 @@ class WatchList(BaseTrade):
                 logger.warning(f"Error during scroll attempt {scroll_attempts + 1}: {e}")
                 scroll_attempts += 1
                 continue
-
             # Check if symbol is now visible
             if self.actions.is_element_displayed(locator):
                 logger.debug(f"Symbol {symbol!r} found after {scroll_attempts + 1} scroll attempts")
                 self.actions.click(locator)
                 return
-
             scroll_attempts += 1
 
         raise Exception(f"Symbol '{symbol}' not found after {scroll_attempts} scroll attempts")
@@ -188,7 +184,6 @@ class WatchList(BaseTrade):
         return selected_symbol
 
     # ------------------------ VERIFY ------------------------ #
-
     def verify_symbol_selected(self, symbol: str):
         """Verify selected item"""
         self.actions.verify_element_displayed(cook_element(self.__selected_item, symbol))
