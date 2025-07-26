@@ -22,7 +22,7 @@ class WebDriver:
     def init_driver(cls, browser="chrome", headless=False):
         match browser.lower():
             case "chrome":
-                service = Service(ChromeDriverManager().install())
+                # service = Service(ChromeDriverManager().install())
 
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
@@ -79,7 +79,6 @@ class WebDriver:
                 raise ValueError(f"Invalid browser value: {browser!r} !!!")
 
         setattr(builtins, "web_driver", driver)
-        driver.set_window_position(-1500, 0)
         driver.maximize_window()
         DriverList.all_drivers["web"] = driver
         return driver
