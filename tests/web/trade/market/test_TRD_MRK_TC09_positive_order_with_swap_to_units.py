@@ -3,7 +3,7 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-def test(web, market_obj, update_entry_price):
+def test(web, market_obj, ):
     trade_obj = market_obj()
 
     logger.info(f"Step 1: Place {trade_obj.trade_type} Order with swap_to_units")

@@ -34,6 +34,7 @@ class URLSites(BaseEnum):
 class URLPaths(BaseEnum):
     """Enum representing different URL paths in the application."""
     LOGIN = "login"
+    HOME = "home"
     TRADE = ""
     ASSETS = "assets"
     SIGNAL = "signal"

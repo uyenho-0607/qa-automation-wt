@@ -1,8 +1,10 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.web_actions import WebActions
+from src.core.config_manager import Config
 from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import Features
+from src.data.enums import URLSites
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id, cook_element
@@ -58,6 +60,9 @@ class BasePage:
     __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
+    def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
+        self.actions.goto(Config.urls(site))
+
     def go_back(self):
         self.actions.click(self.__btn_nav_back)
 
