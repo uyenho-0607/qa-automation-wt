@@ -33,7 +33,6 @@ class AssetTabs(BaseEnum):
             self.POSITIONS_HISTORY: "history-position",
             self.ORDER_AND_DEALS: "order-and-deals"
         }
-
         return table_mapping.get(self, self)
 
     @classmethod

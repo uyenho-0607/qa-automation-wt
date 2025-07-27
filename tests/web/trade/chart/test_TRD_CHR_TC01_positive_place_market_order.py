@@ -18,10 +18,10 @@ def test(web, symbol, get_asset_tab_amount, trade_type, sl_type, tp_type, disabl
     logger.info(f"Step 2: Place {trade_type.upper()} order, sl: {sl_type!r}, tp: {tp_type!r}")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
-    logger.info("Verify trade confirmation modal information is correct")
+    logger.info(f"Verify trade confirmation")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 3: Confirm Place Order")
+    logger.info("Step 3: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")

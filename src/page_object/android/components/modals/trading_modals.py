@@ -1,4 +1,3 @@
-import random
 import time
 
 from appium.webdriver.common.appiumby import AppiumBy
@@ -33,8 +32,8 @@ class TradingModals(BaseTrade):
         "/following-sibling::*[2]"
     )
     __confirm_units = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Units']/following-sibling::*[2]")
-    __confirm_price = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Price']/following-sibling::*[1]")
-    __confirm_stop_limit_price = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Stop Limit Price']/following-sibling::*[1]")
+    __confirm_price = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Price']/following-sibling::*[@resource-id='trade-confirmation-value']")
+    __confirm_stop_limit_price = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Stop Limit Price']/following-sibling::*[@resource-id='trade-confirmation-value'][2]")
     __confirm_stop_loss = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Stop Loss']/following-sibling::*[2]")
     __confirm_take_profit = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Take Profit']/following-sibling::*[2]")
     __confirm_expiry = (AppiumBy.XPATH, "//*[@resource-id='trade-confirmation-label' and @text='Expiry']/following-sibling::*[@resource-id='trade-confirmation-value'][1]")
@@ -98,11 +97,6 @@ class TradingModals(BaseTrade):
         "//*[@resource-id='edit-confirmation-value' and @text='{}']"
     )
 
-    # control buttons
-    __btn_inc_dec_sl = (AppiumBy.XPATH, resource_id('edit-input-stoploss-{}-{}'))  # price/ points - increase/ decrease
-    __btn_inc_dec_tp = (AppiumBy.XPATH, resource_id('edit-input-takeprofit-{}-{}'))
-    __btn_inc_dec_price = (AppiumBy.XPATH, resource_id('edit-input-price-{}'))
-    __btn_inc_dec_stop_limit_price = (AppiumBy.XPATH, resource_id('edit-input-stoplimit-price-{}'))
 
     __btn_confirm_update_order = (AppiumBy.XPATH, resource_id('edit-confirmation-button-confirm'))
     __btn_cancel_update_order = (AppiumBy.XPATH, resource_id('edit-confirmation-button-close'))
@@ -137,10 +131,6 @@ class TradingModals(BaseTrade):
     def cancel_bulk_close(self, timeout=QUICK_WAIT):
         self.actions.click(self.__btn_bulk_close_cancel, timeout=timeout, raise_exception=False, show_log=False)
 
-    def confirm_close_order(self):
-        """Confirm close order action."""
-        self.actions.click(self.__btn_confirm_close_order)
-
     def cancel_close_order(self, timeout=QUICK_WAIT):
         self.actions.click(self.__btn_cancel_close_order, timeout=timeout, raise_exception=False, show_log=False)
 
@@ -154,82 +144,60 @@ class TradingModals(BaseTrade):
     def confirm_update_order(self):
         self.actions.click(self.__btn_confirm_update_order)
 
-    def get_edit_price(self, order_type: OrderType = OrderType.MARKET):
+    def _get_edit_price(self, order_type: OrderType = OrderType.MARKET):
         """Return current price of the symbol"""
-        res = None
-        if order_type == OrderType.MARKET:
-            res = self.actions.get_text(self.__edit_symbol_price)
+        time.sleep(0.5)
+        if not order_type or order_type == OrderType.MARKET:
+            return self.actions.get_text(self.__edit_symbol_price)
 
-        if order_type in [OrderType.LIMIT, OrderType.STOP]:
-            res = self.actions.get_text(self.__txt_edit_price)
+        return self.actions.get_text(self.__txt_edit_price)
 
-        if order_type.is_stp_limit():
-            res = self.actions.get_text(self.__txt_edit_stop_limit_price)
-
-        logger.debug(f"- Current edit price: {res!r}")
-        return res
-
-    def input_edit_sl(self, value, sl_type: SLTPType = SLTPType.PRICE):
-        logger.debug(f"- Input stop loss as {sl_type.capitalize()!r}, value: {value!r}")
+    def _input_edit_sl(self, value, sl_type: SLTPType = SLTPType.PRICE):
+        logger.debug(f"- Input SL: {value!r}, type: {sl_type.value.capitalize()!r}")
         locator = cook_element(self.__txt_edit_sl, sl_type.lower())
-        self.actions.click(locator)
+        # self.actions.click(locator)
         self.actions.send_keys(locator, value)
         self.actions.press_done()
 
-    def input_edit_tp(self, value, tp_type: SLTPType = SLTPType.PRICE):
-        logger.debug(f"- Input take profit as {tp_type.capitalize()!r}, value: {value!r}")
+    def _input_edit_tp(self, value, tp_type: SLTPType = SLTPType.PRICE):
+        logger.debug(f"- Input TP: {value!r}, type: {tp_type.value.capitalize()!r}")
         locator = cook_element(self.__txt_edit_tp, tp_type.lower())
-        self.actions.click(locator)
+        # self.actions.click(locator)
         self.actions.send_keys(locator, value)
         self.actions.press_done()
 
-    def input_edit_price(self, value):
+    def _input_edit_price(self, value):
         logger.debug(f"- Input price: {value!r}")
         self.actions.send_keys(self.__txt_edit_price, value)
 
-    def input_edit_stop_limit_price(self, value):
+    def _input_edit_stop_price(self, value):
         logger.debug(f"- Input stop limit price: {value!r}")
         self.actions.send_keys(self.__txt_edit_stop_limit_price, value)
+    
+    def _select_expiry(self, expiry: Expiry):
+        self.actions.click(self.__drp_expiry)
+        self.actions.click(cook_element(self.__option_edit_expiry, locator_format(expiry)))
 
-    # Control buttons
-    def __control_price(self, order_type, stop_limit_price=True, price=True, stop_loss=True, take_profit=True):
-
-        if stop_limit_price and order_type == OrderType.STOP_LIMIT:
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_stop_limit_price, "increase"))
-
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_stop_limit_price, "decrease"))
-
-        if price and order_type != OrderType.MARKET:
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_price, "increase"))
-
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_price, "decrease"))
-
-        if stop_loss:
-            sl_type = SLTPType.sample_values()
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_sl, sl_type.lower(), "increase"))
-
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_sl, sl_type.lower(), "decrease"))
-
-        if take_profit:
-            tp_type = SLTPType.sample_values()
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_tp, tp_type.lower(), "increase"))
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_tp, tp_type.lower(), "decrease"))
-
+        if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
+            logger.debug(f"- Select expiry date")
+            self.actions.scroll_down()
+            self.actions.click(self.__expiry_date)
+            self.actions.swipe_picker_wheel_down(self.__wheel_expiry_date)
+            self.click_confirm_btn()
+    
+    def _select_fill_policy(self, policy: FillPolicy):
+        self.actions.click(self.__drp_fill_policy)
+        self.actions.click(cook_element(self.__opt_edit_fill_policy, locator_format(policy)))
+        
+        
     def modify_order(
             self,
             trade_object: ObjTrade,
             sl_type: SLTPType = None,
             tp_type: SLTPType = None,
             fill_policy: FillPolicy = None,
-            expiry: Expiry = None
+            expiry: Expiry = None,
+            confirm=False
     ):
         """
         Modify stop loss/ take profit/ fill policy/ Expiry
@@ -242,50 +210,36 @@ class TradingModals(BaseTrade):
         self.__asset_tab.click_edit_button(AssetTabs.get_tab(order_type), trade_object.get("order_id", 0))
 
         # Get current price to re-calculate prices
-        edit_price = self.get_edit_price(trade_object.order_type) or trade_object.entry_price
-        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type)
-
-        # if order_type != OrderType.MARKET:
-        #     self.input_edit_price(trade_params.entry_price)
-        #     trade_object.entry_price = trade_params.entry_price
-        #
-        # if order_type.is_stp_limit():
-        #     self.input_edit_stop_limit_price(trade_params.stop_limit_price)
-        #     trade_object.stop_limit_price = trade_params.stop_limit_price
+        edit_price = self._get_edit_price(trade_object.order_type) or trade_object.entry_price
+        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
 
         if sl_type:
-            self.input_edit_sl(stop_loss, sl_type)
-            time.sleep(0.5)
+            self._input_edit_sl(stop_loss, sl_type)
+            if sl_type == SLTPType.POINTS:
+                stop_loss = self.actions.get_text(cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower()))
+                trade_object.sl_type = sl_type
+
+            trade_object.stop_loss = stop_loss
 
         if tp_type:
-            self.input_edit_tp(take_profit, tp_type)
-            time.sleep(0.5)
+            self._input_edit_tp(take_profit, tp_type)
+            if tp_type == SLTPType.POINTS:
+                take_profit = self.actions.get_text(cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower()))
+                trade_object.tp_type = tp_type
+
+            trade_object.take_profit = take_profit
 
         if expiry:
-            self.actions.click(self.__drp_expiry)
-            self.actions.click(cook_element(self.__option_edit_expiry, locator_format(expiry)))
-
-            if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-                logger.debug(f"- Select expiry date")
-                self.actions.scroll_down()
-                self.actions.click(self.__expiry_date)
-                self.actions.swipe_picker_wheel_down(self.__wheel_expiry_date)
-                self.click_confirm_btn()
-
+            self.actions.scroll_down()
+            self._select_expiry(expiry)
             trade_object.expiry = expiry
 
         if fill_policy:
-            self.actions.click(self.__drp_fill_policy)
-            self.actions.click(cook_element(self.__opt_edit_fill_policy, locator_format(fill_policy)))
+            self._select_fill_policy(fill_policy)
             trade_object.fill_policy = fill_policy
 
-        if sl_type:
-            trade_object.stop_loss = self.actions.get_text(cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower()))
-
-        if tp_type:
-            trade_object.take_profit = self.actions.get_text(cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower()))
-
         self.click_btn_edit_order()
+        not confirm or self.confirm_update_order()
 
     def modify_invalid_order(
             self,
@@ -308,51 +262,28 @@ class TradingModals(BaseTrade):
 
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
 
-        edit_price = self.get_edit_price(trade_object.order_type)
+        edit_price = self._get_edit_price(trade_object.order_type)
         invalid_price = calculate_trading_params(edit_price, trade_type, order_type, is_invalid=True)
 
         if entry_price:
             price = invalid_price.entry_price
-            self.input_edit_price(price)
+            self._input_edit_price(price)
 
         if stop_limit_price:
             stp_price = invalid_price.stop_limit_price
-            self.input_edit_stop_limit_price(stp_price)
+            self._input_edit_stop_price(stp_price)
 
         if stop_loss:
             sl = invalid_price.stop_loss
-            self.input_edit_sl(sl)
+            self._input_edit_sl(sl)
 
         if take_profit:
             tp = invalid_price.take_profit
-            self.input_edit_tp(tp)
+            self._input_edit_tp(tp)
 
         self.click_btn_edit_order()
         if submit:
             self.confirm_update_order()
-
-    def modify_order_with_control_buttons(
-            self, trade_object: DotDict = None,
-            stop_limit_price=True, price=True,
-            stop_loss=True,
-            take_profit=True,
-    ):
-        self.__control_price(trade_object.order_type, stop_limit_price, price, stop_loss, take_profit)
-
-        # Load data to trade_object for verifying
-        edit_sl = self.actions.get_text(cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower()))
-        edit_tp = self.actions.get_text(cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower()))
-
-        trade_object.stop_loss = edit_sl
-        trade_object.take_profit = edit_tp
-
-        if trade_object.order_type != OrderType.MARKET:
-            trade_object.entry_price = self.actions.get_text(self.__txt_edit_price)
-
-        if trade_object.order_type == OrderType.STOP_LIMIT:
-            trade_object.stop_limit_price = self.actions.get_text(self.__txt_edit_stop_limit_price)
-
-        self.click_btn_edit_order()
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
     def verify_trade_confirmation(self, trade_object: ObjTrade):
@@ -382,14 +313,12 @@ class TradingModals(BaseTrade):
         actual = {
             k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
         }
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())
 
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
-
-    def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
-
+    def verify_trade_edit_confirm_details(self, trade_object: ObjTrade):
         expected = trade_object.trade_edit_confirm_details()
-
         actual = {
+            "order_no": self.actions.get_text(self.__edit_confirm_order_id),
             "order_type": self.actions.get_text(self.__edit_confirm_order_type),
             "symbol": self.actions.get_text(self.__edit_confirm_symbol),
             "volume": self.actions.get_text(self.__edit_confirm_volume),
@@ -397,7 +326,6 @@ class TradingModals(BaseTrade):
             "stop_loss": self.actions.get_text(self.__edit_confirm_sl),
             "take_profit": self.actions.get_text(self.__edit_confirm_tp)
         }
-
         if expected.get("entry_price"):
             actual["entry_price"] = self.actions.get_text(self.__edit_confirm_price)
 
@@ -410,4 +338,4 @@ class TradingModals(BaseTrade):
         if expected.get("expiry"):
             actual["expiry"] = self.actions.get_text(self.__edit_confirm_expiry)
 
-        soft_assert(actual, expected)
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())

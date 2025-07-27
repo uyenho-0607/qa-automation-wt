@@ -20,7 +20,7 @@ def test(android):
     for i, subtab in enumerate(tabs):
 
         logger.info(f"Step {i + 1}: Select tab {subtab}")
-        android.markets_screen.watch_list.select_tab(subtab)
+        android.markets_screen.select_tab(subtab)
         time.sleep(2)  # wait a bit for loading symbols
 
         logger.info(f"Step {i + 2}: Get random displaying symbol")

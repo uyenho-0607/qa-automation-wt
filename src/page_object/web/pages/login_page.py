@@ -97,8 +97,8 @@ class LoginPage(BasePage):
 
         account_type = account_type or ProjectConfig.account
         err_msg = UIMessages.LOGIN_INVALID
-        # if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
-        #     err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
+        if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
+            err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
         super().verify_alert_error_message(err_msg, timeout=30)
 

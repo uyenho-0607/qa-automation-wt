@@ -8,7 +8,6 @@ from src.data.consts import get_symbols
 from src.data.enums import OrderType, Features
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
-from tests.android.asset.conftest import android
 
 
 @pytest.mark.critical
@@ -17,8 +16,8 @@ def test(android, setup_order_data):
     symbols = setup_order_data
 
     logger.info("Step 1: Navigate to Asset Screen")
-    time.sleep(1)
     android.home_screen.navigate_to(Features.ASSETS)
+    time.sleep(2)
 
     logger.info(f"Verify symbols list displayed in My Trade are: {symbols[::-1]}")
     android.assets_screen.verify_mytrade_items(symbols[::-1])
@@ -27,13 +26,13 @@ def test(android, setup_order_data):
     android.assets_screen.watch_list.select_last_symbol(tab=None)
 
     trade_obj = ObjTrade(symbol=symbols[-1], order_type=OrderType.LIMIT)
-    android.trade_screen.place_order_panel.place_order(trade_obj, submit=True)
+    android.trade_screen.place_order_panel.place_order(trade_obj, submit=True, sl_type=None, tp_type=None)
 
     logger.info("Step 3: Navigate to Asset Screen")
     android.home_screen.navigate_to(Features.ASSETS, wait=True)
 
     logger.info("Verify displaying symbols are not changed")
-    android.assets_screen.verify_mytrade_items(get_symbols[::-1])
+    android.assets_screen.verify_mytrade_items(symbols[::-1])
 
 
 @pytest.fixture
@@ -43,6 +42,9 @@ def setup_order_data(android):
     logger.info(f"- Place 5 order for list symbol: {symbols}")
     for _symbol in symbols:
         trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)
-        APIClient().trade.post_order(trade_object)
+        APIClient().trade.post_order(trade_object, update_price=False)
+
+    logger.info("- Navigate to Home Page")
+    android.assets_screen.navigate_to(Features.HOME)
 
     yield symbols

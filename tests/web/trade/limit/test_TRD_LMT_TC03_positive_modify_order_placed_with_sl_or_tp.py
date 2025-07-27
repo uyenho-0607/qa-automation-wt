@@ -1,7 +1,7 @@
 import pytest
-from src.data.enums import OrderType, SLTPType, AssetTabs
+
+from src.data.enums import SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -16,23 +16,22 @@ from src.utils.logging_utils import logger
         ("TP", "SL,TP"),
     ]
 )
-def test(web, symbol, create_order_data, exclude_field, update_field, close_edit_confirm_modal):
+def test(web, create_order_data, exclude_field, update_field, close_edit_confirm_modal, limit_obj):
 
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
-    trade_object[exclude_field] = 0
+    trade_object = limit_obj(**{exclude_field: 0})
     update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
     create_order_data(trade_object)
 
-    logger.info("Verify order placed successfully")
+    logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
     logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
     web.trade_page.modals.modify_order(trade_object, **update_info)
 
-    logger.info("Verify edit confirmation info")
-    web.trade_page.modals.verify_edit_trade_confirmation(trade_object)
+    logger.info("Verify trade edit confirmation")
+    web.trade_page.modals.verify_trade_edit_confirm_details(trade_object)
 
     logger.info("Step 3: Confirm update order")
     web.trade_page.modals.confirm_update_order()

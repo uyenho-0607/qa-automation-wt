@@ -66,7 +66,7 @@ def random_points(current_price: float, min_pct_dis=0.2, max_pct_dis=0.3):
 
 
 def get_sl_tp(current_price, trade_type: TradeType, sl_type: SLTPType = SLTPType.PRICE, tp_type: SLTPType = SLTPType.PRICE, is_invalid=False, is_modify=False):
-    """Calculate stop loss and take profit with configurable risk-reward ratio"""
+    """Calculate SL and TP with configurable risk-reward ratio"""
     current_price = remove_comma(current_price)
     point_step = _point_step(current_price)
 
@@ -201,7 +201,7 @@ def calculate_trading_params(
     # Calculate pending price
     pending_price = get_pending_price(stop_price or current_price, trade_type, order_type, is_invalid)
 
-    # Calculate stop loss and take profit
+    # Calculate SL and TP
     sl, tp = get_sl_tp(stop_price or pending_price or current_price, trade_type, sl_type, tp_type, is_invalid).values()
 
     result = {

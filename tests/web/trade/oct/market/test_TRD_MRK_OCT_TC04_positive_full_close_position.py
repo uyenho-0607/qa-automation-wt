@@ -1,6 +1,4 @@
-import pytest
-
-from src.data.enums import AssetTabs, OrderType, SLTPType
+from src.data.enums import AssetTabs, OrderType
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
@@ -12,6 +10,9 @@ def test(web, symbol, get_asset_tab_amount, cancel_close_order, create_order_dat
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     create_order_data(trade_object)
+
+    logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
+    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
     logger.info("Step 2: Close Position")
     web.trade_page.asset_tab.full_close_position(trade_object.order_id, confirm=False)

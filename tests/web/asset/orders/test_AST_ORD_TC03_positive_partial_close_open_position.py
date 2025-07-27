@@ -25,7 +25,7 @@ def test(web, symbol, search_symbol):
     web.home_page.navigate_to(Features.ASSETS)
 
     logger.info("Step 5: Partial Close Position")
-    web.assets_page.asset_tab.partial_close_position(trade_object.order_id, trade_object=new_object)
+    web.assets_page.asset_tab.partial_close_position(new_object, trade_object.order_id)
 
     # update new volume, units after partial close
     trade_object.volume, trade_object.units = new_object.close_volume, new_object.close_units

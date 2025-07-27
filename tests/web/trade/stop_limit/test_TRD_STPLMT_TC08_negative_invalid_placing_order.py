@@ -21,9 +21,8 @@ Scenarios: - Place new order
         ("stop_loss,take_profit", UIMessages.INVALID_SL_TP_BANNER_DES),
     ]
 )
-def test(web, invalid_field, expected_message):
-    order_type = OrderType.STOP_LIMIT
-    trade_object = ObjTrade(order_type=order_type)
+def test(web, invalid_field, expected_message, stop_limit_obj):
+    trade_object = stop_limit_obj()
 
     invalid_dict = {key: True for key in invalid_field.split(",")}
 

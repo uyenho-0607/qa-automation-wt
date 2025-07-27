@@ -1,28 +1,25 @@
-from src.data.enums import OrderType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 
 from src.utils.logging_utils import logger
 
 
-def test(web, symbol, update_entry_price):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(web, market_obj, update_entry_price):
+    trade_obj = market_obj()
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with swap_to_units")
-    web.trade_page.place_order_panel.place_order(trade_object, swap_to_units=True, swap_to_volume=False)
+    logger.info(f"Step 1: Place {trade_obj.trade_type} Order with swap_to_units")
+    web.trade_page.place_order_panel.place_order(trade_obj, swap_to_units=True, swap_to_volume=False)
 
-    logger.info("Verify trade confirmation modal information is correct")
-    web.trade_page.modals.verify_trade_confirmation(trade_object)
+    logger.info(f"Verify trade confirmation")
+    web.trade_page.modals.verify_trade_confirmation(trade_obj)
 
-    logger.info("Step 2: Confirm Place Order")
+    logger.info("Step 2: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")
-    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_obj).order_submitted_banner())
 
     logger.info(f"Verify order details in Asset Tab")
-    update_entry_price(trade_object)
-    web.trade_page.asset_tab.verify_item_data(trade_object)
+    web.trade_page.asset_tab.verify_item_data(trade_obj)
 
     logger.info("Verify Open Position noti in Notification Box")
-    web.home_page.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(trade_object.order_id))
+    web.home_page.notifications.verify_notification_result(ObjNoti(trade_obj).open_position_details(trade_obj.order_id))

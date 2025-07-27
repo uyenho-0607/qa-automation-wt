@@ -27,10 +27,10 @@ def test(web, symbol, get_asset_tab_amount, order_type):
     logger.info(f"Step 1: Place {trade_object.trade_type.upper()} Order with control button")
     web.trade_page.place_order_panel.place_order_by_control_button(trade_object, input_value=random.randint(0, 1))
 
-    logger.info("Verify trade confirmation modal information is correct")
+    logger.info(f"Verify trade confirmation")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 2: Confirm Place Order")
+    logger.info("Step 2: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")

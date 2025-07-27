@@ -19,7 +19,7 @@ def test(android, symbol, create_order_data, sl_type, tp_type):
     tab = AssetTabs.PENDING_ORDER
     # -------------------
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with stop loss and take profit")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")
     create_order_data(trade_object)
 
     logger.info(f"Step 2: Update {tab.title()} with sl_type: {sl_type.capitalize()!r} - tp_type: {tp_type.capitalize()!r}")

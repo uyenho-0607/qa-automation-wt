@@ -1,7 +1,4 @@
 import pytest
-
-from src.data.enums import OrderType
-from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 
@@ -22,9 +19,8 @@ Scenarios: - Place new order
         ("stop_loss,take_profit", UIMessages.INVALID_SL_TP_BANNER_DES),
     ]
 )
-def test(web, invalid_field, expected_message):
-    order_type = OrderType.STOP
-    trade_object = ObjTrade(order_type=order_type)
+def test(web, invalid_field, expected_message, stop_obj):
+    trade_object = stop_obj()
 
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
