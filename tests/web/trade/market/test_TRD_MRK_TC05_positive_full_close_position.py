@@ -1,22 +1,21 @@
-import random
-
 import pytest
 
-from src.data.enums import AssetTabs, OrderType, TradeType
+from src.data.enums import AssetTabs
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize("trade_type", random.choices([TradeType.BUY, TradeType.SELL], k=1))
-def test(web, symbol, get_asset_tab_amount, trade_type, cancel_close_order, create_order_data):
+def test(web, market_obj, get_asset_tab_amount, cancel_close_order, create_order_data):
 
-    trade_object = ObjTrade(trade_type, order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = market_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_type.value.upper()} {trade_object.trade_type} Order")
+    logger.info(f"Step 1: Place {trade_object.trade_type.value.upper()} {trade_object.trade_type} Order")
     create_order_data(trade_object)
+
+    logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
+    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
 
     logger.info("Step 2: Close Position")
     web.trade_page.asset_tab.full_close_position(trade_object.order_id)

@@ -22,7 +22,7 @@ def test(web, symbol, get_asset_tab_amount, update_field, sl_type, tp_type, clos
     trade_object = ObjTrade(order_type=order_type, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=None, tp_type=None)
 
     logger.info("Verify notification banner displays correct input trade information")

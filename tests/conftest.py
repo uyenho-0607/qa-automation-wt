@@ -4,21 +4,40 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols, get_symbol_details
+from src.core.driver.driver_manager import DriverManager
+from src.core.page_container.web_container import WebContainer
+from src.data.consts import get_symbols
 from src.data.enums import OrderType, BulkCloseOpts
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.format_utils import format_str_prices
 from src.utils.logging_utils import logger
 
 
+@pytest.fixture(scope="package")
+def web():
+    logger.info("- Init Web Driver")
+    DriverManager.get_driver()
+
+    yield WebContainer()
+
+    logger.info("- Clean up Web Driver")
+    DriverManager.quit_driver()
+
+
+@pytest.fixture(scope="package")
+def login_member_site(web):
+
+    logger.info("- Navigate to WT Member Site")
+    web.login_page.goto()
+
+    logger.info("- Login to Member Site")
+    web.login_page.login(wait=True)
+    web.home_page.feature_announcement_modal.got_it()
+
+
 @pytest.fixture(scope="package", autouse=True)
 def symbol():
-    selected_symbol = random.choice(get_symbols())
-    # symbol_details = get_symbol_details(selected_symbol)
-    # ObjTrade.POINT_STEP = symbol_details["point_step"]
-    # ObjTrade.DECIMAL = symbol_details["decimal"]
-
-    return selected_symbol
+    return random.choice(get_symbols())
 
 
 @pytest.fixture

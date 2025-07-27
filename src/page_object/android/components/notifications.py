@@ -63,20 +63,21 @@ class Notifications(BaseScreen):
 
     # ------------------------ VERIFY ------------------------ #
 
-    def verify_notification_banner(self, expected_title, expected_des=None):
+    def verify_notification_banner(self, expected_title, expected_des, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        title = self.actions.find_element(self.__noti_title, raise_exception=False, timeout=SHORT_WAIT)
-        des = self.actions.find_element(self.__noti_des, raise_exception=False, timeout=SHORT_WAIT)
+        # Execute sequentially instead of in parallel to avoid Device Farm connection pool issues
+        logger.debug("- Fetching notification description")
+        actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
-        actual_title = title.text.strip() if title else ""
-        actual_des = des.text.strip() if des else ""
+        logger.debug("- Fetching notification title")
+        actual_title = self.actions.get_text(self.__noti_title, timeout=QUICK_WAIT)
 
-        logger.debug(f"- Check noti_title equal: {expected_title!r}")
-        soft_assert(actual_title, expected_title)
+        logger.debug(f"- Check noti des - {expected_des!r}")
+        compare_noti_with_tolerance(actual_des, expected_des)
 
-        if expected_des:
-            logger.debug(f"- Check noti_des equal: {expected_des!r}")
-            compare_noti_with_tolerance(actual_des, expected_des)
+        if actual_title:
+            logger.debug(f"- Check noti title - {expected_title!r}")
+            soft_assert(actual_title, expected_title)
 
 
     def verify_notification_result(self, expected_result: str | list, go_back=True):

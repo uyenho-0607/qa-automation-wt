@@ -19,10 +19,10 @@ def test(web, symbol, get_asset_tab_amount, disable_OCT):
     logger.info("Step 2: Place order")
     web.trade_page.place_order_panel.place_order(trade_object)
 
-    logger.info("Verify trade confirmation modal information is correct")
+    logger.info(f"Verify trade confirmation")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 3: Confirm Place Order")
+    logger.info("Step 3: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")

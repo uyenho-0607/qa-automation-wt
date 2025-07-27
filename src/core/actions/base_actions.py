@@ -138,6 +138,15 @@ class BaseActions:
         )
         return element.get_attribute(attribute) if element else None
 
+
+    @handle_stale_element
+    def get_text_elements(self, locator, timeout = SHORT_WAIT):
+        elements = self.find_elements(locator, timeout)
+        res = [ele.text.strip() if ele else "" for ele in elements]
+        return res
+
+
+
     @handle_stale_element
     def get_text(
             self,
@@ -217,7 +226,7 @@ class BaseActions:
             failed_locator.append(locators[0])
 
         # wait for the others locator with quick-wait as page already loaded
-        for _locator in locators:
+        for _locator in locators[1:]:
             res = self.is_element_displayed(_locator, timeout=QUICK_WAIT, is_display=is_display, show_log=is_display)
             all_res.append(res)
             if not res:

@@ -1,28 +1,31 @@
 import pytest
 
 from src.apis.api_client import APIClient
+from src.data.enums import AssetTabs
 from src.data.enums import SLTPType, OrderType, Expiry
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.order(2)
 @pytest.mark.critical
-def test(web, symbol, close_edit_confirm_modal, create_order_data):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
+def test(web, limit_obj, close_edit_confirm_modal, create_order_data):
+    trade_object = limit_obj()
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     create_order_data(trade_object)
 
-    logger.info(f"Step 2: Update item stop loss and take profit")
+    logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
+    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
+    
+    logger.info(f"Step 2: Modify order with SL and TP")
     web.trade_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), expiry=Expiry.sample_values(OrderType.LIMIT), confirm=True)
 
     logger.info(f"Verify item details after update")
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
-    logger.info("Step 3: Get placed order API data")
+    logger.info(f"Step 3: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
-        symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
+        symbol=trade_object["symbol"], order_id=trade_object["order_id"], order_type=trade_object["order_type"]
     )
 
     logger.info("Verify against API data")

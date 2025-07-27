@@ -88,7 +88,7 @@ def compare_with_tolerance(
     expected = remove_comma(expected)
 
     if not is_float(expected) or not is_float(actual):
-        logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected}, actual: {actual}")
+        logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected} - type: {type(expected)}, actual: {actual} - type: {type(actual)}")
         res = False
         return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
 
@@ -329,7 +329,7 @@ def soft_assert(
     validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
 
     if isinstance(actual, dict) and isinstance(expected, dict):
-        logger.debug(f"Compare values: {format_dict_to_string(expected=expected, actual=actual)}")
+        # logger.debug(f"Compare values: {format_dict_to_string(expected=expected, actual=actual)}")
 
         tolerance = kwargs.get("tolerance")
         tolerance_fields = kwargs.get("tolerance_fields", [])

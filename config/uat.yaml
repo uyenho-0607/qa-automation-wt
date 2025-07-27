@@ -31,7 +31,7 @@ lirunex:
       user_demo: 569202036
 
   mobile:
-    app_package: com.aquariux.wt.uat.lirunex
+    app_package: com.aquariux.uat.lirunex
     app_bundle: ...
 
 transactCloud:

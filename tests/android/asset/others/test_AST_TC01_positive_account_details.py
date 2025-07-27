@@ -30,7 +30,6 @@ def test(android, setup_teardown, symbol):
     for _id in order_ids:
         android.trade_screen.asset_tab.full_close_position(_id)
 
-
     logger.info("Step 5: Navigate back to Asset Page")
     android.trade_screen.navigate_to(Features.ASSETS)
 
@@ -51,7 +50,7 @@ def setup_teardown(android, symbol):
     account_summary = APIClient().statistics.get_account_statistics(get_asset_acc=True)
     account_info = APIClient().user.get_user_account(get_acc=True)
 
-    logger.info("- Preparing order data")
+    logger.info("- Prepare order data")
     resp_ord = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
     cur_orders = [item for item in resp_ord if item["symbol"] == symbol]
 

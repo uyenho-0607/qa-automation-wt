@@ -2,9 +2,6 @@ import builtins
 from src.core.config_manager import Config as prj_config
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-
 from src.data.consts import GRID_SERVER
 from src.data.project_info import DriverList
 import os
@@ -60,7 +57,8 @@ class WebDriver:
                     driver = webdriver.Remote(testgrid_url, options=options)
 
                 else:
-                    driver = webdriver.Chrome(options=options)
+                    # driver = webdriver.Chrome(options=options)
+                    driver = webdriver.Remote(GRID_SERVER, options=options)
 
             case "firefox":
                 options = FirefoxOptions()

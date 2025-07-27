@@ -34,8 +34,8 @@ def test(web, symbol, search_symbol, close_edit_confirm_modal, order_type):
     logger.info(f" Step 3: Update order with SL and TP")
     web.assets_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
 
-    logger.info("Verify edit confirmation info")
-    web.assets_page.modals.verify_edit_trade_confirmation(trade_object)
+    logger.info("Verify trade edit confirmation")
+    web.assets_page.modals.verify_trade_edit_confirm_details(trade_object)
 
     logger.info("Step 4: Confirm update order")
     web.assets_page.modals.confirm_update_order()

@@ -18,7 +18,6 @@ class WatchList(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
     __items = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
     __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
     __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
@@ -36,16 +35,6 @@ class WatchList(BaseTrade):
         if self.actions.is_element_displayed(locator):
             self.actions.click(locator)
             return
-
-        # Handle swipe scroll tab for markets screen
-        if self.actions.is_element_enabled(self.__horizontal_scroll_tab):
-            # If not visible, attempt to scroll horizontally to reveal it
-            for direction in ["left", "right"]:
-                logger.debug(f"- Swipe {direction} to show tab")
-                self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
-                if self.actions.is_element_displayed(locator):
-                    self.actions.click(locator)
-                    return
 
         # For home screen, in case tab is sub-tab
         logger.debug(f"- Tab is sub-tab, select tab {WatchListTab.ALL.value!r} first")

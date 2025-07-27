@@ -24,8 +24,7 @@ class BaseTrade(BaseScreen):
     ##### Trade Confirmation Modal #####
     __btn_trade_confirm = (AppiumBy.XPATH, resource_id('trade-confirmation-button-confirm'))
     __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))
-    __btn_confirm_close_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
-    __btn_confirm_delete_order = (AppiumBy.XPATH, resource_id('confirmation-modal-button-submit'))  # delete order
+    __btn_confirm_close_delete_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
     __btn_cancel_trade = (AppiumBy.XPATH, "//android.widget.TextView[@text='Cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
@@ -62,9 +61,8 @@ class BaseTrade(BaseScreen):
         self.actions.click(self.__btn_cancel_trade, timeout=timeout, raise_exception=False, show_log=False)
 
 
-    def confirm_close_order(self, force=False):
+    def confirm_close_order(self):
         """Confirm close order action."""
-        self.actions.click(self.__btn_confirm_close_order)
+        self.actions.click(self.__btn_confirm_close_delete_order)
 
-    def confirm_delete_order(self):
-        self.actions.click(self.__btn_confirm_delete_order)
+    confirm_delete_order = confirm_close_order
