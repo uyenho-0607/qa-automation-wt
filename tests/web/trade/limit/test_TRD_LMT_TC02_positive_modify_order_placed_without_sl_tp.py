@@ -2,34 +2,33 @@ import pytest
 
 from src.data.enums import SLTPType, OrderType, Expiry, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
     [
-        ("stop_loss", SLTPType.random_values(), None),
-        ("take_profit", None, SLTPType.random_values()),
-        pytest.param("stop_loss, take_profit", SLTPType.PRICE, SLTPType.PRICE, marks=pytest.mark.critical),
-        pytest.param("stop_loss, take_profit", SLTPType.POINTS, SLTPType.POINTS, marks=pytest.mark.critical),
-        ("stop_loss, take_profit", *SLTPType.random_values(amount=2)),
+        ("SL", SLTPType.random_values(), None),
+        ("TP", None, SLTPType.random_values()),
+        pytest.param("SL, TP", SLTPType.PRICE, SLTPType.PRICE, marks=pytest.mark.critical),
+        pytest.param("SL, TP", SLTPType.POINTS, SLTPType.POINTS, marks=pytest.mark.critical),
+        ("SL, TP", *SLTPType.random_values(amount=2)),
     ]
 )
-def test(web, symbol, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
+def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data, limit_obj):
+    trade_object = limit_obj(stop_loss=0, take_profit=0)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
     create_order_data(trade_object)
 
-    logger.info("Verify order placed successfully")
+    logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
-    logger.info(f"Step 2: Update item with {edit_field!r}")
+    logger.info(f"Step 2: Modify order with {edit_field!r}")
     web.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type, expiry=Expiry.sample_values(OrderType.LIMIT))
 
-    logger.info("Verify edit confirmation info")
-    web.trade_page.modals.verify_edit_trade_confirmation(trade_object)
+    logger.info("Verify trade edit confirmation")
+    web.trade_page.modals.verify_trade_edit_confirm_details(trade_object)
 
     logger.info("Step 3: Confirm update order")
     web.trade_page.modals.confirm_update_order()

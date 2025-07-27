@@ -5,7 +5,7 @@ from src.data.enums import SettingOptions, Language, ThemeOptions
 from src.data.enums.home import NotiSettingsOpts
 from src.data.objects.account_obj import ObjDemoAccount
 from src.page_object.web.base_page import BasePage
-from src.page_object.web.components.modals.demo_account_modals import DemoAccountModal
+from src.page_object.web.components.modals.demo_acc_modals import DemoAccountModal
 from src.page_object.web.components.modals.notification_settings import NotificationSettingsModal
 from src.page_object.web.components.modals.password_modals import PasswordModal
 from src.utils.assert_utils import soft_assert

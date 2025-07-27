@@ -1,15 +1,14 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.order(1)
 @pytest.mark.critical
-def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
+def test(web, symbol, get_asset_tab_amount, close_confirm_modal, limit_obj):
+    trade_object = limit_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} order")
@@ -21,7 +20,7 @@ def test(web, symbol, get_asset_tab_amount, close_confirm_modal):
     logger.info("Step 3: Get order_id of placed order")
     web.trade_page.asset_tab.get_last_order_id(trade_object)
 
-    logger.info("Step 4: Get placed order API data")
+    logger.info(f"Step 4: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
         symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
     )

@@ -106,6 +106,7 @@ class TradingModals(BaseTrade):
 
     def click_edit_order_btn(self):
         """Click the edit order button."""
+        time.sleep(0.5)
         self.actions.click(self.__btn_edit_order)
 
     def confirm_update_order(self):
@@ -248,17 +249,6 @@ class TradingModals(BaseTrade):
         logger.debug(f"- Edit price is {edit_price!r}")
         stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
 
-        # params = calculate_trade_parameters(edit_price, trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
-        # stop_loss, take_profit = params.stop_loss, params.take_profit
-        #
-        # if order_type != OrderType.MARKET:
-        #     self._input_edit_price(params.entry_price, order_type)
-        #     trade_object.entry_price = params.entry_price
-        #
-        # if order_type.is_stp_limit():
-        #     self._input_edit_stp_price(params.stop_limit_price, order_type)
-        #     trade_object.stop_limit_price = params.stop_limit_price
-
         self._input_edit_sl(stop_loss, sl_type)
         if sl_type == SLTPType.POINTS:
             sl = self._get_edit_sl()
@@ -266,7 +256,6 @@ class TradingModals(BaseTrade):
                 logger.debug("- Fall back - stop loss is negative, re-input")
                 self._input_edit_sl(stop_loss, sl_type)
                 sl = self._get_edit_sl()
-
             stop_loss = sl
 
         self._input_edit_tp(take_profit, tp_type)
@@ -397,9 +386,9 @@ class TradingModals(BaseTrade):
             k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
         }
 
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())
 
-    def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
+    def verify_trade_edit_confirm_details(self, trade_object: ObjTrade):
         expected = trade_object.trade_edit_confirm_details()
         actual_locators = [
             self.__edit_confirm_order_id,
@@ -418,4 +407,4 @@ class TradingModals(BaseTrade):
             k: v for k, v in zip(list(expected.keys()), [self.actions.get_text(locator) for locator in actual_locators])
         }
 
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())

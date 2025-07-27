@@ -44,8 +44,10 @@ class AssetsScreen(BaseScreen):
     def get_mytrade_item(self):
         # scroll down a bit
         self.actions.scroll_down()
-        elements = self.actions.find_elements(self.__item_watchlist)
-        return [ele.text.strip() for ele in elements]
+        return self.actions.get_text_elements(self.__item_watchlist)
+
+        # elements = self.actions.find_elements(self.__item_watchlist)
+        # return [ele.text.strip() for ele in elements]
 
     # ------------------------ VERIFY ------------------------ #
     def verify_account_details(self, exp_data):

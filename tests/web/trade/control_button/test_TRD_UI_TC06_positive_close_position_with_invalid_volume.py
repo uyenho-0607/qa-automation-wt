@@ -15,7 +15,7 @@ def test(web, setup_close_position_test, volume):
     tab_amount = setup_close_position_test.tab_amount
 
     logger.info(f"Step 1: Attempt partial close with invalid volume input: {volume!r}")
-    web.trade_page.asset_tab.partial_close_position(order_id, volume=volume, confirm=False)
+    web.trade_page.asset_tab.partial_close_position(order_id=order_id, volume=volume, confirm=False)
 
     logger.info("Step 2: Confirm close order with force option due to invalid volume")
     web.trade_page.modals.confirm_close_order(force=True)

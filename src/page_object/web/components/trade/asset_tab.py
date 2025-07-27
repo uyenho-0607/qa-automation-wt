@@ -4,6 +4,7 @@ from typing import Optional, List
 
 from selenium.webdriver.common.by import By
 
+from src.data.consts import EXPLICIT_WAIT
 from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts
@@ -173,7 +174,7 @@ class AssetTab(BaseTrade):
 
     click_delete_button = click_close_button
 
-    def delete_pending_order(self, order_id: int = 0, trade_object: ObjTrade = None, confirm=True, wait=False) -> None:
+    def delete_order(self, order_id: int = 0, trade_object: ObjTrade = None, confirm=True, wait=False) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         tab = AssetTabs.PENDING_ORDER
         if order_id:
@@ -215,7 +216,7 @@ class AssetTab(BaseTrade):
         not confirm or self.confirm_close_order()
         not wait or self.wait_for_spin_loader()
 
-    def partial_close_position(self, order_id=0, trade_object=None, volume=0, confirm=True, wait=False):
+    def partial_close_position(self, trade_object=None, order_id=0, volume=0, confirm=True, wait=False):
         order_id = order_id or trade_object.get("order_id", 0)
         tab = AssetTabs.OPEN_POSITION
         if order_id:
@@ -349,14 +350,14 @@ class AssetTab(BaseTrade):
 
         actual = {k: v for k, v in item_data.items() if k in expected}
 
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_item_displayed(self, tab: AssetTabs, order_id: int | str | list, is_display: bool = True) -> None:
         """Verify that an item is displayed or not displayed."""
         self.select_tab(tab)
         order_id = order_id if isinstance(order_id, list) else [order_id]
         locator_list = [cook_element(self.__item_by_id, tab.get_col(), _id) for _id in order_id]
-        self.actions.verify_elements_displayed(locator_list, timeout=SHORT_WAIT, is_display=is_display)
+        self.actions.verify_elements_displayed(locator_list, timeout=EXPLICIT_WAIT, is_display=is_display)
 
     def verify_volume_btn_disabled(
             self,

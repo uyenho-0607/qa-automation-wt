@@ -21,10 +21,10 @@ def test(web, symbol, get_asset_tab_amount, ):
         trade_object, sl_type=SLTPType.sample_values(), tp_type=SLTPType.sample_values(), swap_to_volume=True
     )
 
-    logger.info("Verify trade confirmation modal information is correct")
+    logger.info(f"Verify trade confirmation")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 2: Confirm Place Order")
+    logger.info("Step 2: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")

@@ -8,7 +8,7 @@ from src.data.enums import AccountType, Language, URLPaths
 from src.data.project_info import ProjectConfig
 from src.data.ui_messages import UIMessages
 from src.page_object.web.base_page import BasePage
-from src.page_object.web.components.modals.demo_account_modals import DemoAccountModal
+from src.page_object.web.components.modals.demo_acc_modals import DemoAccountModal
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element, translate_sign_in
 from src.utils.logging_utils import logger

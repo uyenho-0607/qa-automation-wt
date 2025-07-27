@@ -33,8 +33,8 @@ class TradeAPI(BaseAPI):
                 "point_step": resp["pointStep"],
                 "contract_size": resp["contractSize"],
                 "current_price": {
-                    TradeType.BUY: float(format_with_decimal(resp["ask"], resp["pointStep"])),
-                    TradeType.SELL: float(format_with_decimal(resp["bid"], resp["pointStep"]))
+                    TradeType.BUY: float(format_with_decimal(resp["ask"], resp["pointStep"])) if resp["ask"] else resp["ask"],
+                    TradeType.SELL: float(format_with_decimal(resp["bid"], resp["pointStep"])) if resp["bid"] else resp["bid"]
                 }
             })
         
@@ -96,7 +96,7 @@ class TradeAPI(BaseAPI):
     def _update_trade_object(self, trade_object: DotDict, payload: dict, response: dict, update_price=True):
         """Update trade object with response data and calculated values."""
         symbol_details = self._symbol_details[trade_object.symbol]
-        
+
         # Update with response data
         payload["order_id"] = response["clOrdId"]
         
@@ -131,7 +131,7 @@ class TradeAPI(BaseAPI):
                 payload["take_profit"] = format_with_decimal(
                     order_details.get("takeProfit") or "--", symbol_details.point_step
                 )
-        
+
         # Update the trade object
         trade_object.update(payload)
         trade_object.pop("indicate", None)

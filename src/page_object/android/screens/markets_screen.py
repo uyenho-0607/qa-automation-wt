@@ -19,6 +19,8 @@ class MarketsScreen(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
 
+    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
+    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
     __chb_symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.widget.TextView[@text='{}']/preceding-sibling::android.view.ViewGroup[.//android.widget.TextView]")
@@ -27,6 +29,27 @@ class MarketsScreen(BaseScreen):
     __btn_save_changes = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Save Changes']")
 
     # ------------------------ ACTIONS ------------------------ #
+
+    def select_tab(self, tab: WatchListTab):
+        """Handle selecting tab for home & markets screen"""
+        locator = cook_element(self.__tab, tab)
+
+        logger.info(f"- Select tab: {tab.value.capitalize()!r}")
+        # if tab is represent, select tab immediately
+        if self.actions.is_element_displayed(locator):
+            self.actions.click(locator)
+            return
+
+        # Handle swipe scroll tab for markets screen
+        if self.actions.is_element_enabled(self.__horizontal_scroll_tab):
+            # If not visible, attempt to scroll horizontally to reveal it
+            for direction in ["left", "right"]:
+                logger.debug(f"- Swipe {direction} to show tab")
+                self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
+                if self.actions.is_element_displayed(locator):
+                    self.actions.click(locator)
+                    return
+
 
     def set_symbol_preference(self, tab: WatchListTab, unchecked=True, show_all=None, store_dict=None):
         """Show/Hide Symbols with accurate state detection"""

@@ -1,5 +1,6 @@
 import os.path
 import shutil
+
 import allure
 import pytest
 from allure_commons.types import Severity
@@ -11,6 +12,7 @@ from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, ProjectConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
 from src.utils.logging_utils import logger
+from src.utils.allure_utils import attach_session_video
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -48,7 +50,7 @@ def pytest_sessionstart(session: pytest.Session):
         test_index = split_path.index("tests")
 
     platform = platform or split_path[test_index + 1]
-    logger.info(f">> Platform: {platform.capitalize()!r}")
+    logger.info(f">> Platform: {platform.replace('_', ' ').capitalize()!r}")
 
     ######## System Options ########
     argo_cd = session.config.getoption("cd")
@@ -206,6 +208,8 @@ def pytest_runtest_makereport(item, call):
 
         if report.failed and "FAILURE" in report.longreprtext:
             StepLogs.all_failed_logs.append(("end_test", ""))
+            if ProjectConfig.is_web():
+                attach_session_video()
 
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):

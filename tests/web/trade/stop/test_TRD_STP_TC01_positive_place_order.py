@@ -1,8 +1,7 @@
 import pytest
 
-from src.data.enums import AssetTabs, SLTPType, OrderType
+from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -16,8 +15,8 @@ from src.utils.logging_utils import logger
         SLTPType.random_values(amount=2)
     ]
 )
-def test(web, symbol, get_asset_tab_amount, sl_type, tp_type, ):
-    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
+def test(web, stop_obj, get_asset_tab_amount, sl_type, tp_type, close_confirm_modal):
+    trade_object = stop_obj()
     tab = AssetTabs.PENDING_ORDER
     tab_amount = get_asset_tab_amount(trade_object.order_type)
     # -------------------
@@ -25,10 +24,10 @@ def test(web, symbol, get_asset_tab_amount, sl_type, tp_type, ):
     logger.info(f"Step 1: Place {trade_object.trade_type} order with sl_type: {sl_type!r}, tp_type: {tp_type!r}")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
-    logger.info("Verify trade confirmation modal information is correct")
+    logger.info(f"Verify trade confirmation")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 2: Confirm Place Order")
+    logger.info("Step 2: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info("Verify notification banner displays correct input trade information")

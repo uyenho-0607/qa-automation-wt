@@ -104,7 +104,7 @@ def format_str_prices(prices, decimal: int = None):
 
 def format_acc_balance(value: str, to_float=True):
     res = value.replace("$", "").replace(",", "").replace("+", "").replace("%", "")
-    if to_float:
+    if to_float and is_float(res):
         res = float(res)
     return res
 

@@ -66,10 +66,6 @@ def handle_stale_element(func):
         
         max_retries = 3
         raise_exception = all_args.get("raise_exception")
-        # print("args:", args)
-        # print("kwargs:", kwargs)
-        # print("all_args:", all_args)
-        # print("func name:", func.__name__)
 
         for attempt in range(max_retries + 1):  # +1 for initial attempt
             try:
@@ -137,7 +133,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
                             return response.text if response.text else []
 
                     # Handle server errors (5xx) - always retry
-                    elif response.status_code >= 500:
+                    elif response.status_code >= 400:
                         logger.warning(f"Server error (attempt {attempt + 1}/{max_retries + 1}): "
                                        f"{format_request_log(response, log_resp=True)}")
 
