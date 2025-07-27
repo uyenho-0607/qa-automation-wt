@@ -14,11 +14,11 @@ from src.utils.logging_utils import logger
         ("SL, TP", *SLTPType.sample_values(amount=2)),
     ]
 )
-def test(web, symbol, get_asset_tab_amount, update_field, sl_type, tp_type, close_edit_confirm_modal, update_entry_price, ):
+def test(web, symbol, get_asset_tab_amount, update_field, sl_type, tp_type, close_edit_confirm_modal, ):
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without Stop Loss and Take Profit")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=None, tp_type=None)
 
     logger.info("Verify notification banner displays correct input trade information")
@@ -28,7 +28,6 @@ def test(web, symbol, get_asset_tab_amount, update_field, sl_type, tp_type, clos
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
     logger.info(f"Verify item details in Asset Tab")
-    update_entry_price(trade_object)
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
     logger.info("Verify Open Position noti in Notification Box")

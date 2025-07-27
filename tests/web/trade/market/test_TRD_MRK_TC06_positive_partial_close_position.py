@@ -2,7 +2,8 @@ import random
 import time
 
 import pytest
-from src.data.enums import AssetTabs, OrderType, TradeType
+
+from src.data.enums import AssetTabs, TradeType
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
@@ -10,9 +11,9 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 @pytest.mark.parametrize("trade_type", random.choices([TradeType.BUY, TradeType.SELL], k=1))
-def test(web, symbol, get_asset_tab_amount, cancel_close_order, trade_type, create_order_data):
+def test(web, market_obj, get_asset_tab_amount, cancel_close_order, trade_type, create_order_data):
 
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+    trade_object = market_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_type.value.upper()} {trade_object.order_type.upper()} Order")
@@ -26,7 +27,7 @@ def test(web, symbol, get_asset_tab_amount, cancel_close_order, trade_type, crea
 
     logger.info(f"Step 2: Partial close position - {trade_object.get('order_id')!r} - tab amount: {tab_amount!r}")
     time.sleep(1)
-    web.trade_page.asset_tab.partial_close_position(trade_object=new_object)
+    web.trade_page.asset_tab.partial_close_position(new_object)
 
     # update new volume, units after partial close
     trade_object.volume, trade_object.units = new_object.close_volume, new_object.close_units

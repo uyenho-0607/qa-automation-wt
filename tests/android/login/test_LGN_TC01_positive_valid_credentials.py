@@ -14,6 +14,7 @@ def test(android, setup_pre_selected_tab):
 
     logger.info("Step 1: Login with valid userid and password")
     android.login_screen.login()
+    android.home_screen.feature_anm_modal.got_it()
 
     logger.info("Verify account info is displayed")
     android.home_screen.verify_account_info_displayed()

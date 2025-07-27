@@ -14,9 +14,9 @@ def test(android, symbol, setup_bulk_test, cancel_bulk_close):
     logger.info(f"Step 1: Bulk close positions")
     android.trade_screen.asset_tab.bulk_close_positions()
 
-    logger.info("Verify bulk close notification banner")
+    logger.info(f"Verify bulk close notification banner")
     android.home_screen.notifications.verify_notification_banner(*ObjNoti.bulk_close_open_position_banner(order_ids))
     android.home_screen.notifications.close_noti_banner()
 
-    logger.info(f"Verify asset tab amount is: {expected_amount}")
+    logger.info(f"Verify asset tab amount is {expected_amount}")
     android.trade_screen.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, expected_amount)

@@ -4,20 +4,19 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs, OrderType
+from src.data.enums import Features
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-# @pytest.fixture(autouse=True, scope="package")
-# def get_symbol_details(symbol):
-#     logger.debug(f"- Getting details of symbol {symbol!r}")
-#     market_details = APIClient().market.get_symbol_details(symbol)
-#
-#     ObjectTrade.POINT_STEP = market_details.get("pointStep")
-#     ObjectTrade.DECIMAL = market_details.get("decimal")
-#     ObjectTrade.CONTRACT_SIZE = market_details.get("contractSize")
-#     ObjectTrade.STOP_LEVEL = market_details.get("stopsLevel")
+@pytest.fixture(scope="package", autouse=True)
+def setup(login_member_site, web, symbol, disable_OCT):
 
+    logger.info("- Select Trade Page")
+    web.home_page.navigate_to(Features.TRADE)
+
+    logger.info(f"- Search and select symbol: {symbol}")
+    web.home_page.search_and_select_symbol(symbol)
 
 @pytest.fixture(scope="package")
 def create_order_data(web, get_asset_tab_amount, symbol):

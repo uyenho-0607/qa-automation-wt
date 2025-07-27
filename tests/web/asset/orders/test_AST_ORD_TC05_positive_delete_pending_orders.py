@@ -29,7 +29,7 @@ def test(web, symbol, search_symbol, order_type):
     web.assets_page.asset_tab.get_last_order_id(trade_object)
 
     logger.info("Step 4: Delete pending order")
-    web.assets_page.asset_tab.delete_pending_order(order_id=trade_object.order_id)
+    web.assets_page.asset_tab.delete_order(order_id=trade_object.order_id)
 
     logger.info(f"Verify notification banner deleted message")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).delete_order_banner())

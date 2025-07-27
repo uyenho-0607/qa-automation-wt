@@ -40,11 +40,11 @@ class ObjTrade(BaseObj):
         self.symbol = symbol or random.choice(get_symbols())
         self.expiry = expiry or Expiry.sample_values(self.order_type)
         self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)
-        self.update_symbol_details(self.symbol)
+        self._update_symbol_details(self.symbol)
         self._update_attributes(**kwargs)
 
-
-    def update_symbol_details(self, symbol):
+    @staticmethod
+    def _update_symbol_details(symbol):
         symbol_details = get_symbol_details(symbol)
         ObjTrade.POINT_STEP = symbol_details["point_step"]
         ObjTrade.DECIMAL = symbol_details["decimal"]
@@ -178,7 +178,6 @@ class ObjTrade(BaseObj):
         """Get asset item data for different tabs."""
         stp_limit_price, entry_price, stop_loss, take_profit = self._format_prices()
         self._format_volume_units()
-
         tab = tab or AssetTabs.get_tab(self.order_type)
 
         details = {
@@ -193,10 +192,10 @@ class ObjTrade(BaseObj):
 
         # Add tab-specific details
         if tab == AssetTabs.PENDING_ORDER:
-            details |= {
-                "fill_policy": self.fill_policy,
-                "pending_price": None if ProjectConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
-            }
+            details["pending_price"] = None if ProjectConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
+            # todo: re-check with QA: mobile trade confirm does not display fill_policy
+            if ProjectConfig.is_web():
+                details["fill_policy"]  = self.fill_policy
 
         if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
             details["remarks"] = "--"

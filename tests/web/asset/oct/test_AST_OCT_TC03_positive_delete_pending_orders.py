@@ -28,7 +28,7 @@ def test(web, symbol, search_symbol, order_type, cancel_close_order):
     web.assets_page.asset_tab.get_last_order_id(trade_object)
 
     logger.info("Step 4: Delete pending order")
-    web.assets_page.asset_tab.delete_pending_order(trade_object=trade_object, confirm=False)
+    web.assets_page.asset_tab.delete_order(trade_object=trade_object, confirm=False)
 
     logger.info(f"Verify notification banner pending orders deleted")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).delete_order_banner())

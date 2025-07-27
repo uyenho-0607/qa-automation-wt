@@ -24,6 +24,7 @@ class MobileActions(BaseActions):
         """Send keys to an element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         if element and value is not None:
+            element.click()
             element.clear()
             element.send_keys(str(value))
 

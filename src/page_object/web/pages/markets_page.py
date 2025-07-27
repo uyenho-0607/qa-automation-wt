@@ -46,13 +46,25 @@ class MarketsPage(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
 
-    def get_last_symbol(self, store_data: DotDict = None):
+    def get_last_symbol(self, section: MarketsSection = None, store_data: DotDict = None):
         """Get lastest symbol of section: My Trade, Top Picks, Top Gainer"""
 
         # Handle signal, sometimes the items do not show
         signal_displayed = self.actions.is_element_displayed(self.__signal_symbol)
         if not signal_displayed:
             self.refresh_page()
+        
+        if section:
+            locator_map = {
+                MarketsSection.MY_TRADE: self.__my_trade_symbol,
+                MarketsSection.TOP_PICKS: self.__top_picks_symbol,
+                MarketsSection.TOP_GAINER: self.__top_gainer_symbol,
+                MarketsSection.SIGNAL: self.__signal_symbol
+            }
+            symbol = self.actions.get_text(locator_map[section])
+            if store_data is not None:
+                store_data |= {section: symbol}
+            return symbol
 
         res = {
             MarketsSection.MY_TRADE: self.actions.get_text(self.__my_trade_symbol),

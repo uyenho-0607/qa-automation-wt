@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.data.objects.account_obj import ObjDemoAccount
-from src.page_object.web.components.modals.demo_account_modals import DemoAccountModal
+from src.page_object.web.components.modals.demo_acc_modals import DemoAccountModal
 from src.utils.logging_utils import logger
 
 pytestmark = [pytest.mark.not_live, pytest.mark.not_crm]

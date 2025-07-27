@@ -92,7 +92,7 @@ class PlaceOrderPanel(BaseTrade):
     def _get_input_price(self):
         return self.actions.get_value(self.__txt_price)
 
-    def _get_input_stop_limit_price(self):
+    def _get_input_stop_price(self):
         return self.actions.get_value(self.__txt_stop_limit_price)
 
     def _input_trade_value(self, locator, value, value_type: str) -> None:
@@ -233,15 +233,25 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Click place order button")
         self.actions.click(self.__btn_place_order)
 
-    def _input_stop_loss(self, value: any) -> None:
+    def _input_sl(self, value: any, sl_type: SLTPType) -> None:
         """Input stop loss value."""
-        sl_type = SLTPType.POINTS if isinstance(value, int) else SLTPType.PRICE
-        self._input_trade_value(cook_element(self.__txt_stop_loss, sl_type), value, "stop loss")
+        if sl_type is None:
+            for _type in SLTPType.list_values():
+                locator = cook_element(self.__txt_stop_loss, _type.lower())
+                self.actions.clear_field(locator)
+            return
 
-    def _input_take_profit(self, value: any) -> None:
+        self._input_trade_value(cook_element(self.__txt_stop_loss, sl_type.lower()), value, "SL")
+
+    def _input_tp(self, value: any, tp_type: SLTPType) -> None:
         """Input take profit value."""
-        tp_type = SLTPType.POINTS if isinstance(value, int) else SLTPType.PRICE
-        self._input_trade_value(cook_element(self.__txt_take_profit, tp_type), value, "take profit")
+        if tp_type is None:
+            for _type in SLTPType.list_values():
+                locator = cook_element(self.__txt_take_profit, _type.lower())
+                self.actions.clear_field(locator)
+            return
+
+        self._input_trade_value(cook_element(self.__txt_take_profit, tp_type.lower()), value, "TP")
 
     def _input_volume(self, value: int | None = None) -> int:
         """Input volume value."""
@@ -262,7 +272,7 @@ class PlaceOrderPanel(BaseTrade):
             return
         self._input_trade_value(self.__txt_price, value, "price")
 
-    def _input_stop_limit_price(self, value: any, order_type: OrderType | None = None) -> None:
+    def _input_stop_price(self, value: any, order_type: OrderType | None = None) -> None:
         """Input stop limit price for order type 'Stop limit'."""
         if not order_type.is_stp_limit():
             return
@@ -280,8 +290,6 @@ class PlaceOrderPanel(BaseTrade):
 
         """Place a valid order and load input data into trade_object."""
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        stop_loss, take_profit = "--", "--"
-
         # select trade tab
         self.select_tab(TradeTab.TRADE)
 
@@ -301,15 +309,15 @@ class PlaceOrderPanel(BaseTrade):
 
         # input price values
         self._input_price(trade_params.entry_price, order_type)
-        self._input_stop_limit_price(trade_params.stop_limit_price, order_type)
+        self._input_stop_price(trade_params.stop_limit_price, order_type)
 
-        if sl_type is not None:
-            stop_loss = trade_params.stop_loss
-            self._input_stop_loss(stop_loss)
+        # input SL
+        stop_loss = trade_params.stop_loss
+        self._input_sl(stop_loss, sl_type)
 
-        if tp_type is not None:
-            take_profit = trade_params.take_profit
-            self._input_take_profit(take_profit)
+        # input TP
+        take_profit = trade_params.take_profit
+        self._input_tp(take_profit, tp_type)
 
         # Select fill policy and expiry
         self._select_fill_policy(trade_object.get("fill_policy"))
@@ -332,8 +340,8 @@ class PlaceOrderPanel(BaseTrade):
             'units': units,
             'entry_price': trade_params.entry_price,
             'stop_limit_price': trade_params.stop_limit_price,
-            'stop_loss': stop_loss,
-            'take_profit': take_profit,
+            'stop_loss': "--" if not sl_type else stop_loss,
+            'take_profit': "--" if not tp_type else take_profit,
             'fill_policy': trade_object.get("fill_policy"),
             'expiry': trade_object.get("expiry")
         }
@@ -387,10 +395,10 @@ class PlaceOrderPanel(BaseTrade):
 
         # Input prices
         self._input_price(price, order_type)
-        self._input_stop_limit_price(stp_price, order_type)
+        self._input_stop_price(stp_price, order_type)
 
-        self._input_stop_loss(sl)
-        self._input_take_profit(tp)
+        self._input_sl(sl, SLTPType.PRICE)
+        self._input_tp(tp, SLTPType.PRICE)
 
         self._click_place_order_btn()
         not submit or self.confirm_trade()
@@ -458,10 +466,10 @@ class PlaceOrderPanel(BaseTrade):
         if input_value:
             logger.debug("- Input value before using control buttons")
             self._input_volume(random.randint(1, 10))
-            self._input_stop_limit_price(prices.stop_limit_price, trade_object.order_type)
+            self._input_stop_price(prices.stop_limit_price, trade_object.order_type)
             self._input_price(prices.entry_price, trade_object.order_type)
-            self._input_stop_loss(prices.stop_loss)
-            self._input_take_profit(prices.take_profit)
+            self._input_sl(prices.stop_loss, SLTPType.PRICE)
+            self._input_tp(prices.take_profit, SLTPType.PRICE)
 
         logger.debug("- Adjust price using increase and decrease button")
         self.control_volume()
@@ -486,7 +494,7 @@ class PlaceOrderPanel(BaseTrade):
         }
 
         if order_type.is_stp_limit():
-            trade_details |= {'stop_limit_price': self._get_input_stop_limit_price()}
+            trade_details |= {'stop_limit_price': self._get_input_stop_price()}
 
         trade_object |= trade_details
 

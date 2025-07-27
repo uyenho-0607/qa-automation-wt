@@ -1,8 +1,6 @@
 import pytest
 
-from src.apis.api_client import APIClient
-
 
 @pytest.fixture(autouse=True, scope="package")
-def disable_OCT():
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(disable_OCT):
+    pass

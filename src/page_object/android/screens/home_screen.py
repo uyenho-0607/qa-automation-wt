@@ -1,14 +1,11 @@
-import time
-
 from appium.webdriver.common.appiumby import AppiumBy
-
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
-from src.page_object.android.components.modals.feature_announcement_modal import FeatureAnnouncementModal
-from src.page_object.android.components.modals.my_account_modal import MyAccountModal
+from src.page_object.android.components.modals.feature_anm_modal import FeatureAnnouncementModal
+from src.page_object.android.components.modals.my_acc_modal import MyAccountModal
 from src.page_object.android.components.notifications import Notifications
 from src.page_object.android.components.settings import Settings
 from src.page_object.android.components.trade.watch_list import WatchList
