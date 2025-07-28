@@ -58,7 +58,7 @@ def update_entry_price(web):
             )
 
             if resp.get("openPrice"):
-                logger.debug(f"- Update entry price from {trade_object.entry_price} to {resp["openPrice"]}")
+                logger.debug(f"- Update entry price from {trade_object.entry_price} to {resp['openPrice']}")
                 trade_object["entry_price"] = format_str_prices(round(resp["openPrice"], ndigits=ObjTrade.DECIMAL), ObjTrade.DECIMAL)
 
         return None

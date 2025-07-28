@@ -2,6 +2,7 @@ import builtins
 import subprocess
 
 from appium import webdriver
+from appium.options.ios import XCUITestOptions
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.appium_service import AppiumService
 
@@ -32,6 +33,7 @@ class AppiumDriver:
         logger.debug("- Starting appium service...")
         cls._appium_service.start(args=args, timeout_ms=30000)
         logger.info("- Appium service started !")
+
 
     @classmethod
     def init_android_driver(cls, host="http://localhost", port=4723) -> webdriver.Remote:
@@ -64,11 +66,43 @@ class AppiumDriver:
         except WebDriverException as error:
             raise WebDriverException(f"Failed to init resources driver with error: {error!r}")
 
+
     @classmethod
-    def quit_android_driver(cls):
-        if DriverList.all_drivers.get("android"):
-            DriverList.all_drivers["android"].quit()
-            DriverList.all_drivers["android"] = None
+    def init_ios_driver(cls, host="http://localhost", port=4723) -> webdriver.Remote:
+        options = XCUITestOptions()
+        options.platform_name = "iOS"
+        options.udid = Config.mobile().device_udid or get_connected_device()
+        options.bundle_id = Config.mobile().app_id
+        options.auto_accept_alerts = True
+        options.no_reset = False
+        options.full_reset = False
+        options.use_prebuilt_wda = True
+        options.new_command_timeout = 30000
+        options.set_capability("appium:dontStopAppOnReset", False)
+        options.set_capability("appium:shouldTerminateApp", True)
+        options.set_capability("wdaStartupRetries", 2)
+        options.set_capability("wdaStartupRetryInterval", 20000)
+
+        if not cls._appium_service:
+            cls.start_appium_service()
+
+        try:
+            logger.debug("- Init iOS driver...")
+            driver = webdriver.Remote(f"{host}:{port}/wd/hub", options=options)
+            setattr(builtins, "ios_driver", driver)
+
+            DriverList.all_drivers["ios"] = driver
+            logger.info("- iOS driver init !")
+            return driver
+
+        except WebDriverException as error:
+            raise WebDriverException(f"Failed to init iOS driver with error: {error!r}")
+
+    @classmethod
+    def quit_mobile_driver(cls, platform):
+        if DriverList.all_drivers.get(platform):
+            DriverList.all_drivers[platform].quit()
+            DriverList.all_drivers[platform] = None
 
     @classmethod
     def stop_appium_service(cls):

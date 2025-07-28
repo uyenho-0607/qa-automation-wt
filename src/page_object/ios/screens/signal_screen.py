@@ -1,0 +1,13 @@
+from src.core.actions.mobile_actions import MobileActions
+from src.page_object.ios.base_screen import BaseScreen
+
+
+class SignalScreen(BaseScreen):
+    def __init__(self, actions: MobileActions):
+        super().__init__(actions)
+
+        # ------------------------ LOCATORS ------------------------ #
+
+    # ------------------------ ACTIONS ------------------------ #
+
+    # ------------------------ VERIFY ------------------------ #

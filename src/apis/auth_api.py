@@ -40,7 +40,7 @@ class AuthAPI(BaseAPI):
                 payload=payload
             )
 
-            self.__headers["Authorization"] = f"Bearer {resp["token"]}"
+            self.__headers["Authorization"] = f"Bearer {resp['token']}"
             ProjectConfig.headers = self.__headers
             return self.__headers
 
