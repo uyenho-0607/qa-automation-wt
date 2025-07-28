@@ -54,6 +54,7 @@ class Settings(BaseScreen):
 
     def logout(self):
         self.__open_setting()
+        self.actions.scroll_down()
         self.actions.click(self.__btn_logout)
 
     # ------------------------ VERIFY ------------------------ #

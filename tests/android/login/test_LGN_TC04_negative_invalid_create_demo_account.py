@@ -4,7 +4,7 @@ import time
 import pytest
 
 from src.data.objects.account_obj import ObjDemoAccount
-from src.page_object.web.components.modals.demo_account_modals import DemoAccountModal
+from src.page_object.web.components.modals.demo_acc_modals import DemoAccountModal
 from src.utils.logging_utils import logger
 from src.utils.random_utils import random_invalid_email, random_number_by_length
 

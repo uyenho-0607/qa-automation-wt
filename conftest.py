@@ -1,5 +1,6 @@
 import os.path
 import shutil
+
 import allure
 import pytest
 from allure_commons.types import Severity
@@ -49,7 +50,7 @@ def pytest_sessionstart(session: pytest.Session):
         test_index = split_path.index("tests")
 
     platform = platform or split_path[test_index + 1]
-    logger.info(f">> Platform: {platform.capitalize()!r}")
+    logger.info(f">> Platform: {platform.replace('_', ' ').capitalize()!r}")
 
     ######## System Options ########
     argo_cd = session.config.getoption("cd")

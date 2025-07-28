@@ -8,7 +8,7 @@ from src.data.enums import Features, URLPaths
 from src.data.enums.home import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.web.base_page import BasePage
-from src.page_object.web.components.modals.feature_announcement_modal import FeatureAnnouncementModal
+from src.page_object.web.components.modals.feature_anm_modal import FeatureAnnouncementModal
 from src.page_object.web.components.notifications import Notifications
 from src.page_object.web.components.settings import Settings
 from src.utils.assert_utils import soft_assert, compare_with_tolerance

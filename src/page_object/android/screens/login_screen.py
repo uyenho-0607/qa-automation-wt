@@ -1,13 +1,13 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
+from src.data.consts import LONG_WAIT
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import ProjectConfig
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
-from src.page_object.android.components.modals.demo_account_modals import DemoAccountModal
+from src.page_object.android.components.modals.demo_acc_modals import DemoAccountModal
 from src.page_object.android.components.modals.password_modals import PasswordModal
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, translate_sign_in
@@ -53,7 +53,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=EXPLICIT_WAIT):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=LONG_WAIT):
             self.actions.click(self.__btn_skip)
 
         if language:
@@ -99,9 +99,8 @@ class LoginScreen(BaseScreen):
     
     def verify_alert_error_message(self, account_type=None):
         account_type = account_type or ProjectConfig.account
-
         err_msg = UIMessages.LOGIN_INVALID
-        if account_type == AccountType.DEMO:
+        if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
         super().verify_alert_error_message(err_msg)
