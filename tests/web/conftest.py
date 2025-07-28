@@ -1,9 +1,9 @@
 import pytest
 
-from core.driver.driver_manager import DriverManager
-from core.page_container.web_container import WebContainer
+from src.core.driver.driver_manager import DriverManager
+from src.core.page_container.web_container import WebContainer
 from src.apis.api_client import APIClient
-from utils.logging_utils import logger
+from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package")
