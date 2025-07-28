@@ -1,5 +1,4 @@
 import pytest
-
 from src.data.enums import SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
@@ -18,7 +17,7 @@ from src.utils.logging_utils import logger
 )
 def test(web, stop_obj, create_order_data, exclude_field, update_field, close_edit_confirm_modal):
     trade_object = stop_obj()
-    trade_obj[exclude_field] = 0
+    trade_object[exclude_field] = 0
     update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")

@@ -4,7 +4,7 @@ from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
 from src.page_object.web_app.base_page import BasePage
 from src.utils.logging_utils import logger
-from utils.common_utils import data_testid
+from src.utils.common_utils import data_testid
 
 
 class FeatureAnnouncementModal(BasePage):

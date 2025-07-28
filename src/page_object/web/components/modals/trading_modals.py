@@ -256,7 +256,6 @@ class TradingModals(BaseTrade):
                 logger.debug("- Fall back - stop loss is negative, re-input")
                 self._input_edit_sl(stop_loss, sl_type)
                 sl = self._get_edit_sl()
-
             stop_loss = sl
 
         self._input_edit_tp(take_profit, tp_type)
