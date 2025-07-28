@@ -7,8 +7,6 @@ import uuid
 from typing import Dict, Any
 
 import allure
-
-from src.core.config_manager import Config
 from src.data.consts import GRID_VIDEO_URL
 from src.data.project_info import DriverList
 from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
@@ -20,8 +18,8 @@ from src.utils.logging_utils import logger
 def attach_session_video():
     driver = DriverList.all_drivers.get("web")
     if driver:
-        s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
-        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
+        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
+        s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
         allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
 
 
