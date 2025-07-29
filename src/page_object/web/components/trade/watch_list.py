@@ -266,9 +266,8 @@ class WatchList(BaseTrade):
 
     def verify_tabs_displayed(self):
         expected_tabs = WatchListTab.parent_tabs() + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
-        actual_tabs = self.actions.find_elements(self.__all_tabs)
-        list_values = [ele.text.strip() for ele in actual_tabs]
-        soft_assert(sorted(list_values), sorted(expected_tabs))
+        actual_tabs = self.actions.get_text_elements(self.__all_tabs)
+        soft_assert(sorted(actual_tabs), sorted(expected_tabs))
 
     def verify_tab_selected(self, tab: WatchListTab = WatchListTab.ALL):
         soft_assert(self.wait_for_tab_selected(tab), True, error_message=f"Tab {tab.capitalize()} is not selected")
