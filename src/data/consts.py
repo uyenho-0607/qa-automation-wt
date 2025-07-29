@@ -36,7 +36,20 @@ SYMBOLS = {
 
 # supporting methods
 def get_symbols():
-    return SYMBOLS[ProjectConfig.client][ProjectConfig.server]
+    symbol_list = SYMBOLS
+    if ProjectConfig.env == "prod":
+        symbol_list = {
+            Client.TRANSACT_CLOUD: {
+                Server.MT5: ["BAKEUSD.d", "AXSUSD.d", "DOGEUSD.d"]
+            },
+            Client.LIRUNEX: {
+                Server.MT5: ["DASHUSD.std", "XRPUSD.std"],
+                Server.MT4: ["DASHUSD.std", "XRPUSD.std"]
+            }
+        }
+
+    return symbol_list[ProjectConfig.client][ProjectConfig.server]
+
 
 def get_symbol_details(symbol):
     details = {

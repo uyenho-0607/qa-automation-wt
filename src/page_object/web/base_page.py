@@ -55,7 +55,7 @@ class BasePage:
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
         self.actions.goto(Config.urls(site))
 
-    def wait_for_spin_loader(self, timeout: int = 5):
+    def wait_for_spin_loader(self, timeout: int = 3):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
@@ -67,12 +67,12 @@ class BasePage:
         self.wait_for_spin_loader()
 
     def is_current_page(self, url_path: URLPaths):
-        return url_path.lower() in self.actions.get_current_url()
+        return f"/{url_path.lower()}" in self.actions.get_current_url()
 
     # ------------------------ VERIFY ------------------------ #
-    def verify_page_url(self, url_path: str, timeout: int = EXPLICIT_WAIT):
+    def verify_page_url(self, url_path: str=None, custom_url="", timeout: int = EXPLICIT_WAIT):
         """Verify that the current URL matches the expected page URL."""
-        expected_url = Config.url_path(url_path)
+        expected_url = Config.url_path(url_path) if url_path is not None else custom_url
         self.actions.verify_site_url(expected_url, timeout=timeout)
 
     def verify_alert_error_message(self, expected_message: UIMessages, timeout=EXPLICIT_WAIT):
