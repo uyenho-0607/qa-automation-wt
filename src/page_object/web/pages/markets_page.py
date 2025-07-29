@@ -4,7 +4,7 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums import MarketsSection, WatchListTab, TradeType
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.trade.watch_list import WatchList
@@ -48,22 +48,31 @@ class MarketsPage(BasePage):
 
     def get_last_symbol(self, section: MarketsSection = None, store_data: DotDict = None):
         """Get lastest symbol of section: My Trade, Top Picks, Top Gainer"""
-
         # Handle signal, sometimes the items do not show
-        signal_displayed = self.actions.is_element_displayed(self.__signal_symbol)
-        if not signal_displayed:
-            self.refresh_page()
-        
+
         if section:
+            if MarketsSection.SIGNAL in list(section):
+                retries = 3
+                signal_displayed = self.actions.is_element_displayed(self.__signal_symbol, timeout=5)
+                while not signal_displayed and retries:
+                    logger.debug("- Retries loading signals")
+                    self.refresh_page()
+                    self.wait_for_spin_loader()
+                    signal_displayed = self.actions.is_element_displayed(self.__signal_symbol)
+                    retries += -1
+
             locator_map = {
                 MarketsSection.MY_TRADE: self.__my_trade_symbol,
                 MarketsSection.TOP_PICKS: self.__top_picks_symbol,
                 MarketsSection.TOP_GAINER: self.__top_gainer_symbol,
                 MarketsSection.SIGNAL: self.__signal_symbol
             }
-            symbol = self.actions.get_text(locator_map[section])
-            if store_data is not None:
-                store_data |= {section: symbol}
+
+            for _section in section:
+                symbol = self.actions.get_text(locator_map[_section])
+                if store_data is not None:
+                    store_data |= {_section: symbol}
+
             return symbol
 
         res = {

@@ -106,7 +106,7 @@ class TradingModals(BaseTrade):
 
     def click_edit_order_btn(self):
         """Click the edit order button."""
-        time.sleep(0.5)
+        time.sleep(1)
         self.actions.click(self.__btn_edit_order)
 
     def confirm_update_order(self):
@@ -287,6 +287,7 @@ class TradingModals(BaseTrade):
             trade_object.tp_type = tp_type
 
         if confirm:
+            time.sleep(1)
             self.confirm_update_order()
 
     def modify_invalid_order(
