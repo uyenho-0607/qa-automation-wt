@@ -95,12 +95,17 @@ class LoginPage(BasePage):
 
     def verify_alert_error_message(self, account_type=None):
 
-        account_type = account_type or ProjectConfig.account
+        other_msg = None
         err_msg = UIMessages.LOGIN_INVALID
+
+        account_type = account_type or ProjectConfig.account
         if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
-        super().verify_alert_error_message(err_msg, timeout=30)
+        if ProjectConfig.env == "prod": # sometimes prod can show 'Trading general error. Please try again later.'
+            other_msg = UIMessages.TRADING_GENERAL_ERRORS
+
+        super().verify_alert_error_message(err_msg, other_msg)
 
     def verify_account_tabs_is_displayed(self):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)

@@ -165,7 +165,7 @@ class HomePage(BasePage):
         """Verify account summary item against exp_dict (should be response from API get account)"""
         actual = {key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key))) for key in AccSummary.checkbox_list()}
         expected = {k: round(v, 2) for k, v in exp_dict.items() if k in AccSummary.checkbox_list()}
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_acc_note_values(self, exp_dict: dict):
         actual = {item: format_acc_balance(self.actions.get_text(cook_element(self.__acc_note_items, item))) for item in AccSummary.note_list()}

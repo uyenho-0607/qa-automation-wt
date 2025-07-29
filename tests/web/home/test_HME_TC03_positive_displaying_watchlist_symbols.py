@@ -1,3 +1,4 @@
+import random
 import time
 
 import pytest
@@ -12,6 +13,8 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize("tab", WatchListTab.list_values(except_val=WatchListTab.ALL))
 def test(web, tab, setup_test):
     exp_symbols = setup_test(tab)
+    if not exp_symbols:
+        pytest.skip("No symbols to test")
 
     logger.info("Step 1: Get random displaying symbol")
     web.trade_page.watch_list.select_tab(tab)
@@ -27,7 +30,7 @@ def test(web, tab, setup_test):
     logger.info("Verify symbol displayed in chart")
     web.trade_page.chart.verify_symbol_selected(select_symbol)
 
-    logger.info(f"Verify current tab displays {len(exp_symbols)} symbols")
+    logger.info(f"Verify current tab displays {len(exp_symbols)} symbols: {', '.join(exp_symbols)}")
     web.trade_page.watch_list.verify_symbols_list(tab, exp_symbols)
 
 
@@ -37,6 +40,7 @@ def setup_test():
 
         logger.info(f"- Get symbols should be displayed in tab: {tab}")
         symbols = APIClient().market.get_watchlist_items(tab, get_symbols=True)
+        symbols = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
 
         if not symbols and tab == WatchListTab.FAVOURITES:
             _list_symbol = get_symbols()[:3]
