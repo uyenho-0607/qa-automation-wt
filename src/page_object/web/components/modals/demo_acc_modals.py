@@ -40,6 +40,10 @@ class DemoAccountModal(BasePage):
     __chb_agreement_checked = (By.CSS_SELECTOR, "div[data-testid='demo-account-creation-modal-agreement-checked'] div")
     __btn_next = (By.CSS_SELECTOR, data_testid('demo-account-creation-modal-confirm'))
     __field_validation = (By.CSS_SELECTOR, data_testid('input-field-validation'))
+    __close_btn = (By.CSS_SELECTOR, data_testid('demo-account-completion-modal-close'))
+
+    def close(self):
+        self.actions.click(self.__close_btn)
 
     # Actions
     def input_name(self, name: str):

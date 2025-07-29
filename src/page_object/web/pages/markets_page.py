@@ -4,7 +4,7 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums import MarketsSection, WatchListTab, TradeType
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.trade.watch_list import WatchList
@@ -48,11 +48,16 @@ class MarketsPage(BasePage):
 
     def get_last_symbol(self, section: MarketsSection = None, store_data: DotDict = None):
         """Get lastest symbol of section: My Trade, Top Picks, Top Gainer"""
-
         # Handle signal, sometimes the items do not show
-        signal_displayed = self.actions.is_element_displayed(self.__signal_symbol)
-        if not signal_displayed:
+
+        retries = 3
+        signal_displayed = self.actions.is_element_displayed(self.__signal_symbol, timeout=5)
+        while not signal_displayed and retries:
+            logger.debug("- Retries loading signals")
             self.refresh_page()
+            self.wait_for_spin_loader()
+            signal_displayed = self.actions.is_element_displayed(self.__signal_symbol)
+            retries += -1
         
         if section:
             locator_map = {

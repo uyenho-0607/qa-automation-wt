@@ -22,7 +22,7 @@ def test(web, setup_test):
     web.trade_page.watch_list.verify_symbol_selected(section_symbol[my_trade])
 
     logger.info(f"Step 2: Select symbol from {top_pick.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
     web.markets_page.select_symbol(top_pick)
 
     logger.info("Verify Top Picks Tab on Trade Page is selected")
@@ -32,7 +32,7 @@ def test(web, setup_test):
     web.trade_page.watch_list.verify_symbol_selected(section_symbol[top_pick])
 
     logger.info(f"Step 3: Select symbol from {top_gainer.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
     web.markets_page.select_symbol(top_gainer)
 
     logger.info("Verify Top Gainer Tab on Trade Page is selected")
@@ -42,7 +42,7 @@ def test(web, setup_test):
     web.trade_page.watch_list.verify_symbol_selected(section_symbol[top_gainer])
 
     logger.info(f"Step 4: Select symbol from {signal.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
     web.markets_page.select_symbol(signal)
 
     logger.info(f"Verify symbol {section_symbol[signal]!r} is selected in Signal Page")
@@ -55,7 +55,7 @@ def setup_test(web):
     section_symbol = DotDict()
 
     logger.info("- Navigate to Market Page")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
 
     logger.info("- Get section symbols")
     web.markets_page.get_last_symbol(store_data=section_symbol)
