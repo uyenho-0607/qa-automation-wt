@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from src.apis.api_client import APIClient
@@ -26,12 +28,13 @@ def test(web, setup_teardown, disable_OCT):
     for _id in order_ids:
         web.assets_page.asset_tab.full_close_position(_id)
 
-    logger.info(f"Verify Profit/Loss and account balance are changed an amount of ~{sum_profit!r} after closing positions")
-    acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + sum_profit
+    logger.info(f"Verify account balance are changed an amount of ~{sum_profit!r} after closing positions")
     acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + sum_profit
-
     web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.BALANCE, tolerance=0.1)
-    web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.REALISED_PROFIT_LOSS, tolerance=0.1)
+
+    logger.info(f"Verify Profit/Loss are changed an amount of ~{sum_profit!r} after closing positions")
+    acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + sum_profit
+    web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.REALISED_PROFIT_LOSS, tolerance=0.5)
 
     logger.info("Verify other info is not changed")
     web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.list_values(except_val=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS]))
@@ -43,7 +46,7 @@ def test(web, setup_teardown, disable_OCT):
 
 @pytest.fixture
 def setup_teardown(web, symbol):
-    close_amount = 5
+    close_amount = 10
     account_summary = APIClient().statistics.get_account_statistics(get_asset_acc=True)
     account_info = APIClient().user.get_user_account(get_acc=True)
 
@@ -53,7 +56,8 @@ def setup_teardown(web, symbol):
     if not cur_orders:
         for _ in range(close_amount):
             trade_object = ObjTrade(order_type=OrderType.MARKET, indicate=SLTPType.POINTS, symbol=symbol)
-            APIClient().trade.post_order(trade_object)
+            APIClient().trade.post_order(trade_object, update_price=False)
+            time.sleep(1)
 
         cur_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
 

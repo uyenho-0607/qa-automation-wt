@@ -4,6 +4,7 @@ class UIMessages:
     # ===== Authentication Messages =====
     # Login
     LOGIN_INVALID_CREDENTIALS = "Invalid credentials, please try again"
+    TRADING_GENERAL_ERRORS = "Trading general error. Please try again later."
     LOGIN_INVALID = "Invalid Login"
     NEW_LOGIN_DETECTED = "New Login Detected"
     REVIEW_LINKED_DEVICE = "Review Linked Device if this is not you"
