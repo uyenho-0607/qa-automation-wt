@@ -88,7 +88,7 @@ class WebActions(BaseActions):
                 "arguments[0].scrollTop = arguments[0].scrollTop + (arguments[0].clientHeight * arguments[1]);",
                 container, scroll_step
             )
-            time.sleep(wait_time)
+            time.sleep(0.3)
         except Exception as e:
             logger.warning(f"Error scrolling container {locator}: {e}")
 
