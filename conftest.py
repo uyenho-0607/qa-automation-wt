@@ -22,6 +22,8 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--account", default="demo", help="Account type to test (demo/ live/ crm)")
     parser.addoption("--platform", default="", help="Platform to run tests (web, ios, android), used for init the driver")
     parser.addoption("--user", help="Custom username")
+    parser.addoption("--password", help="Custom raw password")
+    parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
     parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
     parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
@@ -66,6 +68,9 @@ def pytest_sessionstart(session: pytest.Session):
         server = Server.MT5
 
     user = session.config.getoption("user")
+    password = session.config.getoption("password")
+    url = session.config.getoption("url")
+
     browser = session.config.getoption("browser")
     headless = session.config.getoption("headless")
     allure_dir = session.config.getoption("allure_report_dir")
@@ -77,8 +82,11 @@ def pytest_sessionstart(session: pytest.Session):
     # Save options config to Config
     Config.config.argo_cd = argo_cd
     Config.config.env = env
+    ProjectConfig.env = env
     Config.config.browser = browser
     Config.config.user = user
+    Config.config.url = url
+    Config.config.password = password
     Config.config.headless = headless
     Config.config.allure_dir = allure_dir
 

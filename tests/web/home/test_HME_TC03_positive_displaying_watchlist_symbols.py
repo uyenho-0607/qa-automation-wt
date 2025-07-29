@@ -12,6 +12,8 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize("tab", WatchListTab.list_values(except_val=WatchListTab.ALL))
 def test(web, tab, setup_test):
     exp_symbols = setup_test(tab)
+    if not exp_symbols:
+        pytest.skip("No symbols to test")
 
     logger.info("Step 1: Get random displaying symbol")
     web.trade_page.watch_list.select_tab(tab)
