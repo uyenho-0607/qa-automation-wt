@@ -13,6 +13,7 @@ class StepLogs:
 
 
 class ProjectConfig:
+    env: str = None
     client: str = None
     server: str = None
     account: str = None

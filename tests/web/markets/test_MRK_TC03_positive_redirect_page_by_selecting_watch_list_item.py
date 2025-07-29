@@ -1,52 +1,47 @@
+import random
+
 import pytest
 
+from src.apis.api_client import APIClient
 from src.data.enums import Features, WatchListTab
 from src.utils import DotDict
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web, setup_test):
+@pytest.mark.parametrize("check_tab", WatchListTab.sub_tabs() + [WatchListTab.ALL, WatchListTab.FAVOURITES])
+def test(web, setup_test, check_tab):
     watchlist_symbol = setup_test
-    subtabs = WatchListTab.sub_tabs()
-    tab_all = WatchListTab.ALL
+    select_symbol = random.choice(watchlist_symbol[check_tab])
 
-    # Test each available subtab dynamically
-    for i, subtab in enumerate(subtabs, 1):
-        logger.info(f"Step {i}: Select symbol from watchlist: {subtab.title()!r}")
-        web.markets_page.watch_list.select_last_symbol(subtab)
+    logger.info("Step 1: Navigate to Market Page")
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
 
-        logger.info("Verify All Tab on Trade Page is selected")
-        web.trade_page.watch_list.verify_tab_selected()
+    logger.info(f"Step 2: Select symbol: {select_symbol!r} from watchlist: {check_tab.title()!r}")
+    web.markets_page.watch_list.select_symbol(select_symbol, tab=check_tab)
 
-        logger.info(f"Verify symbol {watchlist_symbol[subtab]} is selected")
-        web.trade_page.watch_list.verify_symbol_selected(watchlist_symbol[subtab])
+    logger.info(f"Verify Tab ALL on Trade Page is selected")
+    web.trade_page.watch_list.verify_tab_selected(WatchListTab.ALL)
 
-        # Navigate back to markets page for next iteration (except for the last one)
-        if i < len(subtabs):
-            web.home_page.navigate_to(Features.MARKETS)
-
-    # Test the "All" tab
-    logger.info(f"Step {len(subtabs) + 1}: Select symbol from watchlist: {tab_all.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
-    web.markets_page.watch_list.select_last_symbol()
-
-    logger.info("Verify All Tab on Trade Page is selected")
-    web.trade_page.watch_list.verify_tab_selected()
-
-    logger.info(f"Verify symbol {watchlist_symbol[tab_all]} is selected")
-    web.trade_page.watch_list.verify_symbol_selected(watchlist_symbol[tab_all])
+    logger.info(f"Verify symbol {select_symbol} is selected")
+    web.trade_page.watch_list.verify_symbol_selected(select_symbol)
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def setup_test(web):
-    watchlist_tabs = WatchListTab.sub_tabs() + [WatchListTab.ALL]
+    watchlist_tabs = WatchListTab.sub_tabs() + [WatchListTab.ALL, WatchListTab.FAVOURITES]
     watchlist_symbol = DotDict()
 
     logger.info("- Navigate to Market Page")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
 
-    logger.info("- Get watchlist symbol for each tab")
-    web.markets_page.watch_list.get_last_symbol(watchlist_tabs, store_data=watchlist_symbol)
+    logger.info("- POST starred symbols")
+    symbols = web.markets_page.watch_list.get_current_symbols()
+    for _symbol in symbols[:5]:
+        APIClient().market.post_starred_symbol(_symbol)
+
+    for tab in watchlist_tabs:
+        logger.info(f"- Get watchlist symbol from tab: {tab!r}")
+        watchlist_symbol[tab] = web.markets_page.watch_list.get_current_symbols(tab)
 
     yield watchlist_symbol
