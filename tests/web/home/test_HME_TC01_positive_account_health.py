@@ -24,6 +24,7 @@ def test(web, setup_teardown):
 
     logger.info("Step 3: Toggle balance summary and show all account summary items")
     web.home_page.check_uncheck_balance_items(AccSummary.checkbox_list())
+    exp_account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
 
     logger.info("Verify Account Balance against API data")
     web.home_page.verify_acc_balance_value(exp_account_summary)

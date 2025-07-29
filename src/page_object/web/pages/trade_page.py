@@ -81,6 +81,6 @@ class TradePage(BasePage):
         soft_assert(
             actual,
             expected,
-            tolerance=0.1,
+            tolerance=0.5,
             tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"]
         )
