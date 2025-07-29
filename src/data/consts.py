@@ -36,12 +36,27 @@ SYMBOLS = {
 
 # supporting methods
 def get_symbols():
-    return SYMBOLS[ProjectConfig.client][ProjectConfig.server]
+    symbol_list = SYMBOLS
+    if ProjectConfig.env == "prod":
+        symbol_list = {
+            Client.TRANSACT_CLOUD: {
+                Server.MT5: ["BAKEUSD.d", "AXSUSD.d"]
+            },
+            Client.LIRUNEX: {
+                Server.MT5: ["DASHUSD.std", "XRPUSD.std"],
+                Server.MT4: ["DASHUSD.std", "XRPUSD.std"]
+            }
+        }
+
+    return symbol_list[ProjectConfig.client][ProjectConfig.server]
+
 
 def get_symbol_details(symbol):
     details = {
         "AXS.USD": dict(point_step=0.01, decimal=2),
+        "AXSUSD.d": dict(point_step=0.01, decimal=2),
         "BAKE.USD": dict(point_step=0.0001, decimal=4),
+        "BAKEUSD.d": dict(point_step=0.0001, decimal=4),
         "DASH.USD": dict(point_step=0.01, decimal=2),
         "DASHUSD.std": dict(point_step=0.01, decimal=2),
         "XRPUSD.std": dict(point_step=0.0001, decimal=4),

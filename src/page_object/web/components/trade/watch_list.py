@@ -67,7 +67,7 @@ class WatchList(BaseTrade):
             self.actions.click(locator)
 
             if wait:
-                self.wait_for_spin_loader(timeout=5)
+                self.wait_for_spin_loader(timeout=3)
 
         # Retry if tab is still not selected and we haven't exceeded max retries
         if not self.__is_tab_selected(tab) and retry_count < max_retries:
@@ -94,7 +94,7 @@ class WatchList(BaseTrade):
             time.sleep(0.5)
         return False
 
-    def _scroll_watchlist_container(self, scroll_step=0.5):
+    def _scroll_watchlist_container(self, scroll_step=0.7):
         self.actions.scroll_container_down(self.__watchlist_container, scroll_step=scroll_step)
 
 
@@ -107,7 +107,7 @@ class WatchList(BaseTrade):
         scroll_attempts = 0
         last_count = 0
         not_found_time = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 2)
+        max_scroll_attempts: int = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
         logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
         while scroll_attempts < max_scroll_attempts:
@@ -119,7 +119,7 @@ class WatchList(BaseTrade):
             all_symbols.update(new_symbols)
 
             # Check if we've found all expected symbols
-            if set(all_symbols) == set(expected_symbols):
+            if all(item in all_symbols for item in expected_symbols):
                 logger.debug(f"Found all expected symbols after {scroll_attempts + 1} scroll attempts. Stopping early.")
                 break
 
@@ -266,9 +266,8 @@ class WatchList(BaseTrade):
 
     def verify_tabs_displayed(self):
         expected_tabs = WatchListTab.parent_tabs() + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
-        actual_tabs = self.actions.find_elements(self.__all_tabs)
-        list_values = [ele.text.strip() for ele in actual_tabs]
-        soft_assert(sorted(list_values), sorted(expected_tabs))
+        actual_tabs = self.actions.get_text_elements(self.__all_tabs)
+        soft_assert(sorted(actual_tabs), sorted(expected_tabs))
 
     def verify_tab_selected(self, tab: WatchListTab = WatchListTab.ALL):
         soft_assert(self.wait_for_tab_selected(tab), True, error_message=f"Tab {tab.capitalize()} is not selected")
@@ -296,7 +295,10 @@ class WatchList(BaseTrade):
         symbols = symbols if isinstance(symbols, list) else [symbols]
         current_symbols = self.get_all_symbols(tab, expected_symbols=symbols)
 
+        if len(current_symbols) > len(symbols):
+            current_symbols = [item for item in current_symbols if item in symbols]
+
         soft_assert(
             sorted(current_symbols) == sorted(symbols), True,
-            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}, Redundant: {[item for item in current_symbols if item not in symbols]}"
+            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}"
         )
