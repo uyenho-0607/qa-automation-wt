@@ -7,7 +7,7 @@ android_udid: ""
 ios_udid: ""
 
 lirunex:
-  base_url: https://webtrader.lirunex.com/web
+  base_url: https://webtrader.lirunex.com
   api_url: https://webtrader.lirunex.com/api
 
   credentials:
@@ -23,14 +23,14 @@ lirunex:
 
 # not yet updated
 transactCloud:
-  base_url: https://transactcloudmt5-mb.webtrader-uat.s20ip12.com/web
+  base_url: https://webtrader.dcodemarkets.com
   bo_url: https://transactcloudmt5-backoffice.webtrader-uat.s20ip12.com/backoffice/
-  api_url: https://transactcloudmt5-mb.webtrader-uat.s20ip12.com/api
+  api_url: https://webtrader.dcodemarkets.com/api
 
   credentials:
     mt5:
-      user_live: 998931
-      user_demo: 998931
+      user_live: 7003091
+      user_demo: 7003091
 
   mobile:
     app_package: com.aquariux.wt.uat.transactcloudmt5

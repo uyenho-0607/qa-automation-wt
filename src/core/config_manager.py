@@ -27,7 +27,8 @@ class Config:
 
         server = cls.config.get("server", Server.MT5)
         account = cls.config.get("account", AccountType.DEMO)
-        cis_username = cls.config.get("user")
+        cus_username = cls.config.get("user")
+        cus_password = cls.config.get("password")
 
         match site:
             case URLSites.ROOT_ADMIN:
@@ -40,9 +41,9 @@ class Config:
 
             case _:
                 credentials = cls.config.credentials[server]
-                username = cis_username or credentials[f'user_{account.lower()}']
+                username = cus_username or credentials[f'user_{account.lower()}']
                 encrypted_password = cls._full_config.get(f"password_{account.lower()}", cls._full_config["password"])
-                password = decrypt_password(encrypted_password)
+                password = cus_password or decrypt_password(encrypted_password)
                 
         return DotDict(username=username, password=password)
 
@@ -50,6 +51,7 @@ class Config:
     def urls(cls, site: URLSites = URLSites.MEMBER_SITE):
         if not cls.config:
             cls.load_config()
+        cus_url = cls.config.get("url")
 
         match site:
             case URLSites.ROOT_ADMIN:
@@ -59,7 +61,8 @@ class Config:
                 return cls.config.bo_url
 
             case _:
-                return cls.config.base_url if cls.config.platform == "web" else cls.config.web_app_url
+                # return cus_url or cls.config.base_url if cls.config.platform == "web" else cls.config.web_app_url
+                return cus_url or cls.config.base_url + ("/web" if cls.config.platform == "web" else "/mobile")
 
     @classmethod
     def url_path(cls, path: URLPaths | str):
