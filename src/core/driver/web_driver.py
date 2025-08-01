@@ -5,9 +5,8 @@ import boto3
 from botocore.config import Config
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
-from src.core.config_manager import Config as prj_config
 from src.data.consts import GRID_SERVER
-from src.data.project_info import DriverList
+from src.data.project_info import DriverList, RuntimeConfig
 
 proxy_server = os.getenv('PROXY_SERVER')
 project_arn = os.getenv('DF_PROJECT_ARN')
@@ -18,13 +17,14 @@ class WebDriver:
 
     @classmethod
     def init_driver(cls, browser="chrome", headless=False):
+
         match browser.lower():
             case "chrome":
                 # service = Service(ChromeDriverManager().install())
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
 
-                if prj_config.config.platform == 'web_app':
+                if RuntimeConfig.platform == 'web_app':
                     options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 14 Pro Max"})
 
                 options.add_argument("--incognito")
@@ -37,7 +37,7 @@ class WebDriver:
                 if headless:
                     options.add_argument("--headless")
 
-                if prj_config.config.argo_cd:
+                if RuntimeConfig.argo_cd:
                     options.add_argument(f"--proxy-server={proxy_server}")
                     options.set_capability("aws:maxDurationSecs", 2400)
                     config = Config(

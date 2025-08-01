@@ -7,12 +7,11 @@ from allure_commons.types import Severity
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
-from src.data.consts import ROOTDIR, VIDEO_DIR
+from src.data.consts import ROOTDIR, VIDEO_DIR, NON_OMS
 from src.data.enums import Server, Client, AccountType
-from src.data.project_info import DriverList, ProjectConfig, StepLogs
+from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
 from src.utils.logging_utils import logger
-from src.utils.allure_utils import attach_session_video
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -26,7 +25,7 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
     parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
-    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", default=False, action="store_true", help="Whether to choose driver to run on argo cd")
 
 
 def pytest_configure(config):
@@ -64,7 +63,7 @@ def pytest_sessionstart(session: pytest.Session):
     if account == AccountType.LIVE and client == Client.LIRUNEX:
         account = "crm"
 
-    if client == Client.TRANSACT_CLOUD:
+    if client in NON_OMS:
         server = Server.MT5
 
     user = session.config.getoption("user")
@@ -79,28 +78,19 @@ def pytest_sessionstart(session: pytest.Session):
     logger.info(f">> Account: {account.capitalize()!r}")
     Config.load_config(env, client)
 
-    # Save options config to Config
-    Config.config.argo_cd = argo_cd
-    Config.config.env = env
-    ProjectConfig.env = env
-    Config.config.browser = browser
-    Config.config.user = user
-    Config.config.url = url
-    Config.config.password = password
-    Config.config.headless = headless
-    Config.config.allure_dir = allure_dir
-
-    Config.config.client = client
-    ProjectConfig.client = client
-
-    Config.config.server = server
-    ProjectConfig.server = server
-
-    Config.config.account = account
-    ProjectConfig.account = account
-
-    Config.config.platform = platform
-    ProjectConfig.platform = platform
+    # Save options to Runtime Config
+    RuntimeConfig.allure_dir = allure_dir
+    RuntimeConfig.argo_cd = argo_cd
+    RuntimeConfig.env = env
+    RuntimeConfig.browser = browser
+    RuntimeConfig.user = user
+    RuntimeConfig.url = url
+    RuntimeConfig.password = password
+    RuntimeConfig.headless = headless
+    RuntimeConfig.client = client
+    RuntimeConfig.server = server
+    RuntimeConfig.account = account
+    RuntimeConfig.platform = platform
 
 
 def pytest_collection_modifyitems(config, items):
@@ -111,8 +101,9 @@ def pytest_collection_modifyitems(config, items):
 
 def pytest_runtest_setup(item: pytest.Item):
     """Setup test and configure Allure reporting"""
-    server = Config.config.server
-    account = Config.config.account
+
+    server = RuntimeConfig.server
+    account = RuntimeConfig.account
 
     # Set up Allure test structure
     module = item.module.__name__.split(".")[2:-1]  # not count test, web, and test name
@@ -120,8 +111,8 @@ def pytest_runtest_setup(item: pytest.Item):
     sub_suite = sub_suite.replace("_", " ").title()
 
     # Set allure labels
-    parent_suite = ProjectConfig.client.upper()
-    if ProjectConfig.env == "prod": # dynamically handle client for prod (todo: still need enhancement)
+    parent_suite = RuntimeConfig.client.upper()
+    if RuntimeConfig.is_prod():  # dynamically handle client for prod (todo: still need enhancement)
         url = Config.urls()
         parent_suite = url.split(".")[-2].upper()
 
@@ -132,22 +123,19 @@ def pytest_runtest_setup(item: pytest.Item):
     if item.get_closest_marker("critical"):
         allure.dynamic.severity(Severity.CRITICAL)
 
-    if Config.config.user:
-        item.add_marker(f"user: {Config.config.user}")
+    if RuntimeConfig.user:
+        item.add_marker(f"user: {RuntimeConfig.user}")
 
-    if item.get_closest_marker("uat") and Config.config.env != "uat":
-        pytest.skip("This test is for UAT environment only !")
-
-    if item.get_closest_marker("non_oms") and not ProjectConfig.is_non_oms():
+    if item.get_closest_marker("non_oms") and not RuntimeConfig.is_non_oms():
         pytest.skip("This test is for Non-OMS server only !")
 
-    if item.get_closest_marker("not_demo") and ProjectConfig.is_demo():
+    if item.get_closest_marker("not_demo") and RuntimeConfig.is_demo():
         pytest.skip("This test is not for demo account !")
 
-    if item.get_closest_marker("not_live") and ProjectConfig.is_live():
+    if item.get_closest_marker("not_live") and RuntimeConfig.is_live():
         pytest.skip("This test is not for live account !")
 
-    if item.get_closest_marker("not_crm") and ProjectConfig.is_crm():
+    if item.get_closest_marker("not_crm") and RuntimeConfig.is_crm():
         pytest.skip("This test is not for crm account !")
 
     print("\x00")  # print a non-printable character to break a new line on console
@@ -158,22 +146,20 @@ def pytest_runtest_setup(item: pytest.Item):
 def pytest_sessionfinish(session: pytest.Session):
     logger.debug("===== pytest_sessionfinish ==== ")
 
-    driver = DriverList.all_drivers.get(Config.config.platform)
-    if driver:
-        DriverManager.quit_driver(Config.config.platform)
+    DriverManager.quit_driver(RuntimeConfig.platform)
+    allure_dir = RuntimeConfig.allure_dir
 
-    allure_dir = Config.config.allure_dir
     if allure_dir and os.path.exists(ROOTDIR / allure_dir):
         custom_allure_report(allure_dir)  # custom allure report
 
         # Set allure report properties
-        browser = Config.config.browser
-        platform = f"{ProjectConfig.platform.capitalize()}" + (f" - {browser.capitalize()}" if ProjectConfig.is_web() else "")
+        browser = RuntimeConfig.browser
+        platform = f"{RuntimeConfig.platform.capitalize()}" + (f" - {browser.capitalize()}" if RuntimeConfig.is_web() else "")
 
         env_data = {
             "Platform": platform,
-            "Environment": Config.config.env.capitalize(),
-            "Account": "Live/Crm" if ProjectConfig.account != AccountType.DEMO else AccountType.DEMO.capitalize(),
+            "Environment": RuntimeConfig.env.capitalize(),
+            "Account": "Live/Crm" if RuntimeConfig.account != AccountType.DEMO else AccountType.DEMO.capitalize(),
         }
 
         with open(f"{allure_dir}/environment.properties", "w") as f:
@@ -187,9 +173,9 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     report = outcome.get_result()
 
-    platform = Config.config.platform
+    platform = RuntimeConfig.platform
     driver = DriverList.all_drivers.get(platform)
-    allure_dir = Config.config.allure_dir
+    allure_dir = RuntimeConfig.allure_dir
 
     # Start recording at the beginning of the test
     if driver and report.when == "setup":
@@ -233,7 +219,7 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_video_folder():
-    if not ProjectConfig.is_web() and Config.config.allure_dir:
+    if not RuntimeConfig.is_web() and RuntimeConfig.allure_dir:
         if os.path.exists(VIDEO_DIR):
             shutil.rmtree(VIDEO_DIR)
 

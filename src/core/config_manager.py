@@ -4,6 +4,7 @@ import yaml
 
 from src.data.consts import CONFIG_DIR
 from src.data.enums import Client, Server, AccountType, URLSites, URLPaths
+from src.data.project_info import RuntimeConfig
 from src.utils import DotDict
 from src.utils.encrypt_utils import decrypt_password
 
@@ -25,10 +26,10 @@ class Config:
         if not cls.config:
             cls.load_config()
 
-        server = cls.config.get("server", Server.MT5)
-        account = cls.config.get("account", AccountType.DEMO)
-        cus_username = cls.config.get("user")
-        cus_password = cls.config.get("password")
+        server = RuntimeConfig.server or Server.MT5
+        account = RuntimeConfig.account or AccountType.LIVE
+        cus_username = RuntimeConfig.user
+        cus_password = RuntimeConfig.password
 
         match site:
             case URLSites.ROOT_ADMIN:
@@ -51,7 +52,8 @@ class Config:
     def urls(cls, site: URLSites = URLSites.MEMBER_SITE):
         if not cls.config:
             cls.load_config()
-        cus_url = cls.config.get("url")
+
+        cus_url = RuntimeConfig.url
 
         match site:
             case URLSites.ROOT_ADMIN:
@@ -61,8 +63,7 @@ class Config:
                 return cls.config.bo_url
 
             case _:
-                # return cus_url or cls.config.base_url if cls.config.platform == "web" else cls.config.web_app_url
-                return cus_url or cls.config.base_url + ("/web" if cls.config.platform == "web" else "/mobile")
+                return cus_url or cls.config.base_url + ("/web" if RuntimeConfig.platform == "web" else "/mobile")
 
     @classmethod
     def url_path(cls, path: URLPaths | str):
@@ -79,7 +80,7 @@ class Config:
         if not cls.config:
             cls.load_config()
 
-        platform = platform or cls.config.get("platform", "android")
+        platform = platform or RuntimeConfig.platform
 
         mobile_config = DotDict(
             android=dict(app_id=cls.config.mobile.app_package, device_udid=cls._full_config.android_udid),

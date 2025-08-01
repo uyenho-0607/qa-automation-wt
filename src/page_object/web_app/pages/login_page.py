@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
 from src.data.enums import AccountType, Language
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
 from src.page_object.web_app.base_page import BasePage
 from src.page_object.web_app.components.modals.demo_acc_modals import DemoAccountModal
@@ -53,7 +53,7 @@ class LoginPage(BasePage):
         if language:
             self.select_language(language)
 
-        self.select_account_tab(account_type or ProjectConfig.account)
+        self.select_account_tab(account_type or RuntimeConfig.account)
         self.actions.send_keys(self.__txt_user_id, str(userid))
         self.actions.send_keys(self.__txt_password, str(password))
         self.actions.click(self.__btn_login)
@@ -84,7 +84,7 @@ class LoginPage(BasePage):
         soft_assert(actual_password, password)
 
     def verify_alert_error_message(self, account_type=None):
-        account_type = account_type or ProjectConfig.account
+        account_type = account_type or RuntimeConfig.account
 
         err_msg = UIMessages.LOGIN_INVALID
         if account_type == AccountType.DEMO:

@@ -7,7 +7,7 @@ from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, BulkCloseOpts
 from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id, cook_element
@@ -110,7 +110,7 @@ class AssetTab(BaseTrade):
     def select_tab(self, tab: AssetTabs) -> None:
         """Select the specified asset tab."""
         if tab.is_sub_history():
-            if not ProjectConfig.is_non_oms():
+            if not RuntimeConfig.is_non_oms():
                 self.actions.click(cook_element(self.__tab, locator_format(AssetTabs.HISTORY)))
                 return
 

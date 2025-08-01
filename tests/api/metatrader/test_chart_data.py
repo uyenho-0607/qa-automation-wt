@@ -2,7 +2,7 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import ChartTimeframe, Server
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 from src.utils.metatrader_utils import parse_metatrader_data, compare_chart_data
 
@@ -11,7 +11,7 @@ SYMBOL_LIST = {
     Server.MT5: ["BAKE.USD"]
 }
 
-server = ProjectConfig.server
+server = RuntimeConfig.server
 
 
 @pytest.mark.parametrize(

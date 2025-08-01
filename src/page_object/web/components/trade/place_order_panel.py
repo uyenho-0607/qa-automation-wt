@@ -8,7 +8,7 @@ from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
 from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
@@ -204,7 +204,7 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_fill_policy(self, fill_policy: FillPolicy | str) -> str | None:
         """Select fill policy for the order. Return selected fill_policy."""
-        if ProjectConfig.is_mt4() or not fill_policy:
+        if RuntimeConfig.is_mt4() or not fill_policy:
             return
 
         locator = cook_element(self.__opt_fill_policy, locator_format(fill_policy))

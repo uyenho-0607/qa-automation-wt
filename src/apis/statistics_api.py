@@ -1,13 +1,13 @@
 from src.apis.api_base import BaseAPI
 from src.data.enums import AccSummary, AccInfo
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 
 
 class StatisticsAPI(BaseAPI):
     _endpoint = "/statistics/v1/account"
 
     def __init__(self):
-        super().__init__(headers=ProjectConfig.headers)
+        super().__init__(headers=RuntimeConfig.headers)
 
     def get_account_statistics(self, get_acc_balance=False, get_asset_acc=False):
         resp = self.get(endpoint=self._endpoint)
