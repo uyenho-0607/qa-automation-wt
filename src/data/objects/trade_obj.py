@@ -5,7 +5,7 @@ from src.data.consts import get_symbols, get_symbol_details
 from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_obj import BaseObj
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.utils.format_utils import format_str_prices, remove_comma, get_decimal, is_integer
 from src.utils.logging_utils import logger
 
@@ -182,7 +182,7 @@ class ObjTrade(BaseObj):
 
         details = {
             "order_type": self._get_order_type(),
-            "volume": self.volume if ProjectConfig.is_mt4() or tab != AssetTabs.PENDING_ORDER else f"{self.volume} / 0",
+            "volume": self.volume if RuntimeConfig.is_mt4() or tab != AssetTabs.PENDING_ORDER else f"{self.volume} / 0",
             "units": self.units,
             "entry_price": entry_price,
             "stop_loss": stop_loss or "--",
@@ -192,14 +192,14 @@ class ObjTrade(BaseObj):
 
         # Add tab-specific details
         if tab == AssetTabs.PENDING_ORDER:
-            details["pending_price"] = None if ProjectConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
+            details["pending_price"] = None if RuntimeConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
             # todo: re-check with QA: mobile trade confirm does not display fill_policy
-            if ProjectConfig.is_web():
+            if RuntimeConfig.is_web():
                 details["fill_policy"]  = self.fill_policy
 
         if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
             details["remarks"] = "--"
-            if ProjectConfig.is_mt4():
+            if RuntimeConfig.is_mt4():
                 details["status"] = "CLOSED"
 
         return {k: v for k, v in details.items() if v}

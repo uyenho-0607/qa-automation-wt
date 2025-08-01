@@ -3,10 +3,8 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import SYMBOLS
 from src.data.enums import OrderType, AccSummary
 from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import ProjectConfig
 from src.utils.logging_utils import logger
 
 

@@ -10,7 +10,7 @@ import allure
 from src.data.consts import GRID_VIDEO_URL
 from src.data.project_info import DriverList
 from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
-from src.data.project_info import StepLogs, ProjectConfig
+from src.data.project_info import StepLogs, RuntimeConfig
 from src.utils.logging_utils import logger
 
 
@@ -35,7 +35,7 @@ def save_recorded_video(video_raw):
 
 def attach_video(driver):
     """attach video to allure report"""
-    if not ProjectConfig.is_web():
+    if not RuntimeConfig.is_web():
         video_data = driver.stop_recording_screen()
         video_path = save_recorded_video(video_data)
         allure.attach.file(
@@ -190,7 +190,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     data["name"] = " ".join(data["name"].split("_"))
 
     # Customize test's properties
-    data["fullName"] = f"{data['fullName']}[{ProjectConfig.client}][{ProjectConfig.server}]"
+    data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
     data["historyId"] = uuid.uuid4().hex
 
 

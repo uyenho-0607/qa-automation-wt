@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.data.enums import Client, Server
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 
 # Framework Paths
 ROOTDIR = Path(__file__).parent.parent.parent
@@ -24,6 +24,10 @@ QUICK_WAIT = 0.5
 CHECK_ICON = "✔"
 FAILED_ICON = "✘"
 
+
+NON_OMS = [Client.TRANSACT_CLOUD]
+MULTI_OMS = [Client.LIRUNEX]
+
 SYMBOLS = {
     Client.TRANSACT_CLOUD: {
         Server.MT5: ["BAKE.USD", "AXS.USD", "DASH.USD"]
@@ -37,7 +41,7 @@ SYMBOLS = {
 # supporting methods
 def get_symbols():
     symbol_list = SYMBOLS
-    if ProjectConfig.env == "prod":
+    if RuntimeConfig.is_prod():
         symbol_list = {
             Client.TRANSACT_CLOUD: {
                 Server.MT5: ["BAKEUSD.d", "AXSUSD.d"]
@@ -48,7 +52,7 @@ def get_symbols():
             }
         }
 
-    return symbol_list[ProjectConfig.client][ProjectConfig.server]
+    return symbol_list[RuntimeConfig.client][RuntimeConfig.server]
 
 
 def get_symbol_details(symbol):

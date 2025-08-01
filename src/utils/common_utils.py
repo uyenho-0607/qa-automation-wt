@@ -1,15 +1,14 @@
 import subprocess
 import xml.dom.minidom
 from datetime import datetime, timedelta
-
-from src.core.config_manager import Config
 from src.data.consts import ROOTDIR
 from src.data.enums import Language
-from src.data.project_info import DriverList
+from src.data.project_info import DriverList, RuntimeConfig
 
 
 def log_page_source(name="page_source"):
-    driver = DriverList.all_drivers[Config.config.platform]
+    platform = RuntimeConfig.platform
+    driver = DriverList.all_drivers[platform]
     output_path = ROOTDIR / f'{name}.xml'
     dom = xml.dom.minidom.parseString(driver.page_source)
     pretty_xml = '\n'.join([line for line in dom.toprettyxml(indent="  ").split('\n') if line.strip()])
@@ -18,7 +17,8 @@ def log_page_source(name="page_source"):
         f.write(pretty_xml)
 
 
-def get_connected_device(platform=Config.config.get("platform", "android")):
+def get_connected_device(platform=None):
+    platform = platform or RuntimeConfig.platform
     if platform == "android":
         result = subprocess.run(['adb', 'devices'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = result.stdout.strip().split('\n')[1:]  # Skip the first line
