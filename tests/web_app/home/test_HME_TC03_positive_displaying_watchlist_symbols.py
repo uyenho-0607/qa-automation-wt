@@ -4,37 +4,39 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import WatchListTab
+from src.data.enums import WatchListTab, Features
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
 @pytest.mark.parametrize("tab", WatchListTab.list_values(except_val=WatchListTab.ALL))
-def test(web, tab, setup_test):
+def test(web_app, tab, setup_test):
     exp_symbols = setup_test(tab)
+
     if not exp_symbols:
         pytest.skip("No symbols to test")
 
-    logger.info("Step 1: Get random displaying symbol")
-    web.home_page.watch_list.select_tab(tab)
-    time.sleep(2)
-    select_symbol = web.home_page.watch_list.get_random_symbol()
+    logger.info("Step 1: Navigate to Home Page")
+    web_app.trade_page.navigate_to(Features.HOME, wait=True)
 
-    logger.info(f"Step 2: Select {select_symbol!r}")
-    web.home_page.watch_list.select_symbol(select_symbol)
-
-    logger.info("Verify symbol is selected")
-    web.home_page.watch_list.verify_symbol_selected(select_symbol)
-
-    logger.info("Verify symbol displayed in chart")
-    web.trade_page.chart.verify_symbol_selected(select_symbol)
+    logger.info(f"Step 2: Select tab: {tab.value.title()}")
+    web_app.home_page.watch_list.select_tab(tab, wait=True)
 
     logger.info(f"Verify current tab displays {len(exp_symbols)} symbols: {', '.join(exp_symbols)}")
-    web.trade_page.watch_list.verify_symbols_list(tab, exp_symbols)
+    web_app.home_page.watch_list.verify_symbols_list(exp_symbols)
+
+    logger.info("Step 3: Get random displaying symbol")
+    select_symbol = web_app.home_page.watch_list.get_random_symbol()
+
+    logger.info(f"Step 4: Select {select_symbol!r}")
+    web_app.home_page.watch_list.select_symbol(select_symbol)
+
+    logger.info("Verify symbol is selected")
+    web_app.trade_page.verify_symbol_overview_id(select_symbol)
 
 
 @pytest.fixture
-def setup_test():
+def setup_test(web_app):
     def _handler(tab):
 
         if tab != WatchListTab.FAVOURITES:
@@ -56,11 +58,16 @@ def setup_test():
                 symbols = random.sample(symbols, 10)
 
         else:
-            symbols = APIClient().market.get_watchlist_items(WatchListTab.ALL, get_symbols=True)
-            _list_symbol = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
-            for symbol in _list_symbol:
-                logger.info(f"- Mark star symbol: {symbol!r}")
-                APIClient().market.post_starred_symbol(symbol)
+            _list_symbol = APIClient().market.get_watchlist_items(WatchListTab.FAVOURITES, get_symbols=True)
+
+            if not _list_symbol:
+                web_app.home_page.watch_list.select_tab(WatchListTab.ALL)
+
+                symbols = APIClient().market.get_watchlist_items(WatchListTab.ALL, get_symbols=True)
+                _list_symbol = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
+                for symbol in _list_symbol:
+                    logger.info(f"- Mark star symbol: {symbol!r}")
+                    APIClient().market.post_starred_symbol(symbol)
 
             symbols = _list_symbol
 

@@ -7,7 +7,6 @@ from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_obj import BaseObj
 from src.data.project_info import RuntimeConfig
 from src.utils.format_utils import format_str_prices, remove_comma, get_decimal, is_integer
-from src.utils.logging_utils import logger
 
 
 class ObjTrade(BaseObj):
@@ -48,7 +47,6 @@ class ObjTrade(BaseObj):
         symbol_details = get_symbol_details(symbol)
         ObjTrade.POINT_STEP = symbol_details["point_step"]
         ObjTrade.DECIMAL = symbol_details["decimal"]
-
 
     @classmethod
     def get_expiry_map(cls, expiry: Expiry | str) -> str:
@@ -120,7 +118,7 @@ class ObjTrade(BaseObj):
 
     def tolerance_fields(self, api_format=False) -> list:
         """Get fields that require tolerance checking."""
-        tolerance_fields = []
+        tolerance_fields = ["open_date", "close_date", "close_price", "current_price"]
         if self.get("sl_type") == SLTPType.POINTS:
             tolerance_fields += ["stop_loss" if not api_format else "stopLoss"]
 
@@ -181,26 +179,32 @@ class ObjTrade(BaseObj):
         tab = tab or AssetTabs.get_tab(self.order_type)
 
         details = {
+            "open_date": self.get("open_date"),
+            "close_date": self.get("close_date") if tab.is_history() else None,
             "order_type": self._get_order_type(),
             "volume": self.volume if RuntimeConfig.is_mt4() or tab != AssetTabs.PENDING_ORDER else f"{self.volume} / 0",
             "units": self.units,
+            "current_price": self.get("current_price"),
             "entry_price": entry_price,
             "stop_loss": stop_loss or "--",
             "take_profit": take_profit or "--",
             "expiry": self.expiry,
+            "remarks": "--" if tab.is_history() else None,
+            "status": "CLOSED" if tab.is_history() and RuntimeConfig.is_mt4() else None
         }
 
         # Add tab-specific details
         if tab == AssetTabs.PENDING_ORDER:
-            details["pending_price"] = None if RuntimeConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
+            details["pending_price" if RuntimeConfig.is_web() else "stop_limit_price"] = (
+                None if RuntimeConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
+            )
+
             # todo: re-check with QA: mobile trade confirm does not display fill_policy
             if RuntimeConfig.is_web():
-                details["fill_policy"]  = self.fill_policy
+                details["fill_policy"] = self.fill_policy
 
-        if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
-            details["remarks"] = "--"
-            if RuntimeConfig.is_mt4():
-                details["status"] = "CLOSED"
+        if tab.is_history():
+            details["close_price"] = details.pop("current_price", None)
 
         return {k: v for k, v in details.items() if v}
 

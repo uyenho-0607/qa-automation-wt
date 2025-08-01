@@ -193,13 +193,13 @@ class PlaceOrderPanel(BaseTrade):
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
         locator = cook_element(self.__opt_order_type, locator_format(order_type))
-        if "selected" in self.actions.get_attribute(locator, "class"):
+        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
             logger.debug(f"- Order Type {order_type.value!r} already selected")
             return
 
         logger.debug(f"- Select order type: {order_type.capitalize()!r}")
         self.actions.click(self.__drp_order_type)
-        time.sleep(1)
+        time.sleep(0.5)
         self.actions.click(locator)
 
     def _select_fill_policy(self, fill_policy: FillPolicy | str) -> str | None:
@@ -208,7 +208,7 @@ class PlaceOrderPanel(BaseTrade):
             return
 
         locator = cook_element(self.__opt_fill_policy, locator_format(fill_policy))
-        if "selected" in self.actions.get_attribute(locator, "class"):
+        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
             logger.debug(f"- Fill Policy: {fill_policy.capitalize()!r} already selected")
             return
 
@@ -257,13 +257,6 @@ class PlaceOrderPanel(BaseTrade):
         """Input volume value."""
         volume = value if value is not None else random.randint(2, 10)
         self._input_trade_value(self.__txt_volume, volume, "volume")
-
-        # fall back
-        input_volume = self.actions.get_value(self.__txt_volume)
-        if input_volume != str(volume):
-            logger.debug(f"- Current input volume: {input_volume} - re-input volume")
-            self._input_trade_value(self.__txt_volume, volume, "volume")
-
         return volume
 
     def _input_price(self, value: any, order_type: OrderType | None = None) -> None:
@@ -348,12 +341,12 @@ class PlaceOrderPanel(BaseTrade):
 
         logger.debug(f"- Order Summary: {format_dict_to_string(trade_details)}")
         self._click_place_order_btn()
+        trade_object |= {k: v for k, v in trade_details.items() if v}
 
         if submit:
-            # time.sleep(0.5)
+            self.get_server_device_time(trade_object)
+            self.get_current_price(trade_object)
             self.confirm_trade()
-
-        trade_object |= {k: v for k, v in trade_details.items() if v}
 
     def place_invalid_order(
             self,

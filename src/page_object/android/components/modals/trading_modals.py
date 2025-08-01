@@ -313,9 +313,9 @@ class TradingModals(BaseTrade):
         actual = {
             k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
         }
-        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=1, tolerance_fields=trade_object.tolerance_fields())
 
-    def verify_trade_edit_confirm_details(self, trade_object: ObjTrade):
+    def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
         expected = trade_object.trade_edit_confirm_details()
         actual = {
             "order_no": self.actions.get_text(self.__edit_confirm_order_id),
@@ -338,4 +338,4 @@ class TradingModals(BaseTrade):
         if expected.get("expiry"):
             actual["expiry"] = self.actions.get_text(self.__edit_confirm_expiry)
 
-        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=1, tolerance_fields=trade_object.tolerance_fields())

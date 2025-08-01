@@ -2,13 +2,14 @@ import builtins
 import time
 
 from selenium.common import TimeoutException
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, QUICK_WAIT
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
+from src.data.project_info import ProjectConfig
 from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
 
@@ -19,14 +20,73 @@ class WebActions(BaseActions):
         self._action_chains = ActionChains(self._driver)
 
     # ------- ACTIONS ------ #
+    def wait_for_page_load(self, timeout=EXPLICIT_WAIT):
+        wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout)
+        wait.until(lambda d: d.execute_script('return document.readyState') == 'complete')
+
     @handle_stale_element
-    def send_keys(self, locator: tuple[str, str], value, timeout=EXPLICIT_WAIT, raise_exception=True, show_log=True):
+    def send_keys(
+            self, locator, value, timeout=EXPLICIT_WAIT
+    ):
+        element = self.find_element(locator, timeout)
+        max_retries = 3
+        if element:
+            self._action_chains.double_click(element).send_keys(Keys.DELETE).pause(1).perform()
+            self._action_chains.send_keys_to_element(element, str(value)).perform()
+            # fallback
+            sent_value = element.get_attribute("value")
+
+            while sent_value != str(value) and max_retries:
+                logger.debug(f"- Sent value: {sent_value}, Re-send key: {value!r}")
+                self._action_chains.double_click(element).send_keys(Keys.DELETE).pause(1).perform()
+                self._action_chains.send_keys_to_element(element, str(value)).perform()
+                max_retries -= 1
+                sent_value = element.get_attribute("value")
+
+
+    @handle_stale_element
+    def _send_keys(
+            self,
+            locator: tuple[str, str],
+            value,
+            fallback_attr="value",
+            timeout=EXPLICIT_WAIT,
+            raise_exception=True,
+            show_log=True
+    ):
         """Send keys to an element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
+        max_retries = 3
         if element:
-            # Double click to select all text and ensure focus
-            self._action_chains.double_click(element).perform()
-            element.send_keys(str(value))
+            if ProjectConfig.platform == "web_app":
+                self.clear_field(locator)
+                element.click()
+                element.send_keys(str(value))
+
+                # check if value is sent correct
+                sent_value = element.get_attribute(fallback_attr)
+
+                while sent_value != str(value) and max_retries:
+                    logger.debug(f"- Sent value: {sent_value}, Re-send key: {value!r}")
+                    self.clear_field(locator)
+                    element.click()
+                    element.send_keys(str(value))
+                    max_retries -= 1
+                    sent_value = element.get_attribute(fallback_attr)
+
+            else:
+                # Double click to select all text and ensure focus
+                self._action_chains.double_click(element).perform()
+                element.send_keys(str(value))
+                # check if value is sent correct
+                sent_value = element.get_attribute(fallback_attr)
+
+                while sent_value != str(value) and max_retries:
+                    logger.debug(f"- Sent value: {sent_value}, Re-send key")
+                    self._action_chains.double_click(element).perform()
+                    element.send_keys(str(value))
+                    max_retries -= 1
+                    sent_value = element.get_attribute(fallback_attr)
 
     @handle_stale_element
     def click_by_offset(
@@ -57,7 +117,7 @@ class WebActions(BaseActions):
         element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
         res = element.get_attribute("value") if element else ""
 
-        if retry and not res:
+        if retry:
             logger.debug("- Retry getting value")
             time.sleep(1)
             element = self.find_element(locator, QUICK_WAIT, raise_exception=False, show_log=False)
@@ -75,6 +135,14 @@ class WebActions(BaseActions):
     def get_current_url(self):
         return self._driver.current_url
 
+    def scroll_to_element(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
+        element = self.find_element(locator, timeout)
+        self._driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
+
+    def scroll_picker_down(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
+        wheel = self.find_element(locator, timeout)
+        self._action_chains.click_and_hold(wheel).move_by_offset(0, -50).release().perform()
+
     def scroll_container_down(self, locator: tuple[str, str], wait_time: float = 0.5, scroll_step: float = 0.5):
         """Scroll a container element down by a smaller step to avoid missing items
         Args:
@@ -84,7 +152,7 @@ class WebActions(BaseActions):
         """
         try:
             container = self.find_element(locator)
-            self.execute_script(
+            self._driver.execute_script(
                 "arguments[0].scrollTop = arguments[0].scrollTop + (arguments[0].clientHeight * arguments[1]);",
                 container, scroll_step
             )

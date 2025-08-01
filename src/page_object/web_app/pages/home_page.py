@@ -1,10 +1,8 @@
 import time
-
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import SHORT_WAIT
+from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.web_app.base_page import BasePage
@@ -47,12 +45,14 @@ class HomePage(BasePage):
 
     __search_history = (By.XPATH, "//*[text()='Search History']")
     __btn_delete_search_history = (By.XPATH, "//*[text()='Search History']/following-sibling::*")
-
     __item_search_history = (By.XPATH, "//div[text()='Search History']/ancestor::div[2]")
     __item_search_history_by_text = (By.XPATH, "//div[text()='Search History']/..//following-sibling::div[contains(normalize-space(), '{}')]")
     __empty_search_result = (By.XPATH, "//*[text()='No items available']")
 
     # ------------------------ ACTIONS ------------------------ #
+    def is_logged_in(self):
+        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+    
     def open_my_account(self, open=True):
         is_open = self.my_account_modal.is_open()
         if open != is_open:

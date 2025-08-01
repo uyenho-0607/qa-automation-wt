@@ -133,7 +133,7 @@ class ObjNoti(BaseObj):
 
     def position_closed_details(self):
         message = UIMessages.POSITION_CLOSED_NOTI_RESULT.format(
-            self.order_id, self.symbol, self.volume, self.units, self.__detail_prices(self.entry_price)
+            self.order_id, self.symbol, self.volume, self.units, self.__detail_prices(self.trade_object.get('current_price'))
         )
         return self.__format_volume(message)
 

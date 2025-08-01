@@ -18,7 +18,7 @@ def test(web, symbol, get_asset_tab_amount, cancel_delete_order):
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
     logger.info("Step 2: Delete pending order")
-    web.trade_page.asset_tab.delete_order(trade_object=trade_object, confirm=False)
+    web.trade_page.asset_tab.delete_order(trade_object, confirm=False)
 
     logger.info("Verify delete order notification banner")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).delete_order_banner())

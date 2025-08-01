@@ -23,7 +23,7 @@ def test(web, symbol, get_asset_tab_amount, ):
 
     logger.info("Step 2: Modify order with control button")
     web.trade_page.asset_tab.click_edit_button(tab)
-    web.trade_page.modals.modify_order_with_control_buttons(trade_object)
+    web.trade_page.asset_tab.modify_order_with_control_buttons(trade_object)
 
     logger.info("Verify order updated notification banner")
     exp_noti = ObjNoti(trade_object)

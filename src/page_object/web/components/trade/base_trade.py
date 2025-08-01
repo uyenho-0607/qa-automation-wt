@@ -2,7 +2,8 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
-from src.data.enums import TradeType, BulkCloseOpts
+from src.data.enums import TradeType, BulkCloseOpts, OrderType
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
@@ -21,10 +22,7 @@ class BaseTrade(BasePage):
 
     # ------------------------ LOCATORS ------------------------ #
     __live_price = (By.CSS_SELECTOR, data_testid('trade-live-{}-price'))  # buy or sell market price
-    __oct_live_price = (
-        By.XPATH, "//div[@data-testid='trade-button-oct-order-{}']/div[2]"
-    )
-    ##### One Click Trading Modal #####
+    __oct_live_price = (By.XPATH, "//div[@data-testid='trade-button-oct-order-{}']/div[2]")
     __btn_oct_confirm = (By.CSS_SELECTOR, data_testid('oct-modal-button-confirm'))
 
     ##### Trade Confirmation Modal #####
@@ -43,22 +41,24 @@ class BaseTrade(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
     def get_live_price(
-            self, trade_type: TradeType, reverse=False, oct=False, trade_object: DotDict = None, timeout=QUICK_WAIT
+            self, trade_type: TradeType, oct=False, timeout=QUICK_WAIT
     ) -> str:
         """Get the current live price for a given trade type.
         The price is displayed in the trading interface and is used for various trading operations.
         """
-
-        if reverse:
-            trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
-
         btn_price = self.__oct_live_price if oct else self.__live_price
         live_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()), timeout=timeout)
-
-        if trade_object:
-            trade_object.current_price = live_price
-
         return live_price if live_price else 0
+
+    def get_current_price(self, trade_object: ObjTrade, timeout=QUICK_WAIT):
+        """Get the current price for a placed order (reverse for order_type = Market).
+        """
+        trade_type, order_type = trade_object.trade_type, trade_object.order_type
+        if order_type == OrderType.MARKET:
+            trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
+
+        current_price = self.actions.get_text(cook_element(self.__live_price, trade_type.lower()), timeout=timeout)
+        trade_object.current_price = current_price
 
     # One Click Trading Modal Actions
     def agree_and_continue(self):

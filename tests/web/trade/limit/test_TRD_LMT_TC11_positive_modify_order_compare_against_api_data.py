@@ -18,7 +18,7 @@ def test(web, limit_obj, close_edit_confirm_modal, create_order_data):
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
     
     logger.info(f"Step 2: Modify order with SL and TP")
-    web.trade_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), expiry=Expiry.sample_values(OrderType.LIMIT), confirm=True)
+    web.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), expiry=Expiry.sample_values(OrderType.LIMIT), confirm=True)
 
     logger.info(f"Verify item details after update")
     web.trade_page.asset_tab.verify_item_data(trade_object)

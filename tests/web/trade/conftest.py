@@ -20,17 +20,23 @@ def setup(login_member_site, web, symbol, disable_OCT):
 
 @pytest.fixture(scope="package")
 def create_order_data(web, get_asset_tab_amount, symbol):
-    def _handler(trade_object):
+    def _handler(trade_object, update_price=True):
+
         tab = AssetTabs.get_tab(trade_object.order_type)
-        current_amount = get_asset_tab_amount(trade_object.order_type)
+
+        logger.info(f"- Select tab: {tab.value.title()}")
+        web.trade_page.asset_tab.select_tab(tab)
+
+        logger.info("- Get tab amount")
+        tab_amount = web.trade_page.asset_tab.get_tab_amount(tab)
 
         logger.info(f"- POST {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order")
-        res = APIClient().trade.post_order(trade_object)
+        res = APIClient().trade.post_order(trade_object, update_price=update_price)
 
-        # Loading new created data
-        web.trade_page.asset_tab.wait_for_tab_amount(tab, expected_amount=current_amount + 1)
+        # wait for loading new created data
+        web.trade_page.asset_tab.wait_for_tab_amount(tab, expected_amount=tab_amount + 1)
 
-        return res
+        return res, tab_amount
 
     return _handler
 

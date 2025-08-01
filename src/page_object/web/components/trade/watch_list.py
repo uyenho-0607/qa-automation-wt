@@ -58,21 +58,24 @@ class WatchList(BaseTrade):
         locator = self.__get_tab_locator(tab)
         return "selected" in self.actions.get_attribute(locator, "class")
 
-    def __select_tab_with_retry(self, tab: WatchListTab, wait=True, retry_count=0):
-        locator = self.__get_tab_locator(tab)
-        max_retries = 3
+    def __select_tab_with_retry(self, tab: WatchListTab, wait=True, retry_count=0, max_retries=3):
+        """Recursively try to select the tab."""
+        # stop condition
+        if self.__is_tab_selected(tab):
+            return
 
-        if not self.__is_tab_selected(tab):
-            logger.info(f"- Select tab: {tab.value!r}")
-            self.actions.click(locator)
+        if retry_count >= max_retries:
+            logger.warning("- Failed to select tab")
 
-            if wait:
-                self.wait_for_spin_loader(timeout=3)
+        logger.info(f"- Select tab: {tab.value.title()!r}")
+        self.actions.click(self.__get_tab_locator(tab))
+        not wait or self.wait_for_spin_loader(timeout=3)
 
-        # Retry if tab is still not selected and we haven't exceeded max retries
-        if not self.__is_tab_selected(tab) and retry_count < max_retries:
-            logger.debug(f"- Retry selecting tab: {tab.value!r}")
-            self.__select_tab_with_retry(tab, wait, retry_count + 1)
+        if self.__is_tab_selected(tab):
+            logger.debug(f"- Tab {tab.value.title()} is selected")
+            return
+
+        self.__select_tab_with_retry(tab, wait, retry_count + 1)
 
 
     def select_tab(self, tab: WatchListTab, wait_for_loader=True):

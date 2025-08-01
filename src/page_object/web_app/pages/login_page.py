@@ -4,6 +4,7 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
+from src.data.consts import SHORT_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
@@ -38,7 +39,9 @@ class LoginPage(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
-        self.actions.click(cook_element(self.__tab_account_type, account_type))
+        tab = cook_element(self.__tab_account_type, account_type)
+        # self.actions.click(tab)
+        self.actions.javascript_click(tab)
 
     def select_language(self, language: Language):
         self.actions.click(self.__drp_language)
@@ -57,19 +60,27 @@ class LoginPage(BasePage):
         credentials = Config.credentials()
         userid = userid or credentials.username
         password = password or credentials.password
+        account_type = account_type or RuntimeConfig.account
 
         logger.debug(f"- Login with user: {userid!r}")
-
         if language:
+            logger.debug(f"- Select language: {language!r}")
             self.select_language(language)
 
-        self.select_account_tab(account_type or RuntimeConfig.account)
+        logger.debug(f"- Select tab: {account_type!r}")
+        self.select_account_tab(account_type)
+
+        logger.debug(f"- Input user_id: {str(userid)!r}")
         self.actions.send_keys(self.__txt_user_id, str(userid))
+
+        logger.info("- Input password")
         self.actions.send_keys(self.__txt_password, str(password))
+
+        logger.debug("- Click btn Login")
         self.actions.click(self.__btn_login)
 
         if wait:
-            self.wait_for_spin_loader()
+            self.wait_for_spin_loader(timeout=SHORT_WAIT)
 
     # ------------------------ VERIFY ------------------------ #
     def verify_language(self, language: Language):

@@ -17,9 +17,9 @@ class FeatureAnnouncementModal(BasePage):
     __btn_try_now = (By.CSS_SELECTOR, data_testid('feature-announcement-modal-try-it-now-button'))
 
     # ------------------------ ACTIONS ------------------------ #
-    def got_it(self):
+    def got_it(self, timeout=SHORT_WAIT):
         """Click the 'Got it' button to dismiss the feature announcement."""
-        while self.actions.is_element_displayed(self.__btn_got_it, timeout=SHORT_WAIT):
+        while self.actions.is_element_displayed(self.__btn_got_it, timeout=timeout):
             logger.debug("- Clicking on btn Ok Got it")
             self.actions.click(self.__btn_got_it)
 
