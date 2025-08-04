@@ -23,17 +23,21 @@ class WatchList(BaseTrade):
     __item_by_name = (By.XPATH, "//div[@data-testid='watchlist-symbol' and text()='{}']")
     __star_icon_by_symbol = (By.XPATH, data_testid("chart-star-symbol"))
     __btn_symbol_remove = (By.XPATH, "//*[text()='Remove']")
-    __selected_item = (By.XPATH, "//*[@data-testid='symbol-overview-id' and text()='{}']")
     __watchlist_container = (By.XPATH, "//div[@data-testid='watchlist-list-item']/ancestor::div[3]")
 
     # ------------------------ ACTIONS ------------------------ 
     def select_tab(self, tab: WatchListTab, wait=True, timeout=3):
-        """Select a tab and retry if needed (handles edge cases like Favourite tab in MARKET)"""
         locator = cook_element(self.__tab, tab)
+        max_retries = 3
+        is_display = self.actions.is_element_displayed(locator)
 
-        if not self.actions.is_element_displayed(locator, show_log=False):
-            self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
-            self.wait_for_spin_loader(timeout=SHORT_WAIT)
+        while not is_display and max_retries:
+            logger.debug("- Tab is subtab, select tab ALL first")
+            # self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
+            self.actions.javascript_click(cook_element(self.__tab, WatchListTab.ALL))
+            self.wait_for_spin_loader(timeout=3)
+            max_retries -= 1
+            is_display = self.actions.is_element_displayed(locator)
 
         self.actions.click(locator)
         not wait or self.wait_for_spin_loader(timeout=timeout)
@@ -62,7 +66,7 @@ class WatchList(BaseTrade):
         all_symbols = set()
         scroll_attempts = 0
         last_count = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 2)
+        max_scroll_attempts = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
         no_new_symbol = 0
         logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 

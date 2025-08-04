@@ -115,7 +115,7 @@ class MarketsPage(BasePage):
             self, tab: WatchListTab, unchecked=True, show_all=False,
             store_dict=None
     ):
-        self.watch_list.select_tab(tab, wait_for_loader=False)
+        self.watch_list.select_tab(tab, wait=False)
         self.actions.click(self.__btn_symbol_preference)
         time.sleep(1)  # wait a bit
         custom = "checked" if unchecked else "unchecked"

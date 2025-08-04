@@ -5,6 +5,7 @@ from src.core.config_manager import Config
 from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
 from src.data.enums import Features
 from src.data.enums import URLSites
+from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, data_testid
 from src.utils.logging_utils import logger
 
@@ -63,7 +64,7 @@ class BasePage:
         logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
             logger.debug("- Wait for spin loader to disappear")
-            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=EXPLICIT_WAIT)
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=30)
 
     def navigate_to(self, feature: Features, wait=False):
         self.actions.click(cook_element(self.__home_nav_option, feature.lower()))
@@ -78,4 +79,11 @@ class BasePage:
             logger.debug("- Click cancel btn")
             self.actions.click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
 
+    def close_alert_box(self):
+        self.actions.click(self.__alert_box_close)
+
     # ------------------------ VERIFY ------------------------ #
+    def verify_alert_error_message(self, expected_message):
+        actual_err = self.actions.get_text(self.__alert_desc, timeout=EXPLICIT_WAIT)
+        soft_assert(actual_err, expected_message)
+        self.close_alert_box()
