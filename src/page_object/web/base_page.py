@@ -68,7 +68,7 @@ class BasePage:
         logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
             logger.info("- Waiting for spin loader to disappear...")
-            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=20)
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=30)
 
     def refresh_page(self):
         self.actions.refresh()
