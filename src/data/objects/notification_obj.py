@@ -1,7 +1,7 @@
 from src.data.enums import OrderType
 from src.data.objects.base_obj import BaseObj
 from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
 from src.utils.format_utils import remove_comma, format_str_price
 
@@ -49,7 +49,7 @@ class ObjNoti(BaseObj):
     @staticmethod
     def __format_volume(message: str) -> str:
         """Format volume text based on server type."""
-        if ProjectConfig.is_mt4():
+        if RuntimeConfig.is_mt4():
             return message.replace("Volume", "Size")
 
         return message
@@ -133,7 +133,7 @@ class ObjNoti(BaseObj):
 
     def position_closed_details(self):
         message = UIMessages.POSITION_CLOSED_NOTI_RESULT.format(
-            self.order_id, self.symbol, self.volume, self.units, self.__detail_prices(self.entry_price)
+            self.order_id, self.symbol, self.volume, self.units, self.__detail_prices(self.trade_object.get('current_price'))
         )
         return self.__format_volume(message)
 

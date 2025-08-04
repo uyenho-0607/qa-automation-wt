@@ -1,14 +1,15 @@
 import builtins
 import time
 
+from appium.webdriver import WebElement
 from selenium.common import TimeoutException
-from selenium.webdriver import ActionChains
+from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, QUICK_WAIT
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
 from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
 
@@ -19,14 +20,40 @@ class WebActions(BaseActions):
         self._action_chains = ActionChains(self._driver)
 
     # ------- ACTIONS ------ #
+
     @handle_stale_element
-    def send_keys(self, locator: tuple[str, str], value, timeout=EXPLICIT_WAIT, raise_exception=True, show_log=True):
-        """Send keys to an element."""
-        element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
+    def _send_key_action_chains(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
+        if locator:
+            element = self.find_element(locator, timeout)
+
         if element:
-            # Double click to select all text and ensure focus
+            self._action_chains.double_click(element).send_keys(Keys.DELETE).perform()
+            self._action_chains.send_keys_to_element(element, str(value)).perform()
+
+    @handle_stale_element
+    def _send_keys(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
+        if locator:
+            element = self.find_element(locator, timeout)
+
+        if element:
             self._action_chains.double_click(element).perform()
             element.send_keys(str(value))
+
+    @handle_stale_element
+    def send_keys(self, locator, value, use_action_chain=False, timeout=EXPLICIT_WAIT):
+
+        max_retries = 3
+        element = self.find_element(locator, timeout)
+
+        send_key_func = self._send_key_action_chains if use_action_chain else self._send_keys
+        send_key_func(value, element=element)
+
+        # Fall back
+        sent_value = element.get_attribute("value")
+        while sent_value != str(value) and max_retries:
+            send_key_func(value, element=element)
+            max_retries -= 1
+            sent_value = element.get_attribute("value")
 
     @handle_stale_element
     def click_by_offset(
@@ -57,7 +84,7 @@ class WebActions(BaseActions):
         element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
         res = element.get_attribute("value") if element else ""
 
-        if retry and not res:
+        if retry:
             logger.debug("- Retry getting value")
             time.sleep(1)
             element = self.find_element(locator, QUICK_WAIT, raise_exception=False, show_log=False)
@@ -75,6 +102,14 @@ class WebActions(BaseActions):
     def get_current_url(self):
         return self._driver.current_url
 
+    def scroll_to_element(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
+        element = self.find_element(locator, timeout)
+        self._driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
+
+    def scroll_picker_down(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
+        wheel = self.find_element(locator, timeout)
+        self._action_chains.click_and_hold(wheel).move_by_offset(0, -50).release().perform()
+
     def scroll_container_down(self, locator: tuple[str, str], wait_time: float = 0.5, scroll_step: float = 0.5):
         """Scroll a container element down by a smaller step to avoid missing items
         Args:
@@ -84,11 +119,11 @@ class WebActions(BaseActions):
         """
         try:
             container = self.find_element(locator)
-            self.execute_script(
+            self._driver.execute_script(
                 "arguments[0].scrollTop = arguments[0].scrollTop + (arguments[0].clientHeight * arguments[1]);",
                 container, scroll_step
             )
-            time.sleep(wait_time)
+            time.sleep(0.3)
         except Exception as e:
             logger.warning(f"Error scrolling container {locator}: {e}")
 

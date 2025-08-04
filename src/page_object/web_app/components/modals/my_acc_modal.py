@@ -1,11 +1,13 @@
-from appium.webdriver.common.appiumby import AppiumBy
+import time
+
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import SHORT_WAIT
+from src.data.consts import SHORT_WAIT, LONG_WAIT
 from src.data.enums import AccSummary
 from src.page_object.web_app.base_page import BasePage
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, resource_id
+from src.utils.common_utils import cook_element, data_testid
 from src.utils.format_utils import format_acc_balance
 
 
@@ -14,10 +16,10 @@ class MyAccountModal(BasePage):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __items = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']/following-sibling::android.widget.TextView[1]")
-    __drp_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Balance']/following-sibling::android.widget.TextView[1]")
-    __drp_note = (AppiumBy.XPATH, "//android.widget.TextView[@text='Note']/following-sibling::android.widget.TextView[1]")
-    __btn_close = (AppiumBy.XPATH, resource_id('modal-close-button'))
+    __drp_balance = (By.XPATH, "//*[text()='Balance']/following-sibling::*")
+    __items = (By.XPATH, "//*[text()='{}']/following-sibling::*")
+    __drp_note = (By.XPATH, "//*[text()='Note']/following-sibling::*")
+    __btn_close = (By.CSS_SELECTOR, data_testid("modal-close-button"))
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -52,13 +54,12 @@ class MyAccountModal(BasePage):
         actual = self.get_account_info()
         soft_assert(actual, exp_dict, tolerance=0.05, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
-
     def verify_balance_items_displayed(self, is_display=True):
+        time.sleep(1)  # Wait for 1 second
         locators = [cook_element(self.__items, item) for item in AccSummary.checkbox_list()]
         self.actions.verify_elements_displayed(locators, is_display=is_display, timeout=SHORT_WAIT)
 
     def verify_note_items_displayed(self, is_display=True):
+        time.sleep(1)  # Wait for 1 second
         locators = [cook_element(self.__items, item) for item in AccSummary.note_list()]
         self.actions.verify_elements_displayed(locators, is_display=is_display, timeout=SHORT_WAIT)
-
-

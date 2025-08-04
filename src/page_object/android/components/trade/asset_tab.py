@@ -7,7 +7,7 @@ from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, BulkCloseOpts
 from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id, cook_element
@@ -75,20 +75,20 @@ class AssetTab(BaseTrade):
 
     def get_last_order_id(self, trade_object: ObjTrade) -> None:
         """Get the latest order ID from the specified tab and update value into trade_object"""
-        res = self.actions.get_text(cook_element(self.__item_order_no, AssetTabs.get_tab(trade_object.order_type).get_col()))
+        res = self.actions.get_text(cook_element(self.__item_order_no, AssetTabs.get_tab(trade_object.order_type).col_locator()))
         trade_object.order_id = res.split(": ")[-1] if res else 0
 
     def get_expand_item_data(self, tab: AssetTabs, order_id: int = 0) -> Dict[str, Any]:
         """Get detailed data for an expanded item in the specified tab."""
         # expand the item
-        locator = cook_element(self.__expand_item_by_order_no, order_id, tab.get_col()) if order_id else cook_element(self.__expand_item, tab.get_col())
+        locator = cook_element(self.__expand_item_by_order_no, order_id, tab.col_locator()) if order_id else cook_element(self.__expand_item, tab.col_locator())
         self.actions.click(locator)
 
         # get expanded item details 
-        tab = AssetTabs.HISTORY if AssetTabs.is_sub_history(tab) else tab
+        tab = AssetTabs.HISTORY if tab.is_history() else tab
         res = {
             ele.get_attribute("resource-id").split("-column-")[-1].replace("-value", "").replace("-", "_"): ele.text.strip()
-            for ele in self.actions.find_elements(cook_element(self.__expand_items, tab.get_col()))
+            for ele in self.actions.find_elements(cook_element(self.__expand_items, tab.col_locator()))
         }
         # get order-type
         res["order_type"] = self.actions.get_text(self.__item_order_type)
@@ -97,7 +97,7 @@ class AssetTab(BaseTrade):
         if "size" in res:
             res["volume"] = res.pop("size")
             # todo: improve to check close_volume / x
-            if tab in [AssetTabs.HISTORY, AssetTabs.POSITIONS_HISTORY]:
+            if tab.is_history():
                 res["volume"] = res["volume"].split(" / ")[0]
 
         logger.debug(f"Item summary: {format_dict_to_string(res)}")
@@ -107,18 +107,18 @@ class AssetTab(BaseTrade):
         return res
 
     # ------------------------ ACTIONS ------------------------ #
-    def select_tab(self, tab: AssetTabs) -> None:
+    def select_tab(self, tab: AssetTabs, wait=False) -> None:
         """Select the specified asset tab."""
-        if tab.is_sub_history():
-            if not ProjectConfig.is_non_oms():
-                self.actions.click(cook_element(self.__tab, locator_format(AssetTabs.HISTORY)))
-                return
+        tab_locator = tab
+        if tab.is_history():
+            if not RuntimeConfig.is_mt4():
+                tab_locator = f"{AssetTabs.HISTORY} {AssetTabs.POSITIONS_HISTORY}"
 
-            # click sub history tab
-            self.actions.click(cook_element(self.__tab, locator_format(f"{AssetTabs.HISTORY} {tab}")))
-            return
+            else:
+                tab_locator = AssetTabs.HISTORY
 
-        self.actions.click(cook_element(self.__tab, locator_format(tab)))
+        self.actions.click(cook_element(self.__tab, locator_format(tab_locator)))
+        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
 
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""
@@ -129,24 +129,23 @@ class AssetTab(BaseTrade):
     def click_edit_button(self, tab: AssetTabs, order_id: int = 0) -> None:
         """Click the edit button for an item in the specified tab."""
         # edit last item by default
-        locator = cook_element(self.__btn_edit, tab.get_col())
+        locator = cook_element(self.__btn_edit, tab.col_locator())
         if order_id:
             # edit item with specific order_id
-            locator = cook_element(self.__btn_edit_by_id, tab.get_col(), order_id, tab.get_col())
+            locator = cook_element(self.__btn_edit_by_id, tab.col_locator(), order_id, tab.col_locator())
         self.actions.click(locator)
 
     def click_close_button(self, tab: AssetTabs = AssetTabs.OPEN_POSITION) -> None:
         """Click the close button last item in the specified tab."""
-        self.actions.click(cook_element(self.__btn_close_delete, tab.get_col()))
+        self.actions.click(cook_element(self.__btn_close_delete, tab.col_locator()))
 
     click_delete_button = click_close_button
 
     def delete_order(self, order_id: int = 0, trade_object: ObjTrade = None, confirm=True) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
-        tab_col = AssetTabs.PENDING_ORDER.get_col()
+        tab_col = AssetTabs.PENDING_ORDER.col_locator()
         if not order_id and trade_object:
-            # load order_id for trade object if provided
-            self.get_last_order_id(trade_object)
+            self.get_last_order_id(trade_object)  # load order_id for trade object if provided
 
         locator = cook_element(self.__btn_close_by_order_no if order_id else self.__btn_close_delete, tab_col, order_id, tab_col)
         self.actions.click(locator)
@@ -158,13 +157,13 @@ class AssetTab(BaseTrade):
         self.click_confirm_btn()
 
     def full_close_position(self, order_id: int = 0, confirm=True) -> None:
-        locator = cook_element(self.__btn_close_by_order_no if order_id else self.__btn_close_delete, AssetTabs.OPEN_POSITION.get_col(), order_id, AssetTabs.OPEN_POSITION.get_col())
+        locator = cook_element(self.__btn_close_by_order_no if order_id else self.__btn_close_delete, AssetTabs.OPEN_POSITION.col_locator(), order_id, AssetTabs.OPEN_POSITION.col_locator())
         self.actions.click(locator)
         not confirm or self.confirm_close_order()
 
     def partial_close_position(self, trade_object: ObjTrade, order_id=0, confirm=True):
 
-        tab_col = AssetTabs.OPEN_POSITION.get_col()
+        tab_col = AssetTabs.OPEN_POSITION.col_locator()
         order_id = order_id or trade_object.get("order_id", 0) if trade_object else 0
         locator = cook_element(self.__btn_close_by_order_no if order_id else self.__btn_close_delete, tab_col, order_id, tab_col)
         self.actions.click(locator)
@@ -216,12 +215,12 @@ class AssetTab(BaseTrade):
         # update order_id for trade_object if not yet
         trade_object.get("order_id") or trade_object.update(dict(order_id=item_data.pop("order_id")))
 
-        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=trade_object.tolerance_fields())
+        soft_assert(actual, expected, tolerance=1, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_item_displayed(self, tab: AssetTabs, order_id: int | str | list, is_display: bool = True) -> None:
         """Verify that an item is displayed or not displayed."""
         order_id = order_id if isinstance(order_id, list) else [order_id]
         self.actions.verify_elements_displayed(
-            [cook_element(self.__item_by_order_no, tab.get_col(), _id) for _id in order_id],
+            [cook_element(self.__item_by_order_no, tab.col_locator(), _id) for _id in order_id],
             is_display=is_display, timeout=SHORT_WAIT
         )

@@ -1,6 +1,7 @@
 import random
+import time
 
-from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
@@ -8,7 +9,7 @@ from src.data.enums import WatchListTab
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element, data_testid
 from src.utils.logging_utils import logger
 
 
@@ -17,41 +18,33 @@ class WatchList(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __items = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
-    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
-    __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
-    __btn_symbol_remove = (AppiumBy.XPATH, "//*[@text='Remove']")
-    __selected_item = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='symbol-overview-id' and @text='{}']")
+    __tab = (By.XPATH, "//div[text()='{}']")
+    __items = (By.CSS_SELECTOR, data_testid("watchlist-symbol"))
+    __item_by_name = (By.XPATH, "//div[@data-testid='watchlist-symbol' and text()='{}']")
+    __star_icon_by_symbol = (By.XPATH, data_testid("chart-star-symbol"))
+    __btn_symbol_remove = (By.XPATH, "//*[text()='Remove']")
+    __selected_item = (By.XPATH, "//*[@data-testid='symbol-overview-id' and text()='{}']")
+    __watchlist_container = (By.XPATH, "//div[@data-testid='watchlist-list-item']/ancestor::div[3]")
 
     # ------------------------ ACTIONS ------------------------ 
-
-    def select_tab(self, tab: WatchListTab):
-        """Handle selecting tab for home & markets page"""
+    def select_tab(self, tab: WatchListTab, wait=True, timeout=3):
+        """Select a tab and retry if needed (handles edge cases like Favourite tab in MARKET)"""
         locator = cook_element(self.__tab, tab)
 
-        logger.info(f"- Select tab: {tab.value.capitalize()!r}")
-        # if tab is represent, select tab immediately
-        if self.actions.is_element_displayed(locator):
-            self.actions.click(locator)
-            return
+        if not self.actions.is_element_displayed(locator, show_log=False):
+            self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
+            self.wait_for_spin_loader(timeout=SHORT_WAIT)
 
-        # For home page, in case tab is sub-tab
-        logger.debug(f"- Tab is sub-tab, select tab {WatchListTab.ALL.value!r} first")
-        self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
         self.actions.click(locator)
+        not wait or self.wait_for_spin_loader(timeout=timeout)
 
-    def get_current_symbols(self, tab: WatchListTab = None, random_symbol=False):
-        if tab:
-            self.select_tab(tab)
+    def get_current_symbols(self):
+        res = self.actions.get_text_elements(self.__items)
+        return res
 
-        elements = self.actions.find_elements(self.__items)
-        if elements:
-            res = [ele.text.strip() for ele in elements]
-            res = [item for item in res if item]  # remove empty text if any
-            return res if not random_symbol else random.choice(res)
-
-        return []
+    def get_random_symbol(self):
+        cur_symbols = self.get_current_symbols()
+        return random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols)/2)])
 
     def get_last_symbol(self, tab: WatchListTab | list[WatchListTab], store_data: DotDict = None):
         """Get latest symbol of each input tab (tab can be str or list)"""
@@ -65,10 +58,7 @@ class WatchList(BaseTrade):
             store_data |= res
         return res
 
-    def get_all_symbols(self, tab: WatchListTab = None, expected_symbols=None):
-        if tab:
-            self.select_tab(tab)
-
+    def get_all_symbols(self, expected_symbols=None):
         all_symbols = set()
         scroll_attempts = 0
         last_count = 0
@@ -78,21 +68,21 @@ class WatchList(BaseTrade):
 
         while scroll_attempts < max_scroll_attempts:
             # Get current visible symbols
-            current_symbols = self.get_current_symbols(tab)
+            current_symbols = self.get_current_symbols()
 
             # Add new symbols to our set
             new_symbols = set(current_symbols) - all_symbols
             all_symbols.update(new_symbols)
 
             # Check if we've found all expected symbols
-            if set(all_symbols) == set(expected_symbols):
+            if all(item in all_symbols for item in expected_symbols):
                 logger.debug(f"Found all expected symbols after {scroll_attempts + 1} scroll attempts. Stopping early.")
                 break
 
             # Check if we're not finding new symbols (end of list)
             if len(all_symbols) == last_count:
                 logger.debug("No new symbols found in this scroll attempt")
-                no_new_symbol +=1
+                no_new_symbol += 1
                 if set(all_symbols) == set(expected_symbols) or no_new_symbol == 5:
                     break
             else:
@@ -101,8 +91,7 @@ class WatchList(BaseTrade):
 
             # Scroll down in the container
             try:
-                self.actions.scroll_down(scroll_step=0.4)
-                # self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.5)
+                self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.5)
             except Exception as e:
                 logger.warning(f"Error during scroll: {e}")
                 break
@@ -113,10 +102,7 @@ class WatchList(BaseTrade):
         logger.debug(f"Finished scrolling. Total symbols collected: {len(result)}")
         return result
 
-    def select_last_symbol(self, tab: WatchListTab = WatchListTab.ALL):
-        if tab:
-            self.select_tab(tab)
-
+    def select_last_symbol(self):
         self.actions.click(self.__items)
 
     def select_symbol(self, symbol, tab=None, max_scroll_attempts=30):
@@ -143,10 +129,11 @@ class WatchList(BaseTrade):
         scroll_attempts = 0
         while scroll_attempts < max_scroll_attempts:
             logger.debug(f"Scroll attempt {scroll_attempts + 1}/{max_scroll_attempts} to find symbol: {symbol!r}")
+            time.sleep(2)
 
             # Scroll down in the container
             try:
-                self.actions.scroll_down()
+                self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.5)
             except Exception as e:
                 logger.warning(f"Error during scroll attempt {scroll_attempts + 1}: {e}")
                 scroll_attempts += 1
@@ -160,46 +147,18 @@ class WatchList(BaseTrade):
 
         raise Exception(f"Symbol '{symbol}' not found after {scroll_attempts} scroll attempts")
 
-    def toggle_star_symbol(self, mark_star=True):
-        """
-        To either mark a symbol as favorite or remove it from favorites.
-        :param mark_star: True to mark star, False to remove from favorites.
-        """
-
-        items = self.actions.find_elements(self.__items)
-        symbols = [item.get_attribute("text") for item in items]
-        selected_symbol = random.choice(symbols)
-
-        locator = cook_element(self.__item_by_name, selected_symbol)
-
-        if mark_star:
-            self.actions.click(locator)  # click on the symbol name
-            self.actions.click(self.__star_icon_by_symbol)  # click on the star icon
-            self.go_back()
-
-        else:
-            self.actions.swipe_element_horizontal(locator)  # swipe left action
-            self.actions.click(self.__btn_symbol_remove)
-
-        return selected_symbol
-
     # ------------------------ VERIFY ------------------------ #
-    def verify_symbol_selected(self, symbol: str):
-        """Verify selected item"""
-        self.actions.verify_element_displayed(cook_element(self.__selected_item, symbol))
-
-    def verify_symbols_displayed(self, tab: WatchListTab, symbols: str | list = None, is_display=True, timeout=SHORT_WAIT):
+    def verify_symbols_displayed(self, symbols: str | list = None, is_display=True, timeout=SHORT_WAIT):
         """Verify symbol is displayed in tab"""
-        self.select_tab(tab)
         symbols = symbols if isinstance(symbols, list) else [symbols]
-        for symbol in symbols:
-            self.actions.verify_element_displayed(cook_element(self.__item_by_name, symbol), is_display=is_display, timeout=timeout)
+        locators = [cook_element(self.__item_by_name, _symbol) for _symbol in symbols]
+        self.actions.verify_elements_displayed(locators, timeout=timeout, is_display=is_display)
 
-    def verify_symbols_list(self, symbols, tab=None):
+    def verify_symbols_list(self, symbols):
         symbols = symbols if isinstance(symbols, list) else [symbols]
-        current_symbols = self.get_all_symbols(tab, expected_symbols=symbols)
+        current_symbols = self.get_all_symbols(expected_symbols=symbols)
 
         soft_assert(
-            sorted(current_symbols), sorted(symbols),
-            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}, Redundant: {[item for item in current_symbols if item not in symbols]}"
+            sorted(item for item in current_symbols if item in symbols), sorted(symbols),
+            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}"
         )

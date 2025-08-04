@@ -35,11 +35,11 @@ class ObjDemoAccount(BaseObj):
         self.agreement = agreement
 
     def full_params(self, **kwargs):
-        self.name = self.name or random_username()
+        self.name = self.name or "MT5 Automation"
         self.email = self.email or random_email()
         self.dial_code = self.dial_code or CountryDialCode.sample_values()
         self.phone_number = self.phone_number or random_phone_number(self.dial_code)
-        self.deposit = self.deposit or DepositAmount.TEN_THOUSAND
+        self.deposit = self.deposit or DepositAmount.FIVE_MILLION
         self.agreement = self.agreement or True
         return self._update_attributes(**kwargs)
 

@@ -2,28 +2,33 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs
-from src.data.enums import SLTPType, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import SLTPType, OrderType, Expiry
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web_app, symbol, create_order_data):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(web_app, market_obj, create_order_data, cancel_all):
+    trade_object = market_obj()
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     create_order_data(trade_object)
+
+    logger.info("Step 2: Select Pending Order tab")
+    web_app.trade_page.asset_tab.select_tab(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web_app.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
 
-    logger.info(f"Step 2: Modify order with SL and TP")
-    web_app.trade_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
+    logger.info(f"Step 3: Modify order with SL and TP")
+    web_app.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
+
+    logger.info("Step 4: Select Pending Order tab")
+    web_app.trade_page.asset_tab.select_tab(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Verify item details after update")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)
 
-    logger.info(f"Step 3: Get placed order API data, order_id: {trade_object.order_id!r}")
+    logger.info(f"Step 5: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
         symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
     )

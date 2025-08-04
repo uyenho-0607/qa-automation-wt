@@ -7,7 +7,7 @@ import pandas as pd
 
 from src.data.consts import DATA_DIR
 from src.data.enums import Server, ChartTimeframe
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.utils.assert_utils import soft_assert, compare_dict_with_keymap
 from src.utils.logging_utils import logger
 
@@ -60,7 +60,7 @@ def _csv_to_json(df, symbol: str, timeframe: ChartTimeframe):
 def _process_metatrader_data(symbol: str, timeframe: ChartTimeframe):
     """Process MetaTrader CSV data and convert to JSON format"""
     timeframe = timeframe.get_timeframe().split("_")[-1]
-    file = os.path.join(os.path.expanduser(CSV_DIR[ProjectConfig.server]), f"{symbol}_{timeframe}.csv")
+    file = os.path.join(os.path.expanduser(CSV_DIR[RuntimeConfig.server]), f"{symbol}_{timeframe}.csv")
 
     # Check if file exists
     if not os.path.exists(file):

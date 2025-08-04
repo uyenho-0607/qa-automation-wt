@@ -5,7 +5,7 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
 from src.data.enums import AccountType, Language, URLPaths
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.demo_acc_modals import DemoAccountModal
@@ -82,7 +82,7 @@ class LoginPage(BasePage):
             password = credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        self.select_account_type(account_type or ProjectConfig.account)
+        self.select_account_type(account_type or RuntimeConfig.account)
         self.input_user_id(str(userid))
         self.input_password(str(password))
         self.click_sign_in()
@@ -95,12 +95,17 @@ class LoginPage(BasePage):
 
     def verify_alert_error_message(self, account_type=None):
 
-        account_type = account_type or ProjectConfig.account
+        other_msg = None
         err_msg = UIMessages.LOGIN_INVALID
-        if account_type == AccountType.DEMO or ProjectConfig.is_non_oms():
+
+        account_type = account_type or RuntimeConfig.account
+        if account_type == AccountType.DEMO or RuntimeConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
-        super().verify_alert_error_message(err_msg, timeout=30)
+        if RuntimeConfig.is_prod(): # sometimes prod can show 'Trading general error. Please try again later.'
+            other_msg = UIMessages.TRADING_GENERAL_ERRORS
+
+        super().verify_alert_error_message(err_msg, other_msg)
 
     def verify_account_tabs_is_displayed(self):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)

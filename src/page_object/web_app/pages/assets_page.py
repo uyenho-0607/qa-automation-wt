@@ -1,11 +1,11 @@
-from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.enums import AccInfo
 from src.page_object.web_app.base_page import BasePage
 from src.page_object.web_app.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id
+from src.utils.common_utils import data_testid
 from src.utils.format_utils import format_acc_balance
 
 
@@ -15,18 +15,18 @@ class AssetsPage(BasePage):
         self.watch_list = WatchList(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __acc_name = (AppiumBy.XPATH, resource_id('account-name'))
-    __acc_id = (AppiumBy.XPATH, resource_id('account-id'))
-    __acc_type = (AppiumBy.XPATH, resource_id('account-type-tag'))
-    __acc_details = (AppiumBy.XPATH, resource_id('account-detail'))
+    __acc_name = (By.CSS_SELECTOR, data_testid('account-name'))
+    __acc_id = (By.CSS_SELECTOR, data_testid('account-id'))
+    __acc_type = (By.CSS_SELECTOR, data_testid('account-type-tag'))
+    __acc_details = (By.CSS_SELECTOR, data_testid('account-detail'))
 
-    __available_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Available Balance']/following-sibling::android.widget.TextView[2]")
-    __realised_profit_loss = (AppiumBy.XPATH, "//android.widget.TextView[@text='Realised Profit/Loss']/following-sibling::android.widget.TextView[2]")
-    __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[3]")
-    __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[3]")
-    __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[3]")
+    __available_balance = (By.XPATH, "//div[text()='Available Balance']/following-sibling::div")
+    __realised_profit_loss = (By.XPATH, "//div[text()='Realised Profit/Loss']/following-sibling::div")
+    __credit = (By.XPATH, "//div[text()='Credit']/following-sibling::div")
+    __deposit = (By.XPATH, "//div[text()='Deposit']/following-sibling::div")
+    __withdrawal = (By.XPATH, "//div[text()='Withdrawal']/following-sibling::div")
 
-    __item_watchlist = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
+    __item_watchlist = (By.CSS_SELECTOR, data_testid('watchlist-symbol'))
 
     # ------------------------ ACTIONS ------------------------ #
     def _get_acc_balance_info(self):
@@ -41,12 +41,8 @@ class AssetsPage(BasePage):
         return res
 
     def get_mytrade_item(self):
-        # scroll down a bit
-        self.actions.scroll_down()
+        self.actions.scroll_to_element(self.__item_watchlist)
         return self.actions.get_text_elements(self.__item_watchlist)
-
-        # elements = self.actions.find_elements(self.__item_watchlist)
-        # return [ele.text.strip() for ele in elements]
 
     # ------------------------ VERIFY ------------------------ #
     def verify_account_details(self, exp_data):

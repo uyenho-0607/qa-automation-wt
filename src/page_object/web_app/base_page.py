@@ -1,13 +1,11 @@
-from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
 from src.data.enums import Features
 from src.data.enums import URLSites
-from src.data.ui_messages import UIMessages
-from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element, data_testid
 from src.utils.logging_utils import logger
 
 
@@ -46,34 +44,29 @@ class BasePage:
             self.initialized = True
 
     # ------------------------ LOCATORS ------------------------ #
-    __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
-    __alert_success = (AppiumBy.XPATH, "//*[@resource-id='alert-success']")
-
-    __alert_box = (AppiumBy.XPATH, "//*[@resource-id='notification-box']")
-    __alert_title = (AppiumBy.XPATH, "//*[@resource-id='notification-box-title']")
-    __alert_desc = (AppiumBy.XPATH, "//*[@resource-id='notification-box-description']")
-    __alert_box_close = (AppiumBy.XPATH, "//*[@resource-id='notification-box-close']")
-    __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
-    __spin_loader = (AppiumBy.XPATH, resource_id('spin-loader'))
-    __home_nav_option = (AppiumBy.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
-    __btn_confirm = (AppiumBy.XPATH, "//*[@content-desc='Confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
+    __alert_box = (By.CSS_SELECTOR, data_testid("notification-box"))
+    __alert_title = (By.CSS_SELECTOR, data_testid("notification-box-title"))
+    __alert_desc = (By.CSS_SELECTOR, data_testid("notification-box-description"))
+    __alert_box_close = (By.CSS_SELECTOR, data_testid("notification-box-close"))
+    __btn_nav_back = (By.CSS_SELECTOR, data_testid("navigation-back-button"))
+    __spin_loader = (By.CSS_SELECTOR, data_testid("spin-loader"))
+    __btn_confirm = (By.XPATH, "//*[text()='Confirm']")
+    __btn_cancel = (By.XPATH, "//*[text()='Cancel']")
+    __home_nav_option = (By.CSS_SELECTOR, data_testid("side-bar-option-{}"))
 
     # ------------------------ ACTIONS ------------------------ #
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
         self.actions.goto(Config.urls(site))
 
-    def go_back(self):
-        self.actions.click(self.__btn_nav_back)
-
-    def wait_for_spin_loader(self, timeout: int = EXPLICIT_WAIT):
+    def wait_for_spin_loader(self, timeout: int | float = 5):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
-        if self.actions.is_element_displayed(self.__spin_loader, timeout=5):
-            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
+            logger.debug("- Wait for spin loader to disappear")
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=EXPLICIT_WAIT)
 
     def navigate_to(self, feature: Features, wait=False):
-        self.actions.click(cook_element(self.__home_nav_option, feature))
+        self.actions.click(cook_element(self.__home_nav_option, feature.lower()))
         if wait:
             self.wait_for_spin_loader()
 
@@ -81,30 +74,8 @@ class BasePage:
         self.actions.click(self.__btn_confirm)
 
     def click_cancel_btn(self):
-        if self.actions.is_element_displayed(self.__btn_cancel):
-            self.actions.click(self.__btn_cancel)
-
-    def close_alert_box(self):
-        if self.actions.is_element_displayed(self.__alert_box_close):
-            self.actions.click(self.__alert_box_close)
+        while self.actions.is_element_displayed(self.__btn_cancel):
+            logger.debug("- Click cancel btn")
+            self.actions.click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
 
     # ------------------------ VERIFY ------------------------ #
-    def verify_alert_error_message(self, expected_message: UIMessages):
-        actual_err = self.actions.get_text(self.__alert_desc, timeout=EXPLICIT_WAIT)
-        soft_assert(actual_err, expected_message)
-        self.close_alert_box()
-
-    def verify_alert_success_message(self, expected_message: UIMessages):
-        actual_msg = self.actions.get_text(self.__alert_success)
-        soft_assert(actual_msg, expected_message)
-        self.close_alert_box()
-
-    def verify_alert_message(self, expected_message: UIMessages):
-        """Verify the success alert message.
-        
-        Args:
-            expected_message (UIMessages): The expected success message
-        """
-        actual_msg = self.actions.get_text(self.__alert_desc)
-        soft_assert(actual_msg, expected_message)
-        self.close_alert_box()

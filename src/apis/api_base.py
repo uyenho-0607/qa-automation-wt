@@ -3,12 +3,12 @@ from requests.adapters import HTTPAdapter
 
 from src.core.config_manager import Config
 from src.core.decorators import after_request
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 
 
 class BaseAPI:
     def __init__(self, headers=None):
-        self.headers = headers or ProjectConfig.headers
+        self.headers = headers or RuntimeConfig.headers
         self.session = self._create_session()
 
     @staticmethod

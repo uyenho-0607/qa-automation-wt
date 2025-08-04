@@ -29,13 +29,16 @@ def test(web_app):
         logger.info(f"Step {i + 3}: Select symbol {select_symbol} from watchlist: {subtab.title()!r}")
         web_app.markets_page.watch_list.select_symbol(select_symbol)
 
+        time.sleep(1)
+
         logger.info(f"Verify symbol {select_symbol} is selected")
         web_app.trade_page.watch_list.verify_symbol_selected(select_symbol)
 
         if subtab != tabs[-1]:
             logger.info(f"Step {i + 4}: Navigate to Markets Screen")
             web_app.home_page.navigate_to(Features.MARKETS)
-    
+
+
 @pytest.fixture(autouse=True)
 def mark_symbol():
     star_symbol = random.choice(get_symbols())

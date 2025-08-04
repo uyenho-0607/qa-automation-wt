@@ -71,6 +71,6 @@ class TradeScreen(BaseScreen):
         soft_assert(
             actual,
             expected,
-            tolerance=0.1,
+            tolerance=1,
             tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"]
         )

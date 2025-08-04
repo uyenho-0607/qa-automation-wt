@@ -1,17 +1,16 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web_app, symbol, get_asset_tab_amount, ):
-    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
+def test(web_app, stop_obj, cancel_all, ):
+    trade_object = stop_obj()
 
     logger.info("Step 1: Get asset tab amount")
-    tab_amount = get_asset_tab_amount(trade_object.order_type)
+    tab_amount = web_app.trade_page.asset_tab.get_tab_amount(AssetTabs.PENDING_ORDER)
 
     logger.info(f"Step 2: Place {trade_object.trade_type} order (tab amount: {tab_amount!r})")
     web_app.trade_page.place_order_panel.place_order(trade_object, submit=True)

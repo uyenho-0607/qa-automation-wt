@@ -1,29 +1,30 @@
 import pytest
 
-from src.data.enums import AssetTabs, SLTPType
+from src.data.enums import AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web, limit_obj, get_asset_tab_amount, cancel_delete_order, create_order_data):
-    trade_object = limit_obj(indicate=SLTPType.sample_values())
-    tab_amount = get_asset_tab_amount(trade_object.order_type)
+def test(web, limit_obj, cancel_delete_order, create_order_data):
+
+    trade_object = limit_obj()
+    tab = AssetTabs.PENDING_ORDER
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
-    create_order_data(trade_object)
+    *_, tab_amount = create_order_data(trade_object)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
-    logger.info("Step 2: Delete pending order")
-    web.trade_page.asset_tab.delete_order(order_id=trade_object.order_id)
+    logger.info(f"Step 2: Delete pending order")
+    web.trade_page.asset_tab.delete_order(trade_object)
 
-    logger.info(f"Verify delete order notification banner")
+    logger.info("Verify Delete order notification banner")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).delete_order_banner())
 
-    logger.info(f"Verify tab amount = {tab_amount}")
-    web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount)
+    logger.info(f"Verify {tab.title()} amount = {tab_amount}")
+    web.trade_page.asset_tab.verify_tab_amount(tab, tab_amount)
 
-    logger.info(f"Verify item is no longer displayed")
-    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id, is_display=False)
+    logger.info("Verify item is no longer displayed")
+    web.trade_page.asset_tab.verify_item_displayed(tab, trade_object.order_id, is_display=False)
