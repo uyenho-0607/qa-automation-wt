@@ -21,7 +21,6 @@ def test_asset_page(web, ):
 
 
 def test(web, ):
-
     logger.info("Step 1: Navigate to Markets Page")
     web.home_page.navigate_to(Features.MARKETS)
 

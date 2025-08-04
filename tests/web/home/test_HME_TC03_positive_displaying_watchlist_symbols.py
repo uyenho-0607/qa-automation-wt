@@ -15,9 +15,10 @@ def test(web, tab, setup_test):
     if not exp_symbols:
         pytest.skip("No symbols to test")
 
-    logger.info("Step 1: Get random displaying symbol")
+    logger.info("Step 1: Select tab")
     web.home_page.watch_list.select_tab(tab)
-    time.sleep(2)
+
+    logger.info("Step 2: Get random displaying symbol")
     select_symbol = web.home_page.watch_list.get_random_symbol()
 
     logger.info(f"Step 2: Select {select_symbol!r}")
