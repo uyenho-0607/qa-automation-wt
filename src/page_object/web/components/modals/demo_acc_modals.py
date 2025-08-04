@@ -83,6 +83,7 @@ class DemoAccountModal(BasePage):
 
     def fill_demo_account_creation_form(self, account_info: ObjDemoAccount, default_deposit=True, submit=True):
         time.sleep(1)  # wait a bit for loading default deposit value
+
         if account_info.name:
             self.input_name(account_info.name)
 

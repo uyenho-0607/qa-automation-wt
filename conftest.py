@@ -25,7 +25,7 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
     parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
-    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", default=False, action="store_true", help="Whether to choose driver to run on argo cd")
 
 
 def pytest_configure(config):

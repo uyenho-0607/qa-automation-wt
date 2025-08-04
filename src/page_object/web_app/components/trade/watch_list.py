@@ -1,6 +1,8 @@
 import random
+import time
 
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.consts import SHORT_WAIT
@@ -8,7 +10,7 @@ from src.data.enums import WatchListTab
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import resource_id, cook_element, data_testid
 from src.utils.logging_utils import logger
 
 
@@ -17,12 +19,12 @@ class WatchList(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __items = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
-    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
-    __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
-    __btn_symbol_remove = (AppiumBy.XPATH, "//*[@text='Remove']")
-    __selected_item = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='symbol-overview-id' and @text='{}']")
+    __tab = (By.XPATH, "//div[contains(text(), '{}')]")
+    __items = (By.CSS_SELECTOR, data_testid("watchlist-symbol"))
+    __item_by_name = (By.XPATH, "//*[@data-testid='watchlist-symbol' and text()='{}']")
+    __star_icon_by_symbol = (By.XPATH, data_testid("chart-star-symbol"))
+    __btn_symbol_remove = (By.XPATH, "//*[text()='Remove']")
+    __selected_item = (By.XPATH, "//*[@data-testid='symbol-overview-id' and text()='{}']")
 
     # ------------------------ ACTIONS ------------------------ 
 
@@ -101,7 +103,7 @@ class WatchList(BaseTrade):
 
             # Scroll down in the container
             try:
-                self.actions.scroll_down(scroll_step=0.4)
+                self.actions.scroll_container_down(scroll_step=0.4)
                 # self.actions.scroll_container_down(self.__watchlist_container, scroll_step=0.5)
             except Exception as e:
                 logger.warning(f"Error during scroll: {e}")
@@ -143,10 +145,11 @@ class WatchList(BaseTrade):
         scroll_attempts = 0
         while scroll_attempts < max_scroll_attempts:
             logger.debug(f"Scroll attempt {scroll_attempts + 1}/{max_scroll_attempts} to find symbol: {symbol!r}")
+            time.sleep(2)
 
             # Scroll down in the container
             try:
-                self.actions.scroll_down()
+                self.actions.scroll_container_down(scroll_step=0.4)
             except Exception as e:
                 logger.warning(f"Error during scroll attempt {scroll_attempts + 1}: {e}")
                 scroll_attempts += 1
@@ -188,18 +191,23 @@ class WatchList(BaseTrade):
         """Verify selected item"""
         self.actions.verify_element_displayed(cook_element(self.__selected_item, symbol))
 
-    def verify_symbols_displayed(self, tab: WatchListTab, symbols: str | list = None, is_display=True, timeout=SHORT_WAIT):
+    def verify_symbols_displayed(self, tab: WatchListTab, symbols: str | list = None,
+                                 is_display=True, timeout=SHORT_WAIT):
+
         """Verify symbol is displayed in tab"""
         self.select_tab(tab)
         symbols = symbols if isinstance(symbols, list) else [symbols]
         for symbol in symbols:
-            self.actions.verify_element_displayed(cook_element(self.__item_by_name, symbol), is_display=is_display, timeout=timeout)
+            self.actions.verify_element_displayed(cook_element(self.__item_by_name, symbol),
+                                                  is_display=is_display, timeout=timeout)
 
     def verify_symbols_list(self, symbols, tab=None):
+        time.sleep(2)
         symbols = symbols if isinstance(symbols, list) else [symbols]
         current_symbols = self.get_all_symbols(tab, expected_symbols=symbols)
 
         soft_assert(
             sorted(current_symbols), sorted(symbols),
-            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}, Redundant: {[item for item in current_symbols if item not in symbols]}"
+            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]},"
+                          f"Redundant: {[item for item in current_symbols if item not in symbols]}"
         )

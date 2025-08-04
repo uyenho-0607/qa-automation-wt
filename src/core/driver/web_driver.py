@@ -23,7 +23,6 @@ class WebDriver:
                 # service = Service(ChromeDriverManager().install())
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
-
                 if RuntimeConfig.platform == 'web_app':
                     options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 14 Pro Max"})
 

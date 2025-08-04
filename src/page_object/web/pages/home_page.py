@@ -112,7 +112,7 @@ class HomePage(BasePage):
     def verify_page_url(self):
         super().verify_page_url(URLPaths.TRADE)
 
-    def verify_acc_info_displayed(self):
+    def verify_account_info_displayed(self):
         """Verify that account information is displayed"""
         self.actions.verify_element_displayed(self.__account_selector)
         self.actions.verify_element_displayed(self.__account_name)

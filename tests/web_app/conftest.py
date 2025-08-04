@@ -23,4 +23,4 @@ def login_member_site(web_app):
 
     logger.info("- Login to Member Site")
     web_app.login_page.login(wait=True)
-    web_app.home_page.feature_announcement_modal.got_it()
+    web_app.home_page.feature_anm_modal.got_it()

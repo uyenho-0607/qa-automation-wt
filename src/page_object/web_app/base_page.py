@@ -1,4 +1,5 @@
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
@@ -7,7 +8,7 @@ from src.data.enums import Features
 from src.data.enums import URLSites
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import resource_id, cook_element, data_testid
 from src.utils.logging_utils import logger
 
 
@@ -46,18 +47,22 @@ class BasePage:
             self.initialized = True
 
     # ------------------------ LOCATORS ------------------------ #
-    __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
-    __alert_success = (AppiumBy.XPATH, "//*[@resource-id='alert-success']")
+    # __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
+    # __alert_success = (AppiumBy.XPATH, "//*[@resource-id='alert-success']")
 
-    __alert_box = (AppiumBy.XPATH, "//*[@resource-id='notification-box']")
-    __alert_title = (AppiumBy.XPATH, "//*[@resource-id='notification-box-title']")
-    __alert_desc = (AppiumBy.XPATH, "//*[@resource-id='notification-box-description']")
-    __alert_box_close = (AppiumBy.XPATH, "//*[@resource-id='notification-box-close']")
-    __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
-    __spin_loader = (AppiumBy.XPATH, resource_id('spin-loader'))
-    __home_nav_option = (AppiumBy.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
-    __btn_confirm = (AppiumBy.XPATH, "//*[@content-desc='Confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
+    __alert_box = (By.CSS_SELECTOR, data_testid("notification-box"))
+    __alert_title = (By.CSS_SELECTOR, data_testid("notification-box-title"))
+    __alert_desc = (By.CSS_SELECTOR, data_testid("notification-box-description"))
+
+    __alert_box_close = (By.CSS_SELECTOR, data_testid("notification-box-close"))
+    __btn_nav_back = (By.CSS_SELECTOR, data_testid("navigation-back-button"))
+    __spin_loader = (By.CSS_SELECTOR, data_testid("spin-loader"))
+
+    # __home_nav_option = (By.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
+    __home_nav_option = (By.CSS_SELECTOR, data_testid("side-bar-option-{}"))
+
+    __btn_confirm = (By.XPATH, "//*[text()='Confirm']")
+    __btn_cancel = (By.XPATH, "//*[text()='Cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):

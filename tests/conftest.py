@@ -3,6 +3,8 @@ import random
 
 import pytest
 
+from src.core.driver.driver_manager import DriverManager
+from src.core.page_container.web_app_container import WebAppContainer
 from src.apis.api_client import APIClient
 from src.data.consts import get_symbols
 from src.data.enums import OrderType, BulkCloseOpts

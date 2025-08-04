@@ -127,7 +127,7 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_expiry(self, expiry: Expiry | str):
         """Select expiry for the order. Return selected expiry"""
-        is_selected = expiry.lower() in self.actions.get_content_desc(self.__drp_expiry).lower()
+        is_selected = expiry.lower() in self.actions.get_text(self.__drp_expiry).lower()
         if is_selected:
             logger.debug(f"- Expiry: {expiry!r} already selected")
             return

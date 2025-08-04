@@ -10,11 +10,11 @@ pytestmark = [pytest.mark.not_live, pytest.mark.not_crm]
 
 
 def test(android):
-    account_info = ObjDemoAccount()
+    account_info = ObjDemoAccount().full_params()
     use_default_deposit = random.randint(0, 1)
 
     logger.info("Step 1: Open demo account modal")
-    android.login_screen.open_demo_account_creation()
+    android.login_screen.select_open_demo_account()
 
     logger.info("Step 2: Fill in demo account details")
     android.login_screen.demo_account_modal.fill_demo_account_creation_form(account_info, default_deposit=use_default_deposit)
@@ -44,4 +44,4 @@ def test(android):
 
     logger.info("Verify login successfully")
     android.home_screen.feature_announcement_modal.got_it()
-    android.home_screen.verify_acc_info_displayed()
+    android.home_screen.verify_account_info_displayed()

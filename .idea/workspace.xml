@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="25310d95-5d40-4faa-91ec-0f8eea4c1a4d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/qa-automation-wt-main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/qa-automation-wt-main.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pytest.ini" beforeDir="false" afterPath="$PROJECT_DIR$/pytest.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/apis/auth_api.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/apis/auth_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/core/driver/web_driver.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/driver/web_driver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/enums/home.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/enums/home.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/objects/account_obj.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/objects/account_obj.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/ui_messages.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/ui_messages.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/android/components/modals/demo_acc_modals.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/android/components/modals/demo_acc_modals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/android/screens/markets_screen.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/android/screens/markets_screen.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web/components/modals/demo_acc_modals.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web/components/modals/demo_acc_modals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web/pages/home_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web/pages/home_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/base_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/base_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/components/modals/demo_acc_modals.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/components/modals/demo_acc_modals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/components/modals/my_acc_modal.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/components/modals/my_acc_modal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/components/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/components/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/components/trade/place_order_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/components/trade/place_order_panel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/components/trade/watch_list.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/components/trade/watch_list.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/pages/home_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/pages/home_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/pages/login_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/pages/login_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/page_object/web_app/pages/markets_page.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/page_object/web_app/pages/markets_page.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/android/login/test_LGN_TC03_positive_create_demo_account.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/android/login/test_LGN_TC03_positive_create_demo_account.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/android/login/test_LGN_TC04_negative_invalid_create_demo_account.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/android/login/test_LGN_TC04_negative_invalid_create_demo_account.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web/login/test_LGN_TC01_positive_valid_credentials.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web/login/test_LGN_TC01_positive_valid_credentials.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web/login/test_LGN_TC03_positive_change_language.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web/login/test_LGN_TC03_positive_change_language.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web/login/test_LGN_TC04_positive_create_demo_account.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web/login/test_LGN_TC04_positive_create_demo_account.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web/settings/test_SET_TC06_positive_open_demo_account.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web/settings/test_SET_TC06_positive_open_demo_account.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web_app/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web_app/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web_app/home/conftest.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web_app/home/conftest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web_app/home/test_HME_TC01_positive_account_health.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web_app/home/test_HME_TC01_positive_account_health.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web_app/home/test_HME_TC02_account_balance_section.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web_app/home/test_HME_TC02_account_balance_section.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web_app/home/test_HME_TC03_positive_displaying_watchlist_symbols.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/web_app/markets/test_MRK_TC03_positive_redirect_page_by_selecting_watch_list_item.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/web_app/markets/test_MRK_TC03_positive_redirect_page_by_selecting_watch_list_item.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="30DM3cItRVbOkaFly4aB6K8kXCg" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/shuting.lim/qa-automation-wt/tests/web_app/home&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/tests/web_app/home" />
+      <recent name="$PROJECT_DIR$/tests/web_app/markets" />
+      <recent name="$PROJECT_DIR$/tests/web_app/login" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.account_obj">
+    <configuration name="account_obj" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="qa-automation-wt-main" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/data/objects" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/data/objects/account_obj.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test_LGN_TC01_positive_valid_credentials" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="qa-automation-wt-main" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="/usr/local/bin/python3.11" />
+      <option name="SDK_NAME" value="Python 3.11" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/ios/login" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/tests/ios/login/test_LGN_TC01_positive_valid_credentials.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests for test_LGN_TC01_positive_valid_credentials.test" type="tests" factoryName="Autodetect" nameIsGenerated="true">
+      <module name="qa-automation-wt-main" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests/ios/login" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_LGN_TC01_positive_valid_credentials.test&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python.account_obj" />
+        <item itemvalue="Python.test_LGN_TC01_positive_valid_credentials" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="25310d95-5d40-4faa-91ec-0f8eea4c1a4d" name="Changes" comment="" />
+      <created>1753157492340</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753157492340</updated>
+    </task>
+    <servers />
+  </component>
+</project>

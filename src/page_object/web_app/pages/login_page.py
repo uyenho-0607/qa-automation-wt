@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -9,7 +11,7 @@ from src.page_object.web_app.base_page import BasePage
 from src.page_object.web_app.components.modals.demo_acc_modals import DemoAccountModal
 from src.page_object.web_app.components.modals.password_modals import PasswordModal
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, data_testid
+from src.utils.common_utils import cook_element, data_testid, translate_sign_in
 from src.utils.logging_utils import logger
 
 
@@ -21,11 +23,11 @@ class LoginPage(BasePage):
 
     # ------------------------ LOCATORS ------------------------ #
     __drp_language = (By.CSS_SELECTOR, data_testid('language-dropdown'))
-    __opt_language = (By.XPATH, "//li[@data-testid='language-option' and text()='{}']")
+    __opt_language = (By.XPATH, "//*[@data-testid='language-option']/div[text()='{}']")
     __tab_account_type = (By.CSS_SELECTOR, data_testid('tab-login-account-type-{}'))
     __txt_user_id = (By.CSS_SELECTOR, data_testid('login-user-id', 'input'))
     __txt_password = (By.CSS_SELECTOR, data_testid('login-password', 'input'))
-    __btn_login = (By.CSS_SELECTOR, data_testid('login-submit', ))
+    __btn_login = (By.CSS_SELECTOR, data_testid('login-submit'))
 
     __forgot_password = (By.CSS_SELECTOR, data_testid('reset-password-link'))
     __txt_forgot_password_email = (By.CSS_SELECTOR, "input[placeholder='user@gmail.com']")
@@ -41,6 +43,14 @@ class LoginPage(BasePage):
     def select_language(self, language: Language):
         self.actions.click(self.__drp_language)
         self.actions.click(cook_element(self.__opt_language, language))
+
+    def click_open_demo_account(self):
+        time.sleep(2)
+        self.select_account_tab(AccountType.DEMO)
+        self.actions.click(self.__open_demo_account)
+
+    def click_sign_in(self):
+        self.actions.click(self.__btn_login)
 
     def login(self, userid="", password="", account_type: AccountType = None, language: Language = None, wait=False):
 
@@ -62,6 +72,10 @@ class LoginPage(BasePage):
             self.wait_for_spin_loader()
 
     # ------------------------ VERIFY ------------------------ #
+    def verify_language(self, language: Language):
+        actual = self.actions.get_text(self.__btn_login)
+        soft_assert(actual, translate_sign_in(language))
+
     def verify_account_tab_is_displayed(self):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)
         self.actions.verify_element_displayed(acc_tab_demo)
