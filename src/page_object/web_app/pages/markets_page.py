@@ -2,6 +2,7 @@ import random
 import time
 
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
@@ -19,7 +20,8 @@ class MarketsPage(BasePage):
 
     # ------------------------ LOCATORS ------------------------ #
 
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
+    __tab = (By.XPATH, "//div[contains(text(), '{}')]")
+
     __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")

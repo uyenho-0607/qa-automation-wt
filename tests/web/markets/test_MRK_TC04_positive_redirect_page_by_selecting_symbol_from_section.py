@@ -1,7 +1,9 @@
 import allure
 import pytest
 
-from src.data.enums import Features, MarketsSection, WatchListTab
+from src.apis.api_client import APIClient
+from src.data.enums import Features, MarketsSection, WatchListTab, OrderType
+from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
 from src.utils.logging_utils import logger
 
@@ -10,54 +12,55 @@ from src.utils.logging_utils import logger
 @pytest.mark.critical
 def test(web, setup_test):
     section_symbol = setup_test
-    my_trade, top_pick, top_gainer, signal = MarketsSection.list_values(except_val=MarketsSection.NEWS)
 
-    logger.info(f"Step 1: Select symbol from {my_trade.title()!r}")
-    web.markets_page.select_symbol(my_trade)
+    for step, (section, symbol) in enumerate(section_symbol.items(), 1):
+        logger.info(f"Step {step}: Select symbol from {section.title()}")
+        # Navigate to Markets page (except for first iteration if it's already there)
+        web.home_page.navigate_to(Features.MARKETS, wait=True)
 
-    logger.info("Verify All Tab on Trade Page is selected")
-    web.trade_page.watch_list.verify_tab_selected(WatchListTab.ALL)
+        # Select symbol from the section
+        web.markets_page.select_symbol(section)
 
-    logger.info(f"Verify symbol {section_symbol[my_trade]} is selected")
-    web.trade_page.watch_list.verify_symbol_selected(section_symbol[my_trade])
+        # Verify based on section type
+        if section == MarketsSection.SIGNAL:
+            logger.info(f"Verify symbol {symbol!r} is selected in Signal Page")
+            web.signal_page.verify_signal_selected(symbol)
 
-    logger.info(f"Step 2: Select symbol from {top_pick.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
-    web.markets_page.select_symbol(top_pick)
+        else:
+            # Verify correct tab is selected based on section
+            expected_tab = {
+                MarketsSection.MY_TRADE: WatchListTab.ALL,
+                MarketsSection.TOP_PICKS: WatchListTab.TOP_PICKS,
+                MarketsSection.TOP_GAINER: WatchListTab.TOP_GAINER
+            }.get(section)
 
-    logger.info("Verify Top Picks Tab on Trade Page is selected")
-    web.trade_page.watch_list.verify_tab_selected(WatchListTab.TOP_PICKS)
-
-    logger.info(f"Verify symbol {section_symbol[top_pick]} is selected")
-    web.trade_page.watch_list.verify_symbol_selected(section_symbol[top_pick])
-
-    logger.info(f"Step 3: Select symbol from {top_gainer.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
-    web.markets_page.select_symbol(top_gainer)
-
-    logger.info("Verify Top Gainer Tab on Trade Page is selected")
-    web.trade_page.watch_list.verify_tab_selected(WatchListTab.TOP_GAINER)
-
-    logger.info(f"Verify symbol {section_symbol[top_gainer]} is selected")
-    web.trade_page.watch_list.verify_symbol_selected(section_symbol[top_gainer])
-
-    logger.info(f"Step 4: Select symbol from {signal.title()!r}")
-    web.home_page.navigate_to(Features.MARKETS)
-    web.markets_page.select_symbol(signal)
-
-    logger.info(f"Verify symbol {section_symbol[signal]!r} is selected in Signal Page")
-    web.signal_page.verify_signal_selected(section_symbol[signal])
+            if expected_tab:
+                logger.info(f"Verify {expected_tab.value} Tab on Trade Page is selected")
+                web.trade_page.watch_list.verify_tab_selected(expected_tab)
+                
+                logger.info(f"Verify symbol {symbol} is selected")
+                web.trade_page.watch_list.verify_symbol_selected(symbol)
 
     # todo: increase coverage: add more check on symbol details is selected
 
 @pytest.fixture
 def setup_test(web):
     section_symbol = DotDict()
+    sections = MarketsSection.list_values(except_val=[MarketsSection.TOP_PICKS, MarketsSection.SIGNAL, MarketsSection.NEWS])
+
+    logger.info("- POST some order for my-trade section")
+    for _ in range(3):
+        APIClient().trade.post_order(trade_object=ObjTrade(order_type=OrderType.MARKET), update_price=False)
 
     logger.info("- Navigate to Market Page")
-    web.home_page.navigate_to(Features.MARKETS)
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
 
     logger.info("- Get section symbols")
-    web.markets_page.get_last_symbol(store_data=section_symbol)
+    web.markets_page.get_last_symbol(section=sections, store_data=section_symbol)
 
-    yield section_symbol
+    remove_keys = []
+    for key in section_symbol.keys():
+        if not section_symbol[key] and key not in [MarketsSection.MY_TRADE]:
+            remove_keys.append(key)
+
+    yield {k: v for k, v in section_symbol.items() if k not in remove_keys}

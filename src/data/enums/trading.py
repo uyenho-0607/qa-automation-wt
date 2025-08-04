@@ -2,7 +2,7 @@ import random
 from typing import Optional
 
 from src.data.enums import BaseEnum
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 
 
 class TradeType(BaseEnum):
@@ -34,7 +34,7 @@ class OrderType(BaseEnum):
     @classmethod
     def sample_values(cls):
         list_val = [cls.MARKET, cls.LIMIT, cls.STOP]
-        if ProjectConfig.is_non_oms():
+        if RuntimeConfig.is_non_oms():
             list_val.append(cls.STOP_LIMIT)
 
         return random.choice(list_val)
@@ -48,7 +48,7 @@ class OrderType(BaseEnum):
     @classmethod
     def pending(cls):
         pending_orders = [cls.LIMIT, cls.STOP]
-        if ProjectConfig.is_non_oms():
+        if RuntimeConfig.is_non_oms():
             pending_orders += [cls.STOP_LIMIT]
         return pending_orders
 
@@ -69,7 +69,7 @@ class Expiry(BaseEnum):
             return None
 
         list_val = [cls.GOOD_TILL_CANCELLED, cls.GOOD_TILL_DAY]
-        if ProjectConfig.is_non_oms():
+        if RuntimeConfig.is_non_oms():
             list_val = cls.list_values()
 
         return random.choice(list_val)
@@ -86,7 +86,7 @@ class FillPolicy(BaseEnum):
         """
         Get a random fill policy based on order type and server configuration.
         """
-        if ProjectConfig.is_mt4():
+        if RuntimeConfig.is_mt4():
             return None
 
         if order_type == OrderType.MARKET:

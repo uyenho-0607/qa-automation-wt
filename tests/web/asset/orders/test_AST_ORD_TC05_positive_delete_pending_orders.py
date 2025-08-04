@@ -25,10 +25,13 @@ def test(web, symbol, search_symbol, order_type):
     logger.info("Step 2: Navigate to Asset Page")
     web.home_page.navigate_to(Features.ASSETS, wait=True)
 
-    logger.info("Step 3: Get order_id from asset tab")
+    logger.info("Step 3: Select Pending Orders tab")
+    web.assets_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
+    logger.info("Step 4 Get order_id from asset tab")
     web.assets_page.asset_tab.get_last_order_id(trade_object)
 
-    logger.info("Step 4: Delete pending order")
+    logger.info("Step 5: Delete pending order")
     web.assets_page.asset_tab.delete_order(order_id=trade_object.order_id)
 
     logger.info(f"Verify notification banner deleted message")

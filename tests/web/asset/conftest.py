@@ -40,8 +40,7 @@ def setup_bulk_asset_test(web, symbol):
 
         logger.info("- Get order id list")
         web.assets_page.asset_tab.select_tab(asset_tab)
-        order_ids = web.trade_page.asset_tab.get_order_id_list(asset_tab)
-        # order_ids = APIClient().order.get_order_id_list(symbol, order_type)
+        order_ids = web.trade_page.asset_tab.get_order_ids(asset_tab)
 
         return tab_amount, order_ids
 

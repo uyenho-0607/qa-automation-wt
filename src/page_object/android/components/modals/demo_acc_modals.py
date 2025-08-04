@@ -31,7 +31,7 @@ class DemoAccountModal(BaseScreen):
     __txt_email = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-email']")
     __drp_country_dial_code = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-dial-code']")
     __item_country_dial_code = (AppiumBy.XPATH, "//*[@resource-id='country-dial-code-item' and contains(@content-desc, '(+{})')]")
-    __txt_phone_number = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-phone']")
+    __txt_phone_number = (AppiumBy.XPATH, "/[@resource-id='demo-account-creation-modal-phone']")
     __deposit = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-deposit']")
     __item_deposit = (AppiumBy.XPATH, "//*[@resource-id='deposit-dropdown-item' and @content-desc='{}']")
     __btn_agree_and_continue = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-confirm']")

@@ -10,21 +10,21 @@ def test(web):
     web.home_page.refresh_page()
 
     logger.info(f"Verify {WatchListTab.TOP_GAINER.title()} is pre-selected by default")
-    web.trade_page.watch_list.verify_tab_selected(WatchListTab.TOP_GAINER)
+    web.home_page.watch_list.verify_tab_selected(WatchListTab.TOP_GAINER)
 
     logger.info("Step 2: Mark Star symbol")
-    web.trade_page.watch_list.mark_star_symbols()
+    web.home_page.watch_list.mark_star_symbols()
     web.home_page.refresh_page()
 
     logger.info(f"Verify {WatchListTab.FAVOURITES.title()} is pre-selected when having starred symbols")
-    web.trade_page.watch_list.verify_tab_selected(WatchListTab.FAVOURITES)
+    web.home_page.watch_list.verify_tab_selected(WatchListTab.FAVOURITES)
 
     logger.info("Step 3: Mark Unstar symbol in Favourites")
-    web.trade_page.watch_list.mark_unstar_symbols()
+    web.home_page.watch_list.mark_unstar_symbols()
     web.home_page.refresh_page()
 
     logger.info(f"Verify pre-selected tab is {WatchListTab.TOP_GAINER.title()}")
-    web.trade_page.watch_list.verify_tab_selected(WatchListTab.TOP_GAINER)
+    web.home_page.watch_list.verify_tab_selected(WatchListTab.TOP_GAINER)
 
 
 @pytest.fixture(autouse=True)

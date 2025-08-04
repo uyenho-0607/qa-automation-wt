@@ -1,15 +1,12 @@
-import time
-
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common import TimeoutException
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT, SHORT_WAIT
+from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
-from src.utils import DotDict
 from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
-from src.utils.common_utils import resource_id, log_page_source
+from src.utils.common_utils import data_testid
 from src.utils.logging_utils import logger
 
 
@@ -18,48 +15,50 @@ class Notifications(BasePage):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __noti_selector = (AppiumBy.XPATH, resource_id('notification-selector', "android.view.ViewGroup"))
-    __tab_noti = (AppiumBy.XPATH, resource_id('tab-notification-type-{}'))
-    __noti_des = (AppiumBy.XPATH, resource_id('notification-box-description'))
-    __noti_title = (AppiumBy.XPATH, resource_id('notification-box-title'))
-    __noti_list_items = (AppiumBy.XPATH, resource_id('notification-list-result-item'))
-    __btn_close = (AppiumBy.XPATH, resource_id('notification-box-close'))
+    __noti_selector = (By.CSS_SELECTOR, data_testid('notification-selector', ))
+    __tab_noti = (By.CSS_SELECTOR, data_testid('tab-notification-type-{}'))
+    __noti_des = (By.CSS_SELECTOR, data_testid('notification-box-description'))
+    __noti_title = (By.CSS_SELECTOR, data_testid('notification-box-title'))
+    __noti_list_items = (By.CSS_SELECTOR, data_testid('notification-list-result-item'))
+    __btn_close = (By.CSS_SELECTOR, data_testid('navigation-back-button'))
+    __btn_close_banner = (By.CSS_SELECTOR, data_testid('notification-box-close'))
 
     # Noti order details
-    __noti_details_order_type = (AppiumBy.XPATH, resource_id('notification-order-details-modal-order-type'))
+    __noti_details_order_type = (By.CSS_SELECTOR, data_testid('notification-order-details-modal-order-type'))
     __noti_details_symbol = (
-        AppiumBy.XPATH,
+        By.XPATH,
         "//*[@resource-id='notification-order-details-label' and @text='Symbol']/following-sibling::*[1]"
     )
     __noti_details_volume = (
-        AppiumBy.XPATH,
+        By.XPATH,
         "//*[@resource-id='notification-order-details-label' and (@text='Size' or @text='Volume')]/following-sibling::*[1]"
     )
     __noti_details_units = (
-        AppiumBy.XPATH,
+        By.XPATH,
         "//*[@resource-id='notification-order-details-label' and @text='Units']/following-sibling::*[1]"
     )
     __noti_details_stop_loss = (
-        AppiumBy.XPATH,
+        By.XPATH,
         "//*[@resource-id='notification-order-details-label' and @text='Stop Loss']/following-sibling::*[1]"
     )
     __noti_details_take_profit = (
-        AppiumBy.XPATH,
+        By.XPATH,
         "//*[@resource-id='notification-order-details-label' and @text='Take Profit']/following-sibling::*[1]"
     )
 
     # ------------------------ ACTIONS ------------------------ #
-    def open_notification_box(self):
+    def close_noti_box(self):
+        if self.actions.is_element_displayed(self.__btn_close):
+            self.actions.click(self.__btn_close)
+
+    def open_noti_box(self, wait=True):
         if self.actions.is_element_displayed(self.__noti_selector):
             self.actions.click(self.__noti_selector)
+        not wait or self.wait_for_spin_loader(timeout=3)
 
     def close_noti_banner(self):
-        if self.actions.is_element_displayed(self.__btn_close, timeout=QUICK_WAIT):
-            try:
-                self.actions.click(self.__btn_close, show_log=False, raise_exception=False)
-
-            except TimeoutException:
-                logger.debug("- Close button is not displayed, skip clicking")
+        if self.actions.is_element_displayed(self.__btn_close_banner, timeout=QUICK_WAIT):
+            self.actions.click(self.__btn_close_banner, show_log=False, raise_exception=False)
 
     # ------------------------ VERIFY ------------------------ #
 
@@ -80,11 +79,13 @@ class Notifications(BasePage):
             soft_assert(actual_title, expected_title)
 
 
-    def verify_notification_result(self, expected_result: str | list, go_back=True):
-        self.open_notification_box()
-        actual_res = self.actions.get_content_desc(self.__noti_list_items).split(", ")[0].replace("  ", " ")
+    def verify_notification_result(self, expected_result: str | list, close=False):
+        self.open_noti_box()
+        actual_res = self.actions.get_text(self.__noti_list_items).split(", ")[0].replace("  ", " ")
+
         compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
-        not go_back or self.go_back()
+        if close:
+            self.close_noti_box()
 
     def verify_notification_details(self, trade_object: ObjTrade):
         self.actions.click(self.__noti_list_items)
@@ -103,6 +104,3 @@ class Notifications(BasePage):
 
         logger.debug("- Verify notification item details")
         soft_assert(actual, expected)
-        self.go_back()
-        time.sleep(0.5)
-        self.go_back()

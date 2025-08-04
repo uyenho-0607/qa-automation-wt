@@ -1,7 +1,7 @@
 from src.apis.api_base import BaseAPI
 from src.core.config_manager import Config
 from src.data.enums import Client, AccountType
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 
 
 class AuthAPI(BaseAPI):
@@ -22,12 +22,12 @@ class AuthAPI(BaseAPI):
         super().__init__(self.__headers)
         self.userid = userid
         self.password = password
-        self.client = Config.config.client
-        self.account_type = Config.config.account
+        self.client = RuntimeConfig.client
+        self.account_type = RuntimeConfig.account
         self.get_token()
 
     def get_token(self):
-        if "Authorization" not in ProjectConfig.headers:
+        if "Authorization" not in RuntimeConfig.headers:
             credentials = Config.credentials()
             payload = {
                 "source": "WEB",
@@ -41,7 +41,7 @@ class AuthAPI(BaseAPI):
             )
 
             self.__headers["Authorization"] = f"Bearer {resp['token']}"
-            ProjectConfig.headers = self.__headers
+            RuntimeConfig.headers = self.__headers
             return self.__headers
 
         return self.__headers

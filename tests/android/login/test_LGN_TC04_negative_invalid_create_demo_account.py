@@ -16,15 +16,15 @@ def test_missing_all_required_fields(android):
     validation_fields = list(DemoAccountModal.validation_fields.values())
 
     logger.info("Step 1: Open demo account modal")
-    android.login_page.open_demo_account_creation()
+    android.login_screen.select_open_demo_account()
 
     logger.info(f"Step 2: Submit demo account creation form without input any field")
     time.sleep(1)  # wait a bit for loading deposit value
-    android.login_page.demo_account_modal.fill_demo_account_creation_form(account_info)
-    android.login_page.demo_account_modal.click_next_button()
+    android.login_screen.demo_account_modal.fill_demo_account_creation_form(account_info)
+    android.login_screen.demo_account_modal.tap_agree_and_continue()
 
     logger.info(f"Verify validation error messages for fields: {validation_fields!r}")
-    android.login_page.demo_account_modal.verify_field_validation(fields=validation_fields)
+    android.login_screen.demo_account_modal.verify_field_validation(fields=validation_fields)
 
 
 def test_invalid_email_and_phone_number_format(android):
@@ -32,15 +32,15 @@ def test_invalid_email_and_phone_number_format(android):
     validation_fields = [DemoAccountModal.validation_fields.email, DemoAccountModal.validation_fields.phone_number]
 
     logger.info("Step 1: Open demo account modal")
-    android.login_page.open_demo_account_creation()
+    android.login_screen.select_open_demo_account()
 
     logger.info(f"Step 2: Submit demo account creation form without invalid email and phone number format")
     time.sleep(1)  # wait a bit for loading deposit value
-    android.login_page.demo_account_modal.fill_demo_account_creation_form(account_info)
-    android.login_page.demo_account_modal.click_next_button()
+    android.login_screen.demo_account_modal.fill_demo_account_creation_form(account_info)
+    android.login_screen.demo_account_modal.tap_agree_and_continue()
 
     logger.info(f"Verify validation error messages for fields: {validation_fields!r}")
-    android.login_page.demo_account_modal.verify_field_validation(fields=validation_fields, validation_type="invalid")
+    android.login_screen.demo_account_modal.verify_field_validation(fields=validation_fields, validation_type="invalid")
 
 
 @pytest.mark.parametrize("missing_field", random.choices(list(DemoAccountModal.validation_fields.keys())))
@@ -49,12 +49,12 @@ def test_single_missing_field(android, missing_field):
     account_info.set_value(missing_field, None)
 
     logger.info("Step 1: Open demo account modal")
-    android.login_page.open_demo_account_creation()
+    android.login_screen.select_open_demo_account()
 
     logger.info(f"Step 3: Submit demo account creation form without input field: {missing_field!r}")
     time.sleep(1)
-    android.login_page.demo_account_modal.fill_demo_account_creation_form(account_info)
-    android.login_page.demo_account_modal.click_next_button()
+    android.login_screen.demo_account_modal.fill_demo_account_creation_form(account_info)
+    android.login_screen.demo_account_modal.tap_agree_and_continue()
 
     logger.info(f"Verify validation message for missing {missing_field}")
-    android.login_page.demo_account_modal.verify_field_validation(fields=[missing_field])
+    android.login_screen.demo_account_modal.verify_field_validation(fields=[missing_field])

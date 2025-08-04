@@ -2,13 +2,14 @@ import random
 import time
 from typing import Optional, Any
 
-from appium.webdriver.common.appiumby import AppiumBy
+from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
+from src.data.consts import QUICK_WAIT
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
-from src.utils.common_utils import cook_element, resource_id
+from src.utils.common_utils import cook_element, data_testid
 from src.utils.format_utils import locator_format, format_str_price, format_dict_to_string
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_trading_params
@@ -25,40 +26,36 @@ class PlaceOrderPanel(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     # One-Click Trading elements
-    __toggle_oct = (AppiumBy.XPATH, resource_id('toggle-oct'))
-    __toggle_oct_checked = (AppiumBy.XPATH, resource_id('toggle-oct-checked'))
-    __btn_oct_trade = (AppiumBy.XPATH, resource_id('trade-button-oct-order-{}'))
-    __btn_pre_trade_details = (AppiumBy.XPATH, resource_id('trade-button-pre-trade-details'))
+    __toggle_oct = (By.CSS_SELECTOR, data_testid('toggle-oct'))
+    __toggle_oct_checked = (By.CSS_SELECTOR, data_testid('toggle-oct-checked'))
+    __btn_oct_trade = (By.CSS_SELECTOR, data_testid('trade-button-oct-order-{}'))
+    __btn_pre_trade_details = (By.CSS_SELECTOR, data_testid('trade-button-pre-trade-details'))
 
     # UI control buttons for adjusting values
-    __swap_units = (AppiumBy.XPATH, resource_id('trade-swap-to-units'))
-    __swap_volume = (AppiumBy.XPATH, resource_id('trade-swap-to-volume'))
+    __swap_units = (By.CSS_SELECTOR, data_testid('trade-swap-to-units'))
+    __swap_volume = (By.CSS_SELECTOR, data_testid('trade-swap-to-volume'))
 
     # Input field elements
-    __txt_volume = (AppiumBy.XPATH, resource_id('trade-input-volume'))
-    __txt_price = (AppiumBy.XPATH, resource_id('trade-input-price'))
-    __txt_stop_loss = (AppiumBy.XPATH, resource_id('trade-input-stoploss-{}', ))
-    __txt_take_profit = (AppiumBy.XPATH, resource_id('trade-input-takeprofit-{}', ))
-    __txt_stop_limit_price = (AppiumBy.XPATH, resource_id('trade-input-stop-limit-price'))
-    __volume_info_value = (
-        AppiumBy.XPATH,
-        "//*[@text='Units' or @text='Volume' or @text='Size']/following-sibling::android.widget.TextView[1]"
-    )
+    __txt_volume = (By.CSS_SELECTOR, data_testid('trade-input-volume'))
+    __txt_price = (By.CSS_SELECTOR, data_testid('trade-input-price'))
+    __txt_stop_loss = (By.CSS_SELECTOR, data_testid('trade-input-stoploss-{}'))
+    __txt_take_profit = (By.CSS_SELECTOR, data_testid('trade-input-takeprofit-{}'))
+    __txt_stop_price = (By.CSS_SELECTOR, data_testid('trade-input-stop-limit-price'))
+    __volume_info_value = (By.XPATH, "//input[@data-testid='trade-input-volume']/ancestor::div[1]/following-sibling::div/div[2]")
 
     # Order placement elements
-    __btn_trade = (AppiumBy.XPATH, resource_id('trade-button-order-{}'))
-    __drp_order_type = (AppiumBy.XPATH, resource_id('trade-dropdown-order-type'))
-    __opt_order_type = (AppiumBy.XPATH, resource_id('trade-dropdown-order-type-{}', "android.view.ViewGroup"))
-    __btn_place_order = (AppiumBy.XPATH, resource_id('trade-button-order'))
-    __drp_expiry = (AppiumBy.XPATH, resource_id('trade-dropdown-expiry'))
-    __opt_expiry = (AppiumBy.XPATH,
-                    "//android.view.ViewGroup[contains(translate(@content-desc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), translate('{}', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'))]")
-    __expiry_date = (AppiumBy.XPATH, resource_id('trade-input-expiry-date'))
-    __wheel_expiry_date = (AppiumBy.XPATH, "//android.widget.SeekBar[contains(@content-desc, 'Select Date')]")
+    __btn_trade = (By.CSS_SELECTOR, data_testid('trade-button-order-{}'))
+    __drp_order_type = (By.CSS_SELECTOR, data_testid('trade-dropdown-order-type'))
+    __opt_order_type = (By.CSS_SELECTOR, data_testid('trade-dropdown-order-type-{}'))
+    __btn_place_order = (By.CSS_SELECTOR, data_testid('trade-button-order'))
+    __drp_expiry = (By.CSS_SELECTOR, data_testid('trade-dropdown-expiry'))
+    __opt_expiry = (By.XPATH, "//div[contains(@data-testid, 'trade-dropdown-expiry') and contains(normalize-space(), '{}')]")
+    __expiry_date = (By.CSS_SELECTOR, data_testid('trade-input-expiry-date'))
+    __wheel_expiry_date = (By.CSS_SELECTOR, "div.datepicker-wheel")
 
     # MT5 specific elements
-    __drp_fill_policy = (AppiumBy.XPATH, resource_id('trade-dropdown-fill-policy'))
-    __opt_fill_policy = (AppiumBy.XPATH, resource_id('trade-dropdown-fill-policy-{}'))
+    __drp_fill_policy = (By.CSS_SELECTOR, data_testid('trade-dropdown-fill-policy'))
+    __opt_fill_policy = (By.CSS_SELECTOR, data_testid('trade-dropdown-fill-policy-{}'))
 
     # ------------------------ HELPER METHODS ------------------------ #
     def _get_volume_info_value(self) -> str:
@@ -66,12 +63,18 @@ class PlaceOrderPanel(BaseTrade):
         return self.actions.get_text(self.__volume_info_value)
 
     def _get_input_sl(self) -> str:
-        """Get the current stop loss value from the input field."""
-        return self.actions.get_text(cook_element(self.__txt_stop_loss, SLTPType.PRICE.lower()))
+        """Get current stop loss value from input field."""
+        locator = cook_element(self.__txt_stop_loss, SLTPType.PRICE.lower())
+        self.actions.click(locator)
+        time.sleep(0.5)
+        return self.actions.get_value(locator)
 
     def _get_input_tp(self) -> str:
-        """Get the current take profit value from the input field."""
-        return self.actions.get_text(cook_element(self.__txt_take_profit, SLTPType.PRICE.lower()))
+        """Get current take profit value from input field."""
+        locator = cook_element(self.__txt_take_profit, SLTPType.PRICE.lower())
+        self.actions.click(locator)
+        time.sleep(0.5)
+        return self.actions.get_value(locator)
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_oct(self, enable: bool = True) -> None:
@@ -83,28 +86,19 @@ class PlaceOrderPanel(BaseTrade):
         if enable:
             self.agree_and_continue()
 
-    def open_pre_trade_details(self):
-        self.actions.click(self.__btn_pre_trade_details)
-
     def swap_to_units(self) -> None:
         """Swap to units display."""
         if self.actions.is_element_displayed(self.__swap_units, timeout=1):
             self.actions.click(self.__swap_units)
 
-    def swap_to_volume(self) -> None:
-        """Swap to volume display."""
-        if self.actions.is_element_displayed(self.__swap_volume, timeout=1):
-            self.actions.click(self.__swap_volume)
-
     def _select_trade_type(self, trade_type: TradeType) -> None:
-        """Select trade type (BUY/SELL
-        )."""
+        """Select trade type (BUY/SELL)."""
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         self.actions.click(cook_element(self.__btn_trade, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
-        is_selected = order_type.lower() in self.actions.get_content_desc(self.__drp_order_type).lower()
+        is_selected = order_type.lower() in self.actions.get_text(self.__drp_order_type, timeout=QUICK_WAIT).lower()
         if is_selected:
             logger.debug(f"- Order type: {order_type} already selected")
             return
@@ -116,7 +110,8 @@ class PlaceOrderPanel(BaseTrade):
     def _select_fill_policy(self, fill_policy: FillPolicy | str):
         """Select the fill policy for the order. Return selected fill_policy"""
         # check current selected fill policy
-        is_selected = fill_policy.lower() in self.actions.get_content_desc(self.__drp_fill_policy).lower()
+        self.actions.scroll_to_element(self.__drp_fill_policy)
+        is_selected = fill_policy.lower() in self.actions.get_text(self.__drp_fill_policy, timeout=QUICK_WAIT).lower()
         if is_selected:
             logger.debug(f"- Fill Policy: {fill_policy!r} already selected")
             return
@@ -127,21 +122,22 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_expiry(self, expiry: Expiry | str):
         """Select expiry for the order. Return selected expiry"""
-        is_selected = expiry.lower() in self.actions.get_content_desc(self.__drp_expiry).lower()
+        self.actions.scroll_to_element(self.__drp_expiry)
+        is_selected = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
         if is_selected:
             logger.debug(f"- Expiry: {expiry!r} already selected")
             return
 
-        logger.debug(f"- Select expiry: {expiry.capitalize()!r}")
+        logger.debug(f"- Select expiry: {expiry.title()!r}")
         self.actions.click(self.__drp_expiry)
-        self.actions.click(cook_element(self.__opt_expiry, expiry.lower()))
+        self.actions.click(cook_element(self.__opt_expiry, expiry))
 
         if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
             logger.debug(f"- Select expiry date")
-            time.sleep(0.5)
-            self.actions.scroll_down(start_x_percent=0.4)
+            self.actions.scroll_to_element(self.__expiry_date)
             self.actions.click(self.__expiry_date)
-            self.actions.swipe_picker_wheel_down(self.__wheel_expiry_date)
+            self.actions.scroll_picker_down(self.__wheel_expiry_date)
+            time.sleep(0.5)
             self.click_confirm_btn()
 
     def _click_place_order_btn(self) -> None:
@@ -151,36 +147,56 @@ class PlaceOrderPanel(BaseTrade):
 
     def _input_sl(self, value: Any, sl_type) -> None:
         """Input stop loss value."""
-        self.actions.click(cook_element(self.__txt_stop_loss, sl_type.lower()))
+        if sl_type is None:
+            for _type in SLTPType.list_values():
+                locator = cook_element(self.__txt_stop_loss, _type.lower())
+                self.actions.clear_field(locator)
+            return
+
+        locator = cook_element(self.__txt_stop_loss, sl_type.lower())
+        self.actions.scroll_to_element(locator)
+
         logger.debug(f"- Input stop loss: {value!r}")
-        self.actions.send_keys(cook_element(self.__txt_stop_loss, sl_type), value, hide_keyboard=True)
+        self.actions.send_keys(cook_element(self.__txt_stop_loss, sl_type), value)
 
     def _input_tp(self, value: Any, tp_type) -> None:
         """Input take profit value."""
-        self.actions.click(cook_element(self.__txt_take_profit, tp_type.lower()))
+        if tp_type is None:
+            for _type in SLTPType.list_values():
+                locator = cook_element(self.__txt_take_profit, _type.lower())
+                self.actions.clear_field(locator)
+            return
+
+        locator = cook_element(self.__txt_take_profit, tp_type.lower())
+        self.actions.scroll_to_element(locator)
+
         logger.debug(f"- Input take profit: {value!r}")
-        self.actions.send_keys(cook_element(self.__txt_take_profit, tp_type), value, hide_keyboard=True)
+        self.actions.send_keys(cook_element(self.__txt_take_profit, tp_type), value)
 
     def _input_volume(self, value: Optional[int] = None) -> int:
         """Input volume value."""
         volume = value if value is not None else random.randint(2, 10)
         logger.debug(f"- Input volume: {volume!r}")
-        self.actions.send_keys(self.__txt_volume, volume, hide_keyboard=True)
+        self.actions.send_keys(self.__txt_volume, volume)
         return volume
 
     def _input_price(self, value: Any, order_type: Optional[OrderType] = None) -> None:
         """Input trade price for order type: Limit, Stop, Stop Limit."""
         if order_type == OrderType.MARKET:
             return
+
         logger.debug(f"- Input price: {value!r}")
-        self.actions.send_keys(self.__txt_price, value, hide_keyboard=True)
+        self.actions.scroll_to_element(self.__txt_price)
+        self.actions.send_keys(self.__txt_price, value)
 
     def _input_stop_price(self, value: Any, order_type: Optional[OrderType] = None) -> None:
         """Input stop limit price for order type 'Stop limit'."""
         if order_type != OrderType.STOP_LIMIT:
             return
+
         logger.debug(f"- Input stop limit price: {value!r}")
-        self.actions.send_keys(self.__txt_stop_limit_price, value, hide_keyboard=True)
+        self.actions.scroll_to_element(self.__txt_stop_price)
+        self.actions.send_keys(self.__txt_stop_price, value)
 
     def place_order(
             self,
@@ -222,14 +238,11 @@ class PlaceOrderPanel(BaseTrade):
         # Select fill_policy
         not trade_object.get("fill_policy") or self._select_fill_policy(trade_object.fill_policy)
 
-        # scroll down a bit
-        time.sleep(0.5)
-        self.actions.scroll_down(start_x_percent=0.3)
-
         # Input SL/TP
         if sl_type is not None:
             stop_loss = prices.stop_loss
             self._input_sl(stop_loss, sl_type)
+
             # get SL price
             if sl_type == SLTPType.POINTS:
                 stop_loss = self._get_input_sl()
@@ -237,19 +250,13 @@ class PlaceOrderPanel(BaseTrade):
         if tp_type is not None:
             take_profit = prices.take_profit
             self._input_tp(take_profit, tp_type)
+
             # get TP price
             if tp_type == SLTPType.POINTS:
                 take_profit = self._get_input_tp()
 
         # select expiry
         not trade_object.get("expiry") or self._select_expiry(trade_object.expiry)
-
-        # # Get final values for SL/TP if using points
-        # if sl_type == SLTPType.POINTS:
-        #     stop_loss = self._get_input_sl()
-        #
-        # if tp_type == SLTPType.POINTS:
-        #     take_profit = self._get_input_tp()
 
         # Prepare trade details
         volume, units = (volume, units) if not swap_to_units else (units, volume)
@@ -269,6 +276,8 @@ class PlaceOrderPanel(BaseTrade):
 
         # Place order
         self._click_place_order_btn()
-        not submit or self.confirm_trade()
+        if submit:
+            self.get_current_price(trade_object)
+            self.confirm_trade()
 
     # ------------------------ VERIFY ------------------------ #

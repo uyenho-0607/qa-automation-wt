@@ -35,4 +35,4 @@ def test(web):
 
     logger.info("Verify login successfully")
     web.home_page.feature_announcement_modal.got_it()
-    web.home_page.verify_acc_info_displayed()
+    web.home_page.verify_account_info_displayed()

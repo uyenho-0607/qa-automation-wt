@@ -1,7 +1,7 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import OrderType, SLTPType, Features, AccInfo, WatchListTab
+from src.data.enums import OrderType, SLTPType, Features, AccInfo, WatchListTab, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -19,18 +19,23 @@ def test(web_app, setup_teardown, symbol):
     logger.info("Verify account balance summary")
     web_app.assets_page.verify_account_balance_summary(acc_balance)
 
-    logger.info("Step 2: Navigate to Trade Page")
+    logger.info("Step 2: Navigate to Home Page")
     web_app.assets_page.navigate_to(Features.HOME)
 
-    logger.info(f"Step 3: Select symbol {symbol}")
-    web_app.trade_page.watch_list.select_tab(WatchListTab.ALL)
-    web_app.trade_page.watch_list.select_symbol(symbol=symbol)
+    logger.info("Step 3: Select tab Crypto")
+    web_app.home_page.watch_list.select_tab(WatchListTab.CRYPTO)
 
-    logger.info("Step 4: Close some orders")
-    for _id in order_ids:
-        web_app.trade_page.asset_tab.full_close_position(_id)
+    logger.info(f"Step 4: Select symbol {symbol!r}")
+    web_app.home_page.watch_list.select_symbol(symbol=symbol)
 
-    logger.info("Step 5: Navigate back to Asset Page")
+    for i , _id in enumerate(order_ids):
+        logger.info(f"Step {5 + i}: Close order: {_id!r}")
+        web_app.trade_page.asset_tab.full_close_position(_id, wait=True)
+
+        logger.info("Verify closed order successfully")
+        web_app.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, _id, is_display=False)
+
+    logger.info("Step 6: Navigate back to Asset Page")
     web_app.trade_page.navigate_to(Features.ASSETS)
 
     logger.info(f"Verify Profit/Loss and account balance are changed an amount of ~{sum_profit!r} after closing positions")
@@ -39,8 +44,10 @@ def test(web_app, setup_teardown, symbol):
 
     web_app.assets_page.verify_account_balance_summary(acc_balance, tolerance_percent=0.1, tolerance_fields=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS])
 
-    logger.info("Verify account info against API data again")
+    logger.info("Step 7: Get updated API data")
     acc_balance = APIClient().statistics.get_account_statistics(get_asset_acc=True)
+
+    logger.info("Verify account info against API data again")
     web_app.assets_page.verify_account_balance_summary(acc_balance)
 
 
