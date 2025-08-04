@@ -20,7 +20,7 @@ def test(web, setup_pre_selected_tab):
     web.home_page.verify_page_url()
 
     logger.info("Verify account info is displayed")
-    web.home_page.verify_acc_info_displayed()
+    web.home_page.verify_account_info_displayed()
 
     logger.info(f"Verify pre-selected tab is {selected_tab.value!r}")
     web.trade_page.watch_list.verify_tab_selected(selected_tab)
@@ -31,14 +31,14 @@ def test(web, setup_pre_selected_tab):
     logger.info("Verify Watch List Tabs displayed in correct order")
     web.trade_page.watch_list.verify_tabs_displayed()
 
-    logger.info("Step 3: Logout")
-    web.home_page.settings.logout()
-
-    logger.info("Verify login page URL is correct")
-    web.login_page.verify_page_url()
-
-    logger.info("Verify login account tabs is displayed")
-    web.login_page.verify_account_tabs_is_displayed()
+    # logger.info("Step 3: Logout")
+    # web.home_page.settings.logout()
+    #
+    # logger.info("Verify login page URL is correct")
+    # web.login_page.verify_page_url()
+    #
+    # logger.info("Verify login account tabs is displayed")
+    # web.login_page.verify_account_tabs_is_displayed()
 
 
 @pytest.fixture

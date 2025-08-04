@@ -39,7 +39,7 @@ def test(web, symbol, get_asset_tab_amount, update_field, close_edit_confirm_mod
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
     logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
-    web.trade_page.modals.modify_order(trade_object, **update_info)
+    web.trade_page.asset_tab.modify_order(trade_object, **update_info)
 
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())

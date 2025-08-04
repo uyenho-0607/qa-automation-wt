@@ -1,7 +1,7 @@
 from typing import Any
-from src.core.config_manager import Config
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.web_driver import WebDriver
+from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
 
@@ -12,12 +12,12 @@ class DriverManager:
         """
         Get a driver instance for the specified platform.
         """
-        platform = platform or Config.config.get("platform", "web")
+        platform = platform or RuntimeConfig.platform
         match platform.lower():
             case "web" | "web_app":
                 _driver = WebDriver.init_driver(
-                    browser=kwargs.get("browser", Config.config.browser),
-                    headless=kwargs.get("headless", Config.config.headless),
+                    browser=kwargs.get("browser", RuntimeConfig.browser),
+                    headless=kwargs.get("headless", RuntimeConfig.headless),
                 )
                 logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver
@@ -38,7 +38,7 @@ class DriverManager:
 
     @classmethod
     def quit_driver(cls, platform=None):
-        platform = platform or Config.config.get("platform")
+        platform = platform or RuntimeConfig.platform
         match platform.lower():
             case "web" | "web_app":
                 WebDriver.quit()

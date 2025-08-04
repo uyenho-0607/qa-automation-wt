@@ -35,7 +35,7 @@ def test(web, symbol, get_asset_tab_amount, update_field, sl_type, tp_type, clos
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
     logger.info(f" Step 2: Update Asset Tab item with {update_field!r}")
-    web.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    web.trade_page.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())

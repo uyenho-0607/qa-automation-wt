@@ -2,7 +2,7 @@ import random
 from typing import List
 
 from src.data.enums import BaseEnum, OrderType
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 
 
 class AccInfo(BaseEnum):
@@ -17,14 +17,14 @@ class AssetTabs(BaseEnum):
     """Enum representing different asset view tabs and their corresponding table types."""
     OPEN_POSITION = "Open Positions"
     PENDING_ORDER = "Pending Orders"
-    HISTORY = "History"
+    HISTORY = "History"  # MT4: order history | mt5: positions history > positions
     POSITIONS_HISTORY = "Positions History"
     ORDER_AND_DEALS = "Order and Deals"
 
-    def is_sub_history(self):
-        return self in [self.POSITIONS_HISTORY, self.ORDER_AND_DEALS]
+    def is_history(self):
+        return self in [self.HISTORY, self.POSITIONS_HISTORY, self.ORDER_AND_DEALS]
 
-    def get_col(self) -> str:
+    def col_locator(self) -> str:
         """Get the corresponding table value for the tab."""
         table_mapping = {
             self.OPEN_POSITION: "open",
@@ -93,11 +93,6 @@ class ColPreference(BaseEnum):
     REMARKS = "Remarks"
 
     @classmethod
-    def __get_volume_label(cls) -> str:
-        """Get the appropriate volume label based on server type."""
-        return "Size" if not ProjectConfig.is_non_oms() else "Volume"
-
-    @classmethod
     def get_display_headers(cls, tab: AssetTabs, asset_page=False) -> List[str]:
         """
         Get the display headers for a specific asset tab.
@@ -107,7 +102,7 @@ class ColPreference(BaseEnum):
         Returns:
             List of column headers appropriate for the tab
         """
-        volume_label = cls.__get_volume_label()
+        volume_label = "Size" if not RuntimeConfig.is_non_oms() else "Volume"
         base_headers = ["Order No.", "Type"] + (["Symbol"] if asset_page else [])
 
         display_headers = {
@@ -122,7 +117,7 @@ class ColPreference(BaseEnum):
                                          cls.TAKE_PROFIT, cls.STOP_LOSS, volume_label
                                      ] + base_headers + ([
                                                              cls.EXPIRY_DATE, cls.STOP_LIMIT_PRICE, cls.FILL_POLICY
-                                                         ] if ProjectConfig.is_non_oms() else []),
+                                                         ] if RuntimeConfig.is_non_oms() else []),
 
             AssetTabs.HISTORY: [
                                    cls.CLOSE_DATE, cls.PROFIT, cls.UNITS, cls.ENTRY_PRICE,
@@ -149,7 +144,7 @@ class ColPreference(BaseEnum):
         elif tab == AssetTabs.PENDING_ORDER:
             available_cols = [cls.UNITS, cls.EXPIRY, cls.PRICE, cls.CURRENT_PRICE,
                               cls.TAKE_PROFIT, cls.STOP_LOSS]
-            if ProjectConfig.is_non_oms():
+            if RuntimeConfig.is_non_oms():
                 available_cols.extend([cls.EXPIRY_DATE, cls.STOP_LIMIT_PRICE, cls.FILL_POLICY])
         else:  # History
             available_cols = [cls.UNITS, cls.ENTRY_PRICE, cls.CLOSE_PRICE,

@@ -8,7 +8,7 @@ from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import DriverList, StepLogs
 from src.utils import DotDict
 from src.utils.allure_utils import attach_screenshot
-from src.utils.format_utils import format_dict_to_string, remove_comma, format_str_price, is_integer, is_float
+from src.utils.format_utils import format_dict_to_string, remove_comma, format_str_price, is_float
 from src.utils.logging_utils import logger
 
 """Utilities"""
@@ -80,8 +80,8 @@ def compare_with_tolerance(
     Compare actual and expected values with percentage-based tolerance.
     Args:
         actual: Actual value as string (will be converted to float)
-        expected: Expected value as float
-        tolerance_percent: Tolerance as percentage (default 1%)
+        expected: Expected value as string or float
+        tolerance_percent: Tolerance as percentage (e.g., 0.5 means 0.5%)
         get_diff: Get full dict result of different information
     """
     actual = remove_comma(actual)
@@ -92,21 +92,41 @@ def compare_with_tolerance(
         res = False
         return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
 
+    actual = float(actual)
+    expected = float(expected)
+
+    diff = abs(actual - expected)
+    tol_frac = tolerance_percent / 100.0  # convert percent to fraction
+
+    if expected != 0:
+        baseline = abs(expected)
+        diff_percent = diff / baseline  # fraction (e.g., 0.005 = 0.5%)
+        tolerance_value = tol_frac * baseline
     else:
-        tolerance = tolerance_percent * expected
-        diff = abs(actual - expected)
-        diff_percent = diff / expected if expected else 0
-
-        if diff:
-            logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance:.2f} ({tolerance_percent}%), Diff: {diff:.4f}, Diff Percent: {diff_percent:.4f}")
-
+        # expected is zero: only allow exact match
+        if diff == 0:
+            diff_percent = 0.0
         else:
-            logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
+            diff_percent = float("inf")
+        tolerance_value = 0.0
 
-        # res = diff_percent <= tolerance_percent
-        res = abs(diff) <= abs(tolerance)
+    # convert to percent for human-readable
+    diff_percent = diff_percent * 100
 
-    return res if not get_diff else dict(res=res, diff=f"{diff:.4f}", diff_percent=f"{diff_percent:.4f}", tolerance=f"±{tolerance:.2f} ({tolerance_percent:.2f}%)")
+
+    if diff:
+        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
+    # else:
+    #     logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
+
+    res = abs(diff) <= abs(tolerance_value)
+
+    return res if not get_diff else dict(
+        res=res,
+        diff=f"{diff:.4f}",
+        diff_percent=f"{diff_percent:.4f}",
+        tolerance=f"±{tolerance_value:.2f} ({tolerance_percent:.2f}%)"
+    )
 
 
 def compare_dict(
@@ -197,6 +217,7 @@ Notification Sample
 - Position Closed: #7592152 DASHUSD.std: Size 0.02 / Units 0.2 @ 19.92, Loss of -1.82
 """
 
+
 def extract_noti_prices(noti_content: str) -> dict:
     """Extract price value from notification text."""
     # Pattern to match price after @ symbol (most common case)
@@ -230,7 +251,7 @@ def extract_noti_prices(noti_content: str) -> dict:
 def compare_noti_with_tolerance(
         actual: str,
         expected: str,
-        tolerance_percent: float = 0.5,
+        tolerance_percent: float = 1,
         is_banner=True
 ):
     """Compare notification messages with tolerance for price values."""
@@ -243,7 +264,6 @@ def compare_noti_with_tolerance(
     if actual_price and expected_price:
         compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])
         res = compare_result["res"]
-        logger.debug(f"- Compare noti result: {compare_result!r}")
 
         if res:
             desc += f"Tolerance: {tolerance_percent}% - \n"
@@ -261,15 +281,14 @@ def compare_noti_with_tolerance(
                 if key in expected_price and key in actual_price and key not in processed_keys:
                     # Only update if prices are different (within tolerance but not exactly the same)
                     if abs(actual_price[key] - expected_price[key]) > 0:
-
                         logger.debug(f"- Updating {key}: {expected_price[key]} -> {actual_price[key]}")
                         expected = re.sub(pattern, lambda m: m.group(0).replace(
                             re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
                             format_str_price(actual_price[key], decimal)
                         ), expected)
-                    else:
-                        logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
-                    
+                    # else:
+                    #     logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
+
                     processed_keys.add(key)  # Mark this key as processed
 
                     desc += f"Update price: {key}, from {expected_price[key]} -> {actual_price[key]}\n"
@@ -309,7 +328,7 @@ def soft_assert(
         check_contains: bool = False,
         error_message: str = "",
         **kwargs
-) -> bool:
+) -> dict[str, bool | list[Any]] | bool:
     """
     Perform a soft assertion that doesn't stop test execution on failure.
     Captures screenshots and logs failures for reporting.
@@ -329,7 +348,8 @@ def soft_assert(
     validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
 
     if isinstance(actual, dict) and isinstance(expected, dict):
-        # logger.debug(f"Compare values: {format_dict_to_string(expected=expected, actual=actual)}")
+        if check_contains:
+            actual = {k: v for k, v in actual.items() if k in expected}
 
         tolerance = kwargs.get("tolerance")
         tolerance_fields = kwargs.get("tolerance_fields", [])
@@ -358,6 +378,7 @@ def soft_assert(
         # Handle error logging and screenshot capture
         if not assertion_result:
             logger.error(validation_err_msg)
+
             for driver in DriverList.all_drivers.values():
                 attach_screenshot(driver)
 

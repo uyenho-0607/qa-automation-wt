@@ -113,15 +113,15 @@ class TradeAPI(BaseAPI):
         payload["stop_loss"] = payload.pop("stopLoss", "--")
         payload["take_profit"] = payload.pop("takeProfit", "--")
         
-        # For market orders, get actual entry price from order details
-        if trade_object.order_type == OrderType.MARKET and update_price:
-            logger.debug("Getting placed order details for updating entry_price")
-            order_details = self._order_api.get_orders_details(
-                trade_object.symbol, trade_object.order_type, payload["order_id"]
-            )
-            
+        # Get actual price from order details
+        if update_price:
+
+            logger.debug("Getting placed order details for updating prices")
+            order_details = self._order_api.get_orders_details(trade_object.symbol, trade_object.order_type, payload["order_id"])
+
             # Update entry price with actual executed price
-            payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjTrade.DECIMAL)
+            if trade_object.order_type == OrderType.MARKET:
+                payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjTrade.DECIMAL)
             
             # Update SL/TP if using points
             if payload.pop("indicate", "").lower() == SLTPType.POINTS.lower():
@@ -131,6 +131,9 @@ class TradeAPI(BaseAPI):
                 payload["take_profit"] = format_with_decimal(
                     order_details.get("takeProfit") or "--", symbol_details.point_step
                 )
+
+             # update current price
+            payload["current_price"] = order_details.get("currentPrice")
 
         # Update the trade object
         trade_object.update(payload)

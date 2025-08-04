@@ -19,15 +19,20 @@ from src.utils.logging_utils import logger
 )
 def test(web, market_obj, get_asset_tab_amount, sl_type, tp_type, close_confirm_modal):
     trade_object = market_obj()
+
+    logger.info("Step 1: Get tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} order for {trade_object.symbol!r} (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
+    logger.info(f"Step 2: Place {trade_object.trade_type} order for {trade_object.symbol!r} (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade confirmation")
     web.trade_page.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 2: Confirm place order")
+    logger.info("Step 3: Get current server/ device time")
+    web.home_page.get_server_device_time(trade_object)
+
+    logger.info("Step 4: Confirm place order")
     web.trade_page.modals.confirm_trade()
 
     logger.info(f"Verify order submitted notification banner")

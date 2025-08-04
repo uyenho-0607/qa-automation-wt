@@ -12,16 +12,31 @@ class StepLogs:
     failed_logs_dict = {}
 
 
-class ProjectConfig:
+class RuntimeConfig:
+    allure_dir: str = None
+    env: str = None
     client: str = None
     server: str = None
     account: str = None
-    platform: str = "web"
+
+    platform: str = None
+    browser: str = None
+    headless: str = None
+    argo_cd: str = None
+
+    user: str = None
+    password: str = None
+    url: str = None
+
     headers: dict = {}
 
     @classmethod
     def is_non_oms(cls):
         return cls.client == "transactCloud"
+
+    @classmethod
+    def is_prod(cls):
+        return cls.env == "prod"
 
     @classmethod
     def is_mt4(cls):

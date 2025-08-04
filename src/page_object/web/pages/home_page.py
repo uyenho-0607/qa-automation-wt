@@ -4,14 +4,15 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT, SHORT_WAIT
-from src.data.enums import Features, URLPaths
+from src.data.enums import URLPaths
 from src.data.enums.home import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.feature_anm_modal import FeatureAnnouncementModal
 from src.page_object.web.components.notifications import Notifications
 from src.page_object.web.components.settings import Settings
-from src.utils.assert_utils import soft_assert, compare_with_tolerance
+from src.page_object.web.components.trade.watch_list import WatchList
+from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import remove_comma, format_acc_balance
 from src.utils.logging_utils import logger
@@ -20,6 +21,7 @@ from src.utils.logging_utils import logger
 class HomePage(BasePage):
     def __init__(self, actions: WebActions):
         super().__init__(actions)
+        self.watch_list = WatchList(actions)
         self.notifications = Notifications(actions)
         self.settings = Settings(actions)
         self.feature_announcement_modal = FeatureAnnouncementModal(actions)
@@ -52,8 +54,6 @@ class HomePage(BasePage):
     __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[text()='{}']")
     __items_search_result = (By.CSS_SELECTOR, data_testid('symbol-input-search-items'))
     __empty_message = (By.CSS_SELECTOR, "div[data-testid='symbol-dropdown-result'] > div[data-testid='empty-message']")
-    # Side Bar Elements
-    __side_bar_option = (By.CSS_SELECTOR, data_testid('side-bar-option-{}'))
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_account_selector(self, open=True):
@@ -79,12 +79,6 @@ class HomePage(BasePage):
                 self.actions.click(locator)
 
         self.toggle_balance_summary(open=False)
-
-    # Navigation Actions
-    def navigate_to(self, feature: Features, wait=False):
-        """Navigate to a specific feature using the sidebar"""
-        self.actions.click(cook_element(self.__side_bar_option, feature.lower()))
-        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
 
     def clear_search_field(self):
         self.actions.clear_field(self.__txt_symbol_search)
@@ -112,7 +106,7 @@ class HomePage(BasePage):
     def verify_page_url(self):
         super().verify_page_url(URLPaths.TRADE)
 
-    def verify_acc_info_displayed(self):
+    def verify_account_info_displayed(self):
         """Verify that account information is displayed"""
         self.actions.verify_element_displayed(self.__account_selector)
         self.actions.verify_element_displayed(self.__account_name)
@@ -165,7 +159,7 @@ class HomePage(BasePage):
         """Verify account summary item against exp_dict (should be response from API get account)"""
         actual = {key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key))) for key in AccSummary.checkbox_list()}
         expected = {k: round(v, 2) for k, v in exp_dict.items() if k in AccSummary.checkbox_list()}
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_acc_note_values(self, exp_dict: dict):
         actual = {item: format_acc_balance(self.actions.get_text(cook_element(self.__acc_note_items, item))) for item in AccSummary.note_list()}
@@ -184,7 +178,7 @@ class HomePage(BasePage):
         logger.debug("- Checking account details")
         expected = {item: format_acc_balance(element_dict[item][0].text) for item in AccSummary.checkbox_list()}
         actual = {item: format_acc_balance(element_dict[item][-1].text) for item in AccSummary.checkbox_list()}
-        soft_assert(actual, expected, tolerance=0.5, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, expected, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_search_result(self, symbol: str):
         self.actions.verify_element_displayed(cook_element(self.__item_search_result, symbol))

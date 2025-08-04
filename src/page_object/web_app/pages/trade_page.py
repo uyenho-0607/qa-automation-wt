@@ -1,28 +1,34 @@
+from selenium.webdriver.common.by import By
+
 from src.apis.api_client import APIClient
 from src.core.actions.web_actions import WebActions
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
 from src.page_object.web_app.components.modals.trading_modals import TradingModals
 from src.page_object.web_app.components.trade.asset_tab import AssetTab
-from src.page_object.web_app.components.trade.chart import Chart
 from src.page_object.web_app.components.trade.place_order_panel import PlaceOrderPanel
-from src.page_object.web_app.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert, compare_dict
+from src.utils.common_utils import data_testid
 from src.utils.logging_utils import logger
 
 
 class TradePage(BasePage):
     def __init__(self, actions: WebActions):
         super().__init__(actions)
-        self.watch_list = WatchList(actions)
         self.asset_tab = AssetTab(actions)
         self.place_order_panel = PlaceOrderPanel(actions)
-        self.chart = Chart(actions)
         self.modals = TradingModals(actions)
 
     # ------------------------ LOCATORS ------------------------ #
+    __symbol_overview_id = (By.CSS_SELECTOR, data_testid('symbol-overview-id'))
+
     # ------------------------ ACTIONS ------------------------ #
     # ------------------------ VERIFY ------------------------ #
+
+    def verify_symbol_overview_id(self, symbol):
+        actual_symbol = self.actions.get_text(self.__symbol_overview_id)
+        soft_assert(actual_symbol, symbol)
+
     @staticmethod
     def verify_placed_order_data(trade_object: ObjTrade, api_data: dict):
         """Verify placed order against API data"""
@@ -71,6 +77,6 @@ class TradePage(BasePage):
         soft_assert(
             actual,
             expected,
-            tolerance=0.1,
+            tolerance=1,
             tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"]
         )

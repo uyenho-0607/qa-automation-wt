@@ -28,4 +28,4 @@ def test(web):
     web.login_page.login()
 
     logger.info("Verify login success")
-    web.home_page.verify_acc_info_displayed()
+    web.home_page.verify_account_info_displayed()

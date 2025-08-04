@@ -7,21 +7,22 @@ import uuid
 from typing import Dict, Any
 
 import allure
+from pytest_selenium import driver
 
-from src.core.config_manager import Config
 from src.data.consts import GRID_VIDEO_URL
 from src.data.project_info import DriverList
 from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
-from src.data.project_info import StepLogs, ProjectConfig
+from src.data.project_info import StepLogs, RuntimeConfig
+from src.utils.common_utils import convert_timestamp
 from src.utils.logging_utils import logger
 
 
 
 def attach_session_video():
-    driver = DriverList.all_drivers.get("web")
+    driver = DriverList.all_drivers.get(RuntimeConfig.platform.lower())
     if driver:
-        s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
-        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
+        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
+        s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
         allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
 
 
@@ -37,7 +38,7 @@ def save_recorded_video(video_raw):
 
 def attach_video(driver):
     """attach video to allure report"""
-    if not ProjectConfig.is_web():
+    if not RuntimeConfig.is_web():
         video_data = driver.stop_recording_screen()
         video_path = save_recorded_video(video_data)
         allure.attach.file(
@@ -85,7 +86,7 @@ def custom_allure_report(allure_dir: str) -> None:
             _add_attachments_prop(data)  # add empty attachments prop for each test report
             _remove_zero_duration(data)
             _attach_table_details(data)  # add verify tables
-            _attach_verify_details(data)
+            _attach_verify_details(data) # add verify details text
 
             if data.get("status", "") == "failed":
                 _process_failed_status(data)  # Process failed status if any
@@ -192,7 +193,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     data["name"] = " ".join(data["name"].split("_"))
 
     # Customize test's properties
-    data["fullName"] = f"{data['fullName']}[{ProjectConfig.client}][{ProjectConfig.server}]"
+    data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
     data["historyId"] = uuid.uuid4().hex
 
 
@@ -368,7 +369,12 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
     for key in all_keys:
         actual_val = actual.get(key, "")
         expected_val = expected.get(key, "")
-        
+
+        if "_date" in key:
+            # convert back to str time for human-readable
+            actual_val = convert_timestamp(actual.get(key)) if actual_val else ""
+            expected_val = convert_timestamp(expected.get(key)) if expected_val else ""
+
         # Check field status using compare_dict results
         is_missing = key in res.get("missing", [])
         is_redundant = key in res.get("redundant", [])
@@ -379,6 +385,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         if is_missing:
             highlight_class = "missing"
             actual_val = "MISSING"
+
         elif is_redundant:
             highlight_class = "redundant"
             expected_val = "REDUNDANT"

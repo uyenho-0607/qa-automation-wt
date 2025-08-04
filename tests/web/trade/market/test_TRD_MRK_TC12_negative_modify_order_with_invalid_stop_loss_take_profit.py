@@ -25,7 +25,7 @@ def test(web, invalid_field, close_edit_confirm_modal, setup_test):
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
     logger.info(f"Step 1: Modify order with {invalid_field!r}")
-    web.trade_page.modals.modify_invalid_order(trade_obj, **invalid_dict, submit=True)
+    web.trade_page.asset_tab.modify_invalid_order(trade_obj, **invalid_dict, submit=True)
 
     logger.info("Verify invalid notification banner")
     web.home_page.notifications.verify_notification_banner(UIMessages.INVALID_ORDER_BANNER_TITLE, UIMessages.INVALID_SL_TP_BANNER_DES)
