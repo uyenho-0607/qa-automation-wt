@@ -144,12 +144,15 @@ class AssetTab(BaseTrade):
         self.click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
         not confirm or self.confirm_delete_order()
 
-    def full_close_position(self, trade_object: ObjTrade, confirm=True, wait=True) -> None:
-        trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
-        self.click_action_btn(AssetTabs.OPEN_POSITION, trade_object.get("order_id"), "close")
+    def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=True) -> None:
+        if trade_object:
+            trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
+
+        self.click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get("order_id"), "close")
 
         if confirm:
-            self.get_current_price(trade_object)
+            if trade_object:
+                self.get_current_price(trade_object)
             self.confirm_close_order()
 
         not wait or self.wait_for_spin_loader()

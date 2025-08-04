@@ -5,6 +5,7 @@ from src.core.config_manager import Config
 from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
 from src.data.enums import Features
 from src.data.enums import URLSites
+from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, data_testid
 from src.utils.logging_utils import logger
 
@@ -78,4 +79,11 @@ class BasePage:
             logger.debug("- Click cancel btn")
             self.actions.click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
 
+    def close_alert_box(self):
+        self.actions.click(self.__alert_box_close)
+
     # ------------------------ VERIFY ------------------------ #
+    def verify_alert_error_message(self, expected_message):
+        actual_err = self.actions.get_text(self.__alert_desc, timeout=EXPLICIT_WAIT)
+        soft_assert(actual_err, expected_message)
+        self.close_alert_box()

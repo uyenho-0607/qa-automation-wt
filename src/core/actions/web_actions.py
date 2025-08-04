@@ -1,9 +1,12 @@
 import builtins
 import time
+from typing import Literal
 
 from appium.webdriver import WebElement
 from selenium.common import TimeoutException
 from selenium.webdriver import ActionChains, Keys
+from selenium.webdriver.common.actions.action_builder import ActionBuilder
+from selenium.webdriver.common.actions.pointer_input import PointerInput
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -21,7 +24,7 @@ class WebActions(BaseActions):
 
     # ------- ACTIONS ------ #
 
-    @handle_stale_element
+    # @handle_stale_element
     def _send_key_action_chains(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
         if locator:
             element = self.find_element(locator, timeout)
@@ -30,7 +33,7 @@ class WebActions(BaseActions):
             self._action_chains.double_click(element).send_keys(Keys.DELETE).perform()
             self._action_chains.send_keys_to_element(element, str(value)).perform()
 
-    @handle_stale_element
+    # @handle_stale_element
     def _send_keys(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
         if locator:
             element = self.find_element(locator, timeout)
@@ -110,13 +113,8 @@ class WebActions(BaseActions):
         wheel = self.find_element(locator, timeout)
         self._action_chains.click_and_hold(wheel).move_by_offset(0, -50).release().perform()
 
-    def scroll_container_down(self, locator: tuple[str, str], wait_time: float = 0.5, scroll_step: float = 0.5):
-        """Scroll a container element down by a smaller step to avoid missing items
-        Args:
-            locator: The locator of the container to scroll
-            wait_time: Time to wait after scrolling for new content to load
-            scroll_step: Fraction of container height to scroll (0.5 = half height, 0.25 = quarter height)
-        """
+    def scroll_container_down(self, locator: tuple[str, str], scroll_step: float = 0.5):
+        """Scroll a container element down by a smaller step to avoid missing items"""
         try:
             container = self.find_element(locator)
             self._driver.execute_script(
@@ -126,6 +124,19 @@ class WebActions(BaseActions):
             time.sleep(0.3)
         except Exception as e:
             logger.warning(f"Error scrolling container {locator}: {e}")
+
+    def drag_element_horizontal(self, locator: tuple[str, str], direction:Literal["left", "right"] | str = "left", timeout=EXPLICIT_WAIT):
+        x_offset = -200 if direction == "left" else 200
+
+        element = self.find_element(locator, timeout)
+        if element:
+            finger = PointerInput("touch", "finger")
+            action = ActionBuilder(self._driver, mouse=finger)
+            action.pointer_action.move_to(element)
+            action.pointer_action.pointer_down()
+            action.pointer_action.move_by(x=x_offset, y=0)
+            action.pointer_action.pointer_up()
+            action.perform()
 
     def wait_for_url(self, url: str, timeout: int = EXPLICIT_WAIT, retries=1):
         """Wait for the current URL to match the expected URL with retry mechanism."""

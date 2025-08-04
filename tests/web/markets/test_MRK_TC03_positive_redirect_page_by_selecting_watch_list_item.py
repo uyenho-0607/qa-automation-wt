@@ -29,6 +29,9 @@ def test(web, setup_test, check_tab):
     logger.info(f"Verify symbol {select_symbol} is selected")
     web.trade_page.watch_list.verify_symbol_selected(select_symbol)
 
+    logger.info("Verify symbol is displayed on chart")
+    web.trade_page.chart.verify_symbol_selected(select_symbol)
+
 
 @pytest.fixture(scope="module")
 def setup_test(web):
