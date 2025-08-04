@@ -78,12 +78,12 @@ class WatchList(BaseTrade):
         self.__select_tab_with_retry(tab, wait, retry_count + 1)
 
 
-    def select_tab(self, tab: WatchListTab, wait_for_loader=True):
+    def select_tab(self, tab: WatchListTab, wait=True):
         """Select a tab and retry if needed (handles edge cases like Favourite tab in MARKET)"""
         if tab in WatchListTab.sub_tabs() and not self.actions.is_element_displayed(self.__get_tab_locator(tab), show_log=False):
-            self.__select_tab_with_retry(WatchListTab.ALL, wait_for_loader)
+            self.__select_tab_with_retry(WatchListTab.ALL, wait)
 
-        self.__select_tab_with_retry(tab, wait_for_loader)
+        self.__select_tab_with_retry(tab, wait)
 
     def wait_for_tab_selected(self, tab: WatchListTab, timeout: int = EXPLICIT_WAIT):
         """Wait for a specific tab to become selected
@@ -110,7 +110,7 @@ class WatchList(BaseTrade):
         scroll_attempts = 0
         last_count = 0
         not_found_time = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
+        max_scroll_attempts = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
         logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
         while scroll_attempts < max_scroll_attempts:

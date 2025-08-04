@@ -82,7 +82,6 @@ def handle_stale_element(func):
         for attempt in range(max_retries + 1):  # +1 for initial attempt
             try:
                 return func(self, *args, **kwargs)
-
             except (StaleElementReferenceException, ElementNotInteractableException, ElementClickInterceptedException) as e:
                 # Clear any broken steps that might have been added from the previous attempt
                 if StepLogs.broken_steps and attempt < max_retries + 1:
@@ -103,8 +102,21 @@ def handle_stale_element(func):
 
                         raise e
 
-        return None
+            except Exception as e:
+                # Handle any other exceptions
+                if raise_exception:
+                    logger.error(f"Unexpected exception for locator {args[0] if args else 'N/A'}: {type(e).__name__}: {str(e)}")
+                    if StepLogs.test_steps:
+                        logger.debug("- Capture broken info")
+                        StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                        attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
+                    raise e
 
+                else:
+                    # Just log debug info when raise_exception = False
+                    logger.debug(f"Exception caught for locator {args[0] if args else 'N/A'}: {type(e).__name__}: {str(e)}")
+                    return None
+        return None
     return wrapper
 
 
