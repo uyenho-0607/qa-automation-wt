@@ -204,11 +204,10 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_fill_policy(self, fill_policy: FillPolicy | str) -> str | None:
         """Select fill policy for the order. Return selected fill_policy."""
-        if RuntimeConfig.is_mt4() or not fill_policy:
-            return
-
         locator = cook_element(self.__opt_fill_policy, locator_format(fill_policy))
-        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
+        is_selected = "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT)
+
+        if is_selected:
             logger.debug(f"- Fill Policy: {fill_policy.capitalize()!r} already selected")
             return
 
@@ -218,15 +217,18 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_expiry(self, expiry: Expiry | str) -> str | None:
         """Select expiry for the order. Return selected expiry."""
-        if expiry:
-            logger.debug(f"- Select expiry: {expiry.capitalize()!r}")
-            self.actions.click(self.__drp_expiry)
-            self.actions.click(cook_element(self.__opt_expiry, locator_format(expiry)))
+        if expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower():
+            logger.debug(f"- Expiry: {expiry!r} already selected")
+            return
 
-            if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-                logger.debug(f"- Select expiry date")
-                self.actions.click(self.__expiry_trade)
-                self.actions.click(self.__expiry_last_date)
+        logger.debug(f"- Select expiry: {expiry.capitalize()!r}")
+        self.actions.click(self.__drp_expiry)
+        self.actions.click(cook_element(self.__opt_expiry, locator_format(expiry)))
+
+        if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
+            logger.debug(f"- Select expiry date")
+            self.actions.click(self.__expiry_trade)
+            self.actions.click(self.__expiry_last_date)
 
     def _click_place_order_btn(self) -> None:
         """Click place order button."""
@@ -313,8 +315,8 @@ class PlaceOrderPanel(BaseTrade):
         self._input_tp(take_profit, tp_type)
 
         # Select fill policy and expiry
-        self._select_fill_policy(trade_object.get("fill_policy"))
-        self._select_expiry(trade_object.get("expiry"))
+        not trade_object.get("fill_policy") or self._select_fill_policy(trade_object.fill_policy)
+        not trade_object.get("expiry") or self._select_expiry(trade_object.expiry)
 
         if sl_type == SLTPType.POINTS:
             stop_loss = self._get_input_sl()

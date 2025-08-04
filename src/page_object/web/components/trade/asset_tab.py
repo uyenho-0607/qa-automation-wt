@@ -154,12 +154,15 @@ class AssetTab(BaseTrade):
         self.confirm_bulk_delete()
         not wait or self.wait_for_spin_loader()
 
-    def full_close_position(self, trade_object, confirm=True, wait=False) -> None:
-        trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
-        self._click_action_btn(AssetTabs.OPEN_POSITION, trade_object.get('order_id'), "close")
+    def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=False) -> None:
+        if trade_object:
+            trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
+
+        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get('order_id'), "close")
 
         if confirm:
-            self.get_server_device_time(trade_object)  # update close time
+            if trade_object:
+                self.get_server_device_time(trade_object)  # update close time
             self.confirm_close_order()
 
         not wait or self.wait_for_spin_loader()

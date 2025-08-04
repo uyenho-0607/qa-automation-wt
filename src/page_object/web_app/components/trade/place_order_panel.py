@@ -49,7 +49,6 @@ class PlaceOrderPanel(BaseTrade):
     __opt_order_type = (By.CSS_SELECTOR, data_testid('trade-dropdown-order-type-{}'))
     __btn_place_order = (By.CSS_SELECTOR, data_testid('trade-button-order'))
     __drp_expiry = (By.CSS_SELECTOR, data_testid('trade-dropdown-expiry'))
-    # __opt_expiry = (By.CSS_SELECTOR, data_testid('trade-dropdown-expiry-{}'))
     __opt_expiry = (By.XPATH, "//div[contains(@data-testid, 'trade-dropdown-expiry') and contains(normalize-space(), '{}')]")
     __expiry_date = (By.CSS_SELECTOR, data_testid('trade-input-expiry-date'))
     __wheel_expiry_date = (By.CSS_SELECTOR, "div.datepicker-wheel")

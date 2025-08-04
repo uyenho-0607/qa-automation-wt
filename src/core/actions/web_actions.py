@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
 from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
 
@@ -58,7 +58,7 @@ class WebActions(BaseActions):
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         max_retries = 3
         if element:
-            if ProjectConfig.platform == "web_app":
+            if RuntimeConfig.platform == "web_app":
                 self.clear_field(locator)
                 element.click()
                 element.send_keys(str(value))
