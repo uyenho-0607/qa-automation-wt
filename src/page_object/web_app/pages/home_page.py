@@ -70,7 +70,6 @@ class HomePage(BasePage):
 
     def search_and_select_symbol(self, symbol: str):
         """Search and select the found symbol"""
-        self.actions.clear_field(self.__txt_symbol_search)
         self.search_symbol(symbol)
         self.actions.click(cook_element(self.__item_search_result, symbol))
 
