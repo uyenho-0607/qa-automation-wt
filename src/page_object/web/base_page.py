@@ -3,10 +3,11 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
 from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, QUICK_WAIT
+from src.data.enums import Features
 from src.data.enums import URLSites, URLPaths
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import data_testid, cook_element
+from src.utils.common_utils import data_testid, cook_element, convert_strtime
 from src.utils.logging_utils import logger
 
 
@@ -50,12 +51,19 @@ class BasePage:
     __alert_success = (By.CSS_SELECTOR, data_testid('alert-success'))
     __locator_by_text = (By.XPATH, "//*[contains(text(), '{}')]")
     __empty_message = (By.CSS_SELECTOR, data_testid('empty-message'))
+    __side_bar_option = (By.CSS_SELECTOR, data_testid('side-bar-option-{}'))
+    __server_time = (By.XPATH, "//span[text()='Server Time' or text()='Device Time']/span")
 
     # ------------------------ ACTIONS ------------------------ #
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
         self.actions.goto(Config.urls(site))
 
-    def wait_for_spin_loader(self, timeout: int = 3):
+    def navigate_to(self, feature: Features, wait=False):
+        """Navigate to a specific feature using the sidebar"""
+        self.actions.click(cook_element(self.__side_bar_option, feature.lower()))
+        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
+
+    def wait_for_spin_loader(self, timeout: int = 5):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
@@ -72,6 +80,17 @@ class BasePage:
 
     def is_current_page(self, url_path: URLPaths):
         return f"/{url_path.lower()}" in self.actions.get_current_url()
+
+    def get_server_device_time(self, trade_object, convert_time=True):
+        server_time = self.actions.get_text(self.__server_time, timeout=QUICK_WAIT)
+        logger.debug(f"- Server/ Device time: {server_time!r}")
+        server_time = server_time if not convert_time else convert_strtime(server_time)
+
+        if not trade_object.get("open_date"):
+            trade_object.open_date = server_time
+
+        else:
+            trade_object.close_date = server_time
 
     # ------------------------ VERIFY ------------------------ #
     def verify_page_url(self, url_path: str=None, custom_url="", timeout: int = EXPLICIT_WAIT):

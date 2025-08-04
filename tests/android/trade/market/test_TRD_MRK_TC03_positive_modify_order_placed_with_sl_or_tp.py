@@ -38,7 +38,7 @@ def test(android, symbol, get_asset_tab_amount, exclude_field, update_field, cre
     android.trade_screen.modals.modify_order(trade_object, **update_info)
 
     logger.info(f"Verify trade edit confirmation")
-    android.trade_screen.modals.verify_trade_edit_confirm_details(trade_object)
+    android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)
 
     logger.info("Step 3: Confirm update order")
     android.trade_screen.modals.confirm_update_order()

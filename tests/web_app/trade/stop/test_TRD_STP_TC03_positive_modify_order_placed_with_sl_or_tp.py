@@ -20,11 +20,11 @@ from src.utils.logging_utils import logger
         ("TP", "SL,TP"),
     ]
 )
-def test(web_app, symbol, get_asset_tab_amount, exclude_field, update_field, create_order_data, close_edit_confirmation):
+def test(web_app, stop_obj, get_asset_tab_amount, exclude_field, update_field, create_order_data, cancel_all):
 
-    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
+    trade_object = stop_obj()
     trade_object[exclude_field] = 0
-    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
+    update_info = {f"{item.lower()}_type": SLTPType.POINTS for item in update_field.split(",")}
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
@@ -37,10 +37,10 @@ def test(web_app, symbol, get_asset_tab_amount, exclude_field, update_field, cre
     web_app.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
     logger.info(f"Step 3: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
-    web_app.trade_page.modals.modify_order(trade_object, **update_info)
+    web_app.trade_page.asset_tab.modify_order(trade_object, **update_info)
 
     logger.info(f"Verify trade edit confirmation")
-    web_app.trade_page.modals.verify_trade_edit_confirm_details(trade_object)
+    web_app.trade_page.modals.verify_edit_trade_confirmation(trade_object)
 
     logger.info("Step 4: Confirm update order")
     web_app.trade_page.modals.confirm_update_order()

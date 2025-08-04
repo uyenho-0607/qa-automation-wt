@@ -6,19 +6,19 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web, stop_limit_obj, get_asset_tab_amount, cancel_delete_order, create_order_data):
+def test(web, stop_limit_obj, cancel_delete_order, create_order_data):
+
     trade_object = stop_limit_obj()
     tab = AssetTabs.PENDING_ORDER
-    tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
-    create_order_data(trade_object)
+    *_, tab_amount = create_order_data(trade_object)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
-    logger.info("Step 2: Delete pending order")
-    web.trade_page.asset_tab.delete_order(order_id=trade_object.order_id)
+    logger.info(f"Step 2: Delete pending order")
+    web.trade_page.asset_tab.delete_order(trade_object)
 
     logger.info("Verify Delete order notification banner")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).delete_order_banner())

@@ -15,8 +15,8 @@ from src.utils.logging_utils import logger
         SLTPType.sample_values(amount=2),
     ]
 )
-def test(web_app, symbol, create_order_data, sl_type, tp_type, close_edit_confirmation):
-    trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, indicate=SLTPType.sample_values())
+def test(web_app, stop_limit_obj, create_order_data, sl_type, tp_type, cancel_all):
+    trade_object = stop_limit_obj(indicate=SLTPType.sample_values())
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")
@@ -29,10 +29,10 @@ def test(web_app, symbol, create_order_data, sl_type, tp_type, close_edit_confir
     web_app.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
     logger.info(f"Step 3: Update order with sl_type: {sl_type.capitalize()!r} - tp_type: {tp_type.capitalize()!r}")
-    web_app.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    web_app.trade_page.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade edit confirmation")
-    web_app.trade_page.modals.verify_trade_edit_confirm_details(trade_object)
+    web_app.trade_page.modals.verify_edit_trade_confirmation(trade_object)
 
     logger.info("Step 4: Confirm update order")
     web_app.trade_page.modals.confirm_update_order()

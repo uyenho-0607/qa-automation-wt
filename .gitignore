@@ -158,3 +158,5 @@ cython_debug/
 
 # Allure results
 allure-results
+.idea/
+.idea/workspace.xml

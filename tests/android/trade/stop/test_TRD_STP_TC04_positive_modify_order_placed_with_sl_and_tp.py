@@ -32,7 +32,7 @@ def test(android, symbol, create_order_data, sl_type, tp_type, close_edit_confir
     android.trade_screen.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade edit confirmation")
-    android.trade_screen.modals.verify_trade_edit_confirm_details(trade_object)
+    android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)
 
     logger.info("Step 4: Confirm update order")
     android.trade_screen.modals.confirm_update_order()

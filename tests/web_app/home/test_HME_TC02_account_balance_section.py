@@ -23,13 +23,13 @@ def test(web_app, teardown):
     logger.info("Step 4: Close Notes section")
     web_app.home_page.my_account_modal.toggle_note(open=False)
 
-    logger.info("Verify Balance section is closed")
+    logger.info("Verify Notes section is closed")
     web_app.home_page.my_account_modal.verify_note_items_displayed(is_display=False)
 
     logger.info("Step 5: Open Notes section")
     web_app.home_page.my_account_modal.toggle_note(open=True)
 
-    logger.info("Verify Balance section is closed")
+    logger.info("Verify Notes section is opened")
     web_app.home_page.my_account_modal.verify_note_items_displayed(is_display=True)
 
 

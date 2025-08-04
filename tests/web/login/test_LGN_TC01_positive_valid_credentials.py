@@ -20,7 +20,7 @@ def test(web, setup_pre_selected_tab):
     web.home_page.verify_page_url()
 
     logger.info("Verify account info is displayed")
-    web.home_page.verify_acc_info_displayed()
+    web.home_page.verify_account_info_displayed()
 
     logger.info(f"Verify pre-selected tab is {selected_tab.value!r}")
     web.trade_page.watch_list.verify_tab_selected(selected_tab)

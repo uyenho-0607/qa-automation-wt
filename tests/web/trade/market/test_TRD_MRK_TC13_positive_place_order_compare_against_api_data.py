@@ -8,20 +8,24 @@ from src.utils.logging_utils import logger
 @pytest.mark.order(1)
 @pytest.mark.critical
 def test(web, market_obj, get_asset_tab_amount, close_confirm_modal):
-
     trade_object = market_obj()
+
+    logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} order")
+    logger.info(f"Step 2: Place {trade_object.trade_type} order (tab:{tab_amount!r})")
     web.trade_page.place_order_panel.place_order(trade_object, submit=True)
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
-    logger.info("Step 3: Get order_id of placed order")
+    logger.info("Step 3: Select Open Positions tab")
+    web.trade_page.asset_tab.select_tab(AssetTabs.OPEN_POSITION)
+
+    logger.info("Step 4: Get order_id of placed order")
     web.trade_page.asset_tab.get_last_order_id(trade_object)
 
-    logger.info(f"Step 4: Get placed order API data, order_id: {trade_object.order_id!r}")
+    logger.info(f"Step 5: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
         symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
     )

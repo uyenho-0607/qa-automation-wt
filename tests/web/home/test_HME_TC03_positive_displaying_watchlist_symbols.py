@@ -16,15 +16,15 @@ def test(web, tab, setup_test):
         pytest.skip("No symbols to test")
 
     logger.info("Step 1: Get random displaying symbol")
-    web.trade_page.watch_list.select_tab(tab)
+    web.home_page.watch_list.select_tab(tab)
     time.sleep(2)
-    select_symbol = web.trade_page.watch_list.get_random_symbol()
+    select_symbol = web.home_page.watch_list.get_random_symbol()
 
     logger.info(f"Step 2: Select {select_symbol!r}")
-    web.trade_page.watch_list.select_symbol(select_symbol)
+    web.home_page.watch_list.select_symbol(select_symbol)
 
     logger.info("Verify symbol is selected")
-    web.trade_page.watch_list.verify_symbol_selected(select_symbol)
+    web.home_page.watch_list.verify_symbol_selected(select_symbol)
 
     logger.info("Verify symbol displayed in chart")
     web.trade_page.chart.verify_symbol_selected(select_symbol)

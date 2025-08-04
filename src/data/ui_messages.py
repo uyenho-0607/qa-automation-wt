@@ -62,5 +62,6 @@ class UIMessages:
     HELP_ON_THE_WAY = "Help is on the way!"
     ALL_CHANGES_SAVED = "All changes are saved."
     DEMO_ACCOUNT_READY = "Your Demo Account is Ready!"
+    DEMO_ACCOUNT_OPEN_SUCCESS = "Your demo account has been opened successfully."
     NO_ITEM_AVAILABLE = "No items available"
     TYPE_SOMETHING_TO_SEARCH = "Type something to search"

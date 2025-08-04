@@ -24,7 +24,7 @@ def test(web, symbol, get_asset_tab_amount, close_edit_confirm_modal, ):
     web.home_page.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(order_id=trade_object.order_id))
 
     logger.info(f"Step 2: Update order with SL & TP")
-    web.trade_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
+    web.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
 
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))

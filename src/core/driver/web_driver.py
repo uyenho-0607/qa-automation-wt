@@ -5,8 +5,8 @@ import boto3
 from botocore.config import Config
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
-from src.data.consts import GRID_SERVER
 from src.data.project_info import DriverList, RuntimeConfig
+from src.data.consts import GRID_SERVER
 
 proxy_server = os.getenv('PROXY_SERVER')
 project_arn = os.getenv('DF_PROJECT_ARN')
@@ -23,7 +23,6 @@ class WebDriver:
                 # service = Service(ChromeDriverManager().install())
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
-
                 if RuntimeConfig.platform == 'web_app':
                     options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 14 Pro Max"})
 
@@ -61,8 +60,8 @@ class WebDriver:
                     driver = webdriver.Remote(testgrid_url, options=options)
 
                 else:
-                    driver = webdriver.Chrome(options=options)
-                    # driver = webdriver.Remote(GRID_SERVER, options=options)
+                    # driver = webdriver.Chrome(options=options)
+                    driver = webdriver.Remote(GRID_SERVER, options=options)
 
             case "firefox":
                 options = FirefoxOptions()
@@ -81,12 +80,13 @@ class WebDriver:
                 raise ValueError(f"Invalid browser value: {browser!r} !!!")
 
         setattr(builtins, "web_driver", driver)
+        # driver.set_window_position(0, -800)
         driver.maximize_window()
-        DriverList.all_drivers["web"] = driver
+        DriverList.all_drivers[RuntimeConfig.platform] = driver
         return driver
 
     @classmethod
     def quit(cls):
-        if DriverList.all_drivers.get("web"):
-            DriverList.all_drivers["web"].quit()
-            DriverList.all_drivers["web"] = None
+        if DriverList.all_drivers.get(RuntimeConfig.platform):
+            DriverList.all_drivers[RuntimeConfig.platform].quit()
+            DriverList.all_drivers[RuntimeConfig.platform] = None

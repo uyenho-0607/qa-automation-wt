@@ -27,10 +27,10 @@ def test(web, market_obj, edit_field, sl_type, tp_type, close_edit_confirm_modal
     web.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
 
     logger.info(f"Step 2: Update order with {edit_field!r}")
-    web.trade_page.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    web.trade_page.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade edit confirmation")
-    web.trade_page.modals.verify_trade_edit_confirm_details(trade_object)
+    web.trade_page.modals.verify_edit_trade_confirmation(trade_object)
 
     logger.info("Step 3: Confirm update order")
     web.trade_page.modals.confirm_update_order()
@@ -39,4 +39,4 @@ def test(web, market_obj, edit_field, sl_type, tp_type, close_edit_confirm_modal
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify order details after update")
-    web.trade_page.asset_tab.verify_item_data(trade_object)
+    web.trade_page.asset_tab.verify_item_data(trade_object, wait=True)

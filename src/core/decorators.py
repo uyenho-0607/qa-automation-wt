@@ -17,8 +17,15 @@ def attach_table_details(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
         __tracebackhide__ = True
+
+        # Use inspect to get all function parameters including defaults
+        sig = inspect.signature(func)
+        bound_args = sig.bind(*args, **kwargs)
+        bound_args.apply_defaults()  # This applies default values
+        all_args = bound_args.arguments
+
         actual, expected, *_ = args
-        
+
         # Store the comparison result if it's returned by the function
         comparison_result = None
         
@@ -30,6 +37,11 @@ def attach_table_details(func):
             comparison_result = result
 
         if all([isinstance(actual, dict), isinstance(expected, dict)]):
+
+            check_contains = all_args.get("check_contains")
+            if check_contains:
+                actual = {k: v for k, v in actual.items() if k in expected}
+
             title = "Verify Table Details"
             if StepLogs.test_steps:
                 title += f" - {StepLogs.test_steps[-1]}"
@@ -42,12 +54,12 @@ def attach_table_details(func):
                 comparison_result=comparison_result
             )
 
-        elif kwargs.get("log_details"):
+        elif all_args.get("log_details"):
             name = "Verification Details"
             if StepLogs.test_steps:
                 name += f" - {StepLogs.test_steps[-1]}"
             log_verification_result(
-                actual, expected, result, desc=kwargs.get("desc", "") + kwargs.get("err_msg", "") if not result else "", name=name
+                actual, expected, result, desc=all_args.get("desc", "") + all_args.get("err_msg", "") if not result else "", name=name
             )
 
     return _wrapper
@@ -84,13 +96,12 @@ def handle_stale_element(func):
                 else:
                     # Final attempt failed, re-raise the exception
                     logger.error(f"{type(e).__name__} for locator {args[0]} after {max_retries + 1} attempts")
-                    # logger.debug(f"raise exception: {raise_exception}")
                     if raise_exception and StepLogs.test_steps:
                         logger.debug("- Capture broken info")
                         StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
                         attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
-                    raise e
+                        raise e
 
         return None
 

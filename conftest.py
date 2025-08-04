@@ -10,7 +10,7 @@ from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR, NON_OMS
 from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
-from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
+from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
 from src.utils.logging_utils import logger
 
 
@@ -106,7 +106,7 @@ def pytest_runtest_setup(item: pytest.Item):
     account = RuntimeConfig.account
 
     # Set up Allure test structure
-    module = item.module.__name__.split(".")[2:-1]  # not count test, web, and test name
+    module = item.nodeid.split("/")[2:-1]  # not count test, web, and test name
     sub_suite = " - ".join(item.capitalize() for item in module)
     sub_suite = sub_suite.replace("_", " ").title()
 
@@ -179,7 +179,6 @@ def pytest_runtest_makereport(item, call):
 
     # Start recording at the beginning of the test
     if driver and report.when == "setup":
-
         if platform in ['android', 'ios']:
             if allure_dir and os.path.exists(ROOTDIR / allure_dir):
                 try:
@@ -198,7 +197,7 @@ def pytest_runtest_makereport(item, call):
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             log_step_to_allure()  # show test steps on allure
 
-            if driver:
+            if driver and RuntimeConfig.platform in ["android", "ios"]:
                 try:
                     # Attach video for mobile
                     attach_video(driver)
@@ -207,8 +206,10 @@ def pytest_runtest_makereport(item, call):
 
         if report.failed and "FAILURE" in report.longreprtext:
             StepLogs.all_failed_logs.append(("end_test", ""))
-            # if ProjectConfig.is_web():
-            #     attach_session_video()
+
+            if RuntimeConfig.platform.lower() in ["web", "web_app"]:
+                logger.debug("- Attach session video")
+                attach_session_video()
 
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
@@ -219,7 +220,7 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_video_folder():
-    if not RuntimeConfig.is_web() and RuntimeConfig.allure_dir:
+    if RuntimeConfig.platform in ["android", "ios"] and Config.config.allure_dir:
         if os.path.exists(VIDEO_DIR):
             shutil.rmtree(VIDEO_DIR)
 

@@ -17,14 +17,14 @@ class AssetTabs(BaseEnum):
     """Enum representing different asset view tabs and their corresponding table types."""
     OPEN_POSITION = "Open Positions"
     PENDING_ORDER = "Pending Orders"
-    HISTORY = "History"
+    HISTORY = "History"  # MT4: order history | mt5: positions history > positions
     POSITIONS_HISTORY = "Positions History"
     ORDER_AND_DEALS = "Order and Deals"
 
-    def is_sub_history(self):
-        return self in [self.POSITIONS_HISTORY, self.ORDER_AND_DEALS]
+    def is_history(self):
+        return self in [self.HISTORY, self.POSITIONS_HISTORY, self.ORDER_AND_DEALS]
 
-    def get_col(self) -> str:
+    def col_locator(self) -> str:
         """Get the corresponding table value for the tab."""
         table_mapping = {
             self.OPEN_POSITION: "open",
@@ -93,11 +93,6 @@ class ColPreference(BaseEnum):
     REMARKS = "Remarks"
 
     @classmethod
-    def __get_volume_label(cls) -> str:
-        """Get the appropriate volume label based on server type."""
-        return "Size" if not RuntimeConfig.is_non_oms() else "Volume"
-
-    @classmethod
     def get_display_headers(cls, tab: AssetTabs, asset_page=False) -> List[str]:
         """
         Get the display headers for a specific asset tab.
@@ -107,7 +102,7 @@ class ColPreference(BaseEnum):
         Returns:
             List of column headers appropriate for the tab
         """
-        volume_label = cls.__get_volume_label()
+        volume_label = "Size" if not RuntimeConfig.is_non_oms() else "Volume"
         base_headers = ["Order No.", "Type"] + (["Symbol"] if asset_page else [])
 
         display_headers = {

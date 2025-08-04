@@ -3,7 +3,7 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import OrderType, SLTPType, Features, AccInfo
+from src.data.enums import OrderType, SLTPType, Features, AccInfo, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -24,9 +24,11 @@ def test(web, setup_teardown, disable_OCT):
     logger.info("Verify account balance summary")
     web.assets_page.verify_account_balance_summary(acc_balance)
 
-    logger.info("Step 2: Close some orders")
+    logger.info(f"Step 2: Close some orders ({', '.join(order_ids)})")
     for _id in order_ids:
-        web.assets_page.asset_tab.full_close_position(_id)
+        web.assets_page.asset_tab.full_close_position(order_id=_id, wait=True)
+        logger.info(f"Verify order closed successfully (id: {_id!r})")
+        web.assets_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, order_id=_id, is_display=False)
 
     logger.info(f"Verify account balance are changed an amount of ~{sum_profit!r} after closing positions")
     acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + sum_profit

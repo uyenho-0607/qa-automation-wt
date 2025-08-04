@@ -1,3 +1,4 @@
+from selenium.common import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -20,6 +21,7 @@ class BaseActions:
         self._wait = WebDriverWait(driver=self._driver, timeout=EXPLICIT_WAIT)
         self._driver.implicitly_wait(IMPLICIT_WAIT)
 
+    # @handle_stale_element
     def find_element(
             self,
             locator: tuple[str, str],
@@ -43,6 +45,10 @@ class BaseActions:
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout)
 
         try:
+            return wait.until(cond(locator))
+
+        except StaleElementReferenceException:
+            logger.info("- Stale element finding element, retry...")
             return wait.until(cond(locator))
 
         except (TimeoutException, NoSuchElementException) as e:
@@ -89,6 +95,19 @@ class BaseActions:
         )
         if element:
             element.click()
+
+    @handle_stale_element
+    def javascript_click(
+            self,
+            locator: tuple[str, str],
+            timeout: int | float = EXPLICIT_WAIT,
+            raise_exception=True,
+            show_log=True,
+    ):
+        """Click on an element using JavaScript."""
+        element = self.find_element(locator, timeout, EC.element_to_be_clickable, raise_exception=raise_exception, show_log=show_log)
+        if element:
+            self._driver.execute_script("arguments[0].click();", element)
 
     def click_if_displayed(self, locator, timeout=QUICK_WAIT):
         if self.is_element_displayed(locator, timeout):
@@ -138,14 +157,12 @@ class BaseActions:
         )
         return element.get_attribute(attribute) if element else None
 
-
     @handle_stale_element
-    def get_text_elements(self, locator, timeout = SHORT_WAIT):
+    def get_text_elements(self, locator, timeout=SHORT_WAIT):
+        """Get text of elements having same locator"""
         elements = self.find_elements(locator, timeout)
         res = [ele.text.strip() if ele else "" for ele in elements]
         return res
-
-
 
     @handle_stale_element
     def get_text(
@@ -166,7 +183,7 @@ class BaseActions:
     def wait_for_element_invisible(
             self,
             locator: tuple[str, str],
-            timeout=EXPLICIT_WAIT,
+            timeout: float | int = EXPLICIT_WAIT,
     ) -> None:
         """Wait for element to be invisible, NO exception will be raised if element is not found"""
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout=timeout)
@@ -190,6 +207,10 @@ class BaseActions:
 
     def is_element_displayed(self, locator: tuple[str, str], timeout=QUICK_WAIT, is_display=True, show_log=False) -> bool:
         """Check if element is displayed, NO exception will be raised if element is not found"""
+        if not is_display:
+            self.wait_for_element_invisible(locator, timeout=timeout)
+            timeout = QUICK_WAIT
+
         element = self.find_element(locator, timeout, raise_exception=False, show_log=show_log)
         res = bool(element)
         return res if is_display else not res
@@ -198,10 +219,6 @@ class BaseActions:
         """Check if element is enabled."""
         element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
         return element.is_enabled() if element else False
-
-    def execute_script(self, script: str, *args):
-        """Execute JavaScript code with optional arguments."""
-        return self._driver.execute_script(script, *args)
 
     # ------- VERIFY ------ #
     def verify_element_displayed(

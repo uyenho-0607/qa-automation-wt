@@ -6,9 +6,9 @@ from src.utils.format_utils import locator_format
 
 
 class Features(BaseEnum):
-    HOME = "Home"  # Mobile
+    HOME = "home"  # Mobile
     TRADE = "Trade"
-    MARKETS = "Markets"
+    MARKETS = "markets"
     ASSETS = "Assets"
     SIGNAL = "Signal"
     CALENDAR = "Calendar"

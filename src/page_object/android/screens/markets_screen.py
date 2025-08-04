@@ -50,7 +50,6 @@ class MarketsScreen(BaseScreen):
                     self.actions.click(locator)
                     return
 
-
     def set_symbol_preference(self, tab: WatchListTab, unchecked=True, show_all=None, store_dict=None):
         """Show/Hide Symbols with accurate state detection"""
 
