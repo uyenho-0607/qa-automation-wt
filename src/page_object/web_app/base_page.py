@@ -64,7 +64,7 @@ class BasePage:
         logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
             logger.debug("- Wait for spin loader to disappear")
-            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=EXPLICIT_WAIT)
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=30)
 
     def navigate_to(self, feature: Features, wait=False):
         self.actions.click(cook_element(self.__home_nav_option, feature.lower()))
@@ -83,7 +83,15 @@ class BasePage:
         self.actions.click(self.__alert_box_close)
 
     # ------------------------ VERIFY ------------------------ #
-    def verify_alert_error_message(self, expected_message):
-        actual_err = self.actions.get_text(self.__alert_desc, timeout=EXPLICIT_WAIT)
-        soft_assert(actual_err, expected_message)
+    def verify_alert_error_message(self, expected_message, other_msg=None):
+        """Verify the error alert message."""
+        actual_err = self.actions.get_text(self.__alert_desc)
+        if not other_msg:
+            soft_assert(actual_err, expected_message)
+
+        else:
+            res = actual_err in [expected_message, other_msg]
+            logger.debug(f"- Actual error msg: {actual_err!r}, expected error msg: {expected_message!r}, other expected msg: {other_msg!r}")
+            soft_assert(res, True, error_message=f"Actual:{actual_err!r}, Expected: {expected_message} or {other_msg}")
+
         self.close_alert_box()

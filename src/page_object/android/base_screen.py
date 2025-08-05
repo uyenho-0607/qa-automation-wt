@@ -61,10 +61,10 @@ class BaseScreen:
     def go_back(self):
         self.actions.click(self.__btn_nav_back)
 
-    def wait_for_spin_loader(self, timeout: int = EXPLICIT_WAIT):
+    def wait_for_spin_loader(self, timeout: int = 5):
         """Wait for the loader to be invisible."""
         logger.debug("- Waiting for spin loader...")
-        if self.actions.is_element_displayed(self.__spin_loader, timeout=5):
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def navigate_to(self, feature: Features, wait=False):
