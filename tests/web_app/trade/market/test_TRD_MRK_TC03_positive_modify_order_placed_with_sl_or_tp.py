@@ -30,9 +30,6 @@ def test(web_app, market_obj, get_asset_tab_amount, exclude_field, update_field,
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
     create_order_data(trade_object)
 
-    # logger.info("Step 2: Select Pending Orders tab")
-    # web_app.trade_page.asset_tab.select_tab(AssetTabs.OPEN_POSITION)
-
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web_app.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
 
@@ -47,9 +44,6 @@ def test(web_app, market_obj, get_asset_tab_amount, exclude_field, update_field,
 
     logger.info(f"Verify order updated notification banner")
     web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
-
-    # logger.info("Step 5: Select Pending Orders tab")
-    # web_app.trade_page.asset_tab.select_tab(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Verify order details after update")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)

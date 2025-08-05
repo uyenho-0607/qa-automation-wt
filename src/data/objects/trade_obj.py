@@ -215,7 +215,7 @@ class ObjTrade(BaseObj):
             'symbol': self.symbol,
             'tradeExpiry': self.get_expiry_map(self.expiry),
             'fillPolicy': self.get_fill_policy_map(self.fill_policy),
-            'volume': float(self.volume.split(" / ")[0]),
+            'volume': float(str(self.volume).split(" / ")[0]),
             'units': remove_comma(self.units),
             'stopLoss': remove_comma(self.stop_loss),
             'takeProfit': remove_comma(self.take_profit),
