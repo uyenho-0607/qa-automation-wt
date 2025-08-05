@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 
@@ -42,6 +43,7 @@ def setup_order_data(web_app):
     for _symbol in symbols:
         trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)
         APIClient().trade.post_order(trade_object, update_price=False)
+        time.sleep(1)
 
     logger.info("- Navigate to Home Page")
     web_app.assets_page.navigate_to(Features.HOME)

@@ -82,6 +82,7 @@ class Notifications(BasePage):
     def verify_notification_result(self, expected_result: str | list, close=False):
         self.open_noti_box()
         actual_res = self.actions.get_text(self.__noti_list_items).split(", ")[0].replace("  ", " ")
+        actual_res = actual_res.split("\n")[0]
 
         compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
         if close:

@@ -28,10 +28,10 @@ def attach_table_details(func):
 
         # Store the comparison result if it's returned by the function
         comparison_result = None
-        
+
         # Call the function and capture any returned comparison result
         result = func(*args, **kwargs)
-        
+
         # Check if the function returned a comparison result (for soft_assert)
         if isinstance(result, dict) and "res" in result and "diff" in result:
             comparison_result = result
@@ -47,9 +47,9 @@ def attach_table_details(func):
                 title += f" - {StepLogs.test_steps[-1]}"
 
             attach_verify_table(
-                actual, expected, 
-                tolerance_percent=kwargs.get("tolerance"), 
-                tolerance_fields=kwargs.get("tolerance_fields"), 
+                actual, expected,
+                tolerance_percent=kwargs.get("tolerance"),
+                tolerance_fields=kwargs.get("tolerance_fields"),
                 title=title,
                 comparison_result=comparison_result
             )
@@ -75,7 +75,7 @@ def handle_stale_element(func):
         bound_args = sig.bind(self, *args, **kwargs)
         bound_args.apply_defaults()  # This applies default values
         all_args = bound_args.arguments
-        
+
         max_retries = 3
         raise_exception = all_args.get("raise_exception")
 
@@ -101,22 +101,8 @@ def handle_stale_element(func):
                         attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
                         raise e
-
-            except Exception as e:
-                # Handle any other exceptions
-                if raise_exception:
-                    logger.error(f"Unexpected exception for locator {args[0] if args else 'N/A'}: {type(e).__name__}: {str(e)}")
-                    if StepLogs.test_steps:
-                        logger.debug("- Capture broken info")
-                        StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
-                        attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
-                    raise e
-
-                else:
-                    # Just log debug info when raise_exception = False
-                    logger.debug(f"Exception caught for locator {args[0] if args else 'N/A'}: {type(e).__name__}: {str(e)}")
-                    return None
         return None
+
     return wrapper
 
 

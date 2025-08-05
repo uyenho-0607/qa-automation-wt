@@ -199,7 +199,7 @@ class PlaceOrderPanel(BaseTrade):
 
         logger.debug(f"- Select order type: {order_type.capitalize()!r}")
         self.actions.click(self.__drp_order_type)
-        time.sleep(0.5)
+        time.sleep(1)
         self.actions.click(locator)
 
     def _select_fill_policy(self, fill_policy: FillPolicy | str) -> str | None:

@@ -106,7 +106,7 @@ def pytest_runtest_setup(item: pytest.Item):
     account = RuntimeConfig.account
 
     # Set up Allure test structure
-    module = item.nodeid.split("/")[2:-1]  # not count test, web, and test name
+    module = item.nodeid.split("::")[0].split("/")[2:-1]  # not count test, web, and test name
     sub_suite = " - ".join(item.capitalize() for item in module)
     sub_suite = sub_suite.replace("_", " ").title()
 

@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import AssetTabs, SLTPType
+from src.data.enums import AssetTabs, SLTPType, Features
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
@@ -39,3 +39,16 @@ def test(web_app, cancel_all, sl_type, tp_type, market_obj):
 
     logger.info(f"Verify order details in tab")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)
+
+    logger.info("Step 3: Navigate to Home Screen")
+    web_app.trade_page.navigate_to(Features.HOME)
+
+    logger.info("Verify Open Position Notification")
+    web_app.home_page.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(order_id=trade_object.order_id), close=True)
+
+
+@pytest.fixture(autouse=True)
+def teardown_test(web_app):
+    yield
+    logger.info("- Navigate back to Trade Screen")
+    web_app.home_page.navigate_to(Features.TRADE)
