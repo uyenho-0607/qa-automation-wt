@@ -125,7 +125,7 @@ class ObjTrade(BaseObj):
         if self.get("tp_type") == SLTPType.POINTS:
             tolerance_fields += ["take_profit" if not api_format else "takeProfit"]
 
-        if self.order_type.is_market():
+        if self.order_type == OrderType.MARKET:
             tolerance_fields += ["entry_price"]
 
         return tolerance_fields
@@ -159,7 +159,7 @@ class ObjTrade(BaseObj):
         stp_limit_price, entry_price, stop_loss, take_profit = self._format_prices()
         details = self._build_base_details()
         # Add entry price for non-market orders
-        if not self.order_type.is_market():
+        if not self.order_type == OrderType.MARKET:
             details["entry_price"] = entry_price
 
         # Add stop limit price for stop limit orders
@@ -215,7 +215,7 @@ class ObjTrade(BaseObj):
             'symbol': self.symbol,
             'tradeExpiry': self.get_expiry_map(self.expiry),
             'fillPolicy': self.get_fill_policy_map(self.fill_policy),
-            'volume': float(self.volume),
+            'volume': float(self.volume.split(" / ")[0]),
             'units': remove_comma(self.units),
             'stopLoss': remove_comma(self.stop_loss),
             'takeProfit': remove_comma(self.take_profit),
@@ -223,10 +223,10 @@ class ObjTrade(BaseObj):
         }
 
         # Add price based on order type
-        api_data |= {"openPrice" if self.order_type.is_market() else "price": remove_comma(self.entry_price)}
+        api_data |= {"openPrice" if self.order_type == OrderType.MARKET else "price": remove_comma(self.entry_price)}
 
         # Add stop limit price for stop limit orders
-        if self.order_type.is_stp_limit():
+        if self.order_type == OrderType.STOP_LIMIT:
             api_data["priceTrigger"] = remove_comma(self.stop_limit_price)
 
         return api_data
