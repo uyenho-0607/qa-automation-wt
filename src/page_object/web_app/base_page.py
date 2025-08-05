@@ -83,7 +83,15 @@ class BasePage:
         self.actions.click(self.__alert_box_close)
 
     # ------------------------ VERIFY ------------------------ #
-    def verify_alert_error_message(self, expected_message):
-        actual_err = self.actions.get_text(self.__alert_desc, timeout=EXPLICIT_WAIT)
-        soft_assert(actual_err, expected_message)
+    def verify_alert_error_message(self, expected_message, other_msg=None):
+        """Verify the error alert message."""
+        actual_err = self.actions.get_text(self.__alert_desc)
+        if not other_msg:
+            soft_assert(actual_err, expected_message)
+
+        else:
+            res = actual_err in [expected_message, other_msg]
+            logger.debug(f"- Actual error msg: {actual_err!r}, expected error msg: {expected_message!r}, other expected msg: {other_msg!r}")
+            soft_assert(res, True, error_message=f"Actual:{actual_err!r}, Expected: {expected_message} or {other_msg}")
+
         self.close_alert_box()

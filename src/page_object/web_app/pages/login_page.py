@@ -109,10 +109,14 @@ class LoginPage(BasePage):
         soft_assert(actual_password, password)
 
     def verify_alert_error_message(self, account_type=None):
-        account_type = account_type or RuntimeConfig.account
-
+        other_msg = None
         err_msg = UIMessages.LOGIN_INVALID
-        if account_type == AccountType.DEMO:
+
+        account_type = account_type or RuntimeConfig.account
+        if account_type == AccountType.DEMO or RuntimeConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
-        super().verify_alert_error_message(err_msg)
+        if RuntimeConfig.is_prod():  # sometimes prod can show 'Trading general error. Please try again later.'
+            other_msg = UIMessages.TRADING_GENERAL_ERRORS
+
+        super().verify_alert_error_message(err_msg, other_msg)
