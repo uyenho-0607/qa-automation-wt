@@ -75,9 +75,11 @@ class BasePage:
         self.actions.click(self.__btn_confirm)
 
     def click_cancel_btn(self):
-        while self.actions.is_element_displayed(self.__btn_cancel):
+        max_retries = 5
+        while self.actions.is_element_displayed(self.__btn_cancel) and max_retries:
             logger.debug("- Click cancel btn")
-            self.actions.click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
+            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
+            max_retries -= 1
 
     def close_alert_box(self):
         self.actions.click(self.__alert_box_close)

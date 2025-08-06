@@ -60,24 +60,10 @@ class TradePage(BasePage):
 
         # Prepare actual and expected data
         actual = trade_object.api_data_format()
+
         keys_to_check = list(actual.keys())
         expected = _prepare_expected(api_data, keys_to_check)
 
-        # Compare with tolerance
-        logger.debug("- Comparing actual vs expected with tolerance")
-        result = compare_dict(
-            actual,
-            expected,
-            tolerance_percent=0.1,
-            tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"]
-        )["res"]
-
-        if not result:
-            logger.warning("- Mismatch detected, retrying API fetch and rechecking")
-            api_data = _get_api_data()
-            expected = _prepare_expected(api_data, keys_to_check)
-
-        # Final soft assert
         soft_assert(
             actual,
             expected,
