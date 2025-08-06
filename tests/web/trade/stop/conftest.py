@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import OrderType
+from src.data.enums import OrderType, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 
 
@@ -10,4 +10,9 @@ def stop_obj(symbol):
         trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol, **kwargs)
         return trade_object
 
-    return _handler 
+    return _handler
+
+
+@pytest.fixture(autouse=True, scope="package")
+def select_tab(web):
+    web.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
