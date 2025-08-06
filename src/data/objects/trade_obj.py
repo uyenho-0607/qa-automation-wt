@@ -227,6 +227,6 @@ class ObjTrade(BaseObj):
 
         # Add stop limit price for stop limit orders
         if self.order_type == OrderType.STOP_LIMIT:
-            api_data["priceTrigger"] = remove_comma(self.stop_limit_price)
+            api_data["priceTrigger"] = remove_comma(self.get("stop_limit_price", self.get("pending_price")))
 
         return api_data

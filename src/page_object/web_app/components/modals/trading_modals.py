@@ -1,6 +1,5 @@
 import time
 
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -9,7 +8,7 @@ from src.data.enums import OrderType, SLTPType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element, data_testid
+from src.utils.common_utils import cook_element, data_testid
 from src.utils.format_utils import locator_format, format_dict_to_string
 from src.utils.logging_utils import logger
 
@@ -25,38 +24,7 @@ class TradingModals(BaseTrade):
     __confirm_symbol = (By.CSS_SELECTOR, data_testid('trade-confirmation-symbol'))
     __confirm_labels = (By.CSS_SELECTOR, data_testid('trade-confirmation-label'))
     __confirm_values = (By.CSS_SELECTOR, data_testid('trade-confirmation-value'))
-
-    # __confirm_volume = (
-    #     By.XPATH,
-    #     "//div[@data-testid='trade-confirmation-label' "
-    #     "and (contains(normalize-space(text()), 'Volume') or contains(normalize-space(text()), 'Size'))]"
-    #     "/following-sibling::div"
-    # )
-    # __confirm_units = (
-    #     By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Units']/following-sibling::div"
-    # )
-    # __confirm_price = (
-    #     By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Price']/following-sibling::div"
-    # )
-    # __confirm_stp_price = (
-    #     By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Stop Limit Price']/following-sibling::div"
-    # )
-    # __confirm_sl = (
-    #     By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Stop Loss']/following-sibling::div"
-    # )
-    # __confirm_tp = (
-    #     By.XPATH, "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Take Profit']/following-sibling::div"
-    # )
-    # __confirm_expiry = (
-    #     By.XPATH,
-    #     "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Expiry']/following-sibling::div"
-    # )
-    # __confirm_fill_policy = (
-    #     By.XPATH,
-    #     "//div[@data-testid='trade-confirmation-label' and normalize-space(text())='Fill Policy']/following-sibling::div"
-    # )
     __btn_cancel_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-close'))
-
 
     ##### Edit Confirmation Modal #####
     __btn_update_order = (By.CSS_SELECTOR, data_testid('edit-button-order'))
@@ -78,16 +46,10 @@ class TradingModals(BaseTrade):
     __edit_confirm_values = (By.CSS_SELECTOR, data_testid('edit-confirmation-value'))
 
     __btn_confirm_update_order = (By.CSS_SELECTOR, data_testid('edit-confirmation-button-confirm'))
-    __btn_cancel_update_order = (AppiumBy.XPATH, resource_id('edit-confirmation-button-close'))
+    __btn_cancel_update_order = (By.CSS_SELECTOR, data_testid('edit-confirmation-button-close'))
 
     ##### Asset Items #####
-    __btn_cancel_close_order = (AppiumBy.XPATH, resource_id('close-order-button-cancel'))
-    __btn_cancel_delete_order = (AppiumBy.XPATH, resource_id('confirmation-modal-button-cancel'))
-
-    __btn_bulk_close_confirm = (AppiumBy.XPATH, resource_id('bulk-close-modal-button-submit-{}'))
-    __btn_bulk_close_cancel = (AppiumBy.XPATH, resource_id('bulk-close-modal-button-cancel-all'))
-    __btn_bulk_delete_confirm = (AppiumBy.XPATH, resource_id('bulk-delete-modal-button-submit'))
-    __btn_bulk_delete_cancel = (AppiumBy.XPATH, resource_id('bulk-delete-modal-button-cancel'))
+    __btn_cancel_sheet = (By.CSS_SELECTOR, data_testid('action-sheet-cancel-button'))
 
     # ------------------------------------------------ ACTIONS ------------------------------------------------ #
     def close_trade_confirm_modal(self, timeout=QUICK_WAIT):
@@ -140,7 +102,13 @@ class TradingModals(BaseTrade):
 
     def select_expiry(self, expiry: Expiry):
         self.actions.click(self.__drp_edit_expiry)
-        self.actions.click(cook_element(self.__opt_edit_expiry, locator_format(expiry)))
+
+        locator = locator_format(expiry)
+        # handle special locator
+        if expiry == Expiry.SPECIFIED_DATE:
+            locator = "_".join(item.lower() for item in expiry.split(" "))
+
+        self.actions.click(cook_element(self.__opt_edit_expiry, locator))
 
         if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
             logger.debug(f"- Select expiry date")
@@ -182,6 +150,7 @@ class TradingModals(BaseTrade):
 
         logger.debug(f"- Actual: {format_dict_to_string(actual)}")
         return actual
+
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
     def verify_trade_confirmation(self, trade_object: ObjTrade):
         """Verify the trade confirmation information."""

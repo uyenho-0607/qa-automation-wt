@@ -15,12 +15,12 @@ from src.utils.logging_utils import logger
         SLTPType.sample_values(amount=2)
     ]
 )
-def test(web_app, cancel_all, sl_type, tp_type, market_obj):
+def test(web_app, cancel_all, sl_type, tp_type, market_obj, get_asset_tab_amount):
     trade_object = market_obj()
     tab = AssetTabs.OPEN_POSITION
 
     logger.info("Step 1: Get asset tab amount")
-    tab_amount = web_app.trade_page.asset_tab.get_tab_amount(tab)
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 2: Place {trade_object.trade_type} order for {trade_object.symbol!r} (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
     web_app.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)

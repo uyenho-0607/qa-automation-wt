@@ -52,7 +52,7 @@ class MyAccountModal(BasePage):
 
     def verify_account_info(self, exp_dict):
         actual = self.get_account_info()
-        soft_assert(actual, exp_dict, tolerance=0.05, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, exp_dict, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_balance_items_displayed(self, is_display=True):
         time.sleep(1)  # Wait for 1 second

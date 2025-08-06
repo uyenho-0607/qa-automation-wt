@@ -111,7 +111,7 @@ class WebActions(BaseActions):
 
     def scroll_picker_down(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
         wheel = self.find_element(locator, timeout)
-        self._action_chains.click_and_hold(wheel).move_by_offset(0, -50).release().perform()
+        self._action_chains.click_and_hold(wheel).move_by_offset(0, -50).release().pause(0.5).perform()
 
     def scroll_container_down(self, locator: tuple[str, str], scroll_step: float = 0.5):
         """Scroll a container element down by a smaller step to avoid missing items"""
