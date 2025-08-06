@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 
@@ -42,6 +43,7 @@ def setup_test(web):
     web.home_page.navigate_to(Features.MARKETS, wait=True)
 
     logger.info("- POST starred symbols")
+    time.sleep(2)
     symbols = web.markets_page.watch_list.get_current_symbols()
     for _symbol in symbols[:5]:
         APIClient().market.post_starred_symbol(_symbol)
