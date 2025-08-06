@@ -222,6 +222,9 @@ class ObjTrade(BaseObj):
             'orderId': self.order_id
         }
 
+        if self.order_type == OrderType.MARKET:
+            api_data.pop("fillPolicy", None)
+
         # Add price based on order type
         api_data |= {"openPrice" if self.order_type == OrderType.MARKET else "price": remove_comma(self.entry_price)}
 
