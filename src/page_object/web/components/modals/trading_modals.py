@@ -72,7 +72,7 @@ class TradingModals(BaseTrade):
 
     def click_edit_order_btn(self):
         """Click the edit order button."""
-        time.sleep(1)
+        time.sleep(2)
         self.actions.click(self.__btn_edit_order)
 
     def confirm_update_order(self, wait=False):
