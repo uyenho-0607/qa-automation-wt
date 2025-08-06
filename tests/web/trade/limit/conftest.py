@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import OrderType
+from src.data.enums import OrderType, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 
 
@@ -11,3 +11,9 @@ def limit_obj(symbol):
         return trade_object
 
     return _handler
+
+
+@pytest.fixture(autouse=True, scope="package")
+def select_tab(web):
+    web.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
