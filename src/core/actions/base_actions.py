@@ -48,7 +48,7 @@ class BaseActions:
             return wait.until(cond(locator))
 
         except StaleElementReferenceException:
-            logger.info("- Stale element finding element, retry...")
+            logger.warning("- Stale element finding element, retry...")
             return wait.until(cond(locator))
 
         except (TimeoutException, NoSuchElementException) as e:
@@ -76,7 +76,13 @@ class BaseActions:
         :param timeout: timeout for WebDriverWait, default is "EXPLICIT_WAIT"
         :return: list[WebElement] or empty list (case not found)
         """
-        res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+        try:
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+
+        except StaleElementReferenceException:
+            logger.warning("StaleElementReferenceException finding elements, retry...")
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+
         return res or []
 
     @handle_stale_element
