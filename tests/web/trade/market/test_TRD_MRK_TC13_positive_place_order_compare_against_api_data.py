@@ -40,13 +40,13 @@ def test(web, update_trade_obj, market_obj, get_asset_tab_amount, symbol, close_
 
 
 @pytest.fixture
-def update_trade_obj():
+def update_trade_obj(symbol):
     def _handler(order_data):
         if not order_data:
             return None
 
         order_data['trade_type'] = order_data.pop("order_type", None)
-        trade_obj = ObjTrade(order_type=OrderType.MARKET, **order_data)
+        trade_obj = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, **order_data)
 
         return trade_obj
 
