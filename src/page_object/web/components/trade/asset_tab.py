@@ -5,7 +5,7 @@ from typing import Optional, List, Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, LONG_WAIT
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts, SLTPType, Expiry, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -132,7 +132,7 @@ class AssetTab(BaseTrade):
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""
         self.actions.wait_for_element_visible(
-            cook_element(self.__tab_amount, locator_format(tab), expected_amount)
+            cook_element(self.__tab_amount, locator_format(tab), expected_amount), timeout=20
         )
 
     def _click_action_btn(self, tab: AssetTabs, order_id=0, action: Literal["close", "edit", "track"] = "close") -> None:
