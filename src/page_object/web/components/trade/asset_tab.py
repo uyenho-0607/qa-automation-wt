@@ -278,7 +278,9 @@ class AssetTab(BaseTrade):
             expiry: Expiry = None,
             confirm=False,
             retry_count=0,
-            max_retries=3
+            max_retries=3,
+            oct=False,
+
     ):
         """
         Modify stop loss/ take profit/ fill policy/ Expiry
@@ -288,6 +290,7 @@ class AssetTab(BaseTrade):
         expiry: one by default, give this value if modifying expiry
         retry_count: Current retry attempt (used internally for recursion)
         max_retries: Maximum number of retry attempts
+        oct: if is True, not checking the edit confirmation modal display
         """
         if retry_count >= max_retries:
             logger.error(f"Failed to display edit confirm modal after {max_retries} attempts")
@@ -329,7 +332,7 @@ class AssetTab(BaseTrade):
         self.__trade_modals.click_edit_order_btn()
 
         # check if edit confirm modal is displayed
-        if not self.__trade_modals.is_edit_confirm_modal_displayed():
+        if not oct and not self.__trade_modals.is_edit_confirm_modal_displayed():
             # Recursive call with incremented retry count
             self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
 

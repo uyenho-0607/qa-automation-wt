@@ -29,7 +29,7 @@ def test(web, symbol, search_symbol, close_edit_confirm_modal, order_type):
     web.assets_page.asset_tab.verify_item_data(trade_object)
 
     logger.info(f" Step 3: Update placed order")
-    web.assets_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
+    web.assets_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), oct=True)
 
     logger.info(f"Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))

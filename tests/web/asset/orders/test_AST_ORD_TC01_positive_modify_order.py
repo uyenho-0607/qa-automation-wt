@@ -34,7 +34,7 @@ def test(web, symbol, search_symbol, close_edit_confirm_modal, order_type):
     web.trade_page.asset_tab.get_last_order_id(trade_object)
 
     logger.info(f" Step 5: Update order with SL and TP")
-    web.assets_page.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
+    web.assets_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
 
     logger.info("Verify trade edit confirmation")
     web.assets_page.modals.verify_edit_trade_confirmation(trade_object)
