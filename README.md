@@ -1,174 +1,375 @@
-# QA Automation Testing
+# Web, Mobile, and API Test Automation Framework
 
-## Setting up your project environment
-- Ensure that you have Python (3.11 and above) installed on your machine
-  - Please refer to https://www.dataquest.io/blog/installing-python-on-mac/ for more information on how to get Python up and running
-- Ensure that `pip` or `pip3` is installed alongside Python as well, `pip` would be your main package manager for Python libraries used in running the test cases
-- Ensure that you have either Visual Studio Code installed on your machine
-  - The IDE (Integrated Development Enviroment) will facilitate your coding of your Python test cases
-  - Download Visual Studio Code (v1.85 and above): https://code.visualstudio.com/download
-- [For macOS] Ensure that you have `brew` installed on your machine
-  **`brew` is a package manager for macOS plugins/libraries that we would have to use to setup your development environment**
-  - Refer to https://brew.sh/ for more info on installation
-    1. Open Terminal
-    2. Run the following command:
-      `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
-    3. Ensure that you follow the commands given after successful installation of `brew`
-      ```
-        eval "$(homebrew/bin/brew shellenv)"
-        brew update --force --quiet
-        chmod -R go-w "$(brew --prefix)/share/zsh"
-      ```
-- Ensure that you have Allure installed on your machine
-  **Allure is an automation test report tool that we will be using to generate reports from the test case results**
-  - Refer to https://allurereport.org/docs/gettingstarted-installation/ for more info on installation
-  - macOS
-    - Make sure Homebrew is installed.
-    - In a terminal, run this command:
-      ```
-      brew install allure
-      brew install ffmpeg
-      ```
-  - Windows
-    - Make sure Scoop is installed.
-    - Make sure Java version 8 or above installed, and its directory is specified in the `JAVA_HOME` environment variable.
-    - In a terminal, run this command:
-      ```
-      scoop install allure
-      ```
-- Ensure that you have `pytest` installed on your machine
-  - `pip` is required for installation of `pytest`
-  ```
-    pip install pytest
-  ```
-  - To verify if `pytest` is working
-  ```
-    # Running this command should print out: pytest 8.x.x
-    pytest --version
-  ```
+A comprehensive test automation framework built with Python, supporting web application testing with Selenium, mobile application testing with Appium, and API testing with RESTful services.
 
-## Project structure
-- The structure of the folder/files in this project will be further elaborated below:
+## 🚀 Features
 
-```
-OPTION-B
+- **Web Application Testing** with Selenium WebDriver
+- **Mobile Application Testing** with Appium (Android support)
+- **API Testing** with RESTful services
+- **Page Object Model (POM)** design pattern for UI testing
+- **Allure Reporting** integration with custom enhancements
+- **Cross-platform support** (Web, Android)
+- **Modular and maintainable** test structure
+- **Code quality tools** integration (flake8, isort, black)
+- **Parallel test execution** with controlled concurrency
+- **Environment-specific configurations** (SIT, UAT, PROD)
+- **Multi-client support** (Lirunex, TransactCloud)
+- **Multi-server support** (MT4, MT5)
+- **Account type testing** (Demo, Live, CRM)
+- **Video recording** for mobile tests
+- **Screenshot capture** on test failures
 
-├── src
-│   ├── common
-│   │   ├── desktop
-│   │   │   ├── login
-│   │   │   │   ├── utils.py
-│   │   │   ├── Logout
-│   │   │   │   ├── utils.py
-│   │   ├── mobileweb
-│   │   │   ├── login
-│   │   │   │   ├── utils.py
-│   │   │   ├── Logout
-│   │   │   │   ├── utils.py
-│   │   ├── main.py
-│   ├── constants
-│   │   ├── main.py
-│   ├── custom_types
-│   │   ├── __init__.py
-│   ├── enums
-│   │   ├── main.py
-│   ├── test
-│   │   ├── ts_da
-│   │   │   ├── test_01.py
-│   │   │   ├── test_02.py
-│   │   ├── ts_db
-│   │   │   ├── test_01.py
-│   │   │   ├── test_02.py
-│   │   ├── main.py
-├── .env
-├── .gitignore
-├── pyproject.toml
-├── README.md
-├── requirements.txt
-└── run.sh
+## 📋 Prerequisites
 
-from common.desktop.login import login_wt
+- Python 3.x
+- pip (Python package manager)
+- Virtual environment (recommended)
+- Git
+- Allure Command Line Tool (for report generation)
+
+## 🛠️ Installation
+
+1. Clone the repository:
+```bash
+git clone [repository-url]
+cd qa-automation-wt
 ```
 
-- `src/`
-  - Main folder containing all test cases and environment variables
-  - `common/`
-    - Contains commonly used functions that are shared across test cases
-    - Each platform will host its own folder hierarchy
-    - Within each platform, it contains folders for specific user actions according to screen (e.g. trade, login, etc.)
-      - All functions will be exported by `utils.py` for usage across the project
-    - A `helper` library will be initialised which will hold most of the commonly used functions across test cases
-  - `constants/`
-    - Contains all test IDs of HTML elements being accessed by `selenium` when running the test cases
-      - All test IDs will be initialissed within `DataTestID` class in `element_ids.py`
-      - e.g. `LOGIN_SUBMIT = 'login-submit'`
-  - `test/`
-    - Contains all test suites and associated test cases of the test suites
-    - Each test suite will have a dedicated folder to contain all test cases within the folder
-- `pyproject.toml`
-  - This file contains info on the build system details required for running your test cases
-  - You do not need to make any changes here, keep this file as it is
-- `requirements.txt`
-  - This is the main file that defines all the libraries required for `run.sh` script to download and install the relevant libraries required for testing
-    - Define the library and version in this format -> `<library>==<version-number>`
-    - e.g. `pandas==2.2.0`
-- `run.sh`
-  - This is the main script file that you will have to execute on your terminal in order to run your test case
-  - This script accepts an optional parameter that will allow you to run all test case within a single `.py` file
-    - The script command will look like this: `./run.sh <file_name>.py` or `./run.sh <file_folder>`
-    - e.g. `./run.sh test/ts_da` will run all test cases with prefix `test_` within the `test/ts_da` test suite e.g. `test_01.py`
-    - e.g. `./run.sh test/ts_da/test_01.py` will run the specific test case `test_01.py` within the `test/ts_da` test suite
-  - Alternatively, as we are using `pytest` as our main testing library, you could run the test directly using the following command:
-    - Assumption: You have already downloaded the libraries required for running test cases through `pytest`
-    - e.g. `pytest test/ts_da/test_01.py`
+2. Create and activate a virtual environment:
+```bash
+python -m venv .venv
+# On Windows
+.venv\Scripts\activate
+# On Unix or MacOS
+source .venv/bin/activate
+```
 
-## Writing of test cases
-- The test cases will be stored under the `test/` folder
-- One test suite (e.g. TS_dA), will have a folder to contain the numerous test cases tied to the test suite
-  - e.g.
-    ```
-      ├── test
-      │   ├── ts_da
-      │   │   ├── test_01.py
-      │   │   ├── test_02.py
-      │   ├── ts_db
-      │   │   ├── test_01.py
-    ```
-- For every test case `.py` file, it must be initialised as a class.
-  - e.g. 
-    ```
-      class TC_zA_001():
-          @allure.title("TC_zA01 - Sample Test Case")
-          def test_sample(self):
-            ...
-    ```
-- `@allure.title` should only be applied onto the individual test case's title.
-- For every test case step, it needs to be annotated with `with allure.step("")`
-  e.g.
-  ```
-    from common.desktop.module_login.utils import login_wt
-    from common.desktop.trade.utils import place_order
-    from constants.helper.driver import shutdown
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-    class TC_zA_001():
-        @allure.title("TC_zA01 - Place a Market Order on WT")
-        def test_place_market_order(self):
-          # Annotation should be done for every individual step indicated on test case
-          with allure.step("Login onto WT"):
-            login_wt()
+4. Install Allure Command Line Tool:
+```bash
+# On macOS
+brew install allure
 
-          with allure.step("Place order on WT"):
-            place_order()
-          
-          ...
+# On Windows (using scoop)
+scoop install allure
 
-          shutdown(driver)
-  ```
-## Generating test report using Allure
-- Within the `run.sh` script commands, the results of the test cases/test suites that are being executed are being collected into the `allure_results/` folder.
-- To view the test case report locally, run the following command:
-  - `allure serve`
-- If there are no errors occurring after running the above command, there will be a log in the terminal stating:
-  - `Server started at <http://<ip-address>55001/>. Press <Ctrl+C> to exit`
-- A webpage will be spawned, which will display your test case report. The URL of the webpage will be something like this:
-  - `http://10.0.25.13:55001/index.html`
+# On Linux
+wget -qO- https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.24.0/allure-commandline-2.24.0.tgz | tar -xz -C /opt/
+sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
+```
+
+## 📁 Framework Structure
+
+```
+qa-automation-wt/
+├── config/                 # Configuration files
+├── docs/                  # Documentation
+│   ├── test_case_rules.md
+│   ├── test_naming_convention.md
+│   └── locator_conventions.md
+├── src/                   # Source code
+│   ├── apis/             # API testing modules
+│   │   ├── api_base.py   # Base API client
+│   │   ├── api_client.py # HTTP client wrapper
+│   │   ├── auth_api.py   # Authentication API
+│   │   ├── trade_api.py  # Trading API
+│   │   ├── user_api.py   # User management API
+│   │   ├── market_api.py # Market data API
+│   │   ├── order_api.py  # Order management API
+│   │   ├── statistics_api.py # Statistics API
+│   │   └── chart_api.py  # Chart data API
+│   │
+│   ├── core/             # Core framework functionality
+│   │   ├── actions/      # Action implementations
+│   │   ├── driver/       # Driver management
+│   │   ├── page_container/ # Page container management
+│   │   ├── config_manager.py # Configuration management
+│   │   └── decorators.py # Custom decorators
+│   │
+│   ├── data/             # Test data and constants
+│   │   ├── enums.py      # Enumerations
+│   │   ├── ui_messages.py # UI message constants
+│   │   └── project_info.py # Project information
+│   │
+│   ├── page_object/      # Page Object classes
+│   │   ├── web/         # Web page objects
+│   │   │   ├── base_page.py
+│   │   │   ├── pages/   # Individual page objects
+│   │   │   └── components/ # Reusable components
+│   │   └── android/     # Android page objects
+│   │       ├── base_page.py
+│   │       ├── pages/   # Individual page objects
+│   │       └── components/ # Reusable components
+│   │
+│   └── utils/            # Utility functions
+│       ├── allure_utils.py
+│       ├── assert_utils.py
+│       ├── common_utils.py
+│       ├── logging_utils.py
+│       └── video_utils.py
+│
+├── tests/                # Test cases
+│   ├── web/             # Web test cases
+│   ├── android/         # Android test cases
+│   ├── api/             # API test cases
+│   └── conftest.py      # Test configuration
+├── conftest.py          # Main pytest configuration
+├── pytest.ini          # Pytest settings
+├── requirements.txt     # Project dependencies
+├── pyproject.toml       # Project metadata
+├── setup.cfg           # Project configuration
+├── run_web_tests.sh    # Web test execution script
+├── merge_report.sh     # Report merging utility
+└── README.md           # Project documentation
+```
+
+### Key Components
+
+1. **APIs** (`src/apis/`)
+   - RESTful API testing modules
+   - Base API client with common functionality
+   - Specialized API modules for different services:
+     - Authentication
+     - Trading operations
+     - User management
+     - Market data
+     - Order management
+     - Statistics
+     - Chart data
+
+2. **Core** (`src/core/`)
+   - Framework's core functionality
+   - Actions: Web and mobile action implementations
+   - Driver management: Web and mobile driver handling
+   - Page container: Page object lifecycle management
+   - Configuration management: Environment and test configuration
+   - Decorators: Custom decorators for test enhancement
+
+3. **Page Objects** (`src/page_object/`)
+   - Page Object Model implementation for web and mobile applications
+   - Organized by platform:
+     - **Web** (`web/`):
+       - `base_page.py`: Base class for all web page objects
+       - `pages/`: Individual page objects (login, trade, markets, etc.)
+       - `components/`: Reusable web components (settings, modals, notifications, etc.)
+     - **Android** (`android/`):
+       - `base_page.py`: Base class for all Android page objects
+       - `pages/`: Individual mobile page objects
+       - `components/`: Reusable mobile components
+   - Each page object follows POM best practices:
+     - Encapsulates page-specific locators
+     - Implements page-specific actions
+     - Inherits from respective base page class
+     - Supports both web and mobile element interactions
+
+4. **Utils** (`src/utils/`)
+   - Allure reporting with custom enhancements
+   - Assertion utilities
+   - Common utilities
+   - Logging utilities
+   - Video recording utilities
+
+5. **Tests** (`tests/`)
+   - Web tests (`web/`)
+   - Android tests (`android/`)
+   - API tests (`api/`)
+
+6. **Config** (`config/`)
+   - Environment-specific configuration files
+
+7. **Docs** (`docs/`)
+   - Test case writing rules
+   - Test naming conventions
+   - Locator conventions
+
+## 🧪 Running Tests
+
+### Basic Test Execution
+
+To run all tests with Allure reporting:
+```bash
+pytest --alluredir=./allure-results
+```
+
+To generate and view the Allure report:
+```bash
+allure serve ./allure-results
+```
+
+### Test Execution Options
+
+The framework supports various test execution options through command-line arguments:
+
+```bash
+# Platform selection
+--platform=web|android
+
+# Environment selection
+--env=sit|uat|prod
+
+# Client selection
+--client=lirunex|transactCloud
+
+# Server selection
+--server=mt4|mt5
+
+# Account type
+--account=demo|live|crm
+
+# Browser selection (for web tests)
+--browser=chrome|firefox|edge
+
+# Headless mode (for web tests)
+--headless
+
+# Custom username
+--user="username"
+
+# Argo CD mode
+--cd
+
+# Test retry on failure
+--reruns <number>
+
+# Test markers
+-m "smoke|regression|e2e|critical|sanity"
+```
+
+### Test Execution Examples
+
+```bash
+# Run web tests on SIT environment for Lirunex client with MT4 server using demo account
+pytest --platform=web --env=sit --client=lirunex --server=mt4 --account=demo --alluredir=./allure-results
+
+# Run mobile tests on UAT environment with live account
+pytest --platform=android --env=uat --account=live --alluredir=./allure-results
+
+# Run API tests
+pytest tests/api --alluredir=./allure-results
+
+# Run smoke tests on Chrome browser in headless mode
+pytest --platform=web --browser=chrome --headless -m "smoke" --alluredir=./allure-results
+
+# Run critical tests with custom username
+pytest -m "critical" --user="testuser123" --alluredir=./allure-results
+
+# Run specific test case
+pytest tests/web/login/test_LGN_TC01_positive_valid_credentials.py --platform=web --env=sit --alluredir=./allure-results
+```
+
+### Parallel Test Execution
+
+Use the provided shell script for controlled parallel execution:
+```bash
+# Run web tests in parallel with controlled concurrency
+./run_web_tests.sh
+```
+
+The script controls the number of parallel test suites to manage memory usage effectively.
+
+## 🏷️ Test Markers
+
+The framework supports various test markers for categorization:
+
+- `smoke`: Smoke test suite
+- `sanity`: Sanity test suite
+- `critical`: Critical priority tests
+- `uat`: Tests for UAT environment only
+- `not_demo`: Tests not for demo accounts
+- `not_live`: Tests not for live accounts
+- `not_crm`: Tests not for CRM accounts
+
+## 🛠️ Development Tools
+
+### Code Quality
+- **flake8**: Linting and style checking
+- **isort**: Import sorting
+- **black**: Code formatting
+
+### Testing Framework
+- **pytest**: Test runner and framework
+- **pytest-selenium**: Selenium integration
+- **allure-pytest**: Test reporting
+- **pytest-check**: Additional test features
+- **pytest-rerunfailures**: Test retry functionality
+
+### Web & Mobile Testing
+- **selenium**: Web browser automation
+- **Appium-Python-Client**: Mobile app automation
+- **webdriver-manager**: WebDriver management
+
+### Utilities
+- **colorama**: Colored terminal output
+- **pyyaml**: YAML configuration parsing
+- **numpy**: Numerical computing
+- **pandas**: Data manipulation
+- **cryptography**: Encryption utilities
+- **boto3**: AWS SDK for Python
+
+## 📊 Reporting
+
+### Allure Reports
+The framework generates comprehensive Allure reports with:
+- Test execution results
+- Screenshots on failures
+- Video recordings for mobile tests
+- Environment information
+- Custom test steps and logs
+- Test categorization by server, account type, and platform
+
+### Report Generation
+```bash
+# Generate report
+allure generate ./allure-results --clean
+
+# Serve report locally
+allure serve ./allure-results
+
+# Open existing report
+allure open ./allure-report
+```
+
+## 🔧 Configuration
+
+### Environment Configuration
+The framework supports multiple environments:
+- **SIT**: System Integration Testing
+- **UAT**: User Acceptance Testing
+- **PROD**: Production (use with caution)
+
+### Client Configuration
+- **Lirunex**: Default client configuration
+- **TransactCloud**: Alternative client configuration
+
+### Server Configuration
+- **MT4**: MetaTrader 4 server
+- **MT5**: MetaTrader 5 server
+
+### Account Types
+- **Demo**: Demo trading accounts
+- **Live**: Live trading accounts
+- **CRM**: Customer Relationship Management accounts
+
+## 📚 Documentation
+
+Additional documentation is available in the `docs/` directory:
+- `test_case_rules.md`: Guidelines for writing test cases
+- `test_naming_convention.md`: Test naming conventions
+- `locator_conventions.md`: Locator strategy guidelines
+
+## 🤝 Contributing
+
+1. Follow the established coding standards
+2. Use the provided code quality tools
+3. Write comprehensive test cases
+4. Update documentation as needed
+5. Follow the test naming conventions
+
+## 📝 License
+
+This project is proprietary and confidential.

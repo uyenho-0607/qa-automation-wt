@@ -157,4 +157,6 @@ dmypy.json
 cython_debug/
 
 # Allure results
-allure-results/
+allure-results
+.idea/
+.idea/workspace.xml

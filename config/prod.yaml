@@ -1,0 +1,37 @@
+# GENERAL #
+# only support demo account for prod
+password_demo: gAAAAABoWMEt4Qc6bYKgPVXrbV3IuZjE_EJr1mE3aiqKPdG-oKPN462pDvi19zh-tkySetZtvasVQXlhuN1KqkCUz63-eyYQhg==
+
+# mobile
+android_udid: ""
+ios_udid: ""
+
+lirunex:
+  base_url: https://webtrader.lirunex.com
+  api_url: https://webtrader.lirunex.com/api
+
+  credentials:
+    mt4:
+      user_demo: 2092009642
+
+    mt5:
+      user_demo: 569202036
+
+  mobile:
+    app_package: com.aquariux.wt.lirunex
+    app_bundle: ...
+
+# not yet updated
+transactCloud:
+  base_url: https://webtrader.dcodemarkets.com
+  bo_url: https://transactcloudmt5-backoffice.webtrader-uat.s20ip12.com/backoffice/
+  api_url: https://webtrader.dcodemarkets.com/api
+
+  credentials:
+    mt5:
+      user_live: 7003091
+      user_demo: 7003091
+
+  mobile:
+    app_package: com.aquariux.wt.uat.transactcloudmt5
+    app_bundle: ...

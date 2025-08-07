@@ -1,0 +1,48 @@
+import random
+import time
+
+import pytest
+
+from src.data.consts import get_symbols
+from src.data.enums import OrderType, Features, WatchListTab, MarketsSection
+from src.data.objects.trade_obj import ObjTrade
+from src.utils.logging_utils import logger
+
+
+@pytest.mark.critical
+def test(web, disable_OCT):
+    symbol_list = random.choices(get_symbols(), k=5)
+
+    logger.info("Step 1: Navigate to Trade Page & Select tab Crypto")
+    web.markets_page.navigate_to(Features.TRADE, wait=True)
+    web.trade_page.watch_list.select_tab(WatchListTab.CRYPTO)
+
+    for idx, _symbol in enumerate(symbol_list):
+        trade_obj = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)
+
+        logger.info(f"Step {2 + idx}: Place {trade_obj.trade_type.upper()} Market orders for symbol {_symbol!r}")
+        web.trade_page.watch_list.select_symbol(_symbol)
+        time.sleep(2)
+        web.trade_page.place_order_panel.place_order(trade_obj, submit=True)
+        web.home_page.notifications.close_noti_banner()
+
+        logger.info(f"Verify order ({idx + 1}) placed successfully")
+        web.trade_page.asset_tab.verify_item_data(trade_object=trade_obj, wait=True)
+
+    logger.info("Step 7: Navigate to Market Page and check My Trade Section")
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
+
+    logger.info(f"Verify symbols list displayed in My Trade are: {symbol_list[::-1]}")
+    web.markets_page.verify_my_trade_items_list(symbol_list[::-1])
+
+    logger.info(f"Step 8: Place Pending Order for symbol: {symbol_list[-1]}")
+    web.markets_page.select_symbol(MarketsSection.MY_TRADE)
+
+    trade_obj = ObjTrade(symbol=symbol_list[-1], order_type=OrderType.LIMIT)
+    web.trade_page.place_order_panel.place_order(trade_obj, submit=True)
+
+    logger.info("Step 9: Navigate to Market Page")
+    web.home_page.navigate_to(Features.MARKETS, wait=True)
+
+    logger.info("Verify displaying symbols are not changed")
+    web.markets_page.verify_my_trade_items_list(symbol_list[::-1])
