@@ -19,12 +19,21 @@ def web():
 
 @pytest.fixture(scope="package")
 def login_member_site(web):
+    retries = 3
     logger.info("- Navigate to WT Member Site")
     web.login_page.goto()
 
     logger.info("- Login to Member Site")
     web.login_page.login(wait=True)
     web.home_page.feature_announcement_modal.got_it()
+
+    logger.info("- Check if logged success")
+    while not web.home_page.is_logged_in() and retries:
+        logger.info("- Retry login")
+        web.login_page.login(wait=True)
+        web.home_page.feature_announcement_modal.got_it()
+
+        retries -= 1
 
 
 @pytest.fixture(scope="package")

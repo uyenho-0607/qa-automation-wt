@@ -3,7 +3,7 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, SHORT_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT, EXPLICIT_WAIT
 from src.data.enums import URLPaths
 from src.data.enums.home import AccSummary
 from src.data.ui_messages import UIMessages
@@ -56,6 +56,9 @@ class HomePage(BasePage):
     __empty_message = (By.CSS_SELECTOR, "div[data-testid='symbol-dropdown-result'] > div[data-testid='empty-message']")
 
     # ------------------------ ACTIONS ------------------------ #
+    def is_logged_in(self):
+        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+
     def toggle_account_selector(self, open=True):
         is_open = self.actions.is_element_displayed(self.__account_balance_item)
         if open != is_open:
