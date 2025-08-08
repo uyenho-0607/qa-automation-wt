@@ -12,7 +12,7 @@ from src.page_object.web.components.modals.feature_anm_modal import FeatureAnnou
 from src.page_object.web.components.notifications import Notifications
 from src.page_object.web.components.settings import Settings
 from src.page_object.web.components.trade.watch_list import WatchList
-from src.utils.assert_utils import soft_assert
+from src.utils.assert_utils import soft_assert, compare_with_tolerance
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import remove_comma, format_acc_balance
 from src.utils.logging_utils import logger
@@ -170,17 +170,24 @@ class HomePage(BasePage):
 
     def verify_acc_summary_dropdown(self):
         element_dict = {}
+        max_retries = 3
 
         for item in AccSummary.checkbox_list():
-            element_dict[item] = self.actions.find_elements(cook_element(self.__acc_balance_items, item))
+            element_dict[item] = [format_acc_balance(text) for text in self.actions.get_text_elements(cook_element(self.__acc_balance_items, item))]
+
+            while not compare_with_tolerance(element_dict[item][0], element_dict[item][-1]) and max_retries:
+                logger.debug("- Retry getting account summary values")
+                element_dict[item] = [format_acc_balance(text) for text in self.actions.get_text_elements(cook_element(self.__acc_balance_items, item))]
+                max_retries -= 1
 
         logger.debug("- Checking enough account items are found")
         for item in AccSummary.checkbox_list():
             soft_assert(len(element_dict[item]), 2, error_message=f"Not enough values to compare, actual {len(element_dict[item])}, expected: 2")
 
         logger.debug("- Checking account details")
-        expected = {item: format_acc_balance(element_dict[item][0].text) for item in AccSummary.checkbox_list()}
-        actual = {item: format_acc_balance(element_dict[item][-1].text) for item in AccSummary.checkbox_list()}
+        expected = {item: element_dict[item][0] for item in AccSummary.checkbox_list()}
+        actual = {item: element_dict[item][-1] for item in AccSummary.checkbox_list()}
+
         soft_assert(actual, expected, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_search_result(self, symbol: str):
