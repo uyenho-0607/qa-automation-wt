@@ -79,11 +79,12 @@ class TradingModals(BaseTrade):
             self.actions.click(self.__btn_edit_order)
 
             if not self.actions.is_element_displayed(self.__btn_confirm_update_order, is_display=False):
-                return  # Success
+                return  True
 
             attempt += 1
 
         logger.warning("- Max retries exceeded for clicking edit order button")
+        return False
 
     def confirm_update_order(self, wait=False, retries=3):
         """Click the confirm update order button."""

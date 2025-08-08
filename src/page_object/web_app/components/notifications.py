@@ -1,12 +1,11 @@
-from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
+from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT, SHORT_WAIT
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
 from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
-from src.utils.common_utils import data_testid
+from src.utils.common_utils import data_testid, cook_element
 from src.utils.logging_utils import logger
 
 
@@ -22,6 +21,8 @@ class Notifications(BasePage):
     __noti_list_items = (By.CSS_SELECTOR, data_testid('notification-list-result-item'))
     __btn_close = (By.CSS_SELECTOR, data_testid('navigation-back-button'))
     __btn_close_banner = (By.CSS_SELECTOR, data_testid('notification-box-close'))
+
+    __noti_result = (By.XPATH, "//div[@data-testid='notification-list-result-item' and contains(normalize-space(), '{}')]")
 
     # Noti order details
     __noti_details_order_type = (By.CSS_SELECTOR, data_testid('notification-order-details-modal-order-type'))
@@ -57,8 +58,22 @@ class Notifications(BasePage):
         not wait or self.wait_for_spin_loader(timeout=3)
 
     def close_noti_banner(self):
-        if self.actions.is_element_displayed(self.__btn_close_banner, timeout=QUICK_WAIT):
-            self.actions.click(self.__btn_close_banner, show_log=False, raise_exception=False)
+        try:
+            if self.actions.is_element_displayed(self.__btn_close_banner, timeout=SHORT_WAIT):
+                logger.info("- Close noti banner")
+                self.actions.click(self.__btn_close, raise_exception=False)
+
+        except Exception as e:
+            logger.debug(f"- Exception {e} closing notification banner")
+            pass
+
+    def _get_open_position(self):
+        noti = cook_element(self.__noti_result, "Open Position")
+        return self.actions.get_text(noti)
+
+    def _get_position_closed(self):
+        noti = cook_element(self.__noti_result, "Position Closed")
+        return self.actions.get_text(noti)
 
     # ------------------------ VERIFY ------------------------ #
 
@@ -78,10 +93,18 @@ class Notifications(BasePage):
             logger.debug(f"- Check noti title - {expected_title!r}")
             soft_assert(actual_title, expected_title)
 
-
     def verify_notification_result(self, expected_result: str | list, close=False):
         self.open_noti_box()
-        actual_res = self.actions.get_text(self.__noti_list_items).split(", ")[0].replace("  ", " ")
+        if "Open Position" in expected_result:
+            noti_res = self._get_open_position()
+
+        elif "Position Closed" in expected_result:
+            noti_res = self._get_position_closed()
+
+        else:
+            noti_res = self.actions.get_text(self.__noti_list_items)
+
+        actual_res = noti_res.split(", ")[0].replace("  ", " ")
         actual_res = actual_res.split("\n")[0]
 
         compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
