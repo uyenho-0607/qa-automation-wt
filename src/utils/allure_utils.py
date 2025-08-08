@@ -155,11 +155,11 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
 
                     else:  # this is a broken step
                         v_step["status"] = "broken"
-                        data["status"] = "broken"
+                        # data["status"] = "broken"
                         data["steps"][-1]["attachments"].extend(list(
                             filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                         ))
-
+            
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
     """Process broken test status and update steps."""

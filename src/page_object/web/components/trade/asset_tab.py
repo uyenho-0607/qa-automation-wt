@@ -86,6 +86,11 @@ class AssetTab(BaseTrade):
         trade_object.order_id = self.actions.get_text(cook_element(self.__col_order_ids, tab.col_locator()))
         return trade_object.order_id
 
+    def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
+        """Get current displaying symbols"""
+        symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()))
+        return symbols
+
     def get_order_ids(self, tab: AssetTabs) -> List[str]:
         """Get a list of displaying order IDs in the specified tab."""
         order_ids = self.actions.get_text_elements(cook_element(self.__col_order_ids, tab.col_locator()))
@@ -158,7 +163,7 @@ class AssetTab(BaseTrade):
         if trade_object:
             trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
 
-        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get('order_id'), "close")
+        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get('order_id') if trade_object else 0, "close")
 
         if confirm:
             if trade_object:
@@ -329,7 +334,10 @@ class AssetTab(BaseTrade):
             self.__trade_modals.select_expiry(expiry)
             trade_object.expiry = expiry
 
-        self.__trade_modals.click_edit_order_btn()
+        res_click = self.__trade_modals.click_edit_order_btn()
+
+        if not res_click:
+            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
 
         # check if edit confirm modal is displayed
         if not oct and not self.__trade_modals.is_edit_confirm_modal_displayed():
