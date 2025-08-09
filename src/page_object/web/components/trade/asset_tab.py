@@ -88,6 +88,7 @@ class AssetTab(BaseTrade):
 
     def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
         """Get current displaying symbols"""
+        self.wait_for_spin_loader()
         symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()))
         return symbols
 
