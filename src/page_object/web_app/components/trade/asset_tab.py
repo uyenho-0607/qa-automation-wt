@@ -13,7 +13,7 @@ from src.page_object.web_app.components.modals.trading_modals import TradingModa
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, data_testid
-from src.utils.format_utils import locator_format, extract_asset_tab_number, format_dict_to_string
+from src.utils.format_utils import locator_format, extract_asset_tab_number, format_dict_to_string, is_float
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_partial_close, get_sl_tp
 
@@ -39,6 +39,9 @@ class AssetTab(BaseTrade):
         By.XPATH,
         "//div[contains(normalize-space(), '{}')]/ancestor::div[2]/following-sibling::div//div[@data-testid='asset-{}-list-item-expand']"
     )
+    __expand_item_profit_loss = (
+        By.XPATH, "//div[@data-testid='asset-open-list-item-expand']/div[contains(normalize-space(), 'Profit/Loss')]"
+    )
     __expanded_labels = (By.CSS_SELECTOR, "[data-testid^='asset-{}-column'][data-testid$='label']")
     __expanded_values = (By.CSS_SELECTOR, "[data-testid^='asset-{}-column'][data-testid$='value']")
     __expanded_symbol = (By.CSS_SELECTOR, data_testid('asset-detailed-header-symbol'))
@@ -54,6 +57,11 @@ class AssetTab(BaseTrade):
     __txt_close_volume = (By.CSS_SELECTOR, data_testid('close-order-input-volume'))
 
     # ------------------------ HELPER METHODS ------------------------ #
+    def get_profit_loss(self, wait=True):
+        not wait or self.wait_for_spin_loader()
+        res = self.actions.get_text_elements(self.__expand_item_profit_loss)
+        res = [item.split("\n")[-1].replace("--", "0") for item in res]
+        return [(float(item) if is_float(item) else 0) for item in res]
 
     def get_tab_amount(self, tab: AssetTabs, wait=True) -> int:
         """Get the number of items in the specified tab."""
