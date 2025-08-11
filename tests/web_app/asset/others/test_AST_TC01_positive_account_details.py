@@ -40,7 +40,6 @@ def test(web_app, setup_teardown, symbol):
     web_app.trade_page.navigate_to(Features.ASSETS)
 
     # update expected value after closing orders
-    # acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + sum_profit
     acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + profit_loss
     acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + profit_loss
 
@@ -62,7 +61,6 @@ def setup_teardown(web_app, symbol):
 
     logger.info("- Prepare order data")
     cur_orders = APIClient().order.get_orders_details(symbol, order_type=OrderType.MARKET)
-    # cur_orders = [item for item in resp_ord if item["symbol"] == symbol]
 
     if not cur_orders:
         logger.debug(f"- POST {close_amount!r} MARKET orders")

@@ -7,7 +7,7 @@ from allure_commons.types import Severity
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
-from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS
+from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
 from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
@@ -155,9 +155,11 @@ def pytest_sessionfinish(session: pytest.Session):
         # Set allure report properties
         browser = RuntimeConfig.browser
         platform = f"{RuntimeConfig.platform.capitalize()}" + (f" - {browser.capitalize()}" if RuntimeConfig.is_web() else "")
+        if platform.lower() == "web_app":
+            platform += f" - {WEB_APP_DEVICE}"
 
         env_data = {
-            "Platform": platform,
+            "Platform": platform.replace("_", " ").title(),
             "Environment": RuntimeConfig.env.capitalize(),
             "Account": "Live/Crm" if RuntimeConfig.account != AccountType.DEMO else AccountType.DEMO.capitalize(),
         }
@@ -203,6 +205,10 @@ def pytest_runtest_makereport(item, call):
                     attach_video(driver)
                 except Exception as e:
                     logger.error(f"Failed to handle video recording: {str(e)}")
+
+            # if RuntimeConfig.platform.lower() in ["web", "web_app"]:
+            #     logger.debug("- Attach session video")
+            #     attach_session_video()
 
         if report.failed and "FAILURE" in report.longreprtext:
             StepLogs.all_failed_logs.append(("end_test", ""))
