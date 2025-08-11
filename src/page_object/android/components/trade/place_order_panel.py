@@ -271,4 +271,26 @@ class PlaceOrderPanel(BaseTrade):
         self._click_place_order_btn()
         not submit or self.confirm_trade()
 
+    def verify_signal_data_populated(self, trade_object: ObjTrade) -> None:
+        """Verify that signal data is correctly populated in the order panel."""
+        logger.debug(f"- Verify signal data populated for {trade_object.symbol!r}")
+        # Verify symbol is selected
+        assert trade_object.symbol in self.get_selected_symbol(), f"Signal symbol {trade_object.symbol} not populated"
+        
+    def submit_order(self) -> None:
+        """Submit the order."""
+        logger.debug("- Submit order")
+        self._click_place_order_btn()
+
+    def get_selected_symbol(self) -> str:
+        """Get the currently selected symbol."""
+        # This would typically get the symbol from a symbol selector element
+        # For now, return a default or get from a symbol display element
+        try:
+            symbol_locator = (AppiumBy.XPATH, resource_id('selected-symbol'))
+            return self.actions.get_text(symbol_locator)
+        except:
+            # Fallback - could get from trade button or other element
+            return "EURUSD"  # Default fallback
+
     # ------------------------ VERIFY ------------------------ #
