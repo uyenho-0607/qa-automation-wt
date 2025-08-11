@@ -89,7 +89,7 @@ def handle_stale_element(func):
 
                 if attempt < max_retries:
                     logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
-                    time.sleep(1)
+                    # time.sleep(0.5)
                     continue
 
                 else:
