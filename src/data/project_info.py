@@ -13,26 +13,26 @@ class StepLogs:
 
 
 class RuntimeConfig:
-    allure_dir: str = None
-    env: str = None
-    client: str = None
-    server: str = None
-    account: str = None
+    allure_dir: str = ""
+    env: str = ""
+    client: str = ""
+    server: str = ""
+    account: str = ""
 
-    platform: str = None
-    browser: str = None
-    headless: str = None
-    argo_cd: str = None
+    platform: str = ""
+    browser: str = ""
+    headless: str = ""
+    argo_cd: str = ""
 
-    user: str = None
-    password: str = None
-    url: str = None
+    user: str = ""
+    password: str = ""
+    url: str = ""
 
     headers: dict = {}
 
     @classmethod
     def is_non_oms(cls):
-        return cls.client == "transactCloud"
+        return cls.client.lower() not in ["lirunex"]
 
     @classmethod
     def is_prod(cls):

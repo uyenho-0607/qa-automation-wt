@@ -98,7 +98,7 @@ class BasePage:
         expected_url = Config.url_path(url_path) if url_path is not None else custom_url
         self.actions.verify_site_url(expected_url, timeout=timeout)
 
-    def verify_alert_error_message(self, expected_message: UIMessages | str, other_msg=None, timeout=EXPLICIT_WAIT):
+    def verify_alert_error_message(self, expected_message: UIMessages | str, other_msg=None, timeout=20):
         """Verify the error alert message."""
         actual_err = self.actions.get_text(self.__alert_error, timeout=timeout)
         if not other_msg:

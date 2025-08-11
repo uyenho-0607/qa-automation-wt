@@ -1,9 +1,7 @@
-import time
-
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import OrderType, SLTPType, Features, AccInfo, WatchListTab, AssetTabs
+from src.data.enums import OrderType, SLTPType, Features, AccInfo, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -62,6 +60,7 @@ def setup_teardown(web_app, symbol):
     cur_orders = [item for item in resp_ord if item["symbol"] == symbol]
 
     if not cur_orders:
+        logger.debug(f"- POST {close_amount!r} MARKET orders")
         for _ in range(close_amount):
             trade_object = ObjTrade(order_type=OrderType.MARKET, indicate=SLTPType.POINTS, symbol=symbol)
             APIClient().trade.post_order(trade_object)
@@ -70,5 +69,7 @@ def setup_teardown(web_app, symbol):
 
     order_ids = [item["orderId"] for item in cur_orders[:close_amount]]
     profit = [item["profit"] for item in cur_orders[:close_amount]]
+
+    logger.debug(f"- Sum Profit: {sum(profit)}")
 
     yield account_summary, account_info, order_ids, sum(profit)

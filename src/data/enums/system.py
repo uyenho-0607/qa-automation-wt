@@ -49,6 +49,7 @@ class Client(BaseEnum):
     """Enum representing different client platforms."""
     LIRUNEX = "lirunex"
     TRANSACT_CLOUD = "transactCloud"
+    DECODE = "dcodemarkets"
 
 
 class Server(BaseEnum):
