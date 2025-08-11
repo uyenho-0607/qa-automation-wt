@@ -7,7 +7,7 @@ from allure_commons.types import Severity
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
-from src.data.consts import ROOTDIR, VIDEO_DIR, NON_OMS
+from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS
 from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
@@ -63,7 +63,7 @@ def pytest_sessionstart(session: pytest.Session):
     if account == AccountType.LIVE and client == Client.LIRUNEX:
         account = "crm"
 
-    if client in NON_OMS:
+    if client not in MULTI_OMS:
         server = Server.MT5
 
     user = session.config.getoption("user")
@@ -207,9 +207,9 @@ def pytest_runtest_makereport(item, call):
         if report.failed and "FAILURE" in report.longreprtext:
             StepLogs.all_failed_logs.append(("end_test", ""))
 
-            # if RuntimeConfig.platform.lower() in ["web", "web_app"]:
-            #     logger.debug("- Attach session video")
-            #     attach_session_video()
+            if RuntimeConfig.platform.lower() in ["web", "web_app"]:
+                logger.debug("- Attach session video")
+                attach_session_video()
 
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):

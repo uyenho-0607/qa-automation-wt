@@ -1,5 +1,6 @@
 import logging
 import subprocess
+from collections import defaultdict
 from pathlib import Path
 from shutil import which
 from typing import List, Dict, Optional
@@ -8,9 +9,11 @@ from gspread import authorize
 from oauth2client.service_account import ServiceAccountCredentials
 
 from src.data.consts import ROOTDIR
+from src.utils.logging_utils import logger
 
 
 class GoogleSheetsAPI:
+    _sheet_data = None
     def __init__(self, keyfile: Optional[Path] = None):
         self.keyfile = keyfile or (ROOTDIR / "ggsheet_key.json")
         self.client = self._init_client()
@@ -26,7 +29,11 @@ class GoogleSheetsAPI:
 
     def _load_sheets(self, sheet_url: str):
         """Load all sheets in a spreadsheet by URL."""
-        return self.client.open_by_url(sheet_url).worksheets()
+        if not self._sheet_data:
+            logger.debug("- Loading sheet data from url")
+            self._sheet_data = self.client.open_by_url(sheet_url).worksheets()
+
+        return self._sheet_data
 
     def _get_sheet_data(self, sheet_url: str, clients: List[str]):
         """Get raw sheet data filtered by client names."""
@@ -44,7 +51,6 @@ class GoogleSheetsAPI:
         Parse the sheet data and directly return a flattened list of accounts
         filtered by account_type.
         """
-        from collections import defaultdict
 
         result = []
 
@@ -52,6 +58,11 @@ class GoogleSheetsAPI:
             data = sheet_data.get(client.lower(), None)
             if not data:
                 continue
+
+            # Extract client_url from the first row (index 1 if it exists, otherwise empty string)
+            client_url = ""
+            if len(data) > 0 and len(data[0]) > 1:
+                client_url = data[0][1] if data[0][1] else ""
 
             header_row = data[1]
             rows = data[2:]
@@ -78,6 +89,7 @@ class GoogleSheetsAPI:
                     if userid and password:
                         result.append({
                             "client": client,
+                            "client_url": client_url,
                             "account_type": acc_type,
                             "server": server,
                             "userid": userid,
@@ -108,8 +120,8 @@ class GoogleSheetsAPI:
 Handle test directories
 """
 
-def collect_critical_folders(platform="web", module="", test_marker="critical"):
 
+def collect_critical_folders(platform="web", module="", test_marker="critical"):
     test_root = ROOTDIR / "tests" / platform / module
     test_folders = set()
 
@@ -140,7 +152,7 @@ def collect_critical_folders(platform="web", module="", test_marker="critical"):
             logging.error(f"Error running pytest in {folder}: {e}")
 
     test_folders = sorted(test_folders)
-    res = [{"directory": f"tests{folder.split("tests")[-1]}"} for folder in test_folders]
+    res = [{"directory": f"tests{folder.split('tests')[-1]}"} for folder in test_folders]
 
     return res
 
@@ -152,21 +164,19 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
     """
     if not dirs:
         return accounts
-    
-    from collections import defaultdict
-    
+
     # Calculate how many accounts we need per client per server
     amount_per_client_server = len(dirs)
-    
+
     # Track counts per client per server
     counts = defaultdict(lambda: defaultdict(int))
     limited_accounts = []
-    
+
     # Filter accounts based on client-server limits
     for account in accounts:
         client = account["client"]
         server = account["server"]
-        
+
         # Check limit per client per server
         if counts[client][server] < amount_per_client_server:
             limited_accounts.append(account)
@@ -179,6 +189,14 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
         assigned.append(account_copy)
     return assigned
 
-if __name__ == '__main__':
-    dirs = collect_critical_folders()
-    print(dirs)
+#
+# if __name__ == '__main__':
+#     ggapi = GoogleSheetsAPI()
+#     sheet_data = ggapi.get_accounts(
+#         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
+#         ["lirunex"], "demo"
+#     )
+#
+#     dirs = collect_critical_folders(module="login")
+#     res = assign_dirs_to_accounts(sheet_data, dirs)
+#     breakpoint()
