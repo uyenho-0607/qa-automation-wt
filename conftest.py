@@ -207,9 +207,9 @@ def pytest_runtest_makereport(item, call):
         if report.failed and "FAILURE" in report.longreprtext:
             StepLogs.all_failed_logs.append(("end_test", ""))
 
-            if RuntimeConfig.platform.lower() in ["web", "web_app"]:
-                logger.debug("- Attach session video")
-                attach_session_video()
+            # if RuntimeConfig.platform.lower() in ["web", "web_app"]:
+            #     logger.debug("- Attach session video")
+            #     attach_session_video()
 
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
