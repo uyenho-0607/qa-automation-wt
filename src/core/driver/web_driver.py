@@ -6,7 +6,7 @@ from botocore.config import Config
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
 from src.data.project_info import DriverList, RuntimeConfig
-from src.data.consts import GRID_SERVER
+from src.data.consts import GRID_SERVER, WEB_APP_DEVICE
 
 proxy_server = os.getenv('PROXY_SERVER')
 project_arn = os.getenv('DF_PROJECT_ARN')
@@ -24,7 +24,7 @@ class WebDriver:
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
                 if RuntimeConfig.platform == 'web_app':
-                    options.add_experimental_option("mobileEmulation", {"deviceName": "iPhone 14 Pro Max"})
+                    options.add_experimental_option("mobileEmulation", {"deviceName": WEB_APP_DEVICE})
 
                 options.add_argument("--incognito")
                 prefs = {
