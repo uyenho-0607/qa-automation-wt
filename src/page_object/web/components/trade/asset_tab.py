@@ -336,7 +336,6 @@ class AssetTab(BaseTrade):
             trade_object.expiry = expiry
 
         res_click = self.__trade_modals.click_edit_order_btn()
-
         if not res_click:
             self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
 
