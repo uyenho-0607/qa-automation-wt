@@ -75,8 +75,7 @@ class TradingModals(BaseTrade):
         attempt = 0
         while attempt < retries:
             logger.debug(f"- Click edit order button (Attempt {attempt + 1})")
-            time.sleep(2)
-            self.actions.click(self.__btn_edit_order)
+            self.actions.click(self.__btn_edit_order, raise_exception=False, timeout=QUICK_WAIT)
 
             if not self.actions.is_element_displayed(self.__btn_confirm_update_order, is_display=False, timeout=QUICK_WAIT):
                 return True

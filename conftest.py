@@ -7,7 +7,7 @@ from allure_commons.types import Severity
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
-from src.data.consts import ROOTDIR, VIDEO_DIR, NON_OMS
+from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS
 from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
@@ -63,7 +63,7 @@ def pytest_sessionstart(session: pytest.Session):
     if account == AccountType.LIVE and client == Client.LIRUNEX:
         account = "crm"
 
-    if client in NON_OMS:
+    if client not in MULTI_OMS:
         server = Server.MT5
 
     user = session.config.getoption("user")
@@ -112,9 +112,9 @@ def pytest_runtest_setup(item: pytest.Item):
 
     # Set allure labels
     parent_suite = RuntimeConfig.client.upper()
-    if RuntimeConfig.is_prod():  # dynamically handle client for prod (todo: still need enhancement)
-        url = Config.urls()
-        parent_suite = url.split(".")[-2].upper()
+    # if RuntimeConfig.is_prod() and RuntimeConfig.url:  # dynamically handle client for prod (todo: still need enhancement)
+    #     url = Config.urls()
+    #     parent_suite = url.split(".")[-2].upper()
 
     allure.dynamic.parent_suite(parent_suite)
     allure.dynamic.suite(server.upper())
