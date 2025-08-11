@@ -22,9 +22,8 @@ lirunex:
     app_bundle: ...
 
 # not yet updated
-transactCloud:
+dcodemarkets:
   base_url: https://webtrader.dcodemarkets.com
-  bo_url: https://transactcloudmt5-backoffice.webtrader-uat.s20ip12.com/backoffice/
   api_url: https://webtrader.dcodemarkets.com/api
 
   credentials:
@@ -33,5 +32,5 @@ transactCloud:
       user_demo: 7003091
 
   mobile:
-    app_package: com.aquariux.wt.uat.transactcloudmt5
+    app_package: com.aquariux.wt.uat.dcodemarkets
     app_bundle: ...

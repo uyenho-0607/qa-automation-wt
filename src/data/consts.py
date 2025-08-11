@@ -10,7 +10,6 @@ VIDEO_DIR = ROOTDIR / ".videos"
 SRC_DIR = ROOTDIR / "src"
 DATA_DIR = SRC_DIR / "data"
 GRID_SERVER = "http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub"
-# GRID_VIDEO_URL = "https://qa-webtrader.devops.k8ns.net"
 GRID_VIDEO_URL = "https://selenium-grid-videos.aquariux.dev"
 
 # Timeouts (in seconds)
@@ -25,7 +24,6 @@ CHECK_ICON = "✔"
 FAILED_ICON = "✘"
 
 
-NON_OMS = [Client.TRANSACT_CLOUD]
 MULTI_OMS = [Client.LIRUNEX]
 
 SYMBOLS = {

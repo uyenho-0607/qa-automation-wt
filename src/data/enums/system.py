@@ -49,6 +49,19 @@ class Client(BaseEnum):
     """Enum representing different client platforms."""
     LIRUNEX = "lirunex"
     TRANSACT_CLOUD = "transactCloud"
+    DECODE = "dcodemarkets"
+
+    # CMSPRIME = "cmsprime"
+    # YAPRIME = "yaprime"
+    # NXGMARKETS = "nxgmarkets"
+    # aleosgm = "aleosgm"
+    # cbcx = "cbcxlabs"
+    # sxofx = "sxoglobal"
+    # height = "heightmarkets"
+    # blazemoneyfx = "blazemoneyfx"
+    # hantec = "hmarkets"
+    # fxcmlabs = "labsfxcm"
+    # golab = "golabsmarkets"
 
 
 class Server(BaseEnum):

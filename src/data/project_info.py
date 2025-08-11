@@ -32,7 +32,7 @@ class RuntimeConfig:
 
     @classmethod
     def is_non_oms(cls):
-        return cls.client == "transactCloud"
+        return cls.client.lower() not in ["lirunex"]
 
     @classmethod
     def is_prod(cls):
