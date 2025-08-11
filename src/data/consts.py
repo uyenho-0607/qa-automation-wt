@@ -50,7 +50,8 @@ def get_symbols():
             }
         }
 
-    return symbol_list[RuntimeConfig.client][RuntimeConfig.server]
+    # return symbol_list[RuntimeConfig.client][RuntimeConfig.server]
+    return symbol_list.get(RuntimeConfig.client, symbol_list.get(Client.TRANSACT_CLOUD))[RuntimeConfig.server]
 
 
 def get_symbol_details(symbol):
