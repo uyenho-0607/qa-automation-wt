@@ -63,7 +63,7 @@ class Config:
                 return cls.config.bo_url
 
             case _:
-                return cus_url or cls.config.base_url + ("/web" if RuntimeConfig.platform == "web" else "/mobile")
+                return (cus_url or cls.config.base_url) + ("/web" if RuntimeConfig.platform == "web" else "/mobile")
 
     @classmethod
     def url_path(cls, path: URLPaths | str):
