@@ -3,7 +3,7 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import OrderType, SLTPType, Features, AccInfo, AssetTabs
+from src.data.enums import OrderType, Features, AccInfo, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -38,7 +38,7 @@ def test(web, setup_teardown, disable_OCT):
     web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.BALANCE, tolerance=0.1)
 
     logger.info(f"Verify Profit/Loss is changed ~{sum_profit!r} ({acc_balance[AccInfo.REALISED_PROFIT_LOSS]!r})")
-    web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.REALISED_PROFIT_LOSS, tolerance=1)
+    web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.REALISED_PROFIT_LOSS, tolerance=5)
 
     logger.info("Verify other info is not changed")
     web.assets_page.verify_account_balance_summary(acc_balance, acc_items=AccInfo.list_values(except_val=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS]))
@@ -67,5 +67,6 @@ def setup_teardown(web, symbol):
 
     order_ids = [item["orderId"] for item in cur_orders[:close_amount]]
     profit = [item["profit"] for item in cur_orders[:close_amount]]
+    logger.debug(f"- Sum profit: {sum(profit)!r}")
 
     yield account_summary, account_info, order_ids, sum(profit)

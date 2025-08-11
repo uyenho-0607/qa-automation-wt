@@ -97,7 +97,7 @@ class GoogleSheetsAPI:
                         })
 
         # Sort the result by client, then server, then userid for consistent ordering
-        result.sort(key=lambda x: (x["client"], x["server"], x["userid"]))
+        result.sort(key=lambda x: (x["client"], x["server"]))
 
         return result
 
@@ -194,7 +194,7 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
 #     ggapi = GoogleSheetsAPI()
 #     sheet_data = ggapi.get_accounts(
 #         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
-#         ["lirunex"], "demo"
+#         ["decode"], "demo"
 #     )
 #
 #     dirs = collect_critical_folders(module="login")
