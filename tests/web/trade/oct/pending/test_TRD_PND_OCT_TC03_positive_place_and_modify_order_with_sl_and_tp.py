@@ -22,14 +22,17 @@ def test(web, symbol, get_asset_tab_amount, close_edit_confirm_modal, order_type
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
+    logger.info("Step 2: Select Pending Order tab")
+    web.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
     logger.info(f"Verify Asset Tab item details")
     web.trade_page.asset_tab.verify_item_data(trade_object)
 
-    logger.info(f"Step 2: Update order with SL & TP")
-    web.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
+    logger.info(f"Step 3: Update order with SL & TP")
+    web.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), oct_mode=True)
 
     logger.info("Verify notification banner updated message")
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify Asset Tab item details after update")
-    web.trade_page.asset_tab.verify_item_data(trade_object)
+    web.trade_page.asset_tab.verify_item_data(trade_object, wait=True)

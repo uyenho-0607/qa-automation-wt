@@ -1,5 +1,6 @@
 import random
 import time
+from contextlib import suppress
 from typing import Literal
 
 from selenium.webdriver.common.by import By
@@ -8,7 +9,6 @@ from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
 from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import RuntimeConfig
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
@@ -120,8 +120,8 @@ class PlaceOrderPanel(BaseTrade):
 
     def select_tab(self, tab: TradeTab):
         locator = cook_element(self.__trade_tab, tab)
-        if self.actions.is_element_displayed(locator, timeout=QUICK_WAIT):
-            self.actions.click(locator)
+        with suppress(Exception):
+            self.actions.click(locator, raise_exception=False, show_log=False)
 
     # UI Control Buttons
     def _control_inc_dec_btn(
@@ -286,6 +286,7 @@ class PlaceOrderPanel(BaseTrade):
 
         """Place a valid order and load input data into trade_object."""
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
+
         # select trade tab
         self.select_tab(TradeTab.TRADE)
 
@@ -474,8 +475,8 @@ class PlaceOrderPanel(BaseTrade):
         self.control_sl(sl_type=sl_type)
         self.control_tp(tp_type=tp_type)
 
-        self._select_fill_policy(trade_object.get("fill_policy"))
-        self._select_expiry(trade_object.get("expiry"))
+        not trade_object.get("fill_policy") or self._select_fill_policy(trade_object.get("fill_policy"))
+        not trade_object.get("expiry") or self._select_expiry(trade_object.get("expiry"))
 
         # Get final values after adjustment
         volume = self.actions.get_value(self.__txt_volume)

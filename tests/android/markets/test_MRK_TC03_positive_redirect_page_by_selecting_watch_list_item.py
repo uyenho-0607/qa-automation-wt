@@ -7,7 +7,7 @@ from src.apis.api_client import APIClient
 from src.data.enums import Features, WatchListTab
 from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
-    
+
 
 @pytest.mark.critical
 def test(android):

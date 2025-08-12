@@ -1,7 +1,5 @@
 import pytest
 
-from src.data.enums import OrderType
-from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 

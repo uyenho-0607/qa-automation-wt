@@ -1,5 +1,7 @@
-import yaml
 import os
+
+import yaml
+
 
 def test(web):
     # Read demo account credentials from YAML file
