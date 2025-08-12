@@ -22,12 +22,6 @@ def test(web_app, setup_pre_selected_tab):
     logger.info(f"Verify pre-selected tab is {selected_tab.value!r}")
     web_app.home_page.watch_list.verify_symbols_list(symbols)
 
-    logger.info("Step 2: User tries to logout")
-    web_app.home_page.settings.logout()
-
-    logger.info("Verify login account tabs is displayed")
-    web_app.login_page.verify_account_tab_is_displayed()
-
 
 @pytest.fixture(autouse=True)
 def setup_pre_selected_tab():

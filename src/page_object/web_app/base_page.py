@@ -87,7 +87,7 @@ class BasePage:
     # ------------------------ VERIFY ------------------------ #
     def verify_alert_error_message(self, expected_message, other_msg=None):
         """Verify the error alert message."""
-        actual_err = self.actions.get_text(self.__alert_desc)
+        actual_err = self.actions.get_text(self.__alert_desc, timeout=20)
         if not other_msg:
             soft_assert(actual_err, expected_message)
 

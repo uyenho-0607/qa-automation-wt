@@ -160,3 +160,5 @@ cython_debug/
 allure-results
 .idea/
 .idea/workspace.xml
+# Local Netlify folder
+.netlify
