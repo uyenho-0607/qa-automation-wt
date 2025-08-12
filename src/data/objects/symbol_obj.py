@@ -31,7 +31,7 @@ class ObjSymbol:
 
     @classmethod
     def get_symbols(cls, get_all=False):
-        return [item['symbol'] for item in cls.symbols_data] if not get_all else cls.all_symbols
+        return [item['symbol'] for item in (cls.symbols_data if not get_all else cls.all_symbols)]
 
     @classmethod
     def get_symbol_details(cls, symbol):
