@@ -4,11 +4,9 @@ import json
 import time
 
 import requests
-from selenium.common import StaleElementReferenceException, ElementNotInteractableException, \
-    ElementClickInterceptedException
 
 from src.data.project_info import StepLogs
-from src.utils.allure_utils import attach_verify_table, log_verification_result, attach_screenshot
+from src.utils.allure_utils import attach_verify_table
 from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
 
@@ -54,57 +52,7 @@ def attach_table_details(func):
                 comparison_result=comparison_result
             )
 
-        elif all_args.get("log_details"):
-            name = "Verification Details"
-            if StepLogs.test_steps:
-                name += f" - {StepLogs.test_steps[-1]}"
-            log_verification_result(
-                actual, expected, result, desc=all_args.get("desc", "") + all_args.get("err_msg", "") if not result else "", name=name
-            )
-
     return _wrapper
-
-
-def handle_stale_element(func):
-    @functools.wraps(func)
-    def wrapper(self, *args, **kwargs):
-        __tradebackhide__ = True
-
-        # Use inspect to get all function parameters including defaults
-        sig = inspect.signature(func)
-        bound_args = sig.bind(self, *args, **kwargs)
-        bound_args.apply_defaults()  # This applies default values
-        all_args = bound_args.arguments
-
-        max_retries = 3
-        raise_exception = all_args.get("raise_exception")
-
-        for attempt in range(max_retries + 1):  # +1 for initial attempt
-            try:
-                return func(self, *args, **kwargs)
-            except (StaleElementReferenceException, ElementNotInteractableException, ElementClickInterceptedException) as e:
-                # Clear any broken steps that might have been added from the previous attempt
-                if StepLogs.broken_steps and attempt < max_retries + 1:
-                    StepLogs.broken_steps.pop()
-
-                if attempt < max_retries:
-                    logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
-                    time.sleep(1)
-                    continue
-
-                else:
-                    # Final attempt failed, re-raise the exception
-                    logger.error(f"{type(e).__name__} for locator {args[0]} after {max_retries + 1} attempts")
-                    if raise_exception and StepLogs.test_steps:
-                        logger.debug("- Capture broken info")
-                        StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
-                        attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
-
-                        raise e
-        return None
-
-    return wrapper
-
 
 def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
     """

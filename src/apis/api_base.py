@@ -34,21 +34,6 @@ class BaseAPI:
         resp = self.session.post(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
         return resp
 
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def put(self, endpoint: str, payload: dict = None):
-        resp = self.session.put(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, data=payload)
-        return resp
-    
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10)
-    def delete(self, endpoint: str,  params: dict = None):
-        resp = self.session.delete(url=f"{Config.config.api_url}{endpoint}", params=params, headers=self.headers)
-        return resp
-
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def patch(self, endpoint: str, payload: dict = None):
-        resp = self.session.patch(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
-        return resp
-
     def __del__(self):
         """Clean up session when object is destroyed"""
         if hasattr(self, 'session'):

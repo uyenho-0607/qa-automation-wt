@@ -1,12 +1,7 @@
 # Testing
 pytest
-pytest-selenium
 allure-pytest
 pytest-check
-
-# Web & Mobile Testing
-Appium-Python-Client
-selenium
 
 # Code Quality
 flake8
@@ -19,8 +14,4 @@ pyyaml
 numpy
 allure-python-commons
 cryptography
-webdriver-manager
-pytest-rerunfailures
-boto3
-botocore
 pandas

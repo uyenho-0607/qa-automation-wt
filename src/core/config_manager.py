@@ -3,7 +3,7 @@ from typing import Any
 import yaml
 
 from src.data.consts import CONFIG_DIR
-from src.data.enums import Client, Server, AccountType, URLSites, URLPaths
+from src.data.enums import Client, Server, AccountType, URLSites
 from src.data.project_info import RuntimeConfig
 from src.utils import DotDict
 from src.utils.encrypt_utils import decrypt_password
@@ -45,7 +45,7 @@ class Config:
                 username = cus_username or credentials[f'user_{account.lower()}']
                 encrypted_password = cls._full_config.get(f"password_{account.lower()}", cls._full_config["password"])
                 password = cus_password or decrypt_password(encrypted_password)
-                
+
         return DotDict(username=username, password=password)
 
     @classmethod
@@ -64,28 +64,3 @@ class Config:
 
             case _:
                 return cus_url or cls.config.base_url + ("/web" if RuntimeConfig.platform == "web" else "/mobile")
-
-    @classmethod
-    def url_path(cls, path: URLPaths | str):
-        """Get full URL including path."""
-        base_url = cls.urls()
-
-        if path == URLPaths.TRADE:
-            return base_url
-
-        return f"{base_url}/{path}"
-
-    @classmethod
-    def mobile(cls, platform=None):
-        if not cls.config:
-            cls.load_config()
-
-        platform = platform or RuntimeConfig.platform
-
-        mobile_config = DotDict(
-            android=dict(app_id=cls.config.mobile.app_package, device_udid=cls._full_config.android_udid),
-            ios=dict(app_id=cls.config.mobile.app_bundle, device_udid=cls._full_config.ios_udid),
-
-        )
-
-        return mobile_config[platform]

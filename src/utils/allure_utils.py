@@ -1,60 +1,13 @@
-import base64
-import glob
 import json
 import os
-import time
 import uuid
 from typing import Dict, Any
 
 import allure
-from pytest_selenium import driver
 
-from src.data.consts import GRID_VIDEO_URL
-from src.data.project_info import DriverList
-from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
+from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON
 from src.data.project_info import StepLogs, RuntimeConfig
-from src.utils.common_utils import convert_timestamp
 from src.utils.logging_utils import logger
-
-
-
-def attach_session_video():
-    driver = DriverList.all_drivers.get(RuntimeConfig.platform.lower())
-    if driver:
-        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
-        s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
-        allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
-
-
-def save_recorded_video(video_raw):
-    """Save recorded videos for android"""
-    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
-
-    with open(raw_path, "wb") as f:
-        f.write(base64.b64decode(video_raw))
-
-    return raw_path
-
-
-def attach_video(driver):
-    """attach video to allure report"""
-    if not RuntimeConfig.is_web():
-        video_data = driver.stop_recording_screen()
-        video_path = save_recorded_video(video_data)
-        allure.attach.file(
-            video_path,
-            name="Screen Recording",
-            attachment_type=allure.attachment_type.MP4
-        )
-
-
-def attach_screenshot(driver, name="screenshot"):
-    """attach screenshot to allure report"""
-    try:
-        allure.attach(driver.get_screenshot_as_png(), name=name, attachment_type=allure.attachment_type.PNG)
-
-    except Exception as e:
-        logger.error(f"Failed to capture screenshot: {str(e)}")
 
 
 def log_step_to_allure():
@@ -86,7 +39,7 @@ def custom_allure_report(allure_dir: str) -> None:
             _add_attachments_prop(data)  # add empty attachments prop for each test report
             _remove_zero_duration(data)
             _attach_table_details(data)  # add verify tables
-            _attach_verify_details(data) # add verify details text
+            _attach_verify_details(data)  # add verify details text
 
             if data.get("status", "") == "failed":
                 _process_failed_status(data)  # Process failed status if any
@@ -178,7 +131,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     if data.get("attachments"):
 
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary" , "setup"]]
+        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
@@ -238,6 +191,7 @@ def _attach_table_details(data: Dict[str, Any]):
                 if not table_attachments:
                     break
 
+
 def _attach_verify_details(data: Dict[str, Any]):
     detail_attachments = list(
         filter(lambda x: "verification details" in x["name"].lower(), data.get("attachments", []))
@@ -261,27 +215,6 @@ def _attach_verify_details(data: Dict[str, Any]):
                     break
 
 
-def clean_allure_log_files(allure_dir):
-    """
-    Check and delete all .txt log files in the allure-results directory.
-    This helps keep the test results clean and prevents accumulation of log files.
-    """
-    allure_results_dir = ROOTDIR / allure_dir
-    if not os.path.exists(allure_dir):
-        return
-
-    # Find all .txt files in allure-results directory
-    log_files = glob.glob(str(allure_results_dir / '*.txt'))
-
-    # Delete each log file
-    for log_file in log_files:
-        try:
-            os.remove(log_file)
-
-        except Exception as e:
-            logger.error(f"Error deleting log file {log_file}: {str(e)}")
-
-
 def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float = None, tolerance_fields: list = None, title="Table Details", comparison_result: dict = None):
     """
     Attach a dynamic HTML table to Allure report.
@@ -297,7 +230,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     res = comparison_result
     tolerance_info = res.get("tolerance_info", {})
-    
+
     # Determine if we should show tolerance columns
     show_tolerance = tolerance_percent is not None and tolerance_fields
 
@@ -370,17 +303,12 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         actual_val = actual.get(key, "")
         expected_val = expected.get(key, "")
 
-        if "_date" in key:
-            # convert back to str time for human-readable
-            actual_val = convert_timestamp(actual.get(key)) if actual_val else ""
-            expected_val = convert_timestamp(expected.get(key)) if expected_val else ""
-
         # Check field status using compare_dict results
         is_missing = key in res.get("missing", [])
         is_redundant = key in res.get("redundant", [])
         is_different = key in res.get("diff", [])
         has_tolerance = key in tolerance_info
-        
+
         # Determine highlight class based on field status
         if is_missing:
             highlight_class = "missing"
@@ -392,7 +320,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         elif has_tolerance:
             tolerance_data = tolerance_info[key]
             diff_percent = float(tolerance_data["diff_percent"]) if tolerance_data["diff_percent"] else 0
-            
+
             # Only highlight if there's an actual difference (diff > 0)
             if diff_percent > 0:
                 if diff_percent <= tolerance_percent:
@@ -430,17 +358,3 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     html += "</table>"
     allure.attach(html, name=title, attachment_type=allure.attachment_type.HTML)
-
-def log_verification_result(actual: any, expected: any, res: bool, desc: str = "", name="Verification Details"):
-    """Log verification results in a structured way."""
-    result_text = ""
-    result_text += f"Status: {'PASS' if res else 'FAIL'}\n"
-    result_text += f"Actual: {actual}\n"
-    result_text += f"Expected: {expected}\n"
-    result_text += desc
-
-    allure.attach(
-        result_text,
-        name=name,
-        attachment_type=allure.attachment_type.TEXT
-    )

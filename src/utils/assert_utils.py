@@ -1,14 +1,11 @@
-import re
 from typing import Any
 
 import pytest_check as check
 
 from src.core.decorators import attach_table_details
-from src.data.objects.trade_obj import ObjTrade
-from src.data.project_info import DriverList, StepLogs
+from src.data.project_info import StepLogs
 from src.utils import DotDict
-from src.utils.allure_utils import attach_screenshot
-from src.utils.format_utils import format_dict_to_string, remove_comma, format_str_price, is_float
+from src.utils.format_utils import format_dict_to_string
 from src.utils.logging_utils import logger
 
 """Utilities"""
@@ -84,13 +81,13 @@ def compare_with_tolerance(
         tolerance_percent: Tolerance as percentage (e.g., 0.5 means 0.5%)
         get_diff: Get full dict result of different information
     """
-    actual = remove_comma(actual)
-    expected = remove_comma(expected)
-
-    if not is_float(expected) or not is_float(actual):
-        logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected} - type: {type(expected)}, actual: {actual} - type: {type(actual)}")
-        res = False
-        return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
+    # actual = remove_comma(actual)
+    # expected = remove_comma(expected)
+    #
+    # if not is_float(expected) or not is_float(actual):
+    #     logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected} - type: {type(expected)}, actual: {actual} - type: {type(actual)}")
+    #     res = False
+    #     return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
 
     actual = float(actual)
     expected = float(expected)
@@ -112,7 +109,6 @@ def compare_with_tolerance(
 
     # convert to percent for human-readable
     diff_percent = diff_percent * 100
-
 
     if diff:
         logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
@@ -189,116 +185,6 @@ def extract_diff_list(actual: dict, expected: dict, diff_keys: list):
         {k: item.get(k, "") for k in diff_keys} for item in [actual, expected]
     ]
     return res
-
-
-def extract_diff_key(actual: dict, expected: dict):
-    res = {}
-    all_keys = set(actual.keys()) | set(expected.keys())
-
-    for key in all_keys:
-        if actual[key] != expected[key]:
-            diff = {key: dict(actual=actual[key], expected=expected[key])}
-            res |= diff
-
-    return res
-
-
-"""Notification
-----------------------------
-Notification Sample
-1. Banner
-- XRPUSD.std - BUY ORDER placed, Size: 1 / Units: 1,000. Stop Loss: 2.5649. Take Profit: 2.5895.
-- XRPUSD.std - BUY LIMIT ORDER placed, Size: 1 / Units: 1,000. Price: 2.2000. Stop Loss: 2.1877. Take Profit: 2.2123.
-- ETH.USD - BUY STOP LIMIT ORDER placed, Volume: 0.1 / Units: 0.1. Stop Limit Price: 2,993.22. Price: 2,994.18. Stop Loss: 2,991.99. Take Profit: 2,994.45.
-- ETH.USD - BUY ORDER updated, Volume: 9 / Units: 9. Entry Price: 2,520.70. Stop Loss: 2,994.23. Take Profit: 2,996.69.
-
-2. Details
-- Open Position: Open Position: #8526920 AUDNZD.std: Size 0.02 / Units 2,000 @ 1.07698 
-- Position Closed: #7592152 DASHUSD.std: Size 0.02 / Units 0.2 @ 19.92, Loss of -1.82
-"""
-
-
-def extract_noti_prices(noti_content: str) -> dict:
-    """Extract price value from notification text."""
-    # Pattern to match price after @ symbol (most common case)
-    price_patterns = [
-        r'@\s*([\d,]+\.?\d*)',  # Price after @ symbol (handles commas)
-        r'Price:\s*([\d,]+\.?\d*)',  # Price after "Price:" (handles commas)
-        r'Entry Price:\s*([\d,]+\.?\d*)',  # Entry Price (handles commas)
-        r'Stop Loss:\s*([\d,]+\.?\d*)',  # Stop Loss (handles commas)
-        r'Take Profit:\s*([\d,]+\.?\d*)',  # Take Profit (handles commas)
-        r'Stop Limit Price:\s*([\d,]+\.?\d*)',  # Stop Limit Price (handles commas)
-    ]
-
-    res = {}
-
-    for pattern in price_patterns:
-        match = re.search(pattern, noti_content)
-        if match:
-            try:
-                # Remove commas before converting to float
-                price_str = match.group(1).replace(',', '')
-
-                key = "entry_price" if "@" in match.group(0) else match.group(0).split(": ")[0].lower().replace(" ", "_")
-                res[key] = float(price_str)
-
-
-            except ValueError:
-                continue
-    return res
-
-
-def compare_noti_with_tolerance(
-        actual: str,
-        expected: str,
-        tolerance_percent: float = 1,
-        is_banner=True
-):
-    """Compare notification messages with tolerance for price values."""
-    # Extract prices from both messages
-    actual_price = extract_noti_prices(actual)
-    expected_price = extract_noti_prices(expected)
-    desc = ""
-    decimal = ObjTrade.DECIMAL if is_banner else None
-
-    if actual_price and expected_price:
-        compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])
-        res = compare_result["res"]
-
-        if res:
-            desc += f"Tolerance: {tolerance_percent}% - \n"
-            # Replace price in expected with actual price for string comparison
-            pattern_key_mapping = {
-                r'@\s*[\d,]+\.?\d*': 'entry_price',
-                r'Entry Price:\s*[\d,]+\.?\d*': 'entry_price',
-                r'Stop Loss:\s*[\d,]+\.?\d*': 'stop_loss',
-                r'Take Profit:\s*[\d,]+\.?\d*': 'take_profit'
-            }
-
-            processed_keys = set()  # Track which keys have been processed
-
-            for pattern, key in pattern_key_mapping.items():
-                if key in expected_price and key in actual_price and key not in processed_keys:
-                    # Only update if prices are different (within tolerance but not exactly the same)
-                    if abs(actual_price[key] - expected_price[key]) > 0:
-                        logger.debug(f"- Updating {key}: {expected_price[key]} -> {actual_price[key]}")
-                        expected = re.sub(pattern, lambda m: m.group(0).replace(
-                            re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
-                            format_str_price(actual_price[key], decimal)
-                        ), expected)
-                    # else:
-                    #     logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
-
-                    processed_keys.add(key)  # Mark this key as processed
-
-                    desc += f"Update price: {key}, from {expected_price[key]} -> {actual_price[key]}\n"
-
-            logger.debug(f"- Expected noti after adjust prices: {expected!r}")
-
-    soft_assert(actual, expected, log_details=True, desc=desc)
-
-
-"""Assertion"""
 
 
 def check_contain(actual: Any, expected: Any, error_message: str) -> bool:
@@ -379,9 +265,6 @@ def soft_assert(
         if not assertion_result:
             logger.error(validation_err_msg)
 
-            for driver in DriverList.all_drivers.values():
-                attach_screenshot(driver)
-
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
@@ -396,9 +279,6 @@ def soft_assert(
 
         if not res:
             logger.error(validation_err_msg)
-            for driver in DriverList.all_drivers.values():
-                attach_screenshot(driver)
-
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]

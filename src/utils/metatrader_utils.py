@@ -66,10 +66,12 @@ def _process_metatrader_data(symbol: str, timeframe: ChartTimeframe):
     if not os.path.exists(file):
         raise FileNotFoundError(f"CSV file not found: {file}")
 
-    # df = pd.read_csv(file, delimiter=';')   # mt4
-    df = pd.read_csv(file, sep='\t')  # mt5
-    df['Time_ms'] = df['Time'].apply(_map_timestamp)
+    if RuntimeConfig.server == "mt4":
+        df = pd.read_csv(file, delimiter=';')   # mt4
+    else:
+        df = pd.read_csv(file, sep='\t')  # mt5
 
+    df['Time_ms'] = df['Time'].apply(_map_timestamp)
     json_filepath = _csv_to_json(df, symbol, timeframe)
 
     return json_filepath

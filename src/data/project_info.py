@@ -1,9 +1,3 @@
-class DriverList:
-    web_driver = []
-    android_driver = []
-    ios_driver = []
-    all_drivers = {}
-
 
 class StepLogs:
     test_steps = []
