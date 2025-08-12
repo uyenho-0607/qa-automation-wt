@@ -23,6 +23,7 @@ QUICK_WAIT = 0.5
 CHECK_ICON = "✔"
 FAILED_ICON = "✘"
 
+WEB_APP_DEVICE = "iPhone 14 Pro Max"
 
 MULTI_OMS = [Client.LIRUNEX]
 

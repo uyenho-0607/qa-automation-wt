@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import os
 from collections import defaultdict
 from pathlib import Path
 from shutil import which
@@ -11,11 +12,13 @@ from oauth2client.service_account import ServiceAccountCredentials
 from src.data.consts import ROOTDIR
 from src.utils.logging_utils import logger
 
+google_sa_creds = os.getenv('GOOGLE_SA_CREDENTIALS')
+
 
 class GoogleSheetsAPI:
     _sheet_data = None
     def __init__(self, keyfile: Optional[Path] = None):
-        self.keyfile = keyfile or (ROOTDIR / "ggsheet_key.json")
+        self.keyfile = keyfile or (ROOTDIR / google_sa_creds)
         self.client = self._init_client()
 
     def _init_client(self):

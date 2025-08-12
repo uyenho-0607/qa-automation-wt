@@ -1,14 +1,10 @@
-import random
-
 import pytest
 
-from src.data.enums import AssetTabs, SLTPType, OrderType
+from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize(
     "exclude_field, update_field",
     [
