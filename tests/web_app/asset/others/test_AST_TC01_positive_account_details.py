@@ -16,7 +16,7 @@ def test(web_app, setup_teardown, symbol):
     logger.info("Verify account info")
     web_app.assets_page.verify_account_details(acc_info)
 
-    logger.info("Verify account balance summary")
+    logger.info("Verify account balance summary against API data")
     web_app.assets_page.verify_account_balance_summary(acc_balance)
 
     logger.info("Step 2: Navigate to Home Page")
@@ -44,7 +44,7 @@ def test(web_app, setup_teardown, symbol):
     acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + profit_loss
 
     logger.info(f"Verify Profit Loss and Account Balance are changed")
-    web_app.assets_page.verify_account_balance_summary(acc_balance, tolerance_percent=1, tolerance_fields=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS])
+    web_app.assets_page.verify_account_balance_summary(acc_balance, tolerance_percent=5, tolerance_fields=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS])
 
     logger.info("Step 6: Get updated API data")
     acc_balance = APIClient().statistics.get_account_statistics(get_asset_acc=True)

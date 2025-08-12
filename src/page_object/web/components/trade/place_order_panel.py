@@ -73,6 +73,7 @@ class PlaceOrderPanel(BaseTrade):
     # ------------------------ HELPER METHODS ------------------------ #
     def _get_volume_info_value(self) -> str:
         """Get current volume/units value from UI."""
+        logger.debug("- Get units value")
         return self.actions.get_text(self.__volume_info_value)
 
     def _get_input_sl(self) -> str:
