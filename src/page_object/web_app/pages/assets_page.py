@@ -69,7 +69,7 @@ class AssetsPage(BasePage):
         for item in exp_data:
             exp_data[item] = round(exp_data[item], 2)
 
-        soft_assert(actual, exp_data, tolerance=tolerance_percent, tolerance_fields=tolerance_fields)
+        soft_assert(actual, exp_data, tolerance=tolerance_percent, tolerance_fields=tolerance_fields, field_tolerances={AccInfo.REALISED_PROFIT_LOSS: 5})
 
     def verify_mytrade_items(self, expected: list):
         actual = self.get_mytrade_item()

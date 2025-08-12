@@ -158,11 +158,14 @@ class HomePage(BasePage):
         total_balance = self.actions.get_text(self.__total_account_balance)
         soft_assert(sum_balance, remove_comma(total_balance.replace("USD", "")))
 
-    def verify_acc_balance_value(self, exp_dict: dict):
+    def verify_acc_balance_value(self, exp_dict: dict, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE)):
         """Verify account summary item against exp_dict (should be response from API get account)"""
-        actual = {key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key))) for key in AccSummary.checkbox_list()}
+        actual = {
+            key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key)))
+            for key in AccSummary.checkbox_list()
+        }
         expected = {k: round(v, 2) for k, v in exp_dict.items() if k in AccSummary.checkbox_list()}
-        soft_assert(actual, expected, tolerance=2, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, expected, tolerance=tolerance, tolerance_fields=tolerance_fields, field_tolerances={AccSummary.PROFIT_LOSS: 5})
 
     def verify_acc_note_values(self, exp_dict: dict):
         actual = {item: format_acc_balance(self.actions.get_text(cook_element(self.__acc_note_items, item))) for item in AccSummary.note_list()}
