@@ -43,7 +43,7 @@ class Notifications(BasePage):
         try:
             if self.actions.is_element_displayed(self.__btn_close, timeout=SHORT_WAIT):
                 logger.info("- Close noti banner")
-                self.actions.click(self.__btn_close, raise_exception=False)
+                self.actions.click(self.__btn_close, raise_exception=False, timeout=SHORT_WAIT)
 
         except Exception as e:
             logger.debug(f"- Exception {e} closing notification banner")

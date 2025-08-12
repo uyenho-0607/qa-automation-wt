@@ -88,6 +88,7 @@ class AssetTab(BaseTrade):
 
     def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
         """Get current displaying symbols"""
+        self.wait_for_spin_loader()
         symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()))
         return symbols
 
@@ -335,7 +336,6 @@ class AssetTab(BaseTrade):
             trade_object.expiry = expiry
 
         res_click = self.__trade_modals.click_edit_order_btn()
-
         if not res_click:
             self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
 

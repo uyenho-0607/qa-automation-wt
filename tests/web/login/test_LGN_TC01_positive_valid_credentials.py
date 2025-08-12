@@ -9,7 +9,6 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 def test(web, setup_pre_selected_tab):
-
     selected_tab = setup_pre_selected_tab
 
     logger.info("Step 1: Login with valid userid and password")
@@ -31,19 +30,9 @@ def test(web, setup_pre_selected_tab):
     logger.info("Verify Watch List Tabs displayed in correct order")
     web.trade_page.watch_list.verify_tabs_displayed()
 
-    # logger.info("Step 3: Logout")
-    # web.home_page.settings.logout()
-    #
-    # logger.info("Verify login page URL is correct")
-    # web.login_page.verify_page_url()
-    #
-    # logger.info("Verify login account tabs is displayed")
-    # web.login_page.verify_account_tabs_is_displayed()
-
 
 @pytest.fixture
 def setup_pre_selected_tab(symbol):
-
     mark_star = bool(random.randint(0, 1))
     pre_selected_tab = WatchListTab.TOP_GAINER
 
