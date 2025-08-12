@@ -89,7 +89,7 @@ def handle_stale_element(func):
 
                 if attempt < max_retries:
                     logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
-                    time.sleep(1)
+                    # time.sleep(0.5)
                     continue
 
                 else:
@@ -130,7 +130,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
 
                     # Handle successful response
                     if response.ok:
-                        logger.debug(f"{format_request_log(response, log_resp=False)}")
+                        logger.debug(f"{format_request_log(response, log_resp=True)}")
 
                         # Parse JSON response safely
                         try:

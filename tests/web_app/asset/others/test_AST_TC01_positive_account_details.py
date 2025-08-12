@@ -1,9 +1,7 @@
-import time
-
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import OrderType, SLTPType, Features, AccInfo, WatchListTab, AssetTabs
+from src.data.enums import OrderType, Features, AccInfo, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -27,8 +25,12 @@ def test(web_app, setup_teardown, symbol):
     logger.info(f"Step 3: Search and select symbol: {symbol!r}")
     web_app.home_page.search_and_select_symbol(symbol)
 
+    profit_loss = 0
+
     logger.info(f"Step 4: Close orders: {', '.join(order_ids)!r}")
     for i, _id in enumerate(order_ids):
+        profit_loss += web_app.trade_page.asset_tab.get_profit_loss()[0]
+
         web_app.trade_page.asset_tab.full_close_position(order_id=_id, wait=True)
 
         logger.info("Verify closed order successfully")
@@ -38,8 +40,8 @@ def test(web_app, setup_teardown, symbol):
     web_app.trade_page.navigate_to(Features.ASSETS)
 
     # update expected value after closing orders
-    acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + sum_profit
-    acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + sum_profit
+    acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + profit_loss
+    acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + profit_loss
 
     logger.info(f"Verify Profit Loss and Account Balance are changed")
     web_app.assets_page.verify_account_balance_summary(acc_balance, tolerance_percent=1, tolerance_fields=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS])
@@ -58,17 +60,18 @@ def setup_teardown(web_app, symbol):
     account_info = APIClient().user.get_user_account(get_acc=True)
 
     logger.info("- Prepare order data")
-    resp_ord = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
-    cur_orders = [item for item in resp_ord if item["symbol"] == symbol]
+    cur_orders = APIClient().order.get_orders_details(symbol, order_type=OrderType.MARKET)
 
     if not cur_orders:
+        logger.debug(f"- POST {close_amount!r} MARKET orders")
         for _ in range(close_amount):
-            trade_object = ObjTrade(order_type=OrderType.MARKET, indicate=SLTPType.POINTS, symbol=symbol)
-            APIClient().trade.post_order(trade_object)
+            APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol))
 
-        cur_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
+        cur_orders = APIClient().order.get_orders_details(symbol, order_type=OrderType.MARKET)
 
     order_ids = [item["orderId"] for item in cur_orders[:close_amount]]
     profit = [item["profit"] for item in cur_orders[:close_amount]]
+
+    logger.debug(f"- Sum Profit: {sum(profit)}")
 
     yield account_summary, account_info, order_ids, sum(profit)
