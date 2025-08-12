@@ -1,53 +1,27 @@
-# GENERAL #
+# Chart Data API Testing Configuration - SIT Environment
 
-
-root_url: https://root.webtrader-sit.s20ip12.com/root
-user_root: root
-password_root: gAAAAABoWMPeEuKg4PHTx1nmw8Yr8oFib99waFf1Exk6ZVh12xoSYt0E42lywgKOXeEg4nog2V2seRABXv8IsHntNSL-PHHN0g==
-
-user_admin: admin
-password_admin: gAAAAABoWMO1SreK-J24asdfSPyW9LH1HxWA6TYcpdN3HqAZXZPGhJICqC3nPM6kOgV9TnZfcO5qyPLyp8VrGuwojIb4aG2hkQ==
-
+# Encrypted passwords for different account types
 password_crm: gAAAAABoWMEXslfQb9KOlvT7GjPiMPOc1cQEVZjrI--VDYHBQHsywhk_AYGjyYv7zpTS51BJ7TyQY7J1unco_TQlE_SqRJX-TQ==
 password_live: gAAAAABoWMEt4Qc6bYKgPVXrbV3IuZjE_EJr1mE3aiqKPdG-oKPN462pDvi19zh-tkySetZtvasVQXlhuN1KqkCUz63-eyYQhg==
 password_demo: gAAAAABoWMEt4Qc6bYKgPVXrbV3IuZjE_EJr1mE3aiqKPdG-oKPN462pDvi19zh-tkySetZtvasVQXlhuN1KqkCUz63-eyYQhg==
 
-
-# mobile
-android_udid: ""
-ios_udid: ""
-
-
+# Lirunex Client Configuration
 lirunex:
-  base_url: https://lirunex-mb.webtrader-sit.s20ip12.com
-  bo_url: https://lirunex-backoffice.webtrader-sit.s20ip12.com/backoffice
   api_url: https://lirunex-mb.webtrader-sit.s20ip12.com/api
-
+  
   credentials:
     mt4:
-#      user_live: ...
       user_crm: mt4_automation28@mailinator.com
       user_demo: 2092010247
-
     mt5:
-#      user_live: 569200612
       user_crm: mt5_automation28@mailinator.com
       user_demo: 569202036
 
-  mobile:
-    app_package: com.aquariux.wt.sit.lirunex
-    app_bundle: ...
-
+# TransactCloud Client Configuration
 transactCloud:
-  base_url: https://transactcloudmt5-mb.webtrader-sit.s20ip12.com
-  bo_url: https://transactcloudmt5-backoffice.webtrader-sit.s20ip12.com/backoffice/
   api_url: https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/api
-
+  
   credentials:
     mt5:
       user_live: 998771
       user_demo: 998771
-
-  mobile:
-    app_package: com.aquariux.wt.sit.transactcloudmt5
-    app_bundle: ...

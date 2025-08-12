@@ -3,6 +3,7 @@ import shutil
 
 import allure
 import pytest
+
 from src.core.config_manager import Config
 from src.data.consts import ROOTDIR, NON_OMS
 from src.data.enums import Server, Client, AccountType
@@ -12,14 +13,12 @@ from src.utils.logging_utils import logger
 
 
 def pytest_addoption(parser: pytest.Parser):
-    parser.addoption("--env", default="sit", help="Environment to run tests (sit, release_sit, uat)")
-    parser.addoption("--client", default="lirunex", help="Client to test (lirunex, transactCloud) - single value only")
+    parser.addoption("--env", default="sit", help="Environment to run tests (sit, uat, release_sit)")
+    parser.addoption("--client", default="lirunex", help="Client to test (lirunex, transactCloud)")
     parser.addoption("--server", default="mt4", help="Server type to test (mt4 or mt5)")
-    parser.addoption("--account", default="demo", help="Account type to test (demo/ live/ crm)")
-    parser.addoption("--platform", default="", help="Platform to run tests (web, ios, android), used for init the driver")
+    parser.addoption("--account", default="demo", help="Account type to test (demo, live)")
     parser.addoption("--user", help="Custom username")
     parser.addoption("--password", help="Custom raw password")
-    parser.addoption("--url", help="Custom tenant url")
 
 
 def pytest_configure(config):
@@ -32,20 +31,7 @@ def pytest_configure(config):
 def pytest_sessionstart(session: pytest.Session):
     print("\x00")  # print a non-printable character to break a new line on console
     logger.debug("============ pytest_sessionstart ============ ")
-
-    # Get initial platform from command line
-    platform = session.config.getoption("platform")
-
-    if "tests" in str(session.config.args):
-        split_path = session.config.args[0].split("/")
-        test_index = split_path.index("tests")
-
-    else:
-        split_path = os.getcwd().split("/")
-        test_index = split_path.index("tests")
-
-    platform = platform or split_path[test_index + 1]
-    logger.info(f">> Platform: {platform.replace('_', ' ').capitalize()!r}")
+    logger.info(">> Platform: Chart Data API Testing")
 
     ######## System Options ########
     env = session.config.getoption("env")
@@ -61,24 +47,22 @@ def pytest_sessionstart(session: pytest.Session):
 
     user = session.config.getoption("user")
     password = session.config.getoption("password")
-    url = session.config.getoption("url")
-
     allure_dir = session.config.getoption("allure_report_dir")
 
     logger.info(f">> Load environment configuration - Client: {client.capitalize()!r}")
     logger.info(f">> Account: {account.capitalize()!r}")
+    logger.info(f">> Server: {server.upper()!r}")
     Config.load_config(env, client)
 
     # Save options to Runtime Config
     RuntimeConfig.allure_dir = allure_dir
     RuntimeConfig.env = env
     RuntimeConfig.user = user
-    RuntimeConfig.url = url
     RuntimeConfig.password = password
     RuntimeConfig.client = client
     RuntimeConfig.server = server
     RuntimeConfig.account = account
-    RuntimeConfig.platform = platform
+    RuntimeConfig.platform = "api"
 
 
 def pytest_runtest_setup(item: pytest.Item):
@@ -87,26 +71,11 @@ def pytest_runtest_setup(item: pytest.Item):
     server = RuntimeConfig.server
     account = RuntimeConfig.account
 
-    # Set up Allure test structure
-    module = item.nodeid.split("::")[0].split("/")[2:-1]  # not count test, web, and test name
-    sub_suite = " - ".join(item.capitalize() for item in module)
-    sub_suite = sub_suite.replace("_", " ").title()
-
     # Set allure labels
-    parent_suite = RuntimeConfig.client.upper()
-    if RuntimeConfig.is_prod():  # dynamically handle client for prod (todo: still need enhancement)
-        url = Config.urls()
-        parent_suite = url.split(".")[-2].upper()
-
-    allure.dynamic.parent_suite(parent_suite)
-    allure.dynamic.suite(server.upper())
-    allure.dynamic.sub_suite(sub_suite)
-
-    if RuntimeConfig.user:
-        item.add_marker(f"user: {RuntimeConfig.user}")
+    allure.dynamic.parent_suite("MetaTrader API Validation")
 
     print("\x00")  # print a non-printable character to break a new line on console
-    logger.info(f"- Running test case: {item.parent.name} - [{server}] - [{account}] ")
+    logger.info(f"- Running test case: {item.name.replace("test_", "").replace("_", " ").title()} - [{server.upper()}] - [{account.upper()}]")
     logger.debug(f"- user: {Config.credentials().username!r}")
 
 
@@ -119,13 +88,12 @@ def pytest_sessionfinish(session: pytest.Session):
         custom_allure_report(allure_dir)  # custom allure report
 
         # Set allure report properties
-        browser = RuntimeConfig.browser
-        platform = f"{RuntimeConfig.platform.capitalize()}" + (f" - {browser.capitalize()}" if RuntimeConfig.is_web() else "")
-
         env_data = {
-            "Platform": platform,
-            "Environment": RuntimeConfig.env.capitalize(),
-            "Account": "Live/Crm" if RuntimeConfig.account != AccountType.DEMO else AccountType.DEMO.capitalize(),
+            "Platform": "Chart Data API Testing",
+            "Environment": RuntimeConfig.env.upper(),
+            "Client": RuntimeConfig.client.upper(),
+            "Server": RuntimeConfig.server.upper(),
+            "Account": RuntimeConfig.account.upper(),
         }
 
         with open(f"{allure_dir}/environment.properties", "w") as f:
@@ -146,4 +114,4 @@ def pytest_runtest_makereport(item, call):
             log_step_to_allure()  # show test steps on allure
 
         if report.failed and "FAILURE" in report.longreprtext:
-            StepLogs.all_failed_logs.append(("end_test", ""))
+            StepLogs.all_failed_logs.append("end_test")

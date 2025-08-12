@@ -1,12 +1,11 @@
 import json
 import os
-import uuid
 from typing import Dict, Any
 
 import allure
 
-from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON
-from src.data.project_info import StepLogs, RuntimeConfig
+from src.data.consts import ROOTDIR
+from src.data.project_info import StepLogs
 from src.utils.logging_utils import logger
 
 
@@ -31,15 +30,8 @@ def custom_allure_report(allure_dir: str) -> None:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
-            # Skip processing and delete file if test status is skipped
-            if data.get("status") == "skipped":
-                _remove_skipped_tests(file_path)
-                continue
-
             _add_attachments_prop(data)  # add empty attachments prop for each test report
             _remove_zero_duration(data)
-            _attach_table_details(data)  # add verify tables
-            _attach_verify_details(data)  # add verify details text
 
             if data.get("status", "") == "failed":
                 _process_failed_status(data)  # Process failed status if any
@@ -48,7 +40,6 @@ def custom_allure_report(allure_dir: str) -> None:
                 _process_broken_status(data)  # Process broken status if any
 
             _cleanup_and_customize_report(data)  # Clean up and customize report
-            _add_check_icon(data)
 
             # Write back the modified data
             with open(file_path, 'w', encoding='utf-8') as file:
@@ -57,13 +48,6 @@ def custom_allure_report(allure_dir: str) -> None:
         except Exception as e:
             logger.error(f"Error processing file {os.path.basename(file_path)}: {str(type(e).__name__)}, {str(e)}")
             continue
-
-
-def _remove_skipped_tests(file_path):
-    try:
-        os.remove(file_path)
-    except Exception as e:
-        logger.error(f"Error deleting skipped test file {os.path.basename(file_path)}: {str(e)}")
 
 
 def _add_attachments_prop(data: Dict[str, Any]) -> None:
@@ -82,7 +66,7 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
 
     should_break = False
     while failed_logs and not should_break:
-        for failed_step, msg_detail in failed_logs:
+        for failed_step in failed_logs:
             if failed_step == "end_test":
                 StepLogs.all_failed_logs.pop(0)
                 should_break = True
@@ -96,7 +80,6 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
 
                     if "verify" in step_name:
                         v_step["status"] = "failed"
-                        v_step["statusDetails"] = dict(message=msg_detail)
                         del v_steps[:index + 1]
 
                         # Attach screenshot if available
@@ -129,9 +112,8 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     """Clean up attachments and customize report details."""
     # Clean up attachments and status details
     if data.get("attachments"):
-
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
+        data["attachments"] = [item for item in attachments if "Chart Comparison Summary" in item["name"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
@@ -145,20 +127,9 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     data["name"] = data["fullName"].split(".")[-1].replace("#test", "")
     data["name"] = " ".join(data["name"].split("_"))
 
-    # Customize test's properties
-    data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
-    data["historyId"] = uuid.uuid4().hex
-
-
-def _add_check_icon(data):
-    for item in data.get("steps", []):
-        if "verify" in item["name"].lower():
-
-            if item["status"] == "passed":
-                item["name"] = f"{CHECK_ICON} {item['name']}"
-
-            if item["status"] == "failed":
-                item["name"] = f"{FAILED_ICON} {item['name']}"
+    # # Customize test's properties
+    # data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
+    # data["historyId"] = uuid.uuid4().hex
 
 
 def _remove_zero_duration(data: Dict[str, Any]):
@@ -167,194 +138,3 @@ def _remove_zero_duration(data: Dict[str, Any]):
         stop = item.get("stop", 0)
         if stop == start:
             item["stop"] += 1
-
-
-def _attach_table_details(data: Dict[str, Any]):
-    table_attachments = list(
-        filter(lambda x: "table" in x["name"].lower(), data.get("attachments", []))
-    )
-
-    for item in table_attachments:
-        item["name"] = item["name"].split("-")[-1].strip()
-
-    if not table_attachments:
-        return
-
-    for item in data.get("steps", []):
-        if "verify" in item["name"].lower():
-            matched = next((table for table in table_attachments if table["name"] == item["name"]), None)
-
-            if matched:
-                item["attachments"].append(matched)
-                del table_attachments[:1]
-
-                if not table_attachments:
-                    break
-
-
-def _attach_verify_details(data: Dict[str, Any]):
-    detail_attachments = list(
-        filter(lambda x: "verification details" in x["name"].lower(), data.get("attachments", []))
-    )
-
-    for item in detail_attachments:
-        item["name"] = item["name"].split("-")[-1].strip()
-
-    if not detail_attachments:
-        return
-
-    for item in data.get("steps", []):
-        if "verify" in item["name"].lower():
-            matched = next((table for table in detail_attachments if table["name"] == item["name"]), None)
-
-            if matched:
-                item["attachments"].append(matched)
-                del detail_attachments[:1]
-
-                if not detail_attachments:
-                    break
-
-
-def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float = None, tolerance_fields: list = None, title="Table Details", comparison_result: dict = None):
-    """
-    Attach a dynamic HTML table to Allure report.
-    
-    Args:
-        actual: Actual dictionary
-        expected: Expected dictionary  
-        tolerance_percent: Tolerance percentage for comparison
-        tolerance_fields: List of fields to apply tolerance to
-        title: Title for the table attachment
-        comparison_result: Optional pre-calculated comparison result to avoid re-computation
-    """
-
-    res = comparison_result
-    tolerance_info = res.get("tolerance_info", {})
-
-    # Determine if we should show tolerance columns
-    show_tolerance = tolerance_percent is not None and tolerance_fields
-
-    html = """
-        <style>
-            table {
-                border-collapse: collapse;
-                width: 90%;
-                font-family: Arial, sans-serif;
-                margin: 10px 0;
-                table-layout: fixed;
-            }
-            th, td {
-                border: 1px solid #ccc;
-                padding: 6px 10px;
-                text-align: center;
-                vertical-align: middle;
-                font-size: 13px;
-                word-break: break-all;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-            .highlight {
-                background-color: #ffcccc;
-                font-weight: bold;
-            }
-            .tolerance-info {
-                font-size: 11px; 
-            }
-            .tolerance-pass {
-                background-color: #d4edda;
-                color: #155724;
-            }
-            .tolerance-fail {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-            .missing {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-            .redundant {
-                background-color: #f8d7da;
-                color: #721c24;
-            }
-        </style>
-        <table>
-        <thead>
-            <tr>
-                <th>Compare Field</th>
-                <th>Actual</th>
-                <th>Expected</th>"""
-
-    if show_tolerance:
-        html += """
-                <th>Tolerance</th>
-                <th>Diff %</th>"""
-
-    html += """
-            </tr>
-        </thead>
-        <tbody>
-        """
-
-    # Get all keys from both dictionaries
-    all_keys = sorted(set(actual.keys()) | set(expected.keys()))
-
-    for key in all_keys:
-        actual_val = actual.get(key, "")
-        expected_val = expected.get(key, "")
-
-        # Check field status using compare_dict results
-        is_missing = key in res.get("missing", [])
-        is_redundant = key in res.get("redundant", [])
-        is_different = key in res.get("diff", [])
-        has_tolerance = key in tolerance_info
-
-        # Determine highlight class based on field status
-        if is_missing:
-            highlight_class = "missing"
-            actual_val = "MISSING"
-
-        elif is_redundant:
-            highlight_class = "redundant"
-            expected_val = "REDUNDANT"
-        elif has_tolerance:
-            tolerance_data = tolerance_info[key]
-            diff_percent = float(tolerance_data["diff_percent"]) if tolerance_data["diff_percent"] else 0
-
-            # Only highlight if there's an actual difference (diff > 0)
-            if diff_percent > 0:
-                if diff_percent <= tolerance_percent:
-                    highlight_class = "tolerance-pass"
-                else:
-                    highlight_class = "tolerance-fail"
-            else:
-                # Values are exactly the same, no highlighting needed
-                highlight_class = ""
-        elif is_different:
-            highlight_class = "highlight"
-        else:
-            highlight_class = ""
-
-        html += f"""
-            <tr>
-                <td>{' '.join(item.capitalize() for item in key.split('_'))}</td>
-                <td class="{highlight_class}">{actual_val}</td>
-                <td class="{highlight_class}">{expected_val}</td>"""
-
-        if show_tolerance:
-            if has_tolerance:
-                tolerance_data = tolerance_info[key]
-                html += f"""
-                <td class="tolerance-info">{tolerance_data["tolerance"]}</td>
-                <td class="tolerance-info">{tolerance_data["diff_percent"]}</td>"""
-            else:
-                html += """
-                <td class="tolerance-info">-</td>
-                <td class="tolerance-info">-</td>"""
-
-        html += """
-            </tr>
-            """
-
-    html += "</table>"
-    allure.attach(html, name=title, attachment_type=allure.attachment_type.HTML)

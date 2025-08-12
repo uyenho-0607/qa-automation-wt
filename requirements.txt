@@ -1,17 +1,18 @@
-# Testing
+# Testing Framework
 pytest
 allure-pytest
 pytest-check
+allure-python-commons
 
-# Code Quality
-flake8
-isort
-black
+# Data Processing
+pandas
+pyyaml
+
+# Security & Environment
+cryptography
 
 # Utilities
 colorama
-pyyaml
-numpy
-allure-python-commons
-cryptography
-pandas
+
+requests
+python-dotenv

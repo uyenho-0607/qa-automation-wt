@@ -2,49 +2,47 @@ from typing import Any
 
 import pytest_check as check
 
-from src.core.decorators import attach_table_details
 from src.data.project_info import StepLogs
 from src.utils import DotDict
-from src.utils.format_utils import format_dict_to_string
 from src.utils.logging_utils import logger
 
 """Utilities"""
 
 
-def compare_dict_with_keymap(actual, expected, key: str, tolerance=None):
+def compare_dict_with_keymap(actual, expected, key: str = 'chart_time', tolerance_percent=0.1):
+    act_chart_time = [item['chartTime'] for item in actual]
+    exp_chart_time = [item['chartTime'] for item in expected]
+
+    # 1. Check missing dataset
+    missing = [item for item in exp_chart_time if item not in act_chart_time]
+    # 2. Check redundant dataset
+    redundant = [item for item in act_chart_time if item not in exp_chart_time]
+
+    # 3. Compare values between 2 dataset
     actual_map = {item[key]: item for item in actual}
     expected_map = {item[key]: item for item in expected}
-
     all_keys = set(actual_map) | set(expected_map)
+
     mismatches = []
-    missing = []
-    redundant = []
 
     for k in all_keys:
         a_item = actual_map.get(k)
         e_item = expected_map.get(k)
 
         if a_item and e_item:
-            a_filtered = {ka: va for ka, va in a_item.items() if ka != key}
-            e_filtered = {ke: ve for ke, ve in e_item.items() if ke != key}
+            # filter out the actual and expected value without chart_time
+            a_filtered = {k: v for k, v in a_item.items() if k != key}
+            e_filtered = {k: v for k, v in e_item.items() if k != key}
 
             actual_diff = {}
             expected_diff = {}
 
-            for subkey in e_filtered:
-                va = a_filtered.get(subkey)
-                ve = e_filtered.get(subkey)
+            res_dict = compare_dict(a_filtered, e_filtered, tolerance_percent=tolerance_percent, tolerance_fields=["close", "high", "low", "open"])
 
-                if tolerance is not None:
-                    delta = round(abs(va - ve), ndigits=4)
-                    if delta <= tolerance:
-                        if delta:
-                            logger.debug(f"- Acceptable tolerance: {delta!r}")
-                        continue
-
-                if va != ve:
-                    actual_diff[subkey] = va
-                    expected_diff[subkey] = ve
+            if not res_dict['res']:
+                for diff in res_dict['diff']:
+                    actual_diff[diff] = a_filtered.get(diff)
+                    expected_diff[diff] = e_filtered.get(diff)
 
             if actual_diff:
                 mismatches.append({
@@ -53,42 +51,26 @@ def compare_dict_with_keymap(actual, expected, key: str, tolerance=None):
                     'expected': expected_diff
                 })
 
-        elif e_item and not a_item:
-            missing.append(k)
-
-        elif a_item and not e_item:
-            redundant.append(k)
-
-    return {
-        'result': not mismatches and not missing and not redundant,
-        'mismatches': mismatches,
-        'missing': missing,  # expected but not in actual
-        'redundant': redundant  # in actual but not in expected
-    }
+    return dict(
+        res=not missing and not mismatches and not redundant,
+        mismatches=mismatches,
+        missing=missing,
+        redundant=redundant
+    )
 
 
 def compare_with_tolerance(
         actual: str | float,
         expected: str | float,
         tolerance_percent: float = 0.1,
-        get_diff: bool = False
-) -> bool | dict:
+) -> dict:
     """
     Compare actual and expected values with percentage-based tolerance.
     Args:
         actual: Actual value as string (will be converted to float)
         expected: Expected value as string or float
         tolerance_percent: Tolerance as percentage (e.g., 0.5 means 0.5%)
-        get_diff: Get full dict result of different information
     """
-    # actual = remove_comma(actual)
-    # expected = remove_comma(expected)
-    #
-    # if not is_float(expected) or not is_float(actual):
-    #     logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected} - type: {type(expected)}, actual: {actual} - type: {type(actual)}")
-    #     res = False
-    #     return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
-
     actual = float(actual)
     expected = float(expected)
 
@@ -109,15 +91,12 @@ def compare_with_tolerance(
 
     # convert to percent for human-readable
     diff_percent = diff_percent * 100
-
-    if diff:
-        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
-    # else:
-    #     logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
+    # if diff:
+    #     logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
 
     res = abs(diff) <= abs(tolerance_value)
 
-    return res if not get_diff else dict(
+    return dict(
         res=res,
         diff=f"{diff:.4f}",
         diff_percent=f"{diff_percent:.4f}",
@@ -144,7 +123,6 @@ def compare_dict(
     diff_keys = []
     tolerance_info = {}
 
-    logger.debug(f"- Compare dict: {format_dict_to_string(expected=expected, actual=actual)}")
     # compare if length of two dicts are the same
     all_res.append(set(actual.keys()) == set(expected.keys()))
 
@@ -152,7 +130,7 @@ def compare_dict(
         act, exp = actual.get(key, "MISSING"), expected[key]
 
         if tolerance_percent is not None and key in tolerance_fields:
-            res_tolerance = compare_with_tolerance(act, exp, tolerance_percent, get_diff=True)
+            res_tolerance = compare_with_tolerance(act, exp, tolerance_percent)
             res = res_tolerance["res"]
             tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
 
@@ -163,15 +141,9 @@ def compare_dict(
         if not res:
             diff_keys.append(key)
 
-    # Find missing and redundant keys
-    missing = [key for key in expected.keys() if key not in actual.keys()]
-    redundant = [key for key in actual.keys() if key not in expected.keys()]
-
     res_dict = dict(
-        res=all(all_res) and not missing and not redundant,
-        missing=missing,
-        redundant=redundant,
-        diff=[item for item in diff_keys if item not in missing + redundant]
+        res=all(all_res),
+        diff=[item for item in diff_keys]
     )
 
     if tolerance_percent and tolerance_fields:
@@ -180,108 +152,28 @@ def compare_dict(
     return res_dict
 
 
-def extract_diff_list(actual: dict, expected: dict, diff_keys: list):
-    res = [
-        {k: item.get(k, "") for k in diff_keys} for item in [actual, expected]
-    ]
-    return res
-
-
-def check_contain(actual: Any, expected: Any, error_message: str) -> bool:
-    """Check if actual contains expected value."""
-    __tracebackhide__ = True
-
-    if isinstance(actual, dict) and isinstance(expected, dict):
-        res = check.is_true(expected.items() <= actual.items(), error_message)
-        return res
-
-    res = check.is_in(expected, actual, error_message)
-    return res
-
-
-def check_equal(actual: Any, expected: Any, error_message: str) -> bool:
-    """Check if actual equals expected value."""
-    __tracebackhide__ = True
-
-    res = check.equal(actual, expected, error_message)
-    return res
-
-
-@attach_table_details
 def soft_assert(
         actual: Any,
         expected: Any,
-        check_contains: bool = False,
         error_message: str = "",
-        **kwargs
-) -> dict[str, bool | list[Any]] | bool:
+) -> bool:
     """
     Perform a soft assertion that doesn't stop test execution on failure.
-    Captures screenshots and logs failures for reporting.
     Args:
         actual: The actual value to check
         expected: The expected value to compare against
-        check_contains: If True, uses contains() instead of equal()
         error_message: Custom error message to display if check fails
     Returns:
         bool: True if assertion passes, False otherwise
-    Raises:
-        TypeError: If actual or expected are None
     """
-    __tracebackhide__ = True
+    validation_err_msg = f"\nValidation Failed ! " + (error_message or f"\n>>> Actual:   {actual!r} \n>>> Expected: {expected!r}")
+    res = check.equal(actual, expected, validation_err_msg)
 
-    check_func = check_contain if check_contains else check_equal
-    validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
+    if not res:
+        logger.error(validation_err_msg)
+        # save failed verify step
+        if StepLogs.test_steps:
+            failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
+            failed_step in StepLogs.all_failed_logs or StepLogs.all_failed_logs.append(failed_step)
 
-    if isinstance(actual, dict) and isinstance(expected, dict):
-        if check_contains:
-            actual = {k: v for k, v in actual.items() if k in expected}
-
-        tolerance = kwargs.get("tolerance")
-        tolerance_fields = kwargs.get("tolerance_fields", [])
-
-        if tolerance is not None and tolerance_fields:
-            logger.debug(f"Tolerance: {tolerance}%, apply for fields: {tolerance_fields}")
-
-        res = compare_dict(actual, expected, tolerance_percent=tolerance, tolerance_fields=tolerance_fields)
-
-        if res["missing"]:
-            validation_err_msg += f"\n>>> Missing Fields: {res['missing']}"
-
-        if res["redundant"]:
-            validation_err_msg += f"\n>>> Redundant Fields: {res['redundant']}"
-
-        if res["diff"]:
-            diff_list = extract_diff_list(actual, expected, res["diff"])
-            validation_err_msg += (
-                f"\n>>> Different Fields: "
-                f"\nActual: {format_dict_to_string(diff_list[0])} "
-                f"\nExpected: {format_dict_to_string(diff_list[-1])}"
-            )
-
-        assertion_result = check_equal(res["res"], True, validation_err_msg)
-
-        # Handle error logging and screenshot capture
-        if not assertion_result:
-            logger.error(validation_err_msg)
-
-            # save failed verify step
-            if StepLogs.test_steps:
-                failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
-
-        # Return the comparison result for the decorator to use
-        return res
-
-    else:
-        validation_err_msg += (error_message or f"\n>>> Actual:   {actual!r} \n>>> Expected: {expected!r}")
-        res = check_func(actual, expected, validation_err_msg)
-
-        if not res:
-            logger.error(validation_err_msg)
-            # save failed verify step
-            if StepLogs.test_steps:
-                failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
-
-        return res
+    return res

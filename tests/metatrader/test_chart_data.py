@@ -30,5 +30,5 @@ def test(symbol, timeframe):
         to=chart_data[-1]["chartTime"]
     )
 
-    logger.info(f"Verify both dataset together, timeframe: {timeframe.value!r}")
-    compare_chart_data(chart_data, api_resp, timeframe)
+    logger.info(f"Verify both dataset together, timeframe: {timeframe.name!r}")
+    compare_chart_data(chart_data, api_resp, timeframe, symbol)

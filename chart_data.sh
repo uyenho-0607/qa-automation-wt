@@ -3,13 +3,18 @@
 # === CONFIGURATION ===
 RESULTS_DIR="allure-results"
 REPORT_DIR="allure-report"
-DEPLOY_URL="https://automation-wt.netlify.app"
+LOCAL_HOST="192.168.0.100"
+LOCAL_PORT="8080"
+
+# Check if deployment option is provided
+DEPLOY_OPTION=${1:-"local"}  # Default to local if no argument provided
 
 echo "=============================="
-echo "🧪 Running Pytest Tests..."
+echo "🧪 Running Chart Data Tests..."
 echo "=============================="
 
-pytest tests/api/metatrader --alluredir="$RESULTS_DIR"
+pytest tests/ --alluredir="$RESULTS_DIR"
+TEST_EXIT_CODE=$?
 
 echo ""
 echo "=============================="
@@ -24,16 +29,27 @@ fi
 
 echo ""
 echo "=============================="
-echo "🚀 Deploying to Netlify..."
-echo "=============================="
 
-# Assume site is already linked with `netlify link`
-netlify deploy --dir="$REPORT_DIR" --prod
-if [ $? -ne 0 ]; then
-  echo "❌ Netlify deployment failed."
-  exit 1
-fi
+if [ "$DEPLOY_OPTION" = "serve" ]; then
+  echo "🌐 Starting Local Allure Server..."
+  echo "=============================="
+  echo "📍 Report will be available at: http://$LOCAL_HOST:$LOCAL_PORT"
+  echo "🔄 Server will start automatically..."
+  echo "⏹️  Press Ctrl+C to stop the server"
+  echo ""
+  
+  allure serve "$RESULTS_DIR" -h "$LOCAL_HOST" -p "$LOCAL_PORT"
 
-echo ""
-echo "✅ Deployment successful!"
-echo "🌐 Report URL: $DEPLOY_URL"
+else
+  echo "📁 Report Generated Successfully!"
+  echo "=============================="
+  echo ""
+  echo "🌐 Starting local server and opening report..."
+  echo "📍 Report will be available at: http://localhost:4040"
+  echo "🔄 Server will start automatically and open in browser"
+  echo "⏹️  Press Ctrl+C to stop the server when done"
+  echo ""
+  
+  # Start allure serve which creates a local server and auto-opens browser
+  allure serve "$RESULTS_DIR"
+fi 

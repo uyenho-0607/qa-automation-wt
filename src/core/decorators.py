@@ -1,58 +1,42 @@
 import functools
-import inspect
 import json
 import time
 
 import requests
+from requests import Response
 
-from src.data.project_info import StepLogs
-from src.utils.allure_utils import attach_verify_table
-from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
 
+def format_request_log(resp: Response, log_resp=False) -> str:
+    # Format request content
+    method = resp.request.method.upper()
+    lines = [f"curl --location --request {method} '{resp.request.url}'"]
 
-def attach_table_details(func):
-    @functools.wraps(func)
-    def _wrapper(*args, **kwargs):
-        __tracebackhide__ = True
+    for key, value in resp.request.headers.items():
+        lines.append(f"--header '{key}: {value}'")
 
-        # Use inspect to get all function parameters including defaults
-        sig = inspect.signature(func)
-        bound_args = sig.bind(*args, **kwargs)
-        bound_args.apply_defaults()  # This applies default values
-        all_args = bound_args.arguments
+    if resp.request.body and isinstance(resp.request.body, (str, bytes)):
+        try:
+            data = json.loads(resp.request.body)
+            json_data = json.dumps(data)  # compact form
+        except Exception:
+            json_data = resp.request.body.decode() if isinstance(resp.request.body, bytes) else resp.request.body
 
-        actual, expected, *_ = args
+        lines.append(f"--data-raw '{json_data}'")
 
-        # Store the comparison result if it's returned by the function
-        comparison_result = None
+    curl_command = " \n".join(lines)
 
-        # Call the function and capture any returned comparison result
-        result = func(*args, **kwargs)
+    # Format response content
+    try:
+        content = resp.json()
+        response_text = json.dumps(content, indent=4)
+    except ValueError:
+        response_text = resp.text.strip()
 
-        # Check if the function returned a comparison result (for soft_assert)
-        if isinstance(result, dict) and "res" in result and "diff" in result:
-            comparison_result = result
+    if log_resp:
+        return f"\n{curl_command}\n\n{response_text}"
+    return f"\n{curl_command}"
 
-        if all([isinstance(actual, dict), isinstance(expected, dict)]):
-
-            check_contains = all_args.get("check_contains")
-            if check_contains:
-                actual = {k: v for k, v in actual.items() if k in expected}
-
-            title = "Verify Table Details"
-            if StepLogs.test_steps:
-                title += f" - {StepLogs.test_steps[-1]}"
-
-            attach_verify_table(
-                actual, expected,
-                tolerance_percent=kwargs.get("tolerance"),
-                tolerance_fields=kwargs.get("tolerance_fields"),
-                title=title,
-                comparison_result=comparison_result
-            )
-
-    return _wrapper
 
 def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
     """

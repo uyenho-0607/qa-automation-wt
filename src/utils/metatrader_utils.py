@@ -5,18 +5,13 @@ from datetime import datetime, timezone, timedelta
 import allure
 import pandas as pd
 
-from src.data.consts import DATA_DIR
-from src.data.enums import Server, ChartTimeframe
+from src.data.consts import ROOTDIR, CSV_DIR, TOLERANCE_PERCENT
+from src.data.enums import ChartTimeframe
 from src.data.project_info import RuntimeConfig
 from src.utils.assert_utils import soft_assert, compare_dict_with_keymap
 from src.utils.logging_utils import logger
 
-CSV_DIR = {
-    Server.MT5: r"~/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Files/",
-    Server.MT4: r"~/Library/Application Support/net.metaquotes.wine.metatrader4/drive_c/Program Files (x86)/MetaTrader 4/MQL4/Files/"
-}
-
-OUTPUT_DIR = DATA_DIR / ".chart_data"
+OUTPUT_DIR = ROOTDIR / ".chart_data"
 
 
 def _map_timestamp(time_str: str):
@@ -32,8 +27,14 @@ def _ms_to_date(milliseconds):
     return dt.strftime("%Y-%m-%d %H:%M:%S UTC")
 
 
+def _ms_to_chart_date(milliseconds):
+    utc_plus_3 = timezone(timedelta(hours=3))
+    dt = datetime.fromtimestamp(milliseconds / 1000, tz=utc_plus_3)
+    return dt.strftime("%Y-%m-%d %H:%M:%S UTC+3")
+
+
 def _csv_to_json(df, symbol: str, timeframe: ChartTimeframe):
-    """Save DataFrame to JSON format as specified"""
+    """Save DataFrame to JSON format"""
     os.makedirs(str(OUTPUT_DIR), exist_ok=True)
     df_reversed = df.iloc[::-1].reset_index(drop=True)
 
@@ -67,7 +68,7 @@ def _process_metatrader_data(symbol: str, timeframe: ChartTimeframe):
         raise FileNotFoundError(f"CSV file not found: {file}")
 
     if RuntimeConfig.server == "mt4":
-        df = pd.read_csv(file, delimiter=';')   # mt4
+        df = pd.read_csv(file, delimiter=';')  # mt4
     else:
         df = pd.read_csv(file, sep='\t')  # mt5
 
@@ -138,6 +139,10 @@ def _exp_interval(interval_min, timeframe):
 
 
 def check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe):
+    """
+    Check if each dataset distance from previous is equal to the expected interval
+    NOTE: if wrong dataset is present on both chart_data and api_data, it's acceptable
+    """
     expected_interval = timeframe_to_ms(timeframe)
     failed = []
 
@@ -167,28 +172,31 @@ def check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe):
     return {"result": len(failed) == 0, "failed": failed}
 
 
-def compare_chart_data(chart_data, api_data, timeframe=None):
+def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     """Compare chart data (MetaTrader) with API data based on chartTime"""
 
     final_res = []
     compare_res = {}
 
-    # clean data
+    # filter not compare keys
     api_data = [{k: v for k, v in item.items() if k not in ["ask", "source"]} for item in api_data]
 
-    # overall dataset amount
+    # Compare overall dataset amount
+    logger.info(f"{'-' * 10} COMPARE DATASET AMOUNT {'-' * 10}")
     res_amount = soft_assert(len(api_data), len(chart_data), error_message=f"Dataset amount mismatch: actual={len(api_data)} <> expected={len(chart_data)}")
-    compare_res["dataset_amount"] = {'actual': len(api_data), 'expected': len(chart_data)}
 
-    if not res_amount:
-        final_res.append(False)
-        compare_res['dataset_amount'] = {'actual': len(api_data), 'expected': len(chart_data)}
+    # append compare dataset amount result
+    final_res.append(res_amount)
+    compare_res['dataset_amount'] = {'actual': len(api_data), 'expected': len(chart_data)}
 
     # chart data comparison
-    res = compare_dict_with_keymap(api_data, chart_data, 'chartTime', tolerance=0.0003)
+    logger.info(f"{'-' * 10} COMPARE CHART DATA {'-' * 10}")
+    res = compare_dict_with_keymap(api_data, chart_data, 'chartTime', tolerance_percent=TOLERANCE_PERCENT)
 
-    if not res['result']:
-        final_res.append(False)
+    # append chart data comparison result
+    final_res.append(res['res'])
+
+    if not res['res']:
         logger.error(f"❌ Chart data comparison failed")
         error_msg = f"Chart data comparison failed"
 
@@ -197,7 +205,9 @@ def compare_chart_data(chart_data, api_data, timeframe=None):
 
             logger.error(f"❌ Mismatched: {len(res['mismatches'])} items")
             for item in res['mismatches']:
-                error_msg += f"\n - Mismatched item {item['chartTime']} ({_ms_to_date(item['chartTime'])}): {item['actual']} <-> {item['expected']}"
+                error_msg += (
+                    f"\n - Mismatched item {item['chartTime']} ({_ms_to_date(item['chartTime'])} - chart_data: {_ms_to_chart_date(item['chartTime'])}): {item['actual']} <-> {item['expected']}"
+                )
 
         if res['missing']:
             compare_res['missing'] = res['missing']
@@ -214,35 +224,44 @@ def compare_chart_data(chart_data, api_data, timeframe=None):
 
         soft_assert(True, False, error_message=error_msg)
 
-    if timeframe:
-        res_int = check_timestamp_interval(api_data, chart_data, timeframe)
+    # Compare timeframe interval
+    logger.info(f"{'-' * 10} COMPARE TIMEFRAME INTERVAL {'-' * 10}")
+    res_int = check_timestamp_interval(api_data, chart_data, timeframe)
 
-        if not res_int["result"]:
-            compare_res['interval'] = res_int['failed']
-            compare_res['timeframe'] = timeframe
+    # append timeframe interval result
+    final_res.append(res_int["result"])
 
-            final_res.append(False)
-            logger.error(f"❌ Invalid interval time: {len(res_int['failed'])}")
-            error_msg = f"Timeframe interval validation failed - Expected {timeframe.name} - Got: "
+    if not res_int["result"]:
+        compare_res['interval'] = res_int['failed']
+        compare_res['timeframe'] = timeframe
 
-            for item in res_int['failed']:
-                act_interval = _exp_interval(item['interval'], timeframe)
-                error_msg += f"\n - {act_interval} - {item['ms']} ({item['date']})"
+        logger.error(f"❌ Invalid interval time: {len(res_int['failed'])}")
+        error_msg = f"Timeframe interval validation failed - Expected {timeframe.name} - Got: "
 
-            soft_assert(True, False, error_message=error_msg)
+        for item in res_int['failed']:
+            act_interval = _exp_interval(item['interval'], timeframe)
+            error_msg += f"\n - {act_interval} - {item['ms']} ({item['date']})"
+
+        soft_assert(True, False, error_message=error_msg)
 
     if all(final_res):
-        logger.info(f"✅ Chart data comparison passed")
+        logger.info(f"{'-' * 10} PASSED ✅ {'-' * 10}")
 
     else:
-        attach_chart_comparison_summary(compare_res)
+        attach_chart_comparison_summary(compare_res, symbol, timeframe)
 
 
-def attach_chart_comparison_summary(comparison_result):
+def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     """Attach a summary table of chart data comparison results to Allure report."""
-    html = """
+    
+    # Create title with symbol and timeframe info
+    symbol_display = symbol or 'Unknown'
+    timeframe_display = (timeframe.name if timeframe else 'Unknown').replace("_", " ").upper()
+    title = f"📊 Chart Data Comparison Summary - {symbol_display} - {timeframe_display}"
+    
+    html = f"""
         <style>
-            .summary-table {
+            .summary-table {{
                 border-collapse: collapse;
                 width: 100%;
                 font-family: Arial, sans-serif;
@@ -251,40 +270,40 @@ def attach_chart_comparison_summary(comparison_result):
                 border-radius: 8px;
                 overflow: hidden;
                 box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            .summary-table th {
+            }}
+            .summary-table th {{
                 background-color: #4CAF50;
                 color: white;
                 padding: 12px 15px;
                 text-align: left;
                 font-weight: bold;
                 font-size: 14px;
-            }
-            .summary-table td {
+            }}
+            .summary-table td {{
                 padding: 10px 15px;
                 border-bottom: 1px solid #ddd;
                 font-size: 13px;
                 vertical-align: top;
-            }
-            .summary-table tr:nth-child(even) {
+            }}
+            .summary-table tr:nth-child(even) {{
                 background-color: #f2f2f2;
-            }
-            .summary-table tr:hover {
+            }}
+            .summary-table tr:hover {{
                 background-color: #e8f5e8;
-            }
-            .status-pass {
+            }}
+            .status-pass {{
                 color: #4CAF50;
                 font-weight: bold;
-            }
-            .status-fail {
+            }}
+            .status-fail {{
                 color: #f44336;
                 font-weight: bold;
-            }
-            .status-warning {
+            }}
+            .status-warning {{
                 color: #ff9800;
                 font-weight: bold;
-            }
-            .header-info {
+            }}
+            .header-info {{
                 background-color: #2196F3;
                 color: white;
                 padding: 10px 15px;
@@ -292,8 +311,8 @@ def attach_chart_comparison_summary(comparison_result):
                 border-radius: 5px;
                 font-weight: bold;
                 text-align: center;
-            }
-            .error-details {
+            }}
+            .error-details {{
                 background-color: #fff3cd;
                 border: 1px solid #ffeaa7;
                 border-radius: 4px;
@@ -302,26 +321,26 @@ def attach_chart_comparison_summary(comparison_result):
                 font-size: 11px;
                 max-height: 200px;
                 overflow-y: auto;
-            }
-            .error-item {
+            }}
+            .error-item {{
                 background-color: #f8f9fa;
                 border-left: 3px solid #dc3545;
                 padding: 6px;
                 margin: 3px 0;
                 border-radius: 3px;
-                font-size: 10px;
-            }
-            .warning-item {
+                font-size: 12px;
+            }}
+            .warning-item {{
                 background-color: #f8f9fa;
                 border-left: 3px solid #ffc107;
                 padding: 6px;
                 margin: 3px 0;
                 border-radius: 3px;
-                font-size: 10px;
-            }
+                font-size: 12px;
+            }}
         </style>
         <div class="header-info">
-            📊 Chart Data Comparison Summary
+            {title}
         </div>
         <table class="summary-table">
         <thead>
@@ -363,7 +382,7 @@ def attach_chart_comparison_summary(comparison_result):
             date_str = _ms_to_date(item)
             missing_details += f"""
                 <div class="error-item">
-                    <strong>Missing #{i + 1}:</strong> {date_str}<br>
+                    <strong>Missing #{i + 1}:</strong> {item} - {date_str}, chart_time: {_ms_to_chart_date(item)}<br>
                 </div>
             """
         missing_details += "</div>"
@@ -389,7 +408,7 @@ def attach_chart_comparison_summary(comparison_result):
             date_str = _ms_to_date(item)
             redundant_details += f"""
                 <div class="warning-item">
-                    <strong>Redundant #{i + 1}:</strong> {date_str}<br>
+                    <strong>Redundant #{i + 1}:</strong> {item} - {date_str} - {_ms_to_chart_date(item)}<br>
                 </div>
             """
         redundant_details += "</div>"
@@ -414,10 +433,11 @@ def attach_chart_comparison_summary(comparison_result):
         for i, item in enumerate(comparison_result.get("mismatches", [])):
             chart_time = item.get("chartTime", "")
             date_str = _ms_to_date(chart_time) if chart_time else "Unknown"
+            original_chart_str = _ms_to_chart_date(chart_time) if chart_time else "Unknown"
 
             different_details += f"""
                 <div class="error-item">
-                    <strong>Different #{i + 1}:</strong> {date_str}<br>
+                    <strong>Different #{i + 1}:</strong> API data: {chart_time} - {date_str} (chart_data: {original_chart_str})<br>
             """
             different_details += f"expected={item.get('expected')}, actual={item.get('actual')}<br>"
             different_details += """
@@ -468,8 +488,9 @@ def attach_chart_comparison_summary(comparison_result):
     """
 
     # Attach to Allure report
+    attachment_name = f"Chart Comparison Summary - {symbol_display} - {timeframe_display}"
     allure.attach(
         html,
-        name=f"Chart Comparison Summary",
+        name=attachment_name,
         attachment_type=allure.attachment_type.HTML
     )

@@ -1,24 +1,17 @@
-# Web, Mobile, and API Test Automation Framework
+# Chart Data API Testing Framework
 
-A comprehensive test automation framework built with Python, supporting web application testing with Selenium, mobile application testing with Appium, and API testing with RESTful services.
+A focused test automation framework for validating MetaTrader chart data through API testing. This framework compares chart data from MetaTrader CSV exports with API responses to ensure data accuracy across different timeframes and symbols.
 
 ## 🚀 Features
 
-- **Web Application Testing** with Selenium WebDriver
-- **Mobile Application Testing** with Appium (Android support)
-- **API Testing** with RESTful services
-- **Page Object Model (POM)** design pattern for UI testing
-- **Allure Reporting** integration with custom enhancements
-- **Cross-platform support** (Web, Android)
-- **Modular and maintainable** test structure
-- **Code quality tools** integration (flake8, isort, black)
-- **Parallel test execution** with controlled concurrency
-- **Environment-specific configurations** (SIT, UAT, PROD)
+- **Chart Data API Testing** with comprehensive validation
+- **MetaTrader Integration** (MT4 and MT5 support)
+- **Multi-timeframe Testing** (1min, 5min, 15min, 30min, 1h, 4h, 1d, 1w, 1M)
+- **Allure Reporting** with detailed comparison summaries
+- **Environment-specific configurations** (SIT, UAT, Release-SIT)
 - **Multi-client support** (Lirunex, TransactCloud)
-- **Multi-server support** (MT4, MT5)
-- **Account type testing** (Demo, Live, CRM)
-- **Video recording** for mobile tests
-- **Screenshot capture** on test failures
+- **Data tolerance validation** with configurable thresholds
+- **Automated report generation and deployment**
 
 ## 📋 Prerequisites
 
@@ -27,6 +20,7 @@ A comprehensive test automation framework built with Python, supporting web appl
 - Virtual environment (recommended)
 - Git
 - Allure Command Line Tool (for report generation)
+- MetaTrader 4/5 with CSV export capability
 
 ## 🛠️ Installation
 
@@ -58,318 +52,185 @@ brew install allure
 # On Windows (using scoop)
 scoop install allure
 
-# On Linux
-wget -qO- https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline/2.24.0/allure-commandline-2.24.0.tgz | tar -xz -C /opt/
-sudo ln -s /opt/allure-2.24.0/bin/allure /usr/bin/allure
-```
-
 ## 📁 Framework Structure
 
 ```
 qa-automation-wt/
-├── config/                 # Configuration files
-├── docs/                  # Documentation
-│   ├── test_case_rules.md
-│   ├── test_naming_convention.md
-│   └── locator_conventions.md
-├── src/                   # Source code
-│   ├── apis/             # API testing modules
-│   │   ├── api_base.py   # Base API client
-│   │   ├── api_client.py # HTTP client wrapper
-│   │   ├── auth_api.py   # Authentication API
-│   │   ├── trade_api.py  # Trading API
-│   │   ├── user_api.py   # User management API
-│   │   ├── market_api.py # Market data API
-│   │   ├── order_api.py  # Order management API
-│   │   ├── statistics_api.py # Statistics API
-│   │   └── chart_api.py  # Chart data API
-│   │
-│   ├── core/             # Core framework functionality
-│   │   ├── actions/      # Action implementations
-│   │   ├── driver/       # Driver management
-│   │   ├── page_container/ # Page container management
+├── config/                 # Environment configuration files
+│   ├── sit.yaml            # SIT environment settings
+│   ├── uat.yaml            # UAT environment settings
+│   ├── prod.yaml           # Production environment settings
+│   └── release_sit.yaml    # Release SIT environment settings
+├── src/                    # Source code
+│   ├── apis/              # API testing modules
+│   │   ├── api_base.py    # Base API client
+│   │   ├── api_client.py  # Main API client
+│   │   ├── auth_api.py    # Authentication API
+│   │   └── chart_api.py   # Chart data API
+│   ├── core/              # Core framework functionality
 │   │   ├── config_manager.py # Configuration management
-│   │   └── decorators.py # Custom decorators
-│   │
-│   ├── data/             # Test data and constants
-│   │   ├── enums.py      # Enumerations
-│   │   ├── ui_messages.py # UI message constants
-│   │   └── project_info.py # Project information
-│   │
-│   ├── page_object/      # Page Object classes
-│   │   ├── web/         # Web page objects
-│   │   │   ├── base_page.py
-│   │   │   ├── pages/   # Individual page objects
-│   │   │   └── components/ # Reusable components
-│   │   └── android/     # Android page objects
-│   │       ├── base_page.py
-│   │       ├── pages/   # Individual page objects
-│   │       └── components/ # Reusable components
-│   │
-│   └── utils/            # Utility functions
-│       ├── allure_utils.py
-│       ├── assert_utils.py
-│       ├── common_utils.py
-│       ├── logging_utils.py
-│       └── video_utils.py
-│
-├── tests/                # Test cases
-│   ├── web/             # Web test cases
-│   ├── android/         # Android test cases
-│   ├── api/             # API test cases
-│   └── conftest.py      # Test configuration
-├── conftest.py          # Main pytest configuration
-├── pytest.ini          # Pytest settings
-├── requirements.txt     # Project dependencies
-├── pyproject.toml       # Project metadata
-├── setup.cfg           # Project configuration
-├── run_web_tests.sh    # Web test execution script
-├── merge_report.sh     # Report merging utility
-└── README.md           # Project documentation
+│   │   └── decorators.py  # API request decorators
+│   ├── data/              # Test data and constants
+│   │   ├── enums.py       # Enumerations (consolidated)
+│   │   ├── consts.py      # Constants and paths
+│   │   └── project_info.py # Runtime configuration
+│   └── utils/             # Utility functions
+│       ├── metatrader_utils.py # MetaTrader data processing
+│       ├── assert_utils.py     # Assertion utilities
+│       ├── allure_utils.py     # Allure reporting
+│       ├── logging_utils.py    # Logging utilities
+│       ├── format_utils.py     # Request formatting
+│       └── encrypt_utils.py    # Password encryption
+├── tests/                 # Test cases
+│   └── api/
+│       └── metatrader/
+│           └── test_chart_data.py # Chart data validation tests
+├── chart_data.sh         # Test execution and deployment script
+├── conftest.py           # Pytest configuration
+├── pytest.ini           # Pytest settings
+└── requirements.txt      # Project dependencies
 ```
-
-### Key Components
-
-1. **APIs** (`src/apis/`)
-   - RESTful API testing modules
-   - Base API client with common functionality
-   - Specialized API modules for different services:
-     - Authentication
-     - Trading operations
-     - User management
-     - Market data
-     - Order management
-     - Statistics
-     - Chart data
-
-2. **Core** (`src/core/`)
-   - Framework's core functionality
-   - Actions: Web and mobile action implementations
-   - Driver management: Web and mobile driver handling
-   - Page container: Page object lifecycle management
-   - Configuration management: Environment and test configuration
-   - Decorators: Custom decorators for test enhancement
-
-3. **Page Objects** (`src/page_object/`)
-   - Page Object Model implementation for web and mobile applications
-   - Organized by platform:
-     - **Web** (`web/`):
-       - `base_page.py`: Base class for all web page objects
-       - `pages/`: Individual page objects (login, trade, markets, etc.)
-       - `components/`: Reusable web components (settings, modals, notifications, etc.)
-     - **Android** (`android/`):
-       - `base_page.py`: Base class for all Android page objects
-       - `pages/`: Individual mobile page objects
-       - `components/`: Reusable mobile components
-   - Each page object follows POM best practices:
-     - Encapsulates page-specific locators
-     - Implements page-specific actions
-     - Inherits from respective base page class
-     - Supports both web and mobile element interactions
-
-4. **Utils** (`src/utils/`)
-   - Allure reporting with custom enhancements
-   - Assertion utilities
-   - Common utilities
-   - Logging utilities
-   - Video recording utilities
-
-5. **Tests** (`tests/`)
-   - Web tests (`web/`)
-   - Android tests (`android/`)
-   - API tests (`api/`)
-
-6. **Config** (`config/`)
-   - Environment-specific configuration files
-
-7. **Docs** (`docs/`)
-   - Test case writing rules
-   - Test naming conventions
-   - Locator conventions
 
 ## 🧪 Running Tests
 
-### Basic Test Execution
+### Quick Start with Script
 
-To run all tests with Allure reporting:
+The easiest way to run tests and generate reports:
+
 ```bash
-pytest --alluredir=./allure-results
+./chart_data.sh
 ```
 
-To generate and view the Allure report:
+This script will:
+1. Run all chart data tests
+2. Generate Allure report
+3. Deploy report to Netlify (if configured)
+
+### Manual Test Execution
+
+Run chart data tests with Allure reporting:
 ```bash
-allure serve ./allure-results
+pytest tests/api/metatrader --alluredir=allure-results
+```
+
+Generate and view the Allure report:
+```bash
+allure serve allure-results
+allure serve -h  192.168.0.100 -p 8080 a
 ```
 
 ### Test Execution Options
 
-The framework supports various test execution options through command-line arguments:
-
 ```bash
-# Platform selection
---platform=web|android
-
 # Environment selection
---env=sit|uat|prod
+--env=sit|uat|release_sit
 
-# Client selection
+# Client selection  
 --client=lirunex|transactCloud
 
 # Server selection
 --server=mt4|mt5
 
 # Account type
---account=demo|live|crm
+--account=demo|live
 
-# Browser selection (for web tests)
---browser=chrome|firefox|edge
-
-# Headless mode (for web tests)
---headless
-
-# Custom username
---user="username"
-
-# Argo CD mode
---cd
-
-# Test retry on failure
---reruns <number>
-
-# Test markers
--m "smoke|regression|e2e|critical|sanity"
+# Custom credentials
+--user="username" --password="password"
 ```
 
 ### Test Execution Examples
 
 ```bash
-# Run web tests on SIT environment for Lirunex client with MT4 server using demo account
-pytest --platform=web --env=sit --client=lirunex --server=mt4 --account=demo --alluredir=./allure-results
+# Run tests for Lirunex MT4 demo account on SIT
+pytest tests/api/ --env=sit --client=lirunex --server=mt4 --account=demo --alluredir=allure-results
 
-# Run mobile tests on UAT environment with live account
-pytest --platform=android --env=uat --account=live --alluredir=./allure-results
+# Run tests for TransactCloud MT5 live account on UAT
+pytest tests/api/ --env=uat --client=transactCloud --server=mt5 --account=live --alluredir=allure-results
 
-# Run API tests
-pytest tests/api --alluredir=./allure-results
-
-# Run smoke tests on Chrome browser in headless mode
-pytest --platform=web --browser=chrome --headless -m "smoke" --alluredir=./allure-results
-
-# Run critical tests with custom username
-pytest -m "critical" --user="testuser123" --alluredir=./allure-results
-
-# Run specific test case
-pytest tests/web/login/test_LGN_TC01_positive_valid_credentials.py --platform=web --env=sit --alluredir=./allure-results
+# Run tests with custom credentials
+pytest tests/api/ --user="12345678" --password="mypassword" --alluredir=allure-results
 ```
 
-### Parallel Test Execution
+## 📊 Chart Data Testing
 
-Use the provided shell script for controlled parallel execution:
-```bash
-# Run web tests in parallel with controlled concurrency
-./run_web_tests.sh
-```
+### What It Tests
 
-The script controls the number of parallel test suites to manage memory usage effectively.
+The framework validates:
 
-## 🏷️ Test Markers
+1. **Dataset Amount**: Ensures API returns the same number of data points as MetaTrader
+2. **Data Accuracy**: Compares OHLC (Open, High, Low, Close) values with configurable tolerance
+3. **Missing Data Points**: Identifies data present in MetaTrader but missing in API
+4. **Redundant Data Points**: Identifies extra data in API not present in MetaTrader  
+5. **Timestamp Intervals**: Validates that data points follow correct timeframe intervals
 
-The framework supports various test markers for categorization:
+### Supported Timeframes
 
-- `smoke`: Smoke test suite
-- `sanity`: Sanity test suite
-- `critical`: Critical priority tests
-- `uat`: Tests for UAT environment only
-- `not_demo`: Tests not for demo accounts
-- `not_live`: Tests not for live accounts
-- `not_crm`: Tests not for CRM accounts
+- 1 minute (`1min`)
+- 5 minutes (`5min`) 
+- 15 minutes (`15min`)
+- 30 minutes (`30min`)
+- 1 hour (`1h`)
+- 4 hours (`4h`)
+- 1 day (`1d`)
+- 1 week (`1w`)
+- 1 month (`1M`)
 
-## 🛠️ Development Tools
+### MetaTrader CSV Setup
 
-### Code Quality
-- **flake8**: Linting and style checking
-- **isort**: Import sorting
-- **black**: Code formatting
+The framework expects CSV files exported from MetaTrader to be available at:
 
-### Testing Framework
-- **pytest**: Test runner and framework
-- **pytest-selenium**: Selenium integration
-- **allure-pytest**: Test reporting
-- **pytest-check**: Additional test features
-- **pytest-rerunfailures**: Test retry functionality
+- **MT5**: `~/Library/Application Support/net.metaquotes.wine.metatrader5/drive_c/Program Files/MetaTrader 5/MQL5/Files/`
+- **MT4**: `~/Library/Application Support/net.metaquotes.wine.metatrader4/drive_c/Program Files (x86)/MetaTrader 4/MQL4/Files/`
 
-### Web & Mobile Testing
-- **selenium**: Web browser automation
-- **Appium-Python-Client**: Mobile app automation
-- **webdriver-manager**: WebDriver management
+CSV files should be named: `{SYMBOL}_{TIMEFRAME}.csv`
 
-### Utilities
-- **colorama**: Colored terminal output
-- **pyyaml**: YAML configuration parsing
-- **numpy**: Numerical computing
-- **pandas**: Data manipulation
-- **cryptography**: Encryption utilities
-- **boto3**: AWS SDK for Python
+Example: `BTCUSD.std_M1.csv`, `BAKE.USD_H1.csv`
 
-## 📊 Reporting
+## 📈 Allure Reports
 
-### Allure Reports
 The framework generates comprehensive Allure reports with:
-- Test execution results
-- Screenshots on failures
-- Video recordings for mobile tests
-- Environment information
-- Custom test steps and logs
-- Test categorization by server, account type, and platform
 
-### Report Generation
-```bash
-# Generate report
-allure generate ./allure-results --clean
-
-# Serve report locally
-allure serve ./allure-results
-
-# Open existing report
-allure open ./allure-report
-```
+- **Test execution summary** with pass/fail status
+- **Detailed comparison tables** for each symbol-timeframe combination
+- **Error details** with timestamps and data differences
+- **Tolerance information** for numerical comparisons
+- **Environment information** and test configuration
 
 ## 🔧 Configuration
 
-### Environment Configuration
-The framework supports multiple environments:
-- **SIT**: System Integration Testing
-- **UAT**: User Acceptance Testing
-- **PROD**: Production (use with caution)
+### Environment Files
 
-### Client Configuration
-- **Lirunex**: Default client configuration
-- **TransactCloud**: Alternative client configuration
+Configuration files in `config/` directory contain:
 
-### Server Configuration
-- **MT4**: MetaTrader 4 server
-- **MT5**: MetaTrader 5 server
+- **API URLs** for different environments
+- **Encrypted passwords** for security
+- **User credentials** for different account types
+- **Client-specific settings**
 
-### Account Types
-- **Demo**: Demo trading accounts
-- **Live**: Live trading accounts
-- **CRM**: Customer Relationship Management accounts
+### Data Tolerance
 
-## 📚 Documentation
+Default tolerance for OHLC comparisons is 0.1% (configurable in `src/data/consts.py`)
 
-Additional documentation is available in the `docs/` directory:
-- `test_case_rules.md`: Guidelines for writing test cases
-- `test_naming_convention.md`: Test naming conventions
-- `locator_conventions.md`: Locator strategy guidelines
+## 🛠️ Development
 
-## 🤝 Contributing
+### Key Components
 
-1. Follow the established coding standards
-2. Use the provided code quality tools
-3. Write comprehensive test cases
-4. Update documentation as needed
-5. Follow the test naming conventions
+1. **APIs** (`src/apis/`): HTTP client and authentication
+2. **Core** (`src/core/`): Configuration and request handling  
+3. **Utils** (`src/utils/`): Data processing and validation utilities
+4. **Tests** (`src/tests/`): Chart data validation test cases
 
-## 📝 License
+### Adding New Symbols
 
-This project is proprietary and confidential.
+1. Add symbol to `SYMBOL_LIST` in `test_chart_data.py`
+2. Ensure CSV files are available in MetaTrader export directory
+3. Update configuration files if needed
+
+## 🚀 Deployment
+
+The `chart_data.sh` script automatically deploys reports to Netlify. Configure your Netlify site by:
+
+1. Install Netlify CLI: `npm install -g netlify-cli`
+2. Login: `netlify login`  
+3. Link site: `netlify link`
+4. Update `DEPLOY_URL` in `chart_data.sh`
