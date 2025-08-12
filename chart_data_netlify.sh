@@ -9,7 +9,7 @@ echo "=============================="
 echo "🧪 Running Pytest Tests..."
 echo "=============================="
 
-pytest tests/api/metatrader --alluredir="$RESULTS_DIR"
+pytest tests/metatrader --alluredir="$RESULTS_DIR"
 
 echo ""
 echo "=============================="

@@ -16,6 +16,7 @@ server = RuntimeConfig.server
 
 @pytest.mark.parametrize(
     "symbol, timeframe", [(_symbol, _time) for _symbol in SYMBOL_LIST[server] for _time in ChartTimeframe.list_values()]
+    # "symbol, timeframe", [(_symbol, _time) for _symbol in SYMBOL_LIST[server] for _time in [ChartTimeframe.one_week]]
 )
 def test(symbol, timeframe):
 

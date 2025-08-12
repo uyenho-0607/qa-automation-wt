@@ -1,9 +1,7 @@
 # Chart Data API Testing Configuration - UAT Environment
-
-# Encrypted passwords for different account types  
-password_crm: gAAAAABoWMEXslfQb9KOlvT7GjPiMPOc1cQEVZjrI--VDYHBQHsywhk_AYGjyYv7zpTS51BJ7TyQY7J1unco_TQlE_SqRJX-TQ==
-password_live: gAAAAABoWMEt4Qc6bYKgPVXrbV3IuZjE_EJr1mE3aiqKPdG-oKPN462pDvi19zh-tkySetZtvasVQXlhuN1KqkCUz63-eyYQhg==
-password_demo: gAAAAABoWMEt4Qc6bYKgPVXrbV3IuZjE_EJr1mE3aiqKPdG-oKPN462pDvi19zh-tkySetZtvasVQXlhuN1KqkCUz63-eyYQhg==
+password_crm: Auto@12345
+password_live: Autotest@12345
+password_demo: Autotest@12345
 
 # Lirunex Client Configuration
 lirunex:

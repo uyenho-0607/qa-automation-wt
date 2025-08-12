@@ -6,7 +6,6 @@ from src.data.consts import CONFIG_DIR
 from src.data.enums import Client, Server, AccountType
 from src.data.project_info import RuntimeConfig
 from src.utils import DotDict
-from src.utils.encrypt_utils import decrypt_password
 
 
 class Config:
@@ -31,8 +30,7 @@ class Config:
 
         credentials = cls.config.credentials[server]
         username = RuntimeConfig.user or credentials[f'user_{account.lower()}']
-        encrypted_password = cls._full_config.get(f"password_{account.lower()}", cls._full_config["password"])
-
-        password = RuntimeConfig.password or decrypt_password(encrypted_password)
+        password = cls._full_config.get(f"password_{account.lower()}", cls._full_config["password"])
+        password = RuntimeConfig.password or password
 
         return DotDict(username=username, password=password)
