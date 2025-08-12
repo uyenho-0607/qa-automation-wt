@@ -4,8 +4,8 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
-from src.data.enums import OrderType, Features, WatchListTab
+from src.data.enums import OrderType, Features
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -38,7 +38,7 @@ def test(web_app, setup_order_data):
 @pytest.fixture
 def setup_order_data(web_app):
 
-    symbols = random.choices(get_symbols(), k=5)
+    symbols = random.choices(ObjSymbol().get_symbols(get_all=True), k=5)
     logger.info(f"- Place 5 order for list symbol: {symbols}")
     for _symbol in symbols:
         trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)

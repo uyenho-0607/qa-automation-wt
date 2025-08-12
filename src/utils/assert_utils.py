@@ -133,15 +133,18 @@ def compare_dict(
         actual: dict | DotDict,
         expected: dict | DotDict,
         tolerance_percent: float = None,
-        tolerance_fields: list[str] = None
+        tolerance_fields: list[str] = None,
+        field_tolerances: dict[str, float] = None
 ):
     """
     Compare two dictionaries with optional tolerance for specified fields.
     Args:
         actual: Actual dictionary
         expected: Expected dictionary
-        tolerance_percent: Tolerance percent value for comparing numbers
-        tolerance_fields: List of field names to apply tolerance to
+        tolerance_percent: Global tolerance percent value for comparing numbers
+        tolerance_fields: List of field names to apply global tolerance to
+        field_tolerances: Dictionary mapping field names to specific tolerance percentages
+                         e.g., {'price': 0.1, 'volume': 0.5} - overrides global tolerance
     """
 
     all_res = []
@@ -155,7 +158,15 @@ def compare_dict(
     for key in expected:
         act, exp = actual.get(key, "MISSING"), expected[key]
 
-        if tolerance_percent is not None and key in tolerance_fields:
+        # Check if field has specific tolerance
+        if field_tolerances and key in field_tolerances:
+            field_tolerance = field_tolerances[key]
+            res_tolerance = compare_with_tolerance(act, exp, field_tolerance, get_diff=True)
+            res = res_tolerance["res"]
+            tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
+        
+        # Check if field should use global tolerance
+        elif tolerance_percent is not None and tolerance_fields and key in tolerance_fields:
             res_tolerance = compare_with_tolerance(act, exp, tolerance_percent, get_diff=True)
             res = res_tolerance["res"]
             tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
@@ -178,7 +189,7 @@ def compare_dict(
         diff=[item for item in diff_keys if item not in missing + redundant]
     )
 
-    if tolerance_percent and tolerance_fields:
+    if (tolerance_percent and tolerance_fields) or field_tolerances:
         res_dict |= {"tolerance_info": tolerance_info}
 
     return res_dict
@@ -337,6 +348,10 @@ def soft_assert(
         expected: The expected value to compare against
         check_contains: If True, uses contains() instead of equal()
         error_message: Custom error message to display if check fails
+        **kwargs: Additional parameters including:
+            - tolerance: Global tolerance percentage for numeric fields
+            - tolerance_fields: List of field names to apply global tolerance to
+            - field_tolerances: Dict mapping field names to specific tolerance percentages
     Returns:
         bool: True if assertion passes, False otherwise
     Raises:
@@ -346,18 +361,21 @@ def soft_assert(
 
     check_func = check_contain if check_contains else check_equal
     validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
+    tolerance = kwargs.get("tolerance")
+    tolerance_fields = kwargs.get("tolerance_fields", [])
+    field_tolerances = kwargs.get("field_tolerances")
 
     if isinstance(actual, dict) and isinstance(expected, dict):
         if check_contains:
             actual = {k: v for k, v in actual.items() if k in expected}
 
-        tolerance = kwargs.get("tolerance")
-        tolerance_fields = kwargs.get("tolerance_fields", [])
-
         if tolerance is not None and tolerance_fields:
-            logger.debug(f"Tolerance: {tolerance}%, apply for fields: {tolerance_fields}")
+            logger.debug(f"Global tolerance: {tolerance}%, apply for fields: {tolerance_fields}")
+        
+        if field_tolerances:
+            logger.debug(f"Field-specific tolerances: {field_tolerances}")
 
-        res = compare_dict(actual, expected, tolerance_percent=tolerance, tolerance_fields=tolerance_fields)
+        res = compare_dict(actual, expected, tolerance_percent=tolerance, tolerance_fields=tolerance_fields, field_tolerances=field_tolerances)
 
         if res["missing"]:
             validation_err_msg += f"\n>>> Missing Fields: {res['missing']}"
@@ -392,7 +410,7 @@ def soft_assert(
 
     else:
         validation_err_msg += (error_message or f"\n>>> Actual:   {actual!r} \n>>> Expected: {expected!r}")
-        res = check_func(actual, expected, validation_err_msg)
+        res = check_func(actual, expected, validation_err_msg) if not tolerance else compare_with_tolerance(actual, expected, tolerance)
 
         if not res:
             logger.error(validation_err_msg)
