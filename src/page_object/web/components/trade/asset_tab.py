@@ -5,7 +5,7 @@ from typing import Optional, List, Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, LONG_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, LONG_WAIT, QUICK_WAIT
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts, SLTPType, Expiry, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -164,7 +164,8 @@ class AssetTab(BaseTrade):
         if trade_object:
             trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
 
-        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get('order_id') if trade_object else 0, "close")
+        _order_id = order_id if order_id else trade_object.get('order_id') if trade_object else 0
+        self._click_action_btn(AssetTabs.OPEN_POSITION, _order_id, "close")
 
         if confirm:
             if trade_object:
@@ -172,6 +173,18 @@ class AssetTab(BaseTrade):
             self.confirm_close_order()
 
         not wait or self.wait_for_spin_loader()
+
+        if _order_id and confirm:
+            # add checking if the position is really closed for retrying
+            locator = cook_element(self.__btn_actions_by_id, order_id, AssetTabs.OPEN_POSITION, "close")
+            logger.debug("- Checking if the position is closed")
+            retries = 3
+            while self.actions.is_element_displayed(locator, timeout=QUICK_WAIT) and retries:
+                logger.warning("- The order is not closed yet, retrying...")
+                self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
+                time.sleep(0.5)
+                self.confirm_close_order()
+                retries -= 1
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
         new_created_obj = ObjTrade(**{k: v for k, v in close_obj.items() if k != "order_id"})

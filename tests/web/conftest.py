@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from src.core.driver.driver_manager import DriverManager
@@ -19,7 +21,8 @@ def web():
 
 @pytest.fixture(scope="package")
 def login_member_site(web):
-    retries = 3
+    max_attempts = 5
+    retries = 0
     logger.info("- Navigate to WT Member Site")
     web.login_page.goto()
 
@@ -28,12 +31,17 @@ def login_member_site(web):
     web.home_page.feature_announcement_modal.got_it()
 
     logger.info("- Check if logged success")
-    while not web.home_page.is_logged_in() and retries:
-        logger.info("- Retry login")
+    while not web.home_page.is_logged_in() and max_attempts:
+        logger.warning("- Login failed, refresh page and login again")
+        web.login_page.refresh_page()
+        time.sleep(3)
+
+        logger.info(f"- Retry login again, attempt {retries + 1}")
         web.login_page.login(wait=True)
         web.home_page.feature_announcement_modal.got_it()
 
-        retries -= 1
+        max_attempts -= 1
+        retries += 1
 
 
 @pytest.fixture(scope="package")
