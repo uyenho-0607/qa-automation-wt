@@ -54,12 +54,13 @@ class AppiumDriver:
         options.device_name = DEVICEFARM_DEVICE_NAME if cd else ""
         options.udid = DEVICEFARM_DEVICE_UDID if cd else Config.mobile().device_udid or get_connected_device()
 
-        options.app_package = Config.mobile().app_id
-        options.app_activity = ".MainActivity"
-        options.app_wait_activity = ".MainActivity"
+        if not cd:
+            options.app_package = Config.mobile().app_id
+            options.app_activity = ".MainActivity"
+            options.app_wait_activity = ".MainActivity"
+            options.no_reset = False
 
         options.auto_grant_permissions = True
-        options.no_reset = False
         options.full_reset = True if cd else False
         options.new_command_timeout = 30000
         options.set_capability("appium:dontStopAppOnReset", False)
