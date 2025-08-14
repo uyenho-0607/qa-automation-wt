@@ -18,7 +18,7 @@ google_sa_creds = os.getenv('GOOGLE_SA_CREDENTIALS')
 class GoogleSheetsAPI:
     _sheet_data = None
     def __init__(self, keyfile: Optional[Path] = None):
-        self.keyfile = keyfile or (ROOTDIR / google_sa_creds)
+        self.keyfile = keyfile or (ROOTDIR / google_sa_creds) if google_sa_creds else ROOTDIR / "ggsheet_key.json"
         self.client = self._init_client()
 
     def _init_client(self):
@@ -108,7 +108,8 @@ class GoogleSheetsAPI:
             self,
             sheet_url: str,
             clients: str | list,
-            account_type: str = None
+            account_type: str = None,
+            reverse=False
     ) -> List[Dict]:
         """
         One call to get a filtered, flattened list of accounts for clients & account_type.
@@ -116,7 +117,7 @@ class GoogleSheetsAPI:
         clients = clients.split(",") if not isinstance(clients, list) else clients
         sheet_data = self._get_sheet_data(sheet_url, clients)
         accounts = self._parse_accounts(sheet_data, clients, account_type or "live")
-        return accounts
+        return accounts if not reverse else accounts[::-1]
 
 
 """
@@ -175,7 +176,6 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
     counts = defaultdict(lambda: defaultdict(int))
     limited_accounts = []
 
-    # Filter accounts based on client-server limits
     for account in accounts:
         client = account["client"]
         server = account["server"]
@@ -192,14 +192,13 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
         assigned.append(account_copy)
     return assigned
 
-#
 # if __name__ == '__main__':
-#     ggapi = GoogleSheetsAPI()
-#     sheet_data = ggapi.get_accounts(
+#     ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
+#     accounts = ggapi.get_accounts(
 #         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
 #         ["decode"], "demo"
 #     )
 #
 #     dirs = collect_critical_folders(module="login")
-#     res = assign_dirs_to_accounts(sheet_data, dirs)
+#     res = assign_dirs_to_accounts(accounts[::-1], dirs)
 #     breakpoint()
