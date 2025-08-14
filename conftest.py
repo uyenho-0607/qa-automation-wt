@@ -112,10 +112,6 @@ def pytest_runtest_setup(item: pytest.Item):
 
     # Set allure labels
     parent_suite = RuntimeConfig.client.upper()
-    # if RuntimeConfig.is_prod() and RuntimeConfig.url:  # dynamically handle client for prod (todo: still need enhancement)
-    #     url = Config.urls()
-    #     parent_suite = url.split(".")[-2].upper()
-
     allure.dynamic.parent_suite(parent_suite)
     allure.dynamic.suite(server.upper())
     allure.dynamic.sub_suite(sub_suite)
@@ -181,7 +177,7 @@ def pytest_runtest_makereport(item, call):
 
     # Start recording at the beginning of the test
     if driver and report.when == "setup":
-        if platform in ['android', 'ios']:
+        if platform in ['android', 'ios'] and not RuntimeConfig.argo_cd:
             if allure_dir and os.path.exists(ROOTDIR / allure_dir):
                 try:
                     driver.start_recording_screen(options={"bit_rate": 200000, "video_size": "480x270"})
@@ -199,7 +195,7 @@ def pytest_runtest_makereport(item, call):
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             log_step_to_allure()  # show test steps on allure
 
-            if driver and RuntimeConfig.platform in ["android", "ios"]:
+            if driver and RuntimeConfig.platform in ["android", "ios"] and not RuntimeConfig.argo_cd:
                 try:
                     # Attach video for mobile
                     attach_video(driver)
@@ -226,7 +222,7 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_video_folder():
-    if RuntimeConfig.platform in ["android", "ios"] and Config.config.allure_dir:
+    if RuntimeConfig.platform in ["android", "ios"] and Config.config.allure_dir and not RuntimeConfig.argo_cd:
         if os.path.exists(VIDEO_DIR):
             shutil.rmtree(VIDEO_DIR)
 

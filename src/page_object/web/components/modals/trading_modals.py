@@ -85,22 +85,14 @@ class TradingModals(BaseTrade):
         logger.warning("- Max retries exceeded for clicking edit order button")
         return False
 
-    def confirm_update_order(self, wait=False, retries=3):
+    def confirm_update_order(self, wait=False):
         """Click the confirm update order button."""
-        attempt = 0
-        while attempt < retries:
-            logger.debug(f"- Confirm update order (Attempt {attempt + 1})")
+        retries = 3
+        while retries and self.actions.is_element_displayed(self.__btn_confirm_update_order, timeout=QUICK_WAIT):
+            logger.debug(f"- Confirm update order)")
             self.actions.click(self.__btn_confirm_update_order)
-            if wait:
-                self.wait_for_spin_loader(timeout=SHORT_WAIT)
-            time.sleep(1)
-
-            if not self.actions.is_element_displayed(self.__btn_confirm_update_order, timeout=QUICK_WAIT):
-                return  # Success
-
-            attempt += 1
-
-        logger.warning("- Max retries exceeded for confirming update order")
+            retries -= 1
+        not wait or self.wait_for_spin_loader()
 
     def get_edit_price(self, order_type: OrderType | str = None):
         """Return current price of the symbol"""

@@ -227,9 +227,3 @@ def calculate_partial_close(trade_object):
         left_units=format_str_price(left_units, 0),
         close_units=format_str_price(close_units, 0),
     )
-
-
-if __name__ == '__main__':
-    ObjTrade(symbol="XRPUSD.std")
-    res = calculate_trading_params(3.319, TradeType.BUY, OrderType.STOP)
-    print(res)
