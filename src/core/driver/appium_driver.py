@@ -4,8 +4,8 @@ import subprocess
 from appium import webdriver
 from appium.options.ios import XCUITestOptions
 from appium.options.android import UiAutomator2Options
+from appium.options.ios import XCUITestOptions
 from appium.webdriver.appium_service import AppiumService
-
 from selenium.common import WebDriverException
 
 from src.core.config_manager import Config

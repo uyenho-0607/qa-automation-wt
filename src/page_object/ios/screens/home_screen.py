@@ -1,5 +1,4 @@
 import time
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -13,7 +12,7 @@ from src.page_object.ios.components.notifications import Notifications
 from src.page_object.ios.components.settings import Settings
 from src.page_object.ios.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
 from src.utils.logging_utils import logger
 
@@ -28,41 +27,30 @@ class HomeScreen(BaseScreen):
         self.watch_list = WatchList(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    # __account_selector = (AppiumBy.XPATH, resource_id("account-selector"))
     __account_selector = (AppiumBy.ACCESSIBILITY_ID, "account-selector")
-
-    # __account_type_tag = (AppiumBy.XPATH, resource_id("account-type-tag"))
     __account_type_tag = (AppiumBy.ACCESSIBILITY_ID, "account-type-tag")
-
-    # __available_balance_dropdown = (AppiumBy.XPATH, resource_id("available-balance-dropdown"))
-    # __available_account_amount = (AppiumBy.XPATH, resource_id('available-balance-amount'))
-    # __available_balance_title = (AppiumBy.XPATH, resource_id("available-balance-title"))
     __available_balance_dropdown = (AppiumBy.ACCESSIBILITY_ID, "available-balance-dropdown")
     __available_account_amount = (AppiumBy.ACCESSIBILITY_ID, 'available-balance-amount')
     __available_balance_title = (AppiumBy.ACCESSIBILITY_ID, "available-balance-title")
-    # __symbol_search_selector = (AppiumBy.XPATH, resource_id("symbol-search-selector"))
     __symbol_search_selector = (AppiumBy.ACCESSIBILITY_ID, "symbol-search-selector")
-
-    # __txt_symbol_search = (AppiumBy.XPATH, resource_id("symbol-input-search"))
     __txt_symbol_search = (AppiumBy.ACCESSIBILITY_ID, "symbol-input-search")
-
-    __item_search_result = (AppiumBy.XPATH, "//*[@resource-id='watchlist-symbol' and @text='{}']")
-    # __items_search_result = (AppiumBy.XPATH, resource_id('symbol-input-search-items'))
+    __item_search_result = (
+        AppiumBy.XPATH, "//XCUIElementTypeOther[@name='watchlist-list-item' and contains(@label, '{}')]"
+    )
     __items_search_result = (AppiumBy.ACCESSIBILITY_ID, "symbol-input-search-items")
-
-    # __search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']")
     __search_history = (AppiumBy.ACCESSIBILITY_ID, "Search History")
-
-    __btn_delete_search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']/following-sibling::android.widget.TextView")
-    # __btn_search_cancel = (AppiumBy.XPATH, resource_id("symbol-input-search-cancel"))
+    __btn_delete_search_history = (
+        AppiumBy.XPATH, "//XCUIElementTypeStaticText[@name='Search History']/following-sibling::*"
+    )
     __btn_search_cancel = (AppiumBy.ACCESSIBILITY_ID, "symbol-input-search-cancel")
-
-    __item_search_history = (AppiumBy.XPATH, "//android.view.ViewGroup[2]/android.view.ViewGroup[@content-desc]")
-    __item_search_history_by_text = (AppiumBy.XPATH, "//android.view.ViewGroup[2]/android.view.ViewGroup[@content-desc='{}']")
-    # __notification_selector = (AppiumBy.XPATH, resource_id("notification-selector"))
+    __item_search_history = (
+        AppiumBy.XPATH, "//XCUIElementTypeOther[starts-with(@name,'Search History')]/XCUIElementTypeOther[2]/XCUIElementTypeOther"
+    )
+    __item_search_history_by_text = (
+        AppiumBy.XPATH, "//XCUIElementTypeOther[starts-with(@name,'Search History')]//XCUIElementTypeOther[@name='{}']"
+    )
     __notification_selector = (AppiumBy.ACCESSIBILITY_ID, "notification-selector")
-
-    __empty_search_result = (AppiumBy.XPATH, "//android.widget.TextView[@text='No items available']")
+    __empty_search_result = (AppiumBy.XPATH, "//XCUIElementTypeStaticText[@name='No items available']")
 
     # ------------------------ ACTIONS ------------------------ #
 

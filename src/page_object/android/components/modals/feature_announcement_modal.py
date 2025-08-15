@@ -12,7 +12,6 @@ class FeatureAnnouncementModal(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
     __btn_got_it = (AppiumBy.XPATH, "//*[@resource-id='feature-announcement-modal-got-it-button']")
-    __btn_try_now = (AppiumBy.XPATH, "//*[@resource-id='feature-announcement-modal-try-it-now-button']")
 
     # ------------------------ ACTIONS ------------------------ #
     def got_it(self):
@@ -20,9 +19,5 @@ class FeatureAnnouncementModal(BaseScreen):
         while self.actions.is_element_displayed(self.__btn_got_it, timeout=SHORT_WAIT):
             logger.debug("- Clicking on btn Ok Got it")
             self.actions.click(self.__btn_got_it)
-
-    def try_it_now(self):
-        """Click the 'Try it now' button to try the new feature."""
-        self.actions.click(self.__btn_try_now)
 
     # ------------------------ VERIFY ------------------------ #

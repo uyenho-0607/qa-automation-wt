@@ -13,7 +13,7 @@ def ios():
     DriverManager.get_driver()
     actions = MobileActions()
 
-    yield iosContainer(actions)
+    yield iOSContainer(actions)
 
     logger.info("- Clean up ios driver")
     DriverManager.quit_driver()

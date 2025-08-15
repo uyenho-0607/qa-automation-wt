@@ -16,18 +16,16 @@ class AssetsScreen(BaseScreen):
         self.watch_list = WatchList(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __acc_name = (AppiumBy.XPATH, resource_id('account-name'))
-    __acc_id = (AppiumBy.XPATH, resource_id('account-id'))
-    __acc_type = (AppiumBy.XPATH, resource_id('account-type-tag'))
-    __acc_details = (AppiumBy.XPATH, resource_id('account-detail'))
+    __acc_name = (AppiumBy.ACCESSIBILITY_ID, 'account-name')
+    __acc_id = (AppiumBy.ACCESSIBILITY_ID, 'account-id')
+    __acc_type = (AppiumBy.ACCESSIBILITY_ID, 'account-selector')
+    __acc_details = (AppiumBy.ACCESSIBILITY_ID, 'account-detail')
 
-    __available_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Available Balance']/following-sibling::android.widget.TextView[2]")
-    __realised_profit_loss = (AppiumBy.XPATH, "//android.widget.TextView[@text='Realised Profit/Loss']/following-sibling::android.widget.TextView[2]")
-    __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[3]")
-    __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[3]")
-    __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[3]")
-
-    # __item_watchlist = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
+    __available_balance = (AppiumBy.XPATH, "//*[contains(@name, 'Account Balance')]/XCUIElementTypeStaticText[2]")
+    __realised_profit_loss = (AppiumBy.XPATH, "//*[contains(@name, 'Profit/Loss')]/XCUIElementTypeStaticText[2]")
+    __credit = (AppiumBy.XPATH, "//*[contains(@name, 'Credit')]/XCUIElementTypeStaticText[2]")
+    __deposit = (AppiumBy.XPATH, "//*[contains(@name, 'Deposit')]/XCUIElementTypeStaticText[2]")
+    __withdrawal = (AppiumBy.XPATH, "//*[contains(@name, 'Withdrawal')]/XCUIElementTypeStaticText[2]")
     __item_watchlist = (AppiumBy.ACCESSIBILITY_ID, "watchlist-symbol")
 
     # ------------------------ ACTIONS ------------------------ #

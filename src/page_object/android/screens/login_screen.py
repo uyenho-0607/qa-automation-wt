@@ -1,3 +1,5 @@
+import time
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -26,6 +28,7 @@ class LoginScreen(BaseScreen):
     __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
     __txt_user_id = (AppiumBy.XPATH, "//*[@resource-id='login-user-id']")
     __txt_password = (AppiumBy.XPATH, "//*[@resource-id='login-password']")
+    __btn_eye_mask = (AppiumBy.XPATH, "//*[@resource-id='input-password-hidden']")
     __btn_sign_in = (AppiumBy.XPATH, "//*[@resource-id='login-submit']")
     __lnk_reset_password = (AppiumBy.XPATH, "//*[@resource-id='reset-password-link']")
     __btn_sign_up = (AppiumBy.XPATH, "//*[@resource-id='login-account-signup']")
@@ -67,7 +70,8 @@ class LoginScreen(BaseScreen):
         if wait:
             self.wait_for_spin_loader()
 
-    def select_open_demo_account(self):
+    def click_open_demo_account(self):
+        time.sleep(1)
         self.select_account_tab(AccountType.DEMO)
         self.actions.click(self.__btn_sign_up)
 
@@ -91,10 +95,11 @@ class LoginScreen(BaseScreen):
         )
 
     def verify_account_autofill_value(self, userid, password):
-        actual_userid = self.actions.get_attribute(self.__txt_user_id, "value")
+        actual_userid = self.actions.get_attribute(self.__txt_user_id, "text")
         soft_assert(actual_userid, str(userid))
 
-        actual_password = self.actions.get_attribute(self.__txt_password, "value")
+        self.actions.click(self.__btn_eye_mask)
+        actual_password = self.actions.get_attribute(self.__txt_password, "text")
         soft_assert(actual_password, password)
     
     def verify_alert_error_message(self, account_type=None):

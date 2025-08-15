@@ -44,18 +44,18 @@ class BaseScreen:
             self.initialized = True
 
     # ------------------------ LOCATORS ------------------------ #
-    __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
-    __alert_success = (AppiumBy.XPATH, "//*[@resource-id='alert-success']")
+    __alert_error = (AppiumBy.ACCESSIBILITY_ID, "alert-error")
+    __alert_success = (AppiumBy.ACCESSIBILITY_ID, "alert-success")
 
-    __alert_box = (AppiumBy.XPATH, "//*[@resource-id='notification-box']")
-    __alert_title = (AppiumBy.XPATH, "//*[@resource-id='notification-box-title']")
-    __alert_desc = (AppiumBy.XPATH, "//*[@resource-id='notification-box-description']")
-    __alert_box_close = (AppiumBy.XPATH, "//*[@resource-id='notification-box-close']")
-    __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
-    __spin_loader = (AppiumBy.XPATH, resource_id('spin-loader'))
-    __home_nav_option = (AppiumBy.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
-    __btn_confirm = (AppiumBy.XPATH, "//*[@content-desc='Confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
+    __alert_box = (AppiumBy.ACCESSIBILITY_ID, "notification-box")
+    __alert_title = (AppiumBy.ACCESSIBILITY_ID, "notification-box-title")
+    __alert_desc = (AppiumBy.ACCESSIBILITY_ID, "notification-box-description")
+    __alert_box_close = (AppiumBy.ACCESSIBILITY_ID, "notification-box-close")
+    __btn_nav_back = (AppiumBy.ACCESSIBILITY_ID, "navigation-back-button")
+    __spin_loader = (AppiumBy.ACCESSIBILITY_ID, 'spin-loader')
+    __home_nav_option = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, '{}')])[18]")
+    __btn_confirm = (AppiumBy.XPATH, "//*[@name='Confirm']")
+    __btn_cancel = (AppiumBy.XPATH, "//*[@name='Cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
     def go_back(self):
