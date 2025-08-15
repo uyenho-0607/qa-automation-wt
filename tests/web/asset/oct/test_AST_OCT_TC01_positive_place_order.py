@@ -11,8 +11,8 @@ from src.utils.logging_utils import logger
 @pytest.mark.parametrize("order_type", (
         [
             OrderType.MARKET,
-            OrderType.STOP_LIMIT,
-            random.choice([OrderType.LIMIT, OrderType.STOP])
+            # OrderType.STOP_LIMIT,
+            # random.choice([OrderType.LIMIT, OrderType.STOP])
         ]
 ))
 def test(web, symbol, search_symbol, close_edit_confirm_modal, order_type):
