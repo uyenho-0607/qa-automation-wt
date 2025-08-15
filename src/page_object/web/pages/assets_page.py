@@ -1,4 +1,5 @@
 from selenium.webdriver.common.by import By
+
 from src.core.actions.web_actions import WebActions
 from src.data.enums import URLPaths, AccInfo
 from src.page_object.web.base_page import BasePage

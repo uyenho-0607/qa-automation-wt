@@ -49,7 +49,6 @@ class AppiumDriver:
 
         cd = RuntimeConfig.argo_cd
         options = UiAutomator2Options()
-        breakpoint()
 
         options.platform_name = "Android"
         options.auto_grant_permissions = True

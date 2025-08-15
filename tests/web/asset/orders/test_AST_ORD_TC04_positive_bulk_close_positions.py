@@ -1,5 +1,3 @@
-import pytest
-
 from src.data.enums import AssetTabs, OrderType
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
@@ -18,6 +16,9 @@ def test(web, setup_bulk_asset_test, cancel_bulk_close):
 
     logger.info(f"Verify asset tab amount is: {expected_amount}")
     web.assets_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, expected_amount)
+
+    logger.info(f"Step 2: Select tab: {AssetTabs.HISTORY}")
+    web.assets_page.asset_tab.select_tab(AssetTabs.HISTORY)
 
     logger.info("Verify items displayed in History Tab")
     web.assets_page.asset_tab.verify_item_displayed(AssetTabs.HISTORY, order_ids)

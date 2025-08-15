@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from src.apis.api_client import APIClient

@@ -1,5 +1,6 @@
 import random
 from typing import Dict, Any, Optional, Tuple
+
 from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_obj import BaseObj

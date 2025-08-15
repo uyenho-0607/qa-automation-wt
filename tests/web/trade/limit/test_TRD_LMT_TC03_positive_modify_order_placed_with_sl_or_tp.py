@@ -1,4 +1,5 @@
 import pytest
+
 from src.data.enums import SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger

@@ -221,6 +221,10 @@ class BaseActions:
         res = bool(element)
         return res if is_display else not res
 
+    def is_element_clickable(self, locator: tuple[str, str], timeout=SHORT_WAIT) -> bool:
+        res = self.find_element(locator, timeout, cond=EC.element_to_be_clickable, raise_exception=False, show_log=False)
+        return bool(res)
+
     def is_element_enabled(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT) -> bool:
         """Check if element is enabled."""
         element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
