@@ -1,8 +1,8 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import Features, WatchListTab
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
@@ -28,7 +28,7 @@ def test(web_app, tab):
 @pytest.fixture(autouse=True)
 def mark_symbol(tab, web_app):
     if tab == WatchListTab.FAVOURITES:
-        for star_symbol in get_symbols():
+        for star_symbol in ObjSymbol().get_symbols(get_all=True):
             logger.info(f"- Mark star symbol: {star_symbol!r}")
             APIClient().market.post_starred_symbol(star_symbol)
     

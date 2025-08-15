@@ -27,8 +27,8 @@ lirunex:
 
     mt5:
       # user_live: ...
-      user_crm: mt5_automation30@mailinator.com
-      user_demo: 569202036
+      user_crm: mt5_automation31@mailinator.com
+      user_demo: 569203282
 
   mobile:
     app_package: com.aquariux.uat.lirunex

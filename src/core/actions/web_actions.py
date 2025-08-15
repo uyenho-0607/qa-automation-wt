@@ -53,10 +53,14 @@ class WebActions(BaseActions):
 
         # Fall back
         sent_value = element.get_attribute("value")
+        logger.debug(f"- Sent value: {sent_value!r}")
+
         while sent_value != str(value) and max_retries:
+            logger.debug(f"- Resend: {value!r}")
             send_key_func(value, element=element)
             max_retries -= 1
             sent_value = element.get_attribute("value")
+            logger.debug(f"- Resent value: {sent_value!r}")
 
     @handle_stale_element
     def click_by_offset(

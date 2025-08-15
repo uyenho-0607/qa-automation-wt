@@ -3,14 +3,16 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import OrderType
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package", autouse=True)
 def symbol():
-    return random.choice(get_symbols())
+    symbols = ObjSymbol().get_symbols()
+    logger.debug(f"- Symbols getting result: {symbols}")
+    return random.choice(symbols)
 
 
 @pytest.fixture(scope="package")
