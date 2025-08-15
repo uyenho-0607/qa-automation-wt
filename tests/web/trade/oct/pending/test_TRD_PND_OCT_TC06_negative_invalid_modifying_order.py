@@ -29,13 +29,13 @@ def test(web, invalid_field, expected_message, close_edit_confirm_modal, setup_t
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
     logger.info(f"Step 1: Modify order with {invalid_field!r}")
-    web.trade_page.modals.modify_invalid_order(trade_object, **invalid_dict)
+    web.trade_page.asset_tab.modify_invalid_order(trade_object, **invalid_dict)
 
     logger.info("Verify invalid notification banner")
     web.home_page.notifications.verify_notification_banner(UIMessages.INVALID_ORDER_BANNER_TITLE, expected_message)
 
 
-@pytest.fixture(scope="package", autouse=True)
+@pytest.fixture(scope="module", autouse=True)
 def setup_test(create_order_data, symbol):
     trade_object = ObjTrade(order_type=random.choice(OrderType.pending()), symbol=symbol, stop_loss=0, take_profit=0)
 

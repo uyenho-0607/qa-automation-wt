@@ -10,7 +10,7 @@ from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
 from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
-from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
+from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
 from src.utils.logging_utils import logger
 
 
@@ -25,7 +25,7 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
     parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
-    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", default=False, action="store_true", help="Whether to choose driver to run on argo cd")
 
 
 def pytest_configure(config):

@@ -18,8 +18,6 @@ def search_symbol(web, symbol):
     logger.info(f"- Search and select symbol: {symbol}")
     web.home_page.search_and_select_symbol(symbol)
 
-    yield
-
 
 @pytest.fixture
 def setup_bulk_asset_test(web, symbol):

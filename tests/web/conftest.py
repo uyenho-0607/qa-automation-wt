@@ -2,9 +2,9 @@ import time
 
 import pytest
 
+from src.apis.api_client import APIClient
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
-from src.apis.api_client import APIClient
 from src.utils.logging_utils import logger
 
 
