@@ -25,6 +25,7 @@ class WatchList(BaseTrade):
     __btn_symbol_remove = (AppiumBy.XPATH, "(//XCUIElementTypeStaticText[@name='Remove'])[1]")
     __selected_item = (AppiumBy.XPATH, "//*[@name='symbol-overview-id' and @text='{}']")
 
+
     # ------------------------ ACTIONS ------------------------ 
 
     def select_tab(self, tab: WatchListTab):
@@ -219,4 +220,3 @@ class WatchList(BaseTrade):
             sorted(current_symbols), sorted(symbols),
             error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}, "
                           f"Redundant: {[item for item in current_symbols if item not in symbols]}"
-        )

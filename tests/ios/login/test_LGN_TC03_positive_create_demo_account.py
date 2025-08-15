@@ -2,6 +2,7 @@ import random
 
 import pytest
 
+from src.data.enums import AccountType
 from src.data.objects.account_obj import ObjDemoAccount
 from src.utils.logging_utils import logger
 

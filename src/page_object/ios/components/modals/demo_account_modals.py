@@ -31,7 +31,6 @@ class DemoAccountModal(BaseScreen):
     # Locators
     __txt_name = (AppiumBy.ACCESSIBILITY_ID, "demo-account-creation-modal-name")
     __txt_email = (AppiumBy.ACCESSIBILITY_ID, "demo-account-creation-modal-email")
-
     __drp_country_dial_code = (
         AppiumBy.XPATH, "(//*[contains(@name, 'Dial Code')])[20]//XCUIElementTypeOther[2]"
     )
@@ -39,12 +38,11 @@ class DemoAccountModal(BaseScreen):
     __item_country_dial_code = (AppiumBy.XPATH, "//*[@name='country-dial-code-item' and contains(@label, '(+{})')]")
     __txt_phone_number = (AppiumBy.ACCESSIBILITY_ID, "demo-account-creation-modal-phone")
     __deposit = (AppiumBy.XPATH, "(//*[contains(@name, 'Deposit')])[20]//XCUIElementTypeOther[2]")
-
     __item_deposit = (AppiumBy.XPATH, "//*[@name='deposit-dropdown-item' and contains(@label, '{}')]")
     __btn_agree_and_continue = (AppiumBy.ACCESSIBILITY_ID, "demo-account-creation-modal-confirm")
     __field_validation = (AppiumBy.ACCESSIBILITY_ID, "input-field-validation")
     __btn_close = (AppiumBy.XPATH, "//*[@resource-id='modal-close-button']")
-
+    __sign_in = (AppiumBy.ACCESSIBILITY_ID, "demo-completion-sign-in")
 
     # Actions
     def input_name(self, name: str):
@@ -76,7 +74,6 @@ class DemoAccountModal(BaseScreen):
 
     def fill_demo_account_creation_form(self, account_info: ObjDemoAccount, default_deposit=False):
         time.sleep(1)  # wait a bit for loading default deposit value
-
         if account_info.name:
             self.input_name(account_info.name)
 
@@ -160,13 +157,15 @@ class DemoAccountModal(BaseScreen):
             error_message=f"Redundant errors: {[item for item in error_messages if item not in error_list]}"
         )
 
+
     # ======================== DEMO ACCOUNT COMPLETION ======================== #
-    # Locators
+    # Locators   
     __demo_acc_completion_title = (AppiumBy.ACCESSIBILITY_ID, "demo-account-completion-modal-title")
     __demo_acc_userid = (AppiumBy.XPATH, "(//*[@name='demo-completion-value'])[1]")
     __demo_acc_password = (AppiumBy.XPATH, "(//*[@name='demo-completion-value'])[2]")
     __demo_acc_name = (AppiumBy.XPATH, "//*[@value='Name']/following-sibling::*[@name='demo-completion-value']")
     __btn_sign_in_demo_acc_completion = (AppiumBy.ACCESSIBILITY_ID, "demo-completion-sign-in")
+
 
     # Actions
     def get_account_details(self) -> DotDict:
@@ -182,6 +181,7 @@ class DemoAccountModal(BaseScreen):
             username=self.actions.get_text(self.__demo_acc_name),
         )
 
+
     def sign_in_from_completion(self):
         """Clicks the sign-in button on the demo account completion modal."""
         self.actions.click(self.__btn_sign_in_demo_acc_completion)
@@ -190,6 +190,7 @@ class DemoAccountModal(BaseScreen):
     def verify_ready_message(self):
         actual_message = self.actions.get_text(self.__demo_acc_completion_title)
         soft_assert(actual_message, UIMessages.DEMO_ACCOUNT_OPEN_SUCCESS)
+
 
     def verify_account_info(self, expected_username):
         actual_username = self.get_account_details().username

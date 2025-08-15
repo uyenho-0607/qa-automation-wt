@@ -51,11 +51,11 @@ class BaseScreen:
     __alert_title = (AppiumBy.ACCESSIBILITY_ID, "notification-box-title")
     __alert_desc = (AppiumBy.ACCESSIBILITY_ID, "notification-box-description")
     __alert_box_close = (AppiumBy.ACCESSIBILITY_ID, "notification-box-close")
-    __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
+    __btn_nav_back = (AppiumBy.ACCESSIBILITY_ID, "navigation-back-button")
     __spin_loader = (AppiumBy.ACCESSIBILITY_ID, 'spin-loader')
     __home_nav_option = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, '{}')])[18]")
     __btn_confirm = (AppiumBy.XPATH, "//*[@name='Confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
+    __btn_cancel = (AppiumBy.XPATH, "//*[@name='Cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
     def go_back(self):

@@ -19,6 +19,7 @@ class MyAccountModal(BaseScreen):
     __drp_note = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, 'Note')])[5]")
     __btn_close = (AppiumBy.ACCESSIBILITY_ID, 'modal-close-button')
 
+
     # ------------------------ ACTIONS ------------------------ #
 
     def is_open(self):
@@ -52,6 +53,7 @@ class MyAccountModal(BaseScreen):
         actual = self.get_account_info()
         soft_assert(actual, exp_dict, tolerance=0.05,
                     tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+
 
     def verify_balance_items_displayed(self, is_display=True):
         locators = [cook_element(self.__items, item) for item in AccSummary.checkbox_list()]

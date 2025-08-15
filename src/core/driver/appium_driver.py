@@ -2,6 +2,7 @@ import builtins
 import subprocess
 
 from appium import webdriver
+from appium.options.ios import XCUITestOptions
 from appium.options.android import UiAutomator2Options
 from appium.options.ios import XCUITestOptions
 from appium.webdriver.appium_service import AppiumService
@@ -33,6 +34,7 @@ class AppiumDriver:
         cls._appium_service.start(args=args, timeout_ms=30000)
         logger.info("- Appium service started !")
 
+
     @classmethod
     def init_android_driver(cls, host="http://localhost", port=4723) -> webdriver.Remote:
 
@@ -63,6 +65,7 @@ class AppiumDriver:
 
         except WebDriverException as error:
             raise WebDriverException(f"Failed to init resources driver with error: {error!r}")
+
 
     @classmethod
     def init_ios_driver(cls, host="http://localhost", port=4723) -> webdriver.Remote:
