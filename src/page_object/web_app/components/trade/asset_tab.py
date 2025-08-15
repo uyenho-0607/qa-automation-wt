@@ -156,7 +156,8 @@ class AssetTab(BaseTrade):
         if trade_object:
             trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
 
-        self.click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get("order_id"), "close")
+        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
+        self.click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
 
         if confirm:
             if trade_object:

@@ -1,8 +1,8 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import WatchListTab, Features
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
@@ -35,7 +35,7 @@ def setup_test():
         symbols = APIClient().market.get_watchlist_items(tab, get_symbols=True)
 
         if not symbols and tab == WatchListTab.FAVOURITES:
-            _list_symbol = get_symbols()[:3]
+            _list_symbol = ObjSymbol().get_symbols(get_all=True)[:3]
 
             for symbol in _list_symbol:
                 logger.info(f"- Mark star symbol: {symbol!r}")

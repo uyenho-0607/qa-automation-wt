@@ -218,10 +218,15 @@ def format_request_log(resp: Response, log_resp=False) -> str:
     # Format response content
     try:
         content = resp.json()
+        if isinstance(content.get("result"), list) and len(content.get("result")) > 5:
+            left_resp = len(content["result"]) - 5
+            content["result"] = content["result"][:5] + [f"... ({left_resp} more)"]
+
         response_text = json.dumps(content, indent=4)
     except ValueError:
         response_text = resp.text.strip()
 
     if log_resp:
-        return f"\n{curl_command}\n\n{response_text}"
-    return f"\n{curl_command}"
+        return f"\n{curl_command}\n\n{response_text}\n"
+
+    return f"\n{curl_command}\n"
