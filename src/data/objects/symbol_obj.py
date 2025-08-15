@@ -1,4 +1,5 @@
-from src.data.enums import WatchListTab
+from src.data.enums import WatchListTab, Client, Server
+from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
 
@@ -6,7 +7,21 @@ class ObjSymbol:
     all_symbols = None
     symbols_data = None
     symbols_details = {}
-    threshold = 100 # prioritize symbols with cheaper price
+    threshold = 100  # prioritize symbols with cheaper price
+
+    # default list to use when resp getting symbols has bugs (status of symbol displays 'OFFQUOTE')
+    CRYPTO = {
+        Client.TRANSACT_CLOUD: {
+            Server.MT5: ["BAKE.USD", "AXS.USD", "DASH.USD"]
+        },
+        Client.LIRUNEX: {
+            Server.MT5: ["DASHUSD.std", "XRPUSD.std"],
+            Server.MT4: ["DASHUSD.std", "XRPUSD.std"]
+        },
+        Client.DECODE: {
+            Server.MT5: ["BAKEUSD.d", "AXSUSD.d", "DOGEUSD.d"]
+        }
+    }
 
     def __init__(self):
         self._init_symbols()
@@ -20,18 +35,22 @@ class ObjSymbol:
             logger.info("- Getting Symbols data")
             resp = APIClient().market.get_watchlist_items(WatchListTab.CRYPTO, get_symbols=False)
 
-            ObjSymbol.all_symbols = [
+            # Filter out only symbols with trading status
+            cls.all_symbols = [
                 item for item in resp if item['type'] == WatchListTab.CRYPTO.upper() and item['status'] == 'TRADING'
             ]
+            # Filter symbols with small prices (to avoid insufficient balance)
             filtered_price = [item for item in cls.all_symbols if item['ask'] < cls.threshold]
 
-            cls.symbols_data = filtered_price or cls.all_symbols
+            cls.symbols_data = filtered_price or cls.all_symbols or cls.CRYPTO.get(RuntimeConfig.client, cls.CRYPTO[Client.TRANSACT_CLOUD]).get(RuntimeConfig.server, {})
 
         return cls.symbols_data
 
     @classmethod
     def get_symbols(cls, get_all=False):
-        return [item['symbol'] for item in (cls.symbols_data if not get_all else cls.all_symbols)]
+        res = [item['symbol'] for item in (cls.symbols_data if not get_all else cls.all_symbols)]
+        return res
+
 
     @classmethod
     def get_symbol_details(cls, symbol):

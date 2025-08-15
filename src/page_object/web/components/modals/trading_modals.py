@@ -89,7 +89,7 @@ class TradingModals(BaseTrade):
         """Click the confirm update order button."""
         retries = 3
         while retries and self.actions.is_element_displayed(self.__btn_confirm_update_order, timeout=QUICK_WAIT):
-            logger.debug(f"- Confirm update order)")
+            logger.debug(f"- Confirm update order")
             self.actions.click(self.__btn_confirm_update_order)
             retries -= 1
         not wait or self.wait_for_spin_loader()
