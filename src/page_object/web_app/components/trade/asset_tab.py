@@ -216,6 +216,7 @@ class AssetTab(BaseTrade):
         """
         if retry_count >= max_retries:
             logger.error(f"Failed to display edit confirm modal after {max_retries} attempts")
+            return
 
         # Log retry attempts (skip for first attempt)
         if retry_count > 0:

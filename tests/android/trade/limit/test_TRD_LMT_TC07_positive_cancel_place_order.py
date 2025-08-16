@@ -1,4 +1,5 @@
 import pytest
+
 from src.data.enums import AssetTabs, OrderType, SLTPType
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger

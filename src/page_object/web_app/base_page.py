@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
+from src.data.consts import QUICK_WAIT
 from src.data.enums import Features
 from src.data.enums import URLSites
 from src.utils.assert_utils import soft_assert

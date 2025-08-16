@@ -5,7 +5,7 @@ from typing import Optional, List, Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, LONG_WAIT, QUICK_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts, SLTPType, Expiry, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -161,30 +161,38 @@ class AssetTab(BaseTrade):
         not wait or self.wait_for_spin_loader()
 
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=False) -> None:
-        if trade_object:
-            trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
+        order_id = order_id or (trade_object.get('order_id') if trade_object else 0)
 
-        _order_id = order_id if order_id else trade_object.get('order_id') if trade_object else 0
-        self._click_action_btn(AssetTabs.OPEN_POSITION, _order_id, "close")
+        if trade_object:
+            if not trade_object.get("order_id"):  # update date latest order_id for trade_object
+                trade_object["order_id"] = self.get_last_order_id(trade_object)
+
+            if not trade_object.get("current_price"):  # update current price for trade_object
+                item_data = self.get_item_data(tab=AssetTabs.get_tab(trade_object.order_type), order_id=order_id)
+                trade_object["current_price"] = item_data["current_price"]
+
+            self.get_server_device_time(trade_object)  # update close time
+
+        logger.debug(f"Closing order: {order_id!r}")
+        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
 
         if confirm:
-            if trade_object:
-                self.get_server_device_time(trade_object)  # update close time
             self.confirm_close_order()
 
-        not wait or self.wait_for_spin_loader()
+        if wait:
+            self.wait_for_spin_loader()
 
-        if _order_id and confirm:
-            # add checking if the position is really closed for retrying
-            locator = cook_element(self.__btn_actions_by_id, order_id, AssetTabs.OPEN_POSITION, "close")
-            logger.debug("- Checking if the position is closed")
-            retries = 3
-            while self.actions.is_element_displayed(locator, timeout=QUICK_WAIT) and retries:
-                logger.warning("- The order is not closed yet, retrying...")
-                self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
-                time.sleep(0.5)
-                self.confirm_close_order()
-                retries -= 1
+        # if order_id and confirm:
+        #     # Retry to make sure the order is closed
+        #     locator = cook_element(self.__btn_actions_by_id, order_id, AssetTabs.OPEN_POSITION, "close")
+        #     logger.debug("- Checking if the position is closed")
+        #     for attempt in range(3):
+        #         if not self.actions.is_element_displayed(locator, timeout=QUICK_WAIT):
+        #             break
+        #         logger.warning(f"- The order is not closed yet, retrying... (attempt {attempt + 1}/3)")
+        #         self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
+        #         time.sleep(0.5)
+        #         self.confirm_close_order()
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
         new_created_obj = ObjTrade(**{k: v for k, v in close_obj.items() if k != "order_id"})
@@ -298,67 +306,76 @@ class AssetTab(BaseTrade):
             confirm=False,
             retry_count=0,
             max_retries=3,
-            oct=False,
-
+            oct_mode=False,
     ):
         """
-        Modify stop loss/ take profit/ fill policy/ Expiry
-        trade_object: should contain trade_type and order_type
-        sl_type: Price or Points
-        tp_type: Price or Points
-        expiry: one by default, give this value if modifying expiry
-        retry_count: Current retry attempt (used internally for recursion)
-        max_retries: Maximum number of retry attempts
-        oct: if is True, not checking the edit confirmation modal display
+        Modify stop loss / take profit / fill policy / expiry.
+        :param trade_object: should contain trade_type and order_type
+        :param sl_type: Price or Points
+        :param tp_type: Price or Points
+        :param expiry: expiry value if modifying expiry
+        :param confirm: whether to confirm after edit
+        :param retry_count: current retry attempt (used internally for recursion)
+        :param max_retries: maximum number of retry attempts
+        :param oct_mode: if True, skip checking edit confirmation modal display
         """
+        # Recursive stop condition
         if retry_count >= max_retries:
             logger.error(f"Failed to display edit confirm modal after {max_retries} attempts")
+            return
 
-        # Log retry attempts (skip for first attempt)
         if retry_count > 0:
-            logger.warning(f"Edit confirm modal not displayed, retrying... ({retry_count}/{max_retries})")
-            time.sleep(1)  # Wait before retrying
-
-        tab = AssetTabs.get_tab(trade_object.order_type)
-        self._click_action_btn(tab, trade_object.get('order_id'), "edit")
+            # Log debug message
+            logger.warning(f"Retry {retry_count}/{max_retries} - Edit confirm modal not displayed yet")
+            time.sleep(1)
 
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self.__trade_modals.get_edit_price()
+        tab = AssetTabs.get_tab(order_type)
 
+        logger.debug("Click Edit Button")
+        self._click_action_btn(tab, trade_object.get('order_id'), "edit")
+
+        # Get edit price to calculate prices
+        edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self.__trade_modals.get_edit_price()
         logger.debug(f"- Edit price is {edit_price!r}")
+
+        # calculate SL and TP
         stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
 
+        # Handle input SL
         if sl_type:
             self.__trade_modals.input_edit_sl(stop_loss, sl_type)
+            # Get price value in case of POINT
             if sl_type == SLTPType.POINTS:
                 stop_loss = self.__trade_modals.get_edit_sl()
-                trade_object.sl_type = sl_type
+                trade_object.sl_type = sl_type  # update sl_type to TradeObject for updating tolerance fields
+            trade_object.stop_loss = stop_loss  # update final input price value
 
-            trade_object.stop_loss = stop_loss
-
+        # Handle input TP
         if tp_type:
             self.__trade_modals.input_edit_tp(take_profit, tp_type)
+            # Get price value in case of POINT
             if tp_type == SLTPType.POINTS:
                 take_profit = self.__trade_modals.get_edit_tp()
-                trade_object.tp_type = tp_type
+                trade_object.tp_type = tp_type  # update tp_type to TradeObject for updating tolerance fields
+            trade_object.take_profit = take_profit  # update final input price value
 
-            trade_object.take_profit = take_profit
-
+        # Handle select Expiry
         if expiry:
             self.__trade_modals.select_expiry(expiry)
             trade_object.expiry = expiry
 
-        res_click = self.__trade_modals.click_edit_order_btn()
+        # Handle click edit order button
+        res_click = self.__trade_modals.click_edit_order_btn(oct_mode=oct_mode)
+
+        # Retry in case sometimes the edit model is closed
         if not res_click:
-            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
+            logger.warning("- Edit modal is disappear, retry modifying order...")
+            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries, oct_mode)
 
-        # check if edit confirm modal is displayed
-        if not oct and not self.__trade_modals.is_edit_confirm_modal_displayed():
-            # Recursive call with incremented retry count
-            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
-
-        # Success case - confirm modal is displayed
-        not confirm or self.__trade_modals.confirm_update_order()
+        # Success case
+        if confirm:
+            self.__trade_modals.confirm_update_order()
 
     def modify_invalid_order(
             self,
@@ -389,15 +406,13 @@ class AssetTab(BaseTrade):
             stp_price = get_stop_price(self.__trade_modals.get_edit_price(order_type), trade_type, True)
             self.__trade_modals.input_edit_stp_price(stp_price, order_type)
 
-        invalid_sl_tp = get_sl_tp(
-            self.__trade_modals.get_edit_price(order_type), trade_type, True
-        )
+        sl, tp = get_sl_tp(
+            self.__trade_modals.get_edit_price(order_type), trade_type, is_invalid=True
+        ).values()
         if stop_loss:
-            sl = invalid_sl_tp.sl.price
             self.__trade_modals.input_edit_sl(sl)
 
         if take_profit:
-            tp = invalid_sl_tp.tp.price
             self.__trade_modals.input_edit_tp(tp)
 
         self.__trade_modals.click_edit_order_btn()
