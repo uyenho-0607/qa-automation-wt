@@ -5,9 +5,9 @@ from src.data.consts import QUICK_WAIT
 from src.data.enums import TradeType, BulkCloseOpts, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.base_page import BasePage
-from src.utils import DotDict
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import locator_format
+from src.utils.logging_utils import logger
 
 
 class BaseTrade(BasePage):
@@ -68,7 +68,9 @@ class BaseTrade(BasePage):
     # Trade Confirmation Modal Actions
     def confirm_trade(self):
         """Confirm the trade in the trade confirmation modal, give trade_object to update the current price for more precise"""
-        self.actions.click(self.__btn_trade_confirm)
+        if self.actions.is_element_displayed(self.__btn_trade_confirm):
+            logger.debug(" - Click confirm button")
+            self.actions.click(self.__btn_trade_confirm)
 
     # Asset tab relates
     def confirm_delete_order(self):

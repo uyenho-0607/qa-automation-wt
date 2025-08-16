@@ -1,26 +1,24 @@
-import pytest
-
-from src.data.enums import AssetTabs, OrderType, SLTPType, Features
+from src.apis.api_client import APIClient
+from src.data.enums import AssetTabs, OrderType, Features
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-def test(web, symbol, search_symbol, cancel_close_order):
+def test(web, symbol, cancel_close_order):
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")
-    web.trade_page.place_order_panel.place_order(trade_object)
-    web.home_page.notifications.close_noti_banner()
+    APIClient().trade.post_order(trade_object, update_price=True)
 
-    logger.info("Step 2: Get item order_id from notification")
-    web.home_page.notifications.get_open_position_order_id(trade_object)
-
-    logger.info("Step 3: Navigate to Asset Page and close Position")
+    logger.info("Step 2: Navigate to Assets Page")
     web.home_page.navigate_to(Features.ASSETS)
 
-    logger.info("Step 4: Full close position")
-    web.assets_page.asset_tab.full_close_position(order_id=trade_object.order_id, confirm=False)
+    logger.info("Verify order placed successfully")
+    web.assets_page.asset_tab.verify_item_displayed(tab=AssetTabs.OPEN_POSITION, order_id=trade_object.order_id)
+
+    logger.info("Step 3: Full close position")
+    web.assets_page.asset_tab.full_close_position(order_id=trade_object.order_id, trade_object=trade_object, confirm=False)
 
     logger.info("Verify Close order notification banner")
     exp_noti = ObjNoti(trade_object)
@@ -32,5 +30,8 @@ def test(web, symbol, search_symbol, cancel_close_order):
     logger.info(f"Verify item is no longer displayed in Open Positions tab")
     web.assets_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id, is_display=False)
 
+    logger.info(f"Step 4: Select Tab {AssetTabs.HISTORY.value!r}")
+    web.assets_page.asset_tab.select_tab(AssetTabs.HISTORY)
+
     logger.info("Verify history order item details")
-    web.assets_page.asset_tab.verify_item_data(trade_object, AssetTabs.HISTORY)
+    web.assets_page.asset_tab.verify_item_data(trade_object, AssetTabs.HISTORY, wait=True)

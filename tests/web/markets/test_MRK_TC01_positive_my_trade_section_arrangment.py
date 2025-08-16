@@ -11,11 +11,11 @@ def test(web, disable_OCT, setup_test):
 
     cur_symbols = setup_test
 
-    logger.info(f"Step 1: Navigate to Market Page and check My Trade Section")
+    logger.info(f"Step 1: Navigate to Market Page")
     web.home_page.navigate_to(Features.MARKETS, wait=True)
 
-    logger.info(f"Verify symbols list displayed in My Trade are: {cur_symbols}")
-    web.markets_page.verify_my_trade_items_list(cur_symbols)
+    logger.info(f"Verify symbols list displays in My Trade are: {cur_symbols}")
+    web.markets_page.verify_my_trade_list(cur_symbols)
 
     logger.info(f"Step 2: Place Pending Order for symbol: {cur_symbols[-1]}")
     web.markets_page.select_symbol(MarketsSection.MY_TRADE)
@@ -25,21 +25,22 @@ def test(web, disable_OCT, setup_test):
     web.home_page.navigate_to(Features.MARKETS, wait=True)
 
     logger.info("Verify displaying symbols are not changed")
-    web.markets_page.verify_my_trade_items_list(cur_symbols)
+    web.markets_page.verify_my_trade_list(cur_symbols)
 
-    logger.info("Step 4: Navigate to Asset Page and close order")
+    logger.info("Step 4: Navigate to Asset Page")
     web.markets_page.navigate_to(Features.ASSETS, wait=True)
+
+    logger.info("Step 5: Close latest order")
     web.assets_page.asset_tab.full_close_position(wait=True)
 
-    logger.info("Step 5: Get current symbols after closing order")
+    logger.info("Step 6: Get current symbols after closing order")
     cur_symbols = web.assets_page.asset_tab.get_symbols()[:5]
 
-    logger.info("Step 6: Navigate to Market Page")
+    logger.info("Step 7: Navigate to Market Page")
     web.assets_page.navigate_to(Features.MARKETS, wait=True)
 
     logger.info(f"Verify symbols list displayed in My Trade are: {cur_symbols}")
-    web.markets_page.verify_my_trade_items_list(cur_symbols)
-
+    web.markets_page.verify_my_trade_list(cur_symbols)
 
 
 @pytest.fixture(autouse=True)
@@ -55,8 +56,7 @@ def setup_test(web, get_asset_tab_amount, ):
     if not cur_symbols:
         logger.info(f"- Create some Markets order")
         for _ in range(5):
-            trade_obj = ObjTrade(order_type=OrderType.MARKET)
-            APIClient().trade.post_order(trade_obj, update_price=False)
+            APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET), update_price=False)
 
         # wait for loading new created data
         web.trade_page.asset_tab.wait_for_tab_amount(AssetTabs.OPEN_POSITION, expected_amount=tab_amount + 5)

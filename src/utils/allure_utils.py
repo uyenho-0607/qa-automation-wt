@@ -2,20 +2,21 @@ import base64
 import glob
 import json
 import os
+import re
 import time
 import uuid
+from pathlib import Path
 from typing import Dict, Any
 
 import allure
 from pytest_selenium import driver
 
 from src.data.consts import GRID_VIDEO_URL
-from src.data.project_info import DriverList
 from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
+from src.data.project_info import DriverList
 from src.data.project_info import StepLogs, RuntimeConfig
 from src.utils.common_utils import convert_timestamp
 from src.utils.logging_utils import logger
-
 
 
 def attach_session_video():
@@ -69,6 +70,10 @@ def log_step_to_allure():
 def custom_allure_report(allure_dir: str) -> None:
     """Process and customize Allure test result files in the specified directory."""
     allure_dir_path = ROOTDIR / allure_dir
+
+    # clean all log files
+    _clean_log_files(allure_dir)
+
     allure_result_files = [f for f in os.listdir(allure_dir_path) if f.endswith("result.json")]  # get all allure result files
     files = [os.path.join(allure_dir_path, f) for f in allure_result_files]  # Sort result files based on created time (oldest first)
     files.sort(key=lambda x: os.path.getmtime(x), reverse=False)
@@ -261,25 +266,19 @@ def _attach_verify_details(data: Dict[str, Any]):
                     break
 
 
-def clean_allure_log_files(allure_dir):
-    """
-    Check and delete all .txt log files in the allure-results directory.
-    This helps keep the test results clean and prevents accumulation of log files.
-    """
+def _clean_log_files(allure_dir):
+
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    logger_prefix = re.compile(r'pythonLog:[^:\s]+\.py:\d+\s*-?\s*')
     allure_results_dir = ROOTDIR / allure_dir
-    if not os.path.exists(allure_dir):
-        return
 
-    # Find all .txt files in allure-results directory
-    log_files = glob.glob(str(allure_results_dir / '*.txt'))
-
-    # Delete each log file
-    for log_file in log_files:
-        try:
-            os.remove(log_file)
-
-        except Exception as e:
-            logger.error(f"Error deleting log file {log_file}: {str(e)}")
+    for txt_file in Path(allure_results_dir).glob("*.txt"):
+        content = txt_file.read_text(encoding="utf-8")
+        # Remove ANSI colors
+        content = ansi_escape.sub('', content)
+        # Remove pythonLog:filename.py:line
+        content = logger_prefix.sub('', content)
+        txt_file.write_text(content, encoding="utf-8")
 
 
 def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float = None, tolerance_fields: list = None, title="Table Details", comparison_result: dict = None):

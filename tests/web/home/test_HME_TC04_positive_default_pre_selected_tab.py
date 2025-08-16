@@ -5,7 +5,8 @@ from src.data.enums import WatchListTab
 from src.utils.logging_utils import logger
 
 
-def test(web):
+def _test(web):
+    """This test is covered by TEST_LGN01"""
     logger.info("Step 1: Refresh Page")
     web.home_page.refresh_page()
 

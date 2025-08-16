@@ -129,6 +129,12 @@ class MarketsSection(BaseEnum):
     SIGNAL = "Signal"
     NEWS = "News"
 
+    def symbol_row(self):
+        map_dict = {
+            self.MY_TRADE: "portfolio-row",
+            self.SIGNAL: "signal-row",
+        }
+        return map_dict.get(self, self)
 
 class SignalTab(BaseEnum):
     FAVOURITE = "Favourite"

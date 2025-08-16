@@ -1,14 +1,14 @@
-from src.data.objects.trade_obj import ObjTrade
+from src.apis.api_client import APIClient
 from src.core.actions.mobile_actions import MobileActions
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.modals.trading_modals import TradingModals
 from src.page_object.android.components.trade.asset_tab import AssetTab
 from src.page_object.android.components.trade.chart import Chart
 from src.page_object.android.components.trade.place_order_panel import PlaceOrderPanel
 from src.page_object.android.components.trade.watch_list import WatchList
-from src.utils.logging_utils import logger
-from src.apis.api_client import APIClient
 from src.utils.assert_utils import soft_assert, compare_dict
+from src.utils.logging_utils import logger
 
 
 class TradeScreen(BaseScreen):

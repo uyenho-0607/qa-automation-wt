@@ -1,4 +1,5 @@
 import random
+
 import pytest
 
 from src.data.objects.symbol_obj import ObjSymbol

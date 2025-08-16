@@ -1,6 +1,6 @@
 import logging
-import subprocess
 import os
+import subprocess
 from collections import defaultdict
 from pathlib import Path
 from shutil import which

@@ -3,7 +3,6 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import AccInfo
 from src.page_object.android.base_screen import BaseScreen
-from src.page_object.android.components.modals.trading_modals import TradingModals
 from src.page_object.android.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id

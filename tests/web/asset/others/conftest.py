@@ -16,9 +16,9 @@ def pre_setup_order(symbol, web):
 
     if not tab_amount:
         logger.info("- Place new order")
-        web.trade_page.place_order_panel.place_order(trade_object, submit=True)
+        APIClient().trade.post_order(trade_object, update_price=False)
 
         logger.info("- Wait for asset tab amount increase")
-        web.trade_page.asset_tab.wait_for_tab_amount(tab, tab_amount + 1)
+        web.assets_page.asset_tab.wait_for_tab_amount(tab, tab_amount + 1)
 
     yield tab

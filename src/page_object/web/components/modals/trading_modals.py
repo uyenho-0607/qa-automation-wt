@@ -57,8 +57,8 @@ class TradingModals(BaseTrade):
 
     # ------------------------------------------------ ACTIONS ------------------------------------------------ #
 
-    def is_edit_confirm_modal_displayed(self):
-        return self.actions.is_element_displayed(self.__edit_confirm_symbol, timeout=SHORT_WAIT)
+    def is_edit_confirm_modal_displayed(self, timeout=SHORT_WAIT):
+        return self.actions.is_element_displayed(self.__edit_confirm_symbol, timeout=timeout)
 
     def close_trade_confirm_modal(self, timeout=QUICK_WAIT):
         self.actions.click(self.__btn_cancel_trade, timeout=timeout, raise_exception=False, show_log=False)
@@ -70,28 +70,32 @@ class TradingModals(BaseTrade):
             self.__edit_confirm_order_type, 300, 20, timeout=timeout, raise_exception=False
         )
 
-    def click_edit_order_btn(self, retries=3):
+    def click_edit_order_btn(self, retries=3, oct_mode=False):
         """Click the edit order button."""
-        attempt = 0
-        while attempt < retries:
-            logger.debug(f"- Click edit order button (Attempt {attempt + 1})")
+        logger.debug(f"Click edit order button")
+        if oct_mode:
+            self.actions.click(self.__btn_edit_order)
+            return True
+
+        for attempt in range(1, retries + 1):
+            logger.debug(f"Attempt {attempt} - Clicking edit order button")
             self.actions.click(self.__btn_edit_order, raise_exception=False, timeout=QUICK_WAIT)
 
-            if not self.actions.is_element_displayed(self.__btn_confirm_update_order, is_display=False, timeout=QUICK_WAIT):
+            logger.debug("- Check if confirm edit modal displayed")
+            if self.is_edit_confirm_modal_displayed(timeout=QUICK_WAIT):
                 return True
-
-            attempt += 1
 
         logger.warning("- Max retries exceeded for clicking edit order button")
         return False
 
     def confirm_update_order(self, wait=False):
         """Click the confirm update order button."""
-        retries = 3
-        while retries and self.actions.is_element_displayed(self.__btn_confirm_update_order, timeout=QUICK_WAIT):
-            logger.debug(f"- Confirm update order")
-            self.actions.click(self.__btn_confirm_update_order)
-            retries -= 1
+        self.actions.javascript_click(self.__btn_confirm_update_order)
+        # retries = 3
+        # while retries and self.actions.is_element_displayed(self.__btn_confirm_update_order, timeout=QUICK_WAIT):
+        #     logger.debug(f"Confirm update order (Attempt {4 - retries})")
+        #     self.actions.click(self.__btn_confirm_update_order)
+        #     retries -= 1
         not wait or self.wait_for_spin_loader()
 
     def get_edit_price(self, order_type: OrderType | str = None):

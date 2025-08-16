@@ -1,4 +1,5 @@
 import pytest
+
 from src.utils.logging_utils import logger
 from src.utils.random_utils import random_password, random_userid
 

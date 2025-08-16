@@ -1,7 +1,6 @@
 import time
 from typing import List, Literal
 
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions

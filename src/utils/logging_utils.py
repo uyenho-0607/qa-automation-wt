@@ -4,7 +4,6 @@ from colorama import Fore, Style
 
 from src.data.project_info import StepLogs
 
-
 def record_steps_log(func):
     def wrapper(*args, **kwargs):
         msg, *_ = args
