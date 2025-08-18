@@ -185,7 +185,7 @@ class AssetTab(BaseTrade):
         self.actions.send_keys(self.__txt_close_order, close_volume)
         not confirm or self.confirm_close_order()
 
-    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL) -> None:
+    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL, submit=False) -> None:
         """Close multiple positions at once using the specified option."""
         self.actions.click(self.__btn_bulk_close)
 
@@ -196,7 +196,11 @@ class AssetTab(BaseTrade):
         }
 
         self.actions.click(cook_element(self.__opt_bulk_close, options[option]))
-        self.click_confirm_btn()
+
+        if submit:
+            self.click_confirm_btn()
+        else:
+            self.click_cancel_btn()
 
     # ------------------------ VERIFY ------------------------ #
     def verify_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:

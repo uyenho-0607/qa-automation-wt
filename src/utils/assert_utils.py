@@ -14,62 +14,6 @@ from src.utils.logging_utils import logger
 """Utilities"""
 
 
-def compare_dict_with_keymap(actual, expected, key: str, tolerance=None):
-    actual_map = {item[key]: item for item in actual}
-    expected_map = {item[key]: item for item in expected}
-
-    all_keys = set(actual_map) | set(expected_map)
-    mismatches = []
-    missing = []
-    redundant = []
-
-    for k in all_keys:
-        a_item = actual_map.get(k)
-        e_item = expected_map.get(k)
-
-        if a_item and e_item:
-            a_filtered = {ka: va for ka, va in a_item.items() if ka != key}
-            e_filtered = {ke: ve for ke, ve in e_item.items() if ke != key}
-
-            actual_diff = {}
-            expected_diff = {}
-
-            for subkey in e_filtered:
-                va = a_filtered.get(subkey)
-                ve = e_filtered.get(subkey)
-
-                if tolerance is not None:
-                    delta = round(abs(va - ve), ndigits=4)
-                    if delta <= tolerance:
-                        if delta:
-                            logger.debug(f"- Acceptable tolerance: {delta!r}")
-                        continue
-
-                if va != ve:
-                    actual_diff[subkey] = va
-                    expected_diff[subkey] = ve
-
-            if actual_diff:
-                mismatches.append({
-                    key: k,
-                    'actual': actual_diff,
-                    'expected': expected_diff
-                })
-
-        elif e_item and not a_item:
-            missing.append(k)
-
-        elif a_item and not e_item:
-            redundant.append(k)
-
-    return {
-        'result': not mismatches and not missing and not redundant,
-        'mismatches': mismatches,
-        'missing': missing,  # expected but not in actual
-        'redundant': redundant  # in actual but not in expected
-    }
-
-
 def compare_with_tolerance(
         actual: str | float,
         expected: str | float,
@@ -89,8 +33,7 @@ def compare_with_tolerance(
 
     if not is_float(expected) or not is_float(actual):
         logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected} - type: {type(expected)}, actual: {actual} - type: {type(actual)}")
-        res = False
-        return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
+        return False if not get_diff else dict(res=False, diff="", diff_percent="", tolerance="")
 
     actual = float(actual)
     expected = float(expected)
@@ -112,12 +55,8 @@ def compare_with_tolerance(
 
     # convert to percent for human-readable
     diff_percent = diff_percent * 100
-
-
     if diff:
         logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
-    # else:
-    #     logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
 
     res = abs(diff) <= abs(tolerance_value)
 
@@ -164,7 +103,7 @@ def compare_dict(
             res_tolerance = compare_with_tolerance(act, exp, field_tolerance, get_diff=True)
             res = res_tolerance["res"]
             tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
-        
+
         # Check if field should use global tolerance
         elif tolerance_percent is not None and tolerance_fields and key in tolerance_fields:
             res_tolerance = compare_with_tolerance(act, exp, tolerance_percent, get_diff=True)
@@ -231,14 +170,13 @@ Notification Sample
 
 def extract_noti_prices(noti_content: str) -> dict:
     """Extract price value from notification text."""
-    # Pattern to match price after @ symbol (most common case)
     price_patterns = [
-        r'@\s*([\d,]+\.?\d*)',  # Price after @ symbol (handles commas)
-        r'Price:\s*([\d,]+\.?\d*)',  # Price after "Price:" (handles commas)
-        r'Entry Price:\s*([\d,]+\.?\d*)',  # Entry Price (handles commas)
-        r'Stop Loss:\s*([\d,]+\.?\d*)',  # Stop Loss (handles commas)
-        r'Take Profit:\s*([\d,]+\.?\d*)',  # Take Profit (handles commas)
-        r'Stop Limit Price:\s*([\d,]+\.?\d*)',  # Stop Limit Price (handles commas)
+        r'@\s*([\d,]+\.?\d*)',  # Price after @ symbol
+        r'\.\s+Price:\s*([\d,]+\.?\d*)',  # Exact ". Price:"
+        r'Entry Price:\s*([\d,]+\.?\d*)',
+        r'Stop Loss:\s*([\d,]+\.?\d*)',
+        r'Take Profit:\s*([\d,]+\.?\d*)',
+        r'Stop Limit Price:\s*([\d,]+\.?\d*)',
     ]
 
     res = {}
@@ -247,15 +185,20 @@ def extract_noti_prices(noti_content: str) -> dict:
         match = re.search(pattern, noti_content)
         if match:
             try:
-                # Remove commas before converting to float
                 price_str = match.group(1).replace(',', '')
 
-                key = "entry_price" if "@" in match.group(0) else match.group(0).split(": ")[0].lower().replace(" ", "_")
+                raw_key = match.group(0).split(":")[0]
+                raw_key = raw_key.strip().lstrip(".").strip()  # remove leading period if present
+                key = "entry_price" if "@" in match.group(0) else raw_key.lower().replace(" ", "_")
+
                 res[key] = float(price_str)
-
-
             except ValueError:
                 continue
+
+        # Remove duplicate "price" if "entry_price" exists
+        if "price" in res and "entry_price" in res:
+            res.pop("price", None)
+
     return res
 
 
@@ -269,27 +212,24 @@ def compare_noti_with_tolerance(
     # Extract prices from both messages
     actual_price = extract_noti_prices(actual)
     expected_price = extract_noti_prices(expected)
-    desc = ""
     decimal = ObjTrade.DECIMAL if is_banner else None
 
     if actual_price and expected_price:
-        compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])
+        compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price", "price"])
         res = compare_result["res"]
 
         if res:
-            desc += f"Tolerance: {tolerance_percent}% - \n"
             # Replace price in expected with actual price for string comparison
             pattern_key_mapping = {
                 r'@\s*[\d,]+\.?\d*': 'entry_price',
                 r'Entry Price:\s*[\d,]+\.?\d*': 'entry_price',
+                r'\.\s+Price:\s*([\d,]+\.?\d*)': 'price',
                 r'Stop Loss:\s*[\d,]+\.?\d*': 'stop_loss',
                 r'Take Profit:\s*[\d,]+\.?\d*': 'take_profit'
             }
 
-            processed_keys = set()  # Track which keys have been processed
-
             for pattern, key in pattern_key_mapping.items():
-                if key in expected_price and key in actual_price and key not in processed_keys:
+                if key in expected_price and key in actual_price:
                     # Only update if prices are different (within tolerance but not exactly the same)
                     if abs(actual_price[key] - expected_price[key]) > 0:
                         logger.debug(f"- Updating {key}: {expected_price[key]} -> {actual_price[key]}")
@@ -297,16 +237,8 @@ def compare_noti_with_tolerance(
                             re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
                             format_str_price(actual_price[key], decimal)
                         ), expected)
-                    # else:
-                    #     logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
 
-                    processed_keys.add(key)  # Mark this key as processed
-
-                    desc += f"Update price: {key}, from {expected_price[key]} -> {actual_price[key]}\n"
-
-            logger.debug(f"- Expected noti after adjust prices: {expected!r}")
-
-    soft_assert(actual, expected, log_details=True, desc=desc)
+    soft_assert(actual, expected, log_details=True)
 
 
 """Assertion"""
@@ -371,7 +303,7 @@ def soft_assert(
 
         if tolerance is not None and tolerance_fields:
             logger.debug(f"Global tolerance: {tolerance}%, apply for fields: {tolerance_fields}")
-        
+
         if field_tolerances:
             logger.debug(f"Field-specific tolerances: {field_tolerances}")
 

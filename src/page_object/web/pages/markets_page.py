@@ -4,13 +4,14 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, SHORT_WAIT
+from src.data.consts import QUICK_WAIT
 from src.data.enums import MarketsSection, WatchListTab, TradeType
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.trade.watch_list import WatchList
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
+from src.utils.format_utils import locator_format
 from src.utils.logging_utils import logger
 
 
@@ -20,11 +21,22 @@ class MarketsPage(BasePage):
         self.watch_list = WatchList(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __my_trade_symbol = (By.CSS_SELECTOR, data_testid('portfolio-row-symbol'))
-    __my_trade_order_type = (By.CSS_SELECTOR, data_testid('portfolio-row-order-type'))
-    __top_picks_symbol = (By.CSS_SELECTOR, data_testid('top-picks-symbol'))
-    __top_gainer_symbol = (By.CSS_SELECTOR, data_testid('top-gainer-symbol'))
-    __signal_symbol = (By.CSS_SELECTOR, data_testid('signal-row-symbol'))
+    __symbol_row = (By.CSS_SELECTOR, data_testid('{}-symbol'))  # symbol-row from MarketsSection
+    __symbol_row_text = (By.XPATH, "//div[@data-testid='{}-symbol' and text()='{}']")
+
+    # __my_trade_symbol = (By.CSS_SELECTOR, data_testid('portfolio-row-symbol'))
+    # __my_trade_symbol_by_text = (By.XPATH, "//div[@data-testid='portfolio-row-symbol' and text()='{}']")
+    # __my_trade_order_type = (By.CSS_SELECTOR, data_testid('portfolio-row-order-type'))
+    #
+    # __top_picks_symbol = (By.CSS_SELECTOR, data_testid('top-picks-symbol'))
+    # __top_picks_symbol_by_text = (By.XPATH, "//div[@data-testid='top-picks-symbol' and text()='{}']")
+    #
+    # __top_gainer_symbol = (By.CSS_SELECTOR, data_testid('top-gainer-symbol'))
+    # __top_gainer_symbol_by_text = (By.XPATH, "//div[@data-testid='top-gainer-symbol' and text()='{}']")
+    #
+    # __signal_symbol = (By.CSS_SELECTOR, data_testid('signal-row-symbol'))
+    # __signal_symbol_by_text = (By.XPATH, "//div[@data-testid='signal-row-symbol' and text()='{}']")
+
     __news_content = (By.CSS_SELECTOR, data_testid('market-news-content-text'))
 
     __redirect_arrow = (
@@ -45,68 +57,25 @@ class MarketsPage(BasePage):
     __btn_close_preference = (By.CSS_SELECTOR, data_testid('symbol-preference-close'))
 
     # ------------------------ ACTIONS ------------------------ #
-
-    def get_last_symbol(self, section: MarketsSection = None, store_data: DotDict = None):
-        """Get lastest symbol of section: My Trade, Top Picks, Top Gainer"""
-        # Handle signal, sometimes the items do not show
-
-        if section:
-            if MarketsSection.SIGNAL in list(section):
-                retries = 3
-                signal_displayed = self.actions.is_element_displayed(self.__signal_symbol, timeout=5)
-                while not signal_displayed and retries:
-                    logger.debug("- Retries loading signals")
-                    self.refresh_page()
-                    self.wait_for_spin_loader()
-                    signal_displayed = self.actions.is_element_displayed(self.__signal_symbol)
-                    retries += -1
-
-            locator_map = {
-                MarketsSection.MY_TRADE: self.__my_trade_symbol,
-                MarketsSection.TOP_PICKS: self.__top_picks_symbol,
-                MarketsSection.TOP_GAINER: self.__top_gainer_symbol,
-                MarketsSection.SIGNAL: self.__signal_symbol
-            }
-
-            for _section in section:
-                symbol = self.actions.get_text(locator_map[_section])
-                if store_data is not None:
-                    store_data |= {_section: symbol}
-
-            return symbol
-
-        res = {
-            MarketsSection.MY_TRADE: self.actions.get_text(self.__my_trade_symbol),
-            MarketsSection.TOP_PICKS: self.actions.get_text(self.__top_picks_symbol),
-            MarketsSection.TOP_GAINER: self.actions.get_text(self.__top_gainer_symbol),
-            MarketsSection.SIGNAL: self.actions.get_text(self.__signal_symbol)
-        }
-
-        if store_data is not None:
-            store_data |= res
-
-        return res
+    def get_symbols(self, section: MarketsSection):
+        symbols = self.actions.get_text_elements(cook_element(self.__symbol_row, locator_format(section.symbol_row())))
+        return symbols
 
     def click_arrow_icon(self, arrow: MarketsSection):
         self.actions.click(cook_element(self.__redirect_arrow, arrow))
 
-    def select_symbol(self, section: MarketsSection | str):
-        match section:
-            case MarketsSection.MY_TRADE:
-                locator = self.__my_trade_symbol
+    def select_symbol(self, section: MarketsSection | str, symbol: str = ""):
+        """Select latest symbol from Section"""
+        locator = self.__symbol_row if not symbol else self.__symbol_row_text
 
-            case MarketsSection.TOP_PICKS:
-                locator = self.__top_picks_symbol
+        logger.debug(f"- Select symbol {symbol} from section: {section!r}")
+        self.actions.click(cook_element(locator, locator_format(section.symbol_row()), symbol))
 
-            case MarketsSection.TOP_GAINER:
-                locator = self.__top_gainer_symbol
+        if not symbol:
+            # GET and return the selected symbol
+            symbol = self.actions.get_text(cook_element(locator, locator_format(section.symbol_row())))
 
-            case MarketsSection.SIGNAL:
-                locator = self.__signal_symbol
-
-            case _:
-                raise ValueError("Invalid Markets Section !!")
-        self.actions.click(locator)
+        return symbol
 
     def select_news_content(self):
         self.actions.click(self.__news_content)
@@ -160,19 +129,7 @@ class MarketsPage(BasePage):
         self.actions.click(cook_element(self.__btn_close_preference))
 
     # ------------------------ VERIFY ------------------------ #
-    def verify_my_trade_last_item(self, symbol: str, trade_type: TradeType):
-        logger.debug(f"- Check last item is: {symbol!r}")
-        actual_symbol = self.actions.get_text(self.__my_trade_symbol)
-        soft_assert(actual_symbol, symbol)
-
-        logger.debug(f"- Check trade_type is: {trade_type!r}")
-        actual_type = self.actions.get_text(self.__my_trade_order_type)
-        soft_assert(actual_type, trade_type)
-
-
-    def verify_my_trade_items_list(self, symbols: str | list):
+    def verify_my_trade_list(self, symbols: str | list):
         symbols = symbols if isinstance(symbols, list) else [symbols]
-        current_list = self.actions.find_elements(self.__my_trade_symbol)
-        current_list = [ele.text.strip() for ele in current_list]
-
-        soft_assert(current_list, symbols)
+        actual = self.get_symbols(MarketsSection.MY_TRADE)
+        soft_assert(actual, symbols)

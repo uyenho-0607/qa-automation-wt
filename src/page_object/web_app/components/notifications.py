@@ -1,3 +1,5 @@
+from contextlib import suppress
+
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -58,14 +60,8 @@ class Notifications(BasePage):
         not wait or self.wait_for_spin_loader(timeout=3)
 
     def close_noti_banner(self):
-        try:
-            if self.actions.is_element_displayed(self.__btn_close_banner, timeout=SHORT_WAIT):
-                logger.info("- Close noti banner")
-                self.actions.click(self.__btn_close, raise_exception=False)
-
-        except Exception as e:
-            logger.debug(f"- Exception {e} closing notification banner")
-            pass
+        with suppress(Exception):
+            self.actions.click(self.__btn_close, timeout=SHORT_WAIT, raise_exception=False)
 
     def _get_open_position(self):
         noti = cook_element(self.__noti_result, "Open Position")

@@ -15,18 +15,24 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(android, symbol, create_order_data, sl_type, tp_type):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, indicate=SLTPType.sample_values())
+    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol, indicate=SLTPType.sample_values())
     tab = AssetTabs.PENDING_ORDER
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")
     create_order_data(trade_object)
 
-    logger.info(f"Step 2: Update {tab.title()} with sl_type: {sl_type.capitalize()!r} - tp_type: {tp_type.capitalize()!r}")
-    android.trade_screen.modals.modify_order(tab, trade_object, sl_type=sl_type, tp_type=tp_type)
+    logger.info(f"Step 2: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
+    logger.info(f"Step 3: Update {tab.title()} with sl_type: {sl_type.capitalize()!r} - tp_type: {tp_type.capitalize()!r}")
+    android.trade_screen.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify notification banner updated message")
     android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+
+    logger.info(f"Step 4: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
 
     logger.info(f"Verify {tab.title()} item details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

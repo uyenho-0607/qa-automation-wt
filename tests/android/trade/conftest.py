@@ -10,15 +10,14 @@ from src.utils.logging_utils import logger
 
 @pytest.fixture(scope="package", autouse=True)
 def setup_trade_test(login_wt_app, android, symbol):
-
     logger.info(f"- Select symbol: {symbol!r}")
     android.home_screen.watch_list.select_tab(WatchListTab.CRYPTO)
     android.home_screen.watch_list.select_symbol(symbol)
 
+
 @pytest.fixture
 def create_order_data(android):
     def _handler(trade_object):
-
         tab_amount = android.trade_screen.asset_tab.get_tab_amount(AssetTabs.get_tab(trade_object.order_type))
 
         logger.info(f"- POST {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order")
@@ -36,7 +35,7 @@ def create_order_data(android):
 
 
 @pytest.fixture(scope="package")
-def enabl_OCT(android):
+def enable_OCT(android):
     logger.info("- Send API to enable OCT")
     APIClient().user.patch_oct()
 
@@ -45,6 +44,18 @@ def enabl_OCT(android):
 def disable_OCT(android):
     logger.info("- Send API to disable OCT")
     APIClient().user.patch_oct(enable=False)
+
+
+@pytest.fixture(scope="package")
+def swap_to_volume(android):
+    logger.info("- Click Swap to Volume button")
+    APIClient().user.patch_swap_volume_units()
+
+
+@pytest.fixture(scope="package")
+def swap_to_units(android):
+    logger.info("- Click Swap to Unit button")
+    APIClient().user.patch_swap_volume_units(use_volume=False)
 
 
 @pytest.fixture

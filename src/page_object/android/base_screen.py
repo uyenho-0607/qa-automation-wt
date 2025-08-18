@@ -54,8 +54,8 @@ class BaseScreen:
     __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
     __spin_loader = (AppiumBy.XPATH, resource_id('spin-loader'))
     __home_nav_option = (AppiumBy.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
-    __btn_confirm = (AppiumBy.XPATH, "//*[@content-desc='Confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='Cancel']")
+    __btn_confirm = (AppiumBy.XPATH, "//*[@content-desc='CONFIRM']")
+    __btn_cancel = (AppiumBy.XPATH, "//*[@content-desc='CANCEL']")
 
     # ------------------------ ACTIONS ------------------------ #
     def go_back(self):

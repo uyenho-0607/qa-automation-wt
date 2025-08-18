@@ -3,6 +3,7 @@ import time
 from contextlib import suppress
 
 from selenium.webdriver.common.by import By
+
 from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT, QUICK_WAIT
 from src.page_object.web.base_page import BasePage
 from src.utils import DotDict
@@ -40,14 +41,8 @@ class Notifications(BasePage):
             self.actions.click(self.__noti_selector)
 
     def close_noti_banner(self):
-        try:
-            if self.actions.is_element_displayed(self.__btn_close, timeout=SHORT_WAIT):
-                logger.info("- Close noti banner")
-                self.actions.click(self.__btn_close, raise_exception=False, timeout=SHORT_WAIT)
-
-        except Exception as e:
-            logger.debug(f"- Exception {e} closing notification banner")
-            pass
+        with suppress(Exception):
+            self.actions.click(self.__btn_close, timeout=QUICK_WAIT, raise_exception=False)
 
     def get_open_position_order_id(self, trade_object: DotDict, amount=1):
         self.toggle_notification(timeout=1)
@@ -65,7 +60,6 @@ class Notifications(BasePage):
     # ------------------------ VERIFY ------------------------ #
     def verify_notification_banner(self, expected_title, expected_des=None, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        # Execute sequentially instead of in parallel to avoid Device Farm connection pool issues
         logger.debug("- Fetching notification description")
         actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
@@ -78,6 +72,9 @@ class Notifications(BasePage):
         if actual_title:
             logger.debug(f"- Check noti title - {expected_title!r}")
             soft_assert(actual_title, expected_title)
+
+        self.close_noti_banner()
+
 
     def verify_notification_result(self, expected_result: str | list, check_contains=False, is_system=False):
         # currently, we have 2 types of noti: open position and position closed in notification box

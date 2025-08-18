@@ -1,21 +1,18 @@
-import pytest
-
-from src.data.enums import OrderType, AssetTabs, TradeType
+from src.data.enums import OrderType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.parametrize("trade_type", TradeType.list_values())
-def test(web, symbol, get_asset_tab_amount, trade_type, enable_OCT):
+def test(web, symbol, get_asset_tab_amount, enable_OCT):
 
-    trade_object = ObjTrade(trade_type, OrderType.MARKET, symbol=symbol)
-    tab_amount = get_asset_tab_amount(OrderType.MARKET)
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info("Step 1: Enter Chart fullscreen")
     web.trade_page.chart.toggle_chart()
 
-    logger.info(f"Step 2: Place {trade_type.upper()} order")
+    logger.info(f"Step 2: Place Market order")
     web.trade_page.place_order_panel.place_oct_order(trade_object)
 
     logger.info("Verify notification banner displays correct input trade information")

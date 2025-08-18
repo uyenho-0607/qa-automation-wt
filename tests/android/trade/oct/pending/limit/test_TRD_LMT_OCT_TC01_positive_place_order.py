@@ -30,5 +30,8 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
     logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
+    logger.info(f"Step 2: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
     logger.info(f"Verify {tab.title()} item details in Asset Tab")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

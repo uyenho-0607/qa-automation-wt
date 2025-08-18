@@ -4,7 +4,7 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-def test(web, setup_bulk_test, cancel_bulk_close, ):
+def test(web, setup_bulk_test, cancel_bulk_close):
     order_ids = setup_bulk_test(order_type=OrderType.MARKET)
     expected_amount = 0 if len(order_ids) <= 30 else len(order_ids) - 30
     # -------------------

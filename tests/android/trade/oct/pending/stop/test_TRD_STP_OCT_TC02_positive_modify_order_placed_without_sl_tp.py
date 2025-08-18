@@ -20,8 +20,8 @@ from src.utils.logging_utils import logger
 )
 def test(android, symbol, edit_field, sl_type, tp_type, cancel_edit_order, create_order_data):
     trade_object = ObjTrade(
-        order_type=OrderType.LIMIT, symbol=symbol,
-        stop_loss=0, take_profit=0, expiry=Expiry.sample_values(OrderType.LIMIT)
+        order_type=OrderType.STOP, symbol=symbol,
+        stop_loss=0, take_profit=0, expiry=Expiry.sample_values(OrderType.STOP)
     )
     tab = AssetTabs.PENDING_ORDER
     # -------------------
@@ -29,11 +29,17 @@ def test(android, symbol, edit_field, sl_type, tp_type, cancel_edit_order, creat
     logger.info("Step 1: Place order without SL and TP")
     create_order_data(trade_object)
 
-    logger.info(f"Step 2: Update {tab.title()} item with {edit_field!r}")
-    android.trade_screen.modals.modify_order(tab, trade_object, sl_type=sl_type, tp_type=tp_type)
+    logger.info(f"Step 2: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
+    logger.info(f"Step 3: Update {tab.title()} item with {edit_field!r}")
+    android.trade_screen.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info("Verify notification banner updated message")
     android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+
+    logger.info(f"Step 4: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
 
     logger.info(f"Verify {tab.title()} item details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

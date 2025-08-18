@@ -1,15 +1,14 @@
 import time
+from contextlib import suppress
 
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common import TimeoutException
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT, SHORT_WAIT
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.base_screen import BaseScreen
-from src.utils import DotDict
 from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
-from src.utils.common_utils import resource_id, log_page_source
+from src.utils.common_utils import resource_id
 from src.utils.logging_utils import logger
 
 
@@ -54,12 +53,8 @@ class Notifications(BaseScreen):
             self.actions.click(self.__noti_selector)
 
     def close_noti_banner(self):
-        if self.actions.is_element_displayed(self.__btn_close, timeout=QUICK_WAIT):
-            try:
-                self.actions.click(self.__btn_close, show_log=False, raise_exception=False)
-
-            except TimeoutException:
-                logger.debug("- Close button is not displayed, skip clicking")
+        with suppress(Exception):
+            self.actions.click(self.__btn_close, timeout=SHORT_WAIT, raise_exception=False)
 
     # ------------------------ VERIFY ------------------------ #
 
@@ -78,7 +73,6 @@ class Notifications(BaseScreen):
         if actual_title:
             logger.debug(f"- Check noti title - {expected_title!r}")
             soft_assert(actual_title, expected_title)
-
 
     def verify_notification_result(self, expected_result: str | list, go_back=True):
         self.open_notification_box()

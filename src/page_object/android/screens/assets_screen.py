@@ -3,7 +3,6 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import AccInfo
 from src.page_object.android.base_screen import BaseScreen
-from src.page_object.android.components.modals.trading_modals import TradingModals
 from src.page_object.android.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id
@@ -26,8 +25,8 @@ class AssetsScreen(BaseScreen):
     __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[3]")
     __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[3]")
     __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[3]")
-
     __item_watchlist = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
+    __view_transaction = (AppiumBy.XPATH, resource_id("asset-header-view-all"))
 
     # ------------------------ ACTIONS ------------------------ #
     def _get_acc_balance_info(self):
@@ -48,6 +47,9 @@ class AssetsScreen(BaseScreen):
 
         # elements = self.actions.find_elements(self.__item_watchlist)
         # return [ele.text.strip() for ele in elements]
+
+    def click_view_all_transaction(self):
+        self.actions.click(self.__view_transaction)
 
     # ------------------------ VERIFY ------------------------ #
     def verify_account_details(self, exp_data):

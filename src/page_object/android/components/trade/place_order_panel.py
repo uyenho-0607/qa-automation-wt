@@ -6,6 +6,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element, resource_id
@@ -74,14 +75,19 @@ class PlaceOrderPanel(BaseTrade):
         return self.actions.get_text(cook_element(self.__txt_take_profit, SLTPType.PRICE.lower()))
 
     # ------------------------ ACTIONS ------------------------ #
-    def toggle_oct(self, enable: bool = True) -> None:
+    def toggle_oct(self, enable: bool = True, submit: bool = False) -> None:
         """Enable/disable One-Click Trading."""
+
+        # Check current OCT state
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=1)
         if is_enabled != enable:
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
         if enable:
-            self.agree_and_continue()
+            if submit:
+                self.agree_and_continue()
+            else:
+                self.click_cancel_btn()
 
     def open_pre_trade_details(self):
         self.actions.click(self.__btn_pre_trade_details)
@@ -101,6 +107,12 @@ class PlaceOrderPanel(BaseTrade):
         )."""
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         self.actions.click(cook_element(self.__btn_trade, trade_type.lower()))
+
+    def _select_oct_trade_type(self, trade_type: TradeType) -> None:
+        """Select trade type (BUY/SELL
+        )."""
+        logger.debug(f"- Select trade type: {trade_type.upper()!r}")
+        self.actions.click(cook_element(self.__btn_oct_trade, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
@@ -182,6 +194,31 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Input stop limit price: {value!r}")
         self.actions.send_keys(self.__txt_stop_limit_price, value, hide_keyboard=True)
 
+    def place_oct_order(self, trade_object: ObjTrade, symbol) -> None:
+        """
+        Place a valid order and load input data into trade_object.
+        Args:
+            trade_object: contain trade_type
+        """
+
+        symbol_details = ObjSymbol().get_symbol_details(symbol)
+
+        trade_type = trade_object.trade_type
+
+        # Input volume and get units
+        volume = self._input_volume()
+
+        # Prepare trade details
+        trade_details = {
+            'volume': format_str_price(volume),
+        }
+
+        logger.debug(f"- Order Summary: {format_dict_to_string(trade_details)}")
+        trade_object |= {k: v for k, v in trade_details.items()}
+
+        # Place Order
+        self._select_oct_trade_type(trade_type)
+
     def place_order(
             self,
             trade_object: ObjTrade,
@@ -213,7 +250,8 @@ class PlaceOrderPanel(BaseTrade):
         units = self._get_volume_info_value()
 
         # Calculate trade parameters
-        prices = calculate_trading_params(self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
+        prices = calculate_trading_params(self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type,
+                                          tp_type=tp_type)
 
         # Input prices
         self._input_price(prices.entry_price, order_type)
@@ -272,3 +310,12 @@ class PlaceOrderPanel(BaseTrade):
         not submit or self.confirm_trade()
 
     # ------------------------ VERIFY ------------------------ #
+
+    def verify_oct_action(self, oct_action=True):
+        # OCT enable
+        if oct_action:
+            self.actions.verify_element_displayed(self.__txt_volume, is_display=True)
+            if self.actions.verify_element_displayed(self.__btn_pre_trade_details, is_display=True):
+                self.open_pre_trade_details()
+        else:
+            self.actions.verify_element_displayed(self.__txt_volume, is_display=False)

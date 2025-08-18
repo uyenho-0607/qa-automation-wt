@@ -1,4 +1,5 @@
 import time
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -20,12 +21,13 @@ class BaseTrade(BaseScreen):
     )
     ##### One Click Trading Modal #####
     __btn_oct_confirm = (AppiumBy.XPATH, resource_id('oct-modal-button-confirm'))
+    __btn_oct_cancel = (AppiumBy.XPATH, resource_id('oct-modal-button-cancel'))
 
     ##### Trade Confirmation Modal #####
     __btn_trade_confirm = (AppiumBy.XPATH, resource_id('trade-confirmation-button-confirm'))
     __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))
     __btn_confirm_close_delete_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
-    __btn_cancel_trade = (AppiumBy.XPATH, "//android.widget.TextView[@text='Cancel']")
+    __btn_cancel_trade = (AppiumBy.XPATH, "//android.widget.TextView[@text='CANCEL']")
 
     # ------------------------ ACTIONS ------------------------ #
     def get_live_price(
@@ -50,6 +52,10 @@ class BaseTrade(BaseScreen):
     def agree_and_continue(self):
         """Confirm the one-click trading action."""
         self.actions.click(self.__btn_oct_confirm)
+
+    def click_cancel_btn(self):
+        """Cancel the one-click trading action."""
+        self.actions.click(self.__btn_oct_cancel)
 
     # Trade Confirmation Modal Actions
     def confirm_trade(self):

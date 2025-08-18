@@ -21,18 +21,24 @@ def test(android, symbol, get_asset_tab_amount, field, place_type, edit_type, cr
     sl_tp_val = {("stop_loss" if field == "take_profit" else "take_profit"): 0, "indicate": place_type}
     update_sl_type, update_tp_type = (edit_type, None) if field == "stop_loss" else (None, edit_type)
 
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, **sl_tp_val)
+    trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, **sl_tp_val)
     tab = AssetTabs.PENDING_ORDER
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with {field!r}")
     create_order_data(trade_object)
 
-    logger.info(f"Step 2: Update {tab.title()} with {field!r} - type: {edit_type.capitalize()!r}")
-    android.trade_screen.modals.modify_order(tab, trade_object, sl_type=update_sl_type, tp_type=update_tp_type)
+    logger.info(f"Step 2: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
+    logger.info(f"Step 3: Update {tab.title()} with {field!r} - type: {edit_type.capitalize()!r}")
+    android.trade_screen.modals.modify_order(trade_object, sl_type=update_sl_type, tp_type=update_tp_type)
 
     logger.info("Verify notification banner updated message")
     android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+
+    logger.info(f"Step 4: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
 
     logger.info(f"Verify {tab.title()} item details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

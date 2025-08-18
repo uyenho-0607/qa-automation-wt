@@ -1,4 +1,5 @@
 import pytest
+
 from src.utils.logging_utils import logger
 from src.utils.random_utils import random_password, random_userid
 
@@ -15,9 +16,6 @@ def test(web):
     logger.info("Verify URL remains on login page")
     web.login_page.verify_page_url()
 
-    # logger.info("Step 2: Wait for alert error disappear")
-    # web.login_page.wait_for_alert_error_disappear()
-
     logger.info("Step 2: Login with INVALID userid and VALID password")
     web.login_page.login(random_userid(), wait=False)
 
@@ -26,9 +24,6 @@ def test(web):
 
     logger.info("Verify URL remains on login page")
     web.login_page.verify_page_url()
-
-    # logger.info("Step 4: Wait for alert error disappear")
-    # web.login_page.wait_for_alert_error_disappear()
 
     logger.info("Step 3: Login with BOTH INVALID userid and password")
     web.login_page.login(random_userid(), random_password(), wait=False)

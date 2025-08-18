@@ -6,7 +6,7 @@ class UserAPI(BaseAPI):
     def __init__(self):
         super().__init__()
 
-    _oct_endpoint = "/user/v1/preference"
+    _endpoint = "/user/v1/preference"
     _hide_order_endpoint = "/user/v1/order/hide/preference"
     _user_account = "/user/v1/account"
 
@@ -16,7 +16,7 @@ class UserAPI(BaseAPI):
             "type": "OCT_ENABLE",
             "value": "true" if enable else "false"
         }
-        resp = self.patch(self._oct_endpoint, payload)
+        resp = self.patch(self._endpoint, payload)
         return resp
 
     def patch_show_all(self, asset_tab=AssetTabs.OPEN_POSITION):
@@ -39,4 +39,14 @@ class UserAPI(BaseAPI):
                 "currency": account["baseCurrency"],
                 "leverage": account["leverage"]
             }
+        return resp
+
+    def patch_swap_volume_units(self, use_volume=True):
+        # Retrieve the Swap to Volume / Units API
+        payload = {
+            "category": "SWAP_UNITS",
+            "type": "SWAP_UNITS",
+            "value": "SIZE" if use_volume else "UNITS"
+        }
+        resp = self.patch(self._endpoint, payload)
         return resp

@@ -218,9 +218,9 @@ def format_request_log(resp: Response, log_resp=False) -> str:
     # Format response content
     try:
         content = resp.json()
-        if isinstance(content.get("result"), list) and len(content.get("result")) > 5:
-            left_resp = len(content["result"]) - 5
-            content["result"] = content["result"][:5] + [f"... ({left_resp} more)"]
+        if isinstance(content.get("result"), list) and len(content.get("result")) > 3:
+            left_resp = len(content["result"]) - 3
+            content["result"] = content["result"][:3] + [f"... ({left_resp} more)"]
 
         response_text = json.dumps(content, indent=4)
     except ValueError:

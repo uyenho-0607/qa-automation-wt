@@ -27,6 +27,7 @@ def test(web, setup_teardown, disable_OCT):
     logger.info(f"Step 2: Close some orders ({', '.join(order_ids)})")
     for _id in order_ids:
         web.assets_page.asset_tab.full_close_position(order_id=_id, wait=True)
+
         logger.info(f"Verify order closed successfully (id: {_id!r})")
         web.assets_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, order_id=_id, is_display=False)
 

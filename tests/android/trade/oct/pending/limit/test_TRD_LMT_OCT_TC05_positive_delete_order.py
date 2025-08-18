@@ -17,7 +17,10 @@ def test(android, symbol, get_asset_tab_amount, cancel_delete_order, create_orde
     logger.info(f"Verify {tab.title()} amount: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
-    logger.info("Step 2: Delete pending order")
+    logger.info(f"Step 2: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
+    logger.info("Step 3: Delete pending order")
     android.trade_screen.asset_tab.delete_order(trade_object=trade_object, confirm=False)
 
     logger.info("Verify Delete order notification banner")

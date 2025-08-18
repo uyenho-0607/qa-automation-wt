@@ -5,8 +5,9 @@ import boto3
 from botocore.config import Config
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
-from src.data.project_info import DriverList, RuntimeConfig
+
 from src.data.consts import GRID_SERVER, WEB_APP_DEVICE
+from src.data.project_info import DriverList, RuntimeConfig
 
 proxy_server = os.getenv('PROXY_SERVER')
 project_arn = os.getenv('DF_PROJECT_ARN')
@@ -60,8 +61,8 @@ class WebDriver:
                     driver = webdriver.Remote(testgrid_url, options=options)
 
                 else:
-                    # driver = webdriver.Chrome(options=options)
-                    driver = webdriver.Remote(GRID_SERVER, options=options)
+                    driver = webdriver.Chrome(options=options)
+                    # driver = webdriver.Remote(GRID_SERVER, options=options)
 
             case "firefox":
                 options = FirefoxOptions()
@@ -80,7 +81,7 @@ class WebDriver:
                 raise ValueError(f"Invalid browser value: {browser!r} !!!")
 
         setattr(builtins, "web_driver", driver)
-        # driver.set_window_position(0, -800)
+        driver.set_window_position(0, -800)
         driver.maximize_window()
         DriverList.all_drivers[RuntimeConfig.platform] = driver
         return driver

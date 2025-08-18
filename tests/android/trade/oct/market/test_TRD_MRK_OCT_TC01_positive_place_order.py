@@ -14,7 +14,7 @@ from src.utils.logging_utils import logger
             SLTPType.sample_values(amount=2),
     )
 )
-def test(android, symbol, get_asset_tab_amount, sl_type, tp_type, ):
+def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
     # -------------------
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab = AssetTabs.OPEN_POSITION
