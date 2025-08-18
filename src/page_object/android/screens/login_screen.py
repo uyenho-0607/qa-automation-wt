@@ -1,8 +1,8 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
-from src.data.consts import LONG_WAIT
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
+from src.data.consts import LONG_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages

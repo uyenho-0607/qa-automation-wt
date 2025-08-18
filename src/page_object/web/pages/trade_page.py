@@ -8,7 +8,7 @@ from src.page_object.web.components.trade.asset_tab import AssetTab
 from src.page_object.web.components.trade.chart import Chart
 from src.page_object.web.components.trade.place_order_panel import PlaceOrderPanel
 from src.page_object.web.components.trade.watch_list import WatchList
-from src.utils.assert_utils import soft_assert, compare_with_tolerance, compare_dict
+from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
 
 

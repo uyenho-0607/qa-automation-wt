@@ -3,7 +3,7 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import SHORT_WAIT, LONG_WAIT
+from src.data.consts import SHORT_WAIT
 from src.data.enums import AccSummary
 from src.page_object.web_app.base_page import BasePage
 from src.utils.assert_utils import soft_assert

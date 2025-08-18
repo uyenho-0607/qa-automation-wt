@@ -1,7 +1,7 @@
 import pytest
 
-from src.core.page_container.web_app_container import WebAppContainer
 from src.core.driver.driver_manager import DriverManager
+from src.core.page_container.web_app_container import WebAppContainer
 from src.utils.logging_utils import logger
 
 
