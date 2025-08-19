@@ -1,11 +1,12 @@
 import time
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
 from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import AccountType, Language
-from src.data.project_info import ProjectConfig
+from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
 from src.page_object.ios.base_screen import BaseScreen
 from src.page_object.ios.components.modals.demo_account_modals import DemoAccountModal
@@ -61,7 +62,7 @@ class LoginScreen(BaseScreen):
         if language:
             self.select_language(language)
 
-        self.select_account_tab(account_type or ProjectConfig.account)
+        self.select_account_tab(account_type or RuntimeConfig.account)
         self.actions.send_keys(self.__txt_user_id, str(userid))
         self.actions.send_keys(self.__txt_password, str(password))
         self.actions.click(self.__btn_sign_in)
@@ -100,9 +101,9 @@ class LoginScreen(BaseScreen):
         self.actions.click(self.__btn_eye_mask)
         actual_password = self.actions.get_attribute(self.__txt_password, "value")
         soft_assert(actual_password, password)
-    
+
     def verify_alert_error_message(self, account_type=None):
-        account_type = account_type or ProjectConfig.account
+        account_type = account_type or RuntimeConfig.account
 
         err_msg = UIMessages.LOGIN_INVALID
         if account_type == AccountType.DEMO:

@@ -22,7 +22,6 @@ from src.utils.logging_utils import logger
 def attach_session_video():
     driver = DriverList.all_drivers.get(RuntimeConfig.platform.lower())
     if driver:
-        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
         s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
         allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
 

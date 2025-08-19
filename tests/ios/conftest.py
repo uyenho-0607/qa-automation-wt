@@ -11,9 +11,8 @@ from src.utils.logging_utils import logger
 def ios():
     logger.info("- Init ios driver")
     DriverManager.get_driver()
-    actions = MobileActions()
 
-    yield iOSContainer(actions)
+    yield iOSContainer()
 
     logger.info("- Clean up ios driver")
     DriverManager.quit_driver()

@@ -3,8 +3,8 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import WatchListTab
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
@@ -36,7 +36,7 @@ def setup_pre_selected_tab():
     logger.info(f"- Mark star: {mark_star!r}")
     if mark_star:
         logger.info("- Mark star symbol")
-        APIClient().market.post_starred_symbol(random.choice(get_symbols()))
+        APIClient().market.post_starred_symbol(random.choice(ObjSymbol().get_symbols(get_all=True)))
 
     else:
         logger.info("- Delete all stared symbols")

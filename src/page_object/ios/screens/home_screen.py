@@ -1,8 +1,7 @@
-import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import SHORT_WAIT
+from src.data.consts import SHORT_WAIT, LONG_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.ios.base_screen import BaseScreen
@@ -12,7 +11,7 @@ from src.page_object.ios.components.notifications import Notifications
 from src.page_object.ios.components.settings import Settings
 from src.page_object.ios.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element
+from src.utils.common_utils import cook_element, log_page_source
 from src.utils.format_utils import format_acc_balance
 from src.utils.logging_utils import logger
 
@@ -34,9 +33,7 @@ class HomeScreen(BaseScreen):
     __available_balance_title = (AppiumBy.ACCESSIBILITY_ID, "available-balance-title")
     __symbol_search_selector = (AppiumBy.ACCESSIBILITY_ID, "symbol-search-selector")
     __txt_symbol_search = (AppiumBy.ACCESSIBILITY_ID, "symbol-input-search")
-    __item_search_result = (
-        AppiumBy.XPATH, "//XCUIElementTypeOther[@name='watchlist-list-item' and contains(@label, '{}')]"
-    )
+    __item_search_result = (AppiumBy.XPATH, "//*[@name='symbol-input-search-items' and contains(@label, '{} ')]")
     __items_search_result = (AppiumBy.ACCESSIBILITY_ID, "symbol-input-search-items")
     __search_history = (AppiumBy.ACCESSIBILITY_ID, "Search History")
     __btn_delete_search_history = (
@@ -53,6 +50,16 @@ class HomeScreen(BaseScreen):
     __empty_search_result = (AppiumBy.XPATH, "//XCUIElementTypeStaticText[@name='No items available']")
 
     # ------------------------ ACTIONS ------------------------ #
+
+    def wait_for_loaded(self):
+        res = self.actions.wait_for_element_visible(self.__account_selector, timeout=LONG_WAIT)
+        if res:
+            logger.info("- Home screen is loaded")
+
+        else:
+            logger.warning(f"- Home screen is not loaded after {LONG_WAIT} sec")
+
+        return res
 
     def open_my_account(self, open=True):
         is_open = self.my_account_modal.is_open()

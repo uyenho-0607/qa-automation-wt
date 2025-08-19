@@ -56,7 +56,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=LONG_WAIT):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=5):
             self.actions.click(self.__btn_skip)
 
         if language:
@@ -65,7 +65,7 @@ class LoginScreen(BaseScreen):
         self.select_account_tab(account_type or RuntimeConfig.account)
         self.actions.send_keys(self.__txt_user_id, str(userid))
         self.actions.send_keys(self.__txt_password, str(password))
-        self.actions.click(self.__btn_sign_in)
+        self.actions.click(self.__btn_sign_in, raise_exception=False)
 
         if wait:
             self.wait_for_spin_loader()

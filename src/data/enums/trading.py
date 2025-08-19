@@ -101,25 +101,34 @@ class FillPolicy(BaseEnum):
 
         return cls.RETURN
 
+
 class ChartTimeframe(BaseEnum):
-    one_min = "1min"
     five_min = "5min"
+    ten_min = "10min"
     fifteen_min = "15min"
+    twenty_min = "20min"
     thirty_min = "30min"
     one_hour = "1h"
+    two_hour = "2h"
+    three_hour = "3h"
     four_hour = "4h"
+    six_hour = "6h"
     one_day = "1d"
     one_week = "1w"
     one_month = "1M"
 
     def get_timeframe(self):
         timeframe_map = {
-            ChartTimeframe.one_min: "PERIOD_M1",
             ChartTimeframe.five_min: "PERIOD_M5",
+            ChartTimeframe.ten_min: "PERIOD_M10",
             ChartTimeframe.fifteen_min: "PERIOD_M15",
+            ChartTimeframe.twenty_min: "PERIOD_M20",
             ChartTimeframe.thirty_min: "PERIOD_M30",
             ChartTimeframe.one_hour: "PERIOD_H1",
+            ChartTimeframe.two_hour: "PERIOD_H2",
+            ChartTimeframe.three_hour: "PERIOD_H3",
             ChartTimeframe.four_hour: "PERIOD_H4",
+            ChartTimeframe.six_hour: "PERIOD_H6",
             ChartTimeframe.one_day: "PERIOD_D1",
             ChartTimeframe.one_week: "PERIOD_W1",
             ChartTimeframe.one_month: "PERIOD_MN1"

@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -6,6 +8,7 @@ from src.data.enums.trading import ChartTimeframe
 from src.page_object.web.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, data_testid
+from src.utils.logging_utils import logger
 
 
 class Chart(BaseTrade):
@@ -20,6 +23,8 @@ class Chart(BaseTrade):
     __btn_close_trade = (By.CSS_SELECTOR, data_testid('chart-trade-button-close'))
     __timeframe_selector = (By.XPATH, "//div[text()='{}']")
     __symbol_overview = (By.XPATH, "//div[@data-testid='symbol-overview-id' and contains(text(), '{}')]")
+    __chart_container = (By.XPATH, "//*[@id='chart-root']//div[@class='fullscreen-loader-container']")
+    __iframe_chart = (By.ID, "chart-root")
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_chart(self, fullscreen=True, timeout=SHORT_WAIT):
@@ -36,8 +41,42 @@ class Chart(BaseTrade):
     def close_trade_tab(self):
         self.actions.click(self.__btn_close_trade)
 
+    def is_symbol_selected(self, symbol, timeout=5):
+        res = self.actions.wait_for_element_visible(cook_element(self.__symbol_overview, symbol), timeout=timeout)
+        return res
+
     def select_timeframe(self, timeframe: ChartTimeframe):
+        self.exit_chart_iframe()
+
+        logger.debug(f"- Select Timeframe: {timeframe!r}")
         self.actions.click(cook_element(self.__timeframe_selector, timeframe))
+
+    def _get_render_time(self):
+        self.actions.switch_to_iframe()
+        start = time.time()
+        try:
+            self.actions._wait.until(
+                lambda d: "display: none;" == d.find_element(*self.__chart_container).get_attribute("style"),
+                message="Chart container still showing loading state after timeout"
+            )
+
+            elapsed = round(time.time() - start, 2)
+
+        except TimeoutError:
+            logger.warning("- Timeout exceeds 10 sec")
+            elapsed = 10
+
+        return elapsed
+
+    def get_first_render_time(self):
+        return self._get_render_time()
+
+    def get_timeframe_render_time(self, timeframe):
+        self.select_timeframe(timeframe)
+        return self._get_render_time()
+
+    def exit_chart_iframe(self):
+        self.actions.switch_to_default()
 
     # ------------------------ VERIFY ------------------------ #
 
