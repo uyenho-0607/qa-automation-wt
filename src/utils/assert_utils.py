@@ -1,3 +1,4 @@
+import operator
 import re
 from typing import Any
 
@@ -73,7 +74,8 @@ def compare_dict(
         expected: dict | DotDict,
         tolerance_percent: float = None,
         tolerance_fields: list[str] = None,
-        field_tolerances: dict[str, float] = None
+        field_tolerances: dict[str, float] = None,
+        cus_operator = None
 ):
     """
     Compare two dictionaries with optional tolerance for specified fields.
@@ -84,6 +86,7 @@ def compare_dict(
         tolerance_fields: List of field names to apply global tolerance to
         field_tolerances: Dictionary mapping field names to specific tolerance percentages
                          e.g., {'price': 0.1, 'volume': 0.5} - overrides global tolerance
+        cus_operator: custom compare operator
     """
 
     all_res = []
@@ -111,7 +114,7 @@ def compare_dict(
             tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
 
         else:
-            res = act == exp
+            res = act == exp if not operator else cus_operator(act, exp)
 
         all_res.append(res)
         if not res:
@@ -292,10 +295,11 @@ def soft_assert(
     __tracebackhide__ = True
 
     check_func = check_contain if check_contains else check_equal
-    validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
+    validation_err_msg = f"\nValidation Failed ! "
     tolerance = kwargs.get("tolerance")
     tolerance_fields = kwargs.get("tolerance_fields", [])
     field_tolerances = kwargs.get("field_tolerances")
+    cus_operator = kwargs.get("cus_operator")
 
     if isinstance(actual, dict) and isinstance(expected, dict):
         if check_contains:
@@ -307,7 +311,7 @@ def soft_assert(
         if field_tolerances:
             logger.debug(f"Field-specific tolerances: {field_tolerances}")
 
-        res = compare_dict(actual, expected, tolerance_percent=tolerance, tolerance_fields=tolerance_fields, field_tolerances=field_tolerances)
+        res = compare_dict(actual, expected, cus_operator=cus_operator, tolerance_percent=tolerance, tolerance_fields=tolerance_fields, field_tolerances=field_tolerances)
 
         if res["missing"]:
             validation_err_msg += f"\n>>> Missing Fields: {res['missing']}"

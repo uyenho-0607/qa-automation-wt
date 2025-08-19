@@ -6,6 +6,7 @@ from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
 from src.page_object.web_app.components.modals.trading_modals import TradingModals
 from src.page_object.web_app.components.trade.asset_tab import AssetTab
+from src.page_object.web_app.components.trade.chart import Chart
 from src.page_object.web_app.components.trade.place_order_panel import PlaceOrderPanel
 from src.utils.assert_utils import soft_assert, compare_dict
 from src.utils.common_utils import data_testid
@@ -18,6 +19,7 @@ class TradePage(BasePage):
         self.asset_tab = AssetTab(actions)
         self.place_order_panel = PlaceOrderPanel(actions)
         self.modals = TradingModals(actions)
+        self.chart = Chart(actions)
 
     # ------------------------ LOCATORS ------------------------ #
     __symbol_overview_id = (By.CSS_SELECTOR, data_testid('symbol-overview-id'))
