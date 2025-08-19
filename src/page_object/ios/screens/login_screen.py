@@ -1,16 +1,15 @@
 import time
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
-from src.data.consts import LONG_WAIT
+from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import AccountType, Language
-from src.data.project_info import RuntimeConfig
+from src.data.project_info import ProjectConfig
 from src.data.ui_messages import UIMessages
-from src.page_object.android.base_screen import BaseScreen
-from src.page_object.android.components.modals.demo_acc_modals import DemoAccountModal
-from src.page_object.android.components.modals.password_modals import PasswordModal
+from src.page_object.ios.base_screen import BaseScreen
+from src.page_object.ios.components.modals.demo_account_modals import DemoAccountModal
+from src.page_object.ios.components.modals.password_modals import PasswordModal
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, translate_sign_in
 from src.utils.logging_utils import logger
@@ -23,17 +22,17 @@ class LoginScreen(BaseScreen):
         self.password_modal = PasswordModal(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab_account_type = (AppiumBy.XPATH, "//*[@resource-id='tab-login-account-type-{}']")
-    __drp_language = (AppiumBy.XPATH, "//*[@resource-id='language-dropdown']")
+
+    __tab_account_type = (AppiumBy.ACCESSIBILITY_ID, "tab-login-account-type-{}")
+    __drp_language = (AppiumBy.ACCESSIBILITY_ID, "language-dropdown")
     __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
-    __txt_user_id = (AppiumBy.XPATH, "//*[@resource-id='login-user-id']")
-    __txt_password = (AppiumBy.XPATH, "//*[@resource-id='login-password']")
-    __btn_eye_mask = (AppiumBy.XPATH, "//*[@resource-id='input-password-hidden']")
-    __btn_sign_in = (AppiumBy.XPATH, "//*[@resource-id='login-submit']")
-    __lnk_reset_password = (AppiumBy.XPATH, "//*[@resource-id='reset-password-link']")
-    __btn_sign_up = (AppiumBy.XPATH, "//*[@resource-id='login-account-signup']")
-    __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
-    __btn_skip = (AppiumBy.XPATH, "//*[resource-id='ads-skip-button']")
+    __txt_user_id = (AppiumBy.ACCESSIBILITY_ID, "login-user-id")
+    __txt_password = (AppiumBy.ACCESSIBILITY_ID, "login-password")
+    __btn_eye_mask = (AppiumBy.ACCESSIBILITY_ID, "input-password-hidden")
+    __btn_sign_in = (AppiumBy.ACCESSIBILITY_ID, "login-submit")
+    __lnk_reset_password = (AppiumBy.ACCESSIBILITY_ID, "reset-password-link")
+    __btn_sign_up = (AppiumBy.ACCESSIBILITY_ID, "login-account-signup")
+    __btn_skip = (AppiumBy.ACCESSIBILITY_ID, "ads-skip-button")
 
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
@@ -56,13 +55,13 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=LONG_WAIT):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=EXPLICIT_WAIT):
             self.actions.click(self.__btn_skip)
 
         if language:
             self.select_language(language)
 
-        self.select_account_tab(account_type or RuntimeConfig.account)
+        self.select_account_tab(account_type or ProjectConfig.account)
         self.actions.send_keys(self.__txt_user_id, str(userid))
         self.actions.send_keys(self.__txt_password, str(password))
         self.actions.click(self.__btn_sign_in)
@@ -95,17 +94,18 @@ class LoginScreen(BaseScreen):
         )
 
     def verify_account_autofill_value(self, userid, password):
-        actual_userid = self.actions.get_attribute(self.__txt_user_id, "text")
+        actual_userid = self.actions.get_attribute(self.__txt_user_id, "value")
         soft_assert(actual_userid, str(userid))
 
         self.actions.click(self.__btn_eye_mask)
-        actual_password = self.actions.get_attribute(self.__txt_password, "text")
+        actual_password = self.actions.get_attribute(self.__txt_password, "value")
         soft_assert(actual_password, password)
     
     def verify_alert_error_message(self, account_type=None):
-        account_type = account_type or RuntimeConfig.account
+        account_type = account_type or ProjectConfig.account
+
         err_msg = UIMessages.LOGIN_INVALID
-        if account_type == AccountType.DEMO or RuntimeConfig.is_non_oms():
+        if account_type == AccountType.DEMO:
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
         super().verify_alert_error_message(err_msg)

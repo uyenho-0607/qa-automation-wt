@@ -2,7 +2,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import SHORT_WAIT
-from src.page_object.android.base_screen import BaseScreen
+from src.page_object.ios.base_screen import BaseScreen
 from src.utils.logging_utils import logger
 
 
@@ -11,7 +11,7 @@ class FeatureAnnouncementModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __btn_got_it = (AppiumBy.XPATH, "//*[@resource-id='feature-announcement-modal-got-it-button']")
+    __btn_got_it = (AppiumBy.ACCESSIBILITY_ID, "feature-announcement-modal-got-it-button")
 
     # ------------------------ ACTIONS ------------------------ #
     def got_it(self):

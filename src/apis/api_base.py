@@ -40,7 +40,7 @@ class BaseAPI:
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
     def put(self, endpoint: str, payload: dict = None):
-        resp = self.session.put(url=f"{self.api_url()}{endpoint}", headers=self.headers, data=payload)
+        resp = self.session.put(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
         return resp
     
     @after_request(max_retries=3, base_delay=1.0, max_delay=10)

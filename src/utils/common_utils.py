@@ -5,6 +5,7 @@ from datetime import datetime, timedelta, timezone
 from src.data.consts import ROOTDIR
 from src.data.enums import Language
 from src.data.project_info import DriverList, RuntimeConfig
+from src.utils.logging_utils import logger
 
 
 def log_page_source(name="page_source"):
@@ -21,16 +22,21 @@ def log_page_source(name="page_source"):
 def get_connected_device(platform=None):
     platform = platform or RuntimeConfig.platform
     if platform == "android":
+        logger.info("Trying to get Android device")
         result = subprocess.run(['adb', 'devices'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = result.stdout.strip().split('\n')[1:]  # Skip the first line
         for line in lines:
             if line.strip() and 'device' in line:
                 return line.split()[0]  # Return the device ID
-    else:
-        # Not Implement for IOS yet
-        pass
+    else: # IOS
+        logger.info("Trying to get iOS device")
+        result = subprocess.run(['idevice_id', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        lines = result.stdout.strip().split('\n')
+        for line in lines:
+            if line.strip():
+                return line.strip()
 
-    return None
+    return None # No device found
 
 
 def cook_element(element: tuple, *custom):
