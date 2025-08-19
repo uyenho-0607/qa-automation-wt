@@ -3,6 +3,7 @@ import builtins
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
 
+from src.core.config_manager import Config
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
 from src.data.consts import EXPLICIT_WAIT
@@ -19,8 +20,12 @@ class MobileActions(BaseActions):
             timeout=EXPLICIT_WAIT,
             raise_exception=True,
             show_log=True,
-            hide_keyboard=True
+            hide_keyboard=True,
+            platform=None
     ):
+
+        platform = platform or Config.config.get("platform", "android")
+
         """Send keys to an element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         if element and value is not None:
@@ -28,7 +33,10 @@ class MobileActions(BaseActions):
             element.send_keys(str(value))
 
             if hide_keyboard:
-                self.hide_keyboard()
+                if platform == "android":
+                    self.hide_keyboard()
+                else:
+                    element.send_keys("\n")
 
     def get_content_desc(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
         return self.get_attribute(locator, "content-desc", timeout=timeout)

@@ -17,13 +17,14 @@ class WatchList(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
-    __items = (AppiumBy.ACCESSIBILITY_ID, "watchlist-symbol")
-    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
-    __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
-    __btn_symbol_remove = (AppiumBy.XPATH, "//*[@text='Remove']")
-    __selected_item = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='symbol-overview-id' and @text='{}']")
+    __tab = (AppiumBy.XPATH, "//XCUIElementTypeOther[@label='{}']")
+    __horizontal_scroll_tab = (AppiumBy.XPATH, "(//XCUIElementTypeScrollView)[1]")
+    __items = (AppiumBy.XPATH, "//XCUIElementTypeOther[@name='watchlist-list-item']")
+    __item_by_name = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@name, '{}')])[23]")
+    __star_icon_by_symbol = (AppiumBy.ACCESSIBILITY_ID, "chart-star-symbol")
+    __btn_symbol_remove = (AppiumBy.XPATH, "(//XCUIElementTypeStaticText[@name='Remove'])[1]")
+    __selected_item = (AppiumBy.XPATH, "//*[@name='symbol-overview-id' and @text='{}']")
+
 
     # ------------------------ ACTIONS ------------------------ 
 
@@ -217,5 +218,5 @@ class WatchList(BaseTrade):
 
         soft_assert(
             sorted(current_symbols), sorted(symbols),
-            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}, Redundant: {[item for item in current_symbols if item not in symbols]}"
-        )
+            error_message=f"Missing: {[item for item in symbols if item not in current_symbols]}, "
+                          f"Redundant: {[item for item in current_symbols if item not in symbols]}"

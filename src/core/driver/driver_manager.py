@@ -1,4 +1,5 @@
 from typing import Any
+
 from src.core.config_manager import Config
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.web_driver import WebDriver

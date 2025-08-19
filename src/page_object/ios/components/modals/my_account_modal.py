@@ -5,7 +5,7 @@ from src.data.consts import SHORT_WAIT
 from src.data.enums import AccSummary
 from src.page_object.ios.base_screen import BaseScreen
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, resource_id
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
 
 
@@ -14,10 +14,11 @@ class MyAccountModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __items = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']/following-sibling::android.widget.TextView[1]")
-    __drp_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Balance']/following-sibling::android.widget.TextView[1]")
-    __drp_note = (AppiumBy.XPATH, "//android.widget.TextView[@text='Note']/following-sibling::android.widget.TextView[1]")
-    __btn_close = (AppiumBy.XPATH, resource_id('modal-close-button'))
+    __items = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, '{}')])[5]")
+    __drp_balance = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, 'Balance')])[5]")
+    __drp_note = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, 'Note')])[5]")
+    __btn_close = (AppiumBy.ACCESSIBILITY_ID, 'modal-close-button')
+
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -50,7 +51,8 @@ class MyAccountModal(BaseScreen):
 
     def verify_account_info(self, exp_dict):
         actual = self.get_account_info()
-        soft_assert(actual, exp_dict, tolerance=0.05, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, exp_dict, tolerance=0.05,
+                    tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
 
     def verify_balance_items_displayed(self, is_display=True):
@@ -60,5 +62,3 @@ class MyAccountModal(BaseScreen):
     def verify_note_items_displayed(self, is_display=True):
         locators = [cook_element(self.__items, item) for item in AccSummary.note_list()]
         self.actions.verify_elements_displayed(locators, is_display=is_display, timeout=SHORT_WAIT)
-
-

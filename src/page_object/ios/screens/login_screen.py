@@ -1,3 +1,4 @@
+import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -27,6 +28,7 @@ class LoginScreen(BaseScreen):
     __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
     __txt_user_id = (AppiumBy.ACCESSIBILITY_ID, "login-user-id")
     __txt_password = (AppiumBy.ACCESSIBILITY_ID, "login-password")
+    __btn_eye_mask = (AppiumBy.ACCESSIBILITY_ID, "input-password-hidden")
     __btn_sign_in = (AppiumBy.ACCESSIBILITY_ID, "login-submit")
     __lnk_reset_password = (AppiumBy.ACCESSIBILITY_ID, "reset-password-link")
     __btn_sign_up = (AppiumBy.ACCESSIBILITY_ID, "login-account-signup")
@@ -67,7 +69,8 @@ class LoginScreen(BaseScreen):
         if wait:
             self.wait_for_spin_loader()
 
-    def select_open_demo_account(self):
+    def click_open_demo_account(self):
+        time.sleep(1)
         self.select_account_tab(AccountType.DEMO)
         self.actions.click(self.__btn_sign_up)
 
@@ -94,6 +97,7 @@ class LoginScreen(BaseScreen):
         actual_userid = self.actions.get_attribute(self.__txt_user_id, "value")
         soft_assert(actual_userid, str(userid))
 
+        self.actions.click(self.__btn_eye_mask)
         actual_password = self.actions.get_attribute(self.__txt_password, "value")
         soft_assert(actual_password, password)
     

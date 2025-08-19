@@ -10,31 +10,31 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android):
+def test(ios):
     """Test symbol selection from each available watchlist subtab."""
     tabs = [WatchListTab.FAVOURITES] + WatchListTab.sub_tabs() + [WatchListTab.ALL]
 
     logger.info("Step 1: Navigate to Markets Screen")
-    android.home_screen.navigate_to(Features.MARKETS)
+    ios.home_screen.navigate_to(Features.MARKETS)
 
     for i, subtab in enumerate(tabs):
 
         logger.info(f"Step {i + 1}: Select tab {subtab}")
-        android.markets_screen.watch_list.select_tab(subtab)
+        ios.markets_screen.watch_list.select_tab(subtab)
         time.sleep(2)  # wait a bit for loading symbols
 
         logger.info(f"Step {i + 2}: Get random displaying symbol")
-        select_symbol = android.markets_screen.watch_list.get_current_symbols(random_symbol=True)
+        select_symbol = ios.markets_screen.watch_list.get_current_symbols(random_symbol=True)
 
         logger.info(f"Step {i + 3}: Select symbol {select_symbol} from watchlist: {subtab.title()!r}")
-        android.markets_screen.watch_list.select_symbol(select_symbol)
+        ios.markets_screen.watch_list.select_symbol(select_symbol)
 
         logger.info(f"Verify symbol {select_symbol} is selected")
-        android.trade_screen.watch_list.verify_symbol_selected(select_symbol)
+        ios.trade_screen.watch_list.verify_symbol_selected(select_symbol)
 
         if subtab != tabs[-1]:
             logger.info(f"Step {i + 4}: Navigate to Markets Screen")
-            android.home_screen.navigate_to(Features.MARKETS)
+            ios.home_screen.navigate_to(Features.MARKETS)
 
 
 @pytest.fixture(autouse=True)

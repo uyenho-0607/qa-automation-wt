@@ -44,11 +44,3 @@ def setup_pre_selected_tab():
 
     display_symbols = APIClient().market.get_watchlist_items(pre_select_tab, get_symbols=True)
     yield pre_select_tab, display_symbols
-
-
-
-
-# def test(ios):
-#
-#     logger.info("Step 1: Login with valid userid and password")
-#     ios.login_screen.login()
