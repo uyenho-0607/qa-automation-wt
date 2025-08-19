@@ -34,7 +34,8 @@ class ObjSymbol:
         if not ObjSymbol.all_symbols:
             logger.info("- Getting Symbols data")
             resp = APIClient().market.get_watchlist_items(WatchListTab.CRYPTO, get_symbols=False)
-            ObjSymbol.all_symbols = [
+            # Filter out only symbols with trading status
+            cls.all_symbols = [
                 item for item in resp if item['type'] == WatchListTab.CRYPTO.upper() and item['status'] == 'TRADING'
             ]
 

@@ -49,6 +49,7 @@ class AppiumDriver:
 
         cd = RuntimeConfig.argo_cd
         options = UiAutomator2Options()
+
         options.platform_name = "Android"
         options.auto_grant_permissions = True
         options.new_command_timeout = 30000

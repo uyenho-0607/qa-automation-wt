@@ -15,7 +15,7 @@ class DriverManager:
         """
         platform = platform or RuntimeConfig.platform
         match platform.lower():
-            case "web" | "web_app":
+            case "web" | "web-app":
                 _driver = WebDriver.init_driver(
                     browser=kwargs.get("browser", RuntimeConfig.browser),
                     headless=kwargs.get("headless", RuntimeConfig.headless),
@@ -41,7 +41,7 @@ class DriverManager:
     def quit_driver(cls, platform=None):
         platform = platform or RuntimeConfig.platform
         match platform.lower():
-            case "web" | "web_app":
+            case "web" | "web-app":
                 WebDriver.quit()
 
             case "ios":
