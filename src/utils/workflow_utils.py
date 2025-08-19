@@ -126,6 +126,7 @@ Handle test directories
 
 
 def collect_critical_folders(platform="web", module="", test_marker="critical"):
+    platform = platform.replace("-", "_")
     test_root = ROOTDIR / "tests" / platform / module
     test_folders = set()
 
@@ -192,13 +193,13 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
         assigned.append(account_copy)
     return assigned
 
-# if __name__ == '__main__':
-#     ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
-#     accounts = ggapi.get_accounts(
-#         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
-#         ["decode"], "demo"
-#     )
-#
-#     dirs = collect_critical_folders(module="login")
-#     res = assign_dirs_to_accounts(accounts[::-1], dirs)
-#     breakpoint()
+if __name__ == '__main__':
+    # ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
+    # accounts = ggapi.get_accounts(
+    #     "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
+    #     ["decode"], "demo"
+    # )
+
+    dirs = collect_critical_folders(platform="web-app")
+    # res = assign_dirs_to_accounts(accounts[::-1], dirs)
+    print(dirs)

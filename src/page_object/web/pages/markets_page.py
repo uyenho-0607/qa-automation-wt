@@ -23,20 +23,6 @@ class MarketsPage(BasePage):
     # ------------------------ LOCATORS ------------------------ #
     __symbol_row = (By.CSS_SELECTOR, data_testid('{}-symbol'))  # symbol-row from MarketsSection
     __symbol_row_text = (By.XPATH, "//div[@data-testid='{}-symbol' and text()='{}']")
-
-    # __my_trade_symbol = (By.CSS_SELECTOR, data_testid('portfolio-row-symbol'))
-    # __my_trade_symbol_by_text = (By.XPATH, "//div[@data-testid='portfolio-row-symbol' and text()='{}']")
-    # __my_trade_order_type = (By.CSS_SELECTOR, data_testid('portfolio-row-order-type'))
-    #
-    # __top_picks_symbol = (By.CSS_SELECTOR, data_testid('top-picks-symbol'))
-    # __top_picks_symbol_by_text = (By.XPATH, "//div[@data-testid='top-picks-symbol' and text()='{}']")
-    #
-    # __top_gainer_symbol = (By.CSS_SELECTOR, data_testid('top-gainer-symbol'))
-    # __top_gainer_symbol_by_text = (By.XPATH, "//div[@data-testid='top-gainer-symbol' and text()='{}']")
-    #
-    # __signal_symbol = (By.CSS_SELECTOR, data_testid('signal-row-symbol'))
-    # __signal_symbol_by_text = (By.XPATH, "//div[@data-testid='signal-row-symbol' and text()='{}']")
-
     __news_content = (By.CSS_SELECTOR, data_testid('market-news-content-text'))
 
     __redirect_arrow = (
