@@ -92,7 +92,6 @@ class HomePage(BasePage):
 
     def select_item_from_search_result(self, symbol: str):
         self.actions.click(cook_element(self.__item_search_result, symbol))
-        time.sleep(1)
 
     def search_and_select_symbol(self, symbol):
         self.search_symbol(symbol)

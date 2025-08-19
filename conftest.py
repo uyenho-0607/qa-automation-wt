@@ -10,7 +10,7 @@ from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
 from src.data.enums import Server, Client, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
-from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
+from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
 from src.utils.logging_utils import logger
 
 
@@ -25,6 +25,11 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
     parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
+
+    # for testing chart render time
+    parser.addoption("--charttime", default="", help="Allow maximum chart render time")
+    parser.addoption("--num_requests", default="", help="Number of Requests to test percentile")
+
     parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
 
 
@@ -92,6 +97,13 @@ def pytest_sessionstart(session: pytest.Session):
     RuntimeConfig.account = account
     RuntimeConfig.platform = platform.replace("_", "-")
 
+    # For chat render
+    if session.config.getoption("charttime"):
+        RuntimeConfig.charttime = int(session.config.getoption("charttime"))
+
+    if session.config.getoption("num_requests"):
+        RuntimeConfig.num_requests = int(session.config.getoption("num_requests"))
+
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
@@ -112,13 +124,9 @@ def pytest_runtest_setup(item: pytest.Item):
 
     # Set allure labels
     parent_suite = RuntimeConfig.client.upper()
-    # if RuntimeConfig.is_prod() and RuntimeConfig.url:  # dynamically handle client for prod (todo: still need enhancement)
-    #     url = Config.urls()
-    #     parent_suite = url.split(".")[-2].upper()
-
     allure.dynamic.parent_suite(parent_suite)
     allure.dynamic.suite(server.upper())
-    allure.dynamic.sub_suite(sub_suite)
+    not sub_suite or allure.dynamic.sub_suite(sub_suite)
 
     if item.get_closest_marker("critical"):
         allure.dynamic.severity(Severity.CRITICAL)
@@ -146,7 +154,9 @@ def pytest_runtest_setup(item: pytest.Item):
 def pytest_sessionfinish(session: pytest.Session):
     logger.debug("===== pytest_sessionfinish ==== ")
 
-    DriverManager.quit_driver(RuntimeConfig.platform)
+    if RuntimeConfig.platform != "api":
+        DriverManager.quit_driver(RuntimeConfig.platform)
+
     allure_dir = RuntimeConfig.allure_dir
 
     if allure_dir and os.path.exists(ROOTDIR / allure_dir):

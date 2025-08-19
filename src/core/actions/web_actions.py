@@ -7,6 +7,7 @@ from selenium.common import TimeoutException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -157,6 +158,13 @@ class WebActions(BaseActions):
                 logger.error(f"Unexpected error for URL '{url}': {type(e).__name__}")
 
         return self._driver.current_url
+
+    def switch_to_iframe(self):
+        iframe = self._wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
+        self._driver.switch_to.frame(iframe)
+
+    def switch_to_default(self):
+        self._driver.switch_to.default_content()
 
     # ------- VERIFY ------ #
 

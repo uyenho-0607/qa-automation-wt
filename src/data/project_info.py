@@ -30,6 +30,9 @@ class RuntimeConfig:
 
     headers: dict = {}
 
+    charttime: int = 2
+    num_requests: int = 50
+
     @classmethod
     def is_non_oms(cls):
         return cls.client.lower() not in ["lirunex"]
