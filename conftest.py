@@ -90,7 +90,7 @@ def pytest_sessionstart(session: pytest.Session):
     RuntimeConfig.client = client
     RuntimeConfig.server = server
     RuntimeConfig.account = account
-    RuntimeConfig.platform = platform
+    RuntimeConfig.platform = platform.replace("_", "-")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -155,7 +155,7 @@ def pytest_sessionfinish(session: pytest.Session):
         # Set allure report properties
         browser = RuntimeConfig.browser
         platform = f"{RuntimeConfig.platform.capitalize()}" + (f" - {browser.capitalize()}" if RuntimeConfig.is_web() else "")
-        if platform.lower() == "web_app":
+        if platform.lower() == "web-app":
             platform += f" - {WEB_APP_DEVICE}"
 
         env_data = {

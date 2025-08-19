@@ -24,7 +24,7 @@ class WebDriver:
                 # service = Service(ChromeDriverManager().install())
                 options = ChromeOptions()
                 options.add_experimental_option('excludeSwitches', ['enable-logging', "enable-automation"])
-                if RuntimeConfig.platform == 'web_app':
+                if RuntimeConfig.platform == 'web-app':
                     options.add_experimental_option("mobileEmulation", {"deviceName": WEB_APP_DEVICE})
 
                 options.add_argument("--incognito")
@@ -81,7 +81,7 @@ class WebDriver:
                 raise ValueError(f"Invalid browser value: {browser!r} !!!")
 
         setattr(builtins, "web_driver", driver)
-        driver.set_window_position(0, -800)
+        # driver.set_window_position(0, -800)
         driver.maximize_window()
         DriverList.all_drivers[RuntimeConfig.platform] = driver
         return driver
