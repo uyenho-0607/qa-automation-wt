@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.core.decorators import handle_stale_element
+from src.core.decorators import handle_stale_element, log_requests
 from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_screenshot
@@ -85,6 +85,7 @@ class BaseActions:
 
         return res or []
 
+    @log_requests
     @handle_stale_element
     def click(
             self,
@@ -102,6 +103,7 @@ class BaseActions:
         if element:
             element.click()
 
+    @log_requests
     @handle_stale_element
     def javascript_click(
             self,
@@ -201,6 +203,7 @@ class BaseActions:
             except Exception:
                 pass
 
+    @log_requests
     def wait_for_element_visible(
             self,
             locator: tuple[str, str],

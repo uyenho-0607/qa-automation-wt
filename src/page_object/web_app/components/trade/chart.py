@@ -27,7 +27,6 @@ class Chart(BaseTrade):
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_chart(self, fullscreen=True, timeout=SHORT_WAIT):
-
         if fullscreen and self.actions.is_element_displayed(self.__chart_toggle_fullscreen, timeout=timeout):
             self.actions.click(self.__chart_toggle_fullscreen)
 
@@ -48,10 +47,12 @@ class Chart(BaseTrade):
         return res
 
     def select_timeframe(self, timeframe: ChartTimeframe):
+        # Switch to main frame to ensure requests are captured
+        self.actions.switch_to_default()
         self.open_timeframe_opt()
 
         logger.debug(f"- Select Timeframe: {timeframe!r}")
-        locator = cook_element(self.__timeframe_selector, timeframe)
+        locator = cook_element(self.__timeframe_selector, timeframe.locator_map())
         if self.actions.is_element_displayed(locator):
             self.actions.click(locator)
             return
@@ -60,6 +61,7 @@ class Chart(BaseTrade):
         self.actions.click(locator)
 
     def _get_render_time(self):
+        # Switch to iframe for checking loading state
         self.actions.switch_to_iframe()
         start = time.time()
         try:
@@ -74,12 +76,16 @@ class Chart(BaseTrade):
             logger.warning("- Timeout exceeds 10 sec")
             elapsed = 10
 
+        # Switch back to main frame to ensure requests are captured
+        self.actions.switch_to_default()
         return elapsed
 
-    def get_first_render_time(self):
+    def get_default_render_time(self):
         return self._get_render_time()
 
     def get_timeframe_render_time(self, timeframe):
+        # Switch to main frame before selecting timeframe
+        self.actions.switch_to_default()
         self.select_timeframe(timeframe)
         return self._get_render_time()
 
@@ -95,3 +101,7 @@ class Chart(BaseTrade):
 
     def verify_symbol_selected(self, symbol):
         self.actions.verify_element_displayed(cook_element(self.__symbol_overview, symbol))
+
+    @staticmethod
+    def verify_render_time(actual, expected):
+        soft_assert(actual <= expected, True, error_message=f"Actual render time: {actual!r} sec, Expected: {expected!r} sec")

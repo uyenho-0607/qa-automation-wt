@@ -13,6 +13,25 @@ from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
 
 
+def log_requests(func):
+    """Decorator to log candlestick requests using Chrome DevTools Protocol"""
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        # Get logs before action
+        if hasattr(self._driver, 'get_performance_logs'):
+            self._driver.get_performance_logs()
+        
+        # Execute the action
+        result = func(self, *args, **kwargs)
+        
+        # Get logs after action
+        if hasattr(self._driver, 'get_performance_logs'):
+            self._driver.get_performance_logs()
+        
+        return result
+    return wrapper
+
+
 def attach_table_details(func):
     @functools.wraps(func)
     def _wrapper(*args, **kwargs):
@@ -89,7 +108,6 @@ def handle_stale_element(func):
 
                 if attempt < max_retries:
                     logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
-                    # time.sleep(0.5)
                     continue
 
                 else:

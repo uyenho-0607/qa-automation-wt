@@ -1,0 +1,9 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"
+Runs both:
+1. Default render time for the chart.
+2. Timeframe render times for all ChartTimeframe values.
+","50705","test CHR TC01 positive chart render time","LIRUNEX","Thu Aug 21 02:18:41 GMT+07:00 2025","passed","Thu Aug 21 02:19:32 GMT+07:00 2025","Chart","MT5","",""
+"
+verifying render times each switch.
+","90406","test CHR TC01 positive chart render time select timeframe repeatedly","LIRUNEX","Thu Aug 21 02:19:33 GMT+07:00 2025","passed","Thu Aug 21 02:21:03 GMT+07:00 2025","Chart","MT5","",""

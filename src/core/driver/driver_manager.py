@@ -1,4 +1,5 @@
 from typing import Any
+
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.web_driver import WebDriver
 from src.data.project_info import RuntimeConfig
@@ -18,6 +19,7 @@ class DriverManager:
                 _driver = WebDriver.init_driver(
                     browser=kwargs.get("browser", RuntimeConfig.browser),
                     headless=kwargs.get("headless", RuntimeConfig.headless),
+                    enable_cdp=True
                 )
                 logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver

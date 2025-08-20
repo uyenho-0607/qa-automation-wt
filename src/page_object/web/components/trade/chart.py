@@ -25,6 +25,7 @@ class Chart(BaseTrade):
     __symbol_overview = (By.XPATH, "//div[@data-testid='symbol-overview-id' and contains(text(), '{}')]")
     __chart_container = (By.XPATH, "//*[@id='chart-root']//div[@class='fullscreen-loader-container']")
     __iframe_chart = (By.ID, "chart-root")
+    __indicators = (By.CSS_SELECTOR, data_testid('chart_indicator'))
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_chart(self, fullscreen=True, timeout=SHORT_WAIT):
@@ -45,20 +46,28 @@ class Chart(BaseTrade):
         res = self.actions.wait_for_element_visible(cook_element(self.__symbol_overview, symbol), timeout=timeout)
         return res
 
+    def open_timeframe_opt(self):
+        self.actions.click_by_offset(self.__indicators, -434)
+
     def select_timeframe(self, timeframe: ChartTimeframe):
+        logger.debug(f"- Select Timeframe: {timeframe!r}")
         self.exit_chart_iframe()
 
-        logger.debug(f"- Select Timeframe: {timeframe!r}")
-        self.actions.click(cook_element(self.__timeframe_selector, timeframe))
+        # todo: enhance later
+        if timeframe not in ChartTimeframe.display_list():
+            self.open_timeframe_opt()
+
+        self.actions.click(cook_element(self.__timeframe_selector, timeframe.locator_map()))
 
     def _get_render_time(self):
         self.actions.switch_to_iframe()
         start = time.time()
         try:
-            self.actions._wait.until(
-                lambda d: "display: none;" == d.find_element(*self.__chart_container).get_attribute("style"),
-                message="Chart container still showing loading state after timeout"
-            )
+            self.actions.test_wait(self.__chart_container)
+            # self.actions._wait.until(
+            #     lambda d: "display: none;" == d.find_element(*self.__chart_container).get_attribute("style"),
+            #     message="Chart container still showing loading state after timeout"
+            # )
 
             elapsed = round(time.time() - start, 2)
 
@@ -68,7 +77,7 @@ class Chart(BaseTrade):
 
         return elapsed
 
-    def get_first_render_time(self):
+    def get_default_render_time(self):
         return self._get_render_time()
 
     def get_timeframe_render_time(self, timeframe):
@@ -77,6 +86,9 @@ class Chart(BaseTrade):
 
     def exit_chart_iframe(self):
         self.actions.switch_to_default()
+
+    def wait_for_symbol_selected(self, symbol):
+        self.actions.wait_for_element_visible(cook_element(self.__symbol_overview, symbol), timeout=SHORT_WAIT)
 
     # ------------------------ VERIFY ------------------------ #
 
@@ -87,3 +99,7 @@ class Chart(BaseTrade):
 
     def verify_symbol_selected(self, symbol):
         self.actions.verify_element_displayed(cook_element(self.__symbol_overview, symbol))
+
+    @staticmethod
+    def verify_render_time(actual, expected):
+        soft_assert(actual <= expected, True, error_message=f"Actual render time: {actual!r} sec, Expected: {expected!r} sec")

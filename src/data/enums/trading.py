@@ -103,6 +103,7 @@ class FillPolicy(BaseEnum):
 
 
 class ChartTimeframe(BaseEnum):
+    one_min = "1min"
     five_min = "5min"
     ten_min = "10min"
     fifteen_min = "15min"
@@ -116,6 +117,58 @@ class ChartTimeframe(BaseEnum):
     one_day = "1d"
     one_week = "1w"
     one_month = "1M"
+
+    @classmethod
+    def display_list(cls):
+        display_list = [
+            cls.one_min,
+            cls.five_min,
+            cls.fifteen_min,
+            cls.thirty_min,
+            cls.one_hour,
+            cls.four_hour,
+            cls.one_day,
+            cls.one_week,
+            cls.one_month
+        ]
+        return display_list
+
+    def locator_map(self):
+        if RuntimeConfig.is_web():
+            map_dict = {
+                self.one_min: "1min",
+                self.five_min: "5min",
+                self.ten_min: "10 minutes",
+                self.fifteen_min: "15min",
+                self.twenty_min: "20 minutes",
+                self.thirty_min: "30min",
+                self.one_hour: "1H",
+                self.two_hour: "2 hours",
+                self.three_hour: "3 hours",
+                self.four_hour: "4H",
+                self.six_hour: "6 hours",
+                self.one_day: "1D",
+                self.one_week: "1W",
+                self.one_month: "1M"
+            }
+        else:
+            map_dict = {
+                self.one_min: "1m",
+                self.five_min: "5m",
+                self.ten_min: "10m",
+                self.fifteen_min: "15m",
+                self.twenty_min: "20m",
+                self.thirty_min: "30m",
+                self.one_hour: "1H",
+                self.two_hour: "2H",
+                self.three_hour: "3H",
+                self.four_hour: "4H",
+                self.six_hour: "6H",
+                self.one_day: "1D",
+                self.one_week: "1W",
+                self.one_month: "1M"
+            }
+        return map_dict.get(self, self)
 
     def get_timeframe(self):
         timeframe_map = {
