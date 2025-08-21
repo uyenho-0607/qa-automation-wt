@@ -11,10 +11,10 @@ pytestmark = [pytest.mark.critical]
 
 # Expected render time (seconds)
 EXP_TIME = RuntimeConfig.charttime
-SYMBOLS = ["BTCUSD", "ETHUSD"]
+SYMBOLS = ["AUDCAD"]
 
 
-@pytest.mark.parametrize("symbol", ["ETHUSD", ])
+@pytest.mark.parametrize("symbol", SYMBOLS)
 def test(web, symbol):
     """
     Runs both:
