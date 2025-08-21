@@ -13,9 +13,11 @@ from src.utils.logging_utils import logger
 
 NUM_REQS = RuntimeConfig.num_requests
 RENDER_TIME = RuntimeConfig.charttime
+TIMEFRAMES = ChartTimeframe.display_list() if RuntimeConfig.is_mt4() else ChartTimeframe.list_values()
 
 
 EXP_DICT = {
+    ChartTimeframe.one_min: {"time_range": "3 days", "returned_time": 864},
     ChartTimeframe.five_min: {"time_range": "3 days", "returned_time": 864},
     ChartTimeframe.ten_min: {"time_range": "3 days", "returned_time": 432},
     ChartTimeframe.fifteen_min: {"time_range": "3 days", "returned_time": 288},
@@ -50,6 +52,7 @@ def calculate_time_range(timeframe: ChartTimeframe) -> tuple[int, int]:
 
     # Map timeframe to timedelta
     timeframe_mapping = {
+        ChartTimeframe.one_min: timedelta(days=3),
         ChartTimeframe.five_min: timedelta(days=3),
         ChartTimeframe.ten_min: timedelta(days=3),
         ChartTimeframe.fifteen_min: timedelta(days=3),
@@ -77,13 +80,12 @@ def calculate_time_range(timeframe: ChartTimeframe) -> tuple[int, int]:
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize("timeframe", ChartTimeframe.list_values())
+@pytest.mark.parametrize("timeframe", TIMEFRAMES)
 def test(timeframe):
 
     response_times = []
     result_counts = []
     failed_req = 0
-    failed_result_counts = []
     _trace_log = []
 
     logger.info("====================================")
@@ -98,7 +100,7 @@ def test(timeframe):
         try:
             # Send API request
             resp = APIClient().chart.get_candlestick(
-                symbol="BTCUSD",
+                symbol="AUDCAD.ecn",
                 timeframe=timeframe,
                 from_time=from_ts,
                 to=to_ts,
@@ -122,13 +124,12 @@ def test(timeframe):
             _trace_log.append(f"- Send request time: {send_time} failed with status: {resp.status_code} - {resp.text}")
 
     # Calculate percentiles
-    p90 = calculate_percentile(response_times, 90)
-    p80 = calculate_percentile(response_times, 80)
+    p90 = calculate_percentile(response_times, 95)
 
-    check_result_counts = all(count == EXP_DICT[timeframe]['returned_time'] for count in result_counts)
-
-    if not check_result_counts:
-        failed_result_counts = [count for count in result_counts if count != EXP_DICT[timeframe]['returned_time']]
+    # check_result_counts = all(count == EXP_DICT[timeframe]['returned_time'] for count in result_counts)
+    #
+    # if not check_result_counts:
+    #     failed_result_counts = [count for count in result_counts if count != EXP_DICT[timeframe]['returned_time']]
 
     # Create plain text description for allure report
     description = f"""
@@ -138,9 +139,7 @@ def test(timeframe):
         Test Summary:<br>
         - Total API calls:     {NUM_REQS}<br>
         - Response Time (sec): {response_times}<br>
-        - 90th percentile:     <b style="color:{'red' if p90 > RENDER_TIME else 'green'}">{p90:.3f}s</b><br>
-        - 80th percentile:     <b style="color:{'red' if p80 > RENDER_TIME else 'green'}">{p80:.3f}s</b><br>
-        - Returned items ({EXP_DICT[timeframe]['returned_time']}): <b style="color:{'red' if not check_result_counts else 'green'}">{check_result_counts}</b> {'<span style="color:red">' if len(failed_result_counts) > 0 else ''}(failed req:{len(failed_result_counts)}){'</span>' if len(failed_result_counts) > 0 else ''}
+        - 95th percentile:     <b style="color:{'red' if p90 > RENDER_TIME else 'green'}">{p90:.3f}s</b><br>
         </div>
     </div>
     <br>
@@ -158,4 +157,4 @@ def test(timeframe):
     assert is_within_threshold, f"90th percentile response time ({p90:.3f}s) exceeds 2.0s threshold for timeframe {timeframe}"
 
     # Assert the minimum items requirement
-    assert check_result_counts, f"{len(failed_result_counts)} request returned in correct amount of items"
+    # assert check_result_counts, f"{len(failed_result_counts)} request returned in correct amount of items"

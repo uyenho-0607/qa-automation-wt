@@ -172,6 +172,7 @@ class ChartTimeframe(BaseEnum):
 
     def get_timeframe(self):
         timeframe_map = {
+            ChartTimeframe.one_min: "PERIOD_M1",
             ChartTimeframe.five_min: "PERIOD_M5",
             ChartTimeframe.ten_min: "PERIOD_M10",
             ChartTimeframe.fifteen_min: "PERIOD_M15",

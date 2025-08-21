@@ -1,9 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"
-verifying render times each switch.
-","121366","test CHR TC01 chart render time chart timeframe repeated switches","LIRUNEX","Thu Aug 21 01:13:42 GMT+07:00 2025","passed","Thu Aug 21 01:15:43 GMT+07:00 2025","Chart","MT5","",""
-"
-Runs both:
-1. Default render time for the chart.
-2. Timeframe render times for all ChartTimeframe values.
-","68287","test CHR TC01 chart render time chart render times","LIRUNEX","Thu Aug 21 01:12:34 GMT+07:00 2025","passed","Thu Aug 21 01:13:42 GMT+07:00 2025","Chart","MT5","",""
