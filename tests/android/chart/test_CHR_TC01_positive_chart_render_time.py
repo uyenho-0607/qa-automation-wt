@@ -15,7 +15,7 @@ pytestmark = [pytest.mark.critical]
 def test_first_render(android):
 
     logger.info("Step 1: Get default render time")
-    elapsed = android.trade_screen.chart.get_first_render_time()
+    elapsed = android.trade_screen.chart.get_default_render_time()
 
     logger.info(f"Verify default render time: {elapsed!r} sec is LESS than / EQUAL to: {EXP_TIME!r} sec")
     soft_assert(elapsed <= EXP_TIME, True, error_message=f"Actual render time: {elapsed!r} sec, EXP: {EXP_TIME!r} sec")

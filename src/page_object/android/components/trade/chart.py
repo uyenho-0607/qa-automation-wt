@@ -35,7 +35,7 @@ class Chart(BaseTrade):
         self.actions.scroll_down()
         self.actions.click(locator)
 
-    def get_first_render_time(self):
+    def get_default_render_time(self):
         start = time.time()
         self.actions.wait_for_element_invisible(self.__chart_loading)
         elapsed = round(time.time() - start, 2)

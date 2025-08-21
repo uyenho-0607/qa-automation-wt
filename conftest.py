@@ -8,7 +8,7 @@ from allure_commons.types import Severity
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
-from src.data.enums import Server, Client, AccountType
+from src.data.enums import Server, AccountType
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
 from src.utils.logging_utils import logger
@@ -30,7 +30,7 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
     parser.addoption("--num_requests", default="", help="Number of Requests to test percentile")
 
-    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", default=False, action="store_true", help="Whether to choose driver to run on argo cd")
 
 
 def pytest_configure(config):
@@ -65,8 +65,8 @@ def pytest_sessionstart(session: pytest.Session):
     server = session.config.getoption("server")
     account = session.config.getoption("account")
 
-    if account == AccountType.LIVE and client == Client.LIRUNEX:
-        account = "crm"
+    # if account == AccountType.LIVE and client == Client.LIRUNEX:
+    #     account = "crm"
 
     if client not in MULTI_OMS:
         server = Server.MT5
@@ -216,16 +216,12 @@ def pytest_runtest_makereport(item, call):
                 except Exception as e:
                     logger.error(f"Failed to handle video recording: {str(e)}")
 
-            # if RuntimeConfig.platform.lower() in ["web", "web_app"]:
-            #     logger.debug("- Attach session video")
-            #     attach_session_video()
+            if "web" in RuntimeConfig.platform.lower():
+                logger.debug("- Attach session video")
+                attach_session_video()
 
         if report.failed and "FAILURE" in report.longreprtext:
             StepLogs.all_failed_logs.append(("end_test", ""))
-
-            # if RuntimeConfig.platform.lower() in ["web", "web_app"]:
-            #     logger.debug("- Attach session video")
-            #     attach_session_video()
 
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
