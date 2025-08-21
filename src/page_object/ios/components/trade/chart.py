@@ -4,7 +4,9 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
+from src.data.enums import ChartTimeframe
 from src.page_object.ios.components.trade.base_trade import BaseTrade
+from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
 
 
@@ -21,52 +23,44 @@ class Chart(BaseTrade):
     def open_candlestick_opt(self):
         self.actions.click_by_offset(self.__candlestick, -22, 10, raise_exception=False)
 
-    def select_timeframe(self, timeframe: str):
+    def select_timeframe(self, timeframe: ChartTimeframe):
         match timeframe:
-            case "1m":
+            case ChartTimeframe.one_min:
                 y_percent = 0.15
-            case "2m":
+            case ChartTimeframe.five_min:
                 y_percent = 0.2
-            case "3m":
+            case ChartTimeframe.ten_min:
                 y_percent = 0.25
-            case "4m":
+            case ChartTimeframe.fifteen_min:
+                y_percent = ...
+            case ChartTimeframe.twenty_min:
                 y_percent = 0.3
-            case "5m":
+            case ChartTimeframe.thirty_min:
                 y_percent = 0.35
-            case "6m":
+            case ChartTimeframe.one_hour:
                 y_percent = 0.4
-            case "10m":
+            case ChartTimeframe.two_hour:
                 y_percent = 0.45
-            case "15m":
+            case ChartTimeframe.three_hour:
                 y_percent = 0.5
-            case "20m":
+            case ChartTimeframe.four_hour:
                 y_percent = 0.55
-            case "30m":
+            case ChartTimeframe.six_hour:
                 y_percent = 0.6
-            case "1H":
+            case ChartTimeframe.one_day:
                 y_percent = 0.7
-            case "2H":
+            case ChartTimeframe.one_week:
                 y_percent = 0.75
-            case "3H":
+            case ChartTimeframe.one_month:
                 y_percent = 0.8
-            case "4H":
-                y_percent = 0.85
-            case "6H":
-                y_percent = 0.9
-            case "1D":
-                y_percent = 0.95
-            case "1W":  
-                y_percent = 1.05
-            case "1M":
-                y_percent = 1.1
-
             case _:
                 raise ValueError("Invalid Timeframe")
 
         self.actions.click_screen_position(y_percent=y_percent)
+        breakpoint()
         logger.debug(f"- timeframe: {timeframe!r} selected")
 
-    def get_chart_render_first_time(self):
+    def get_default_render_time(self):
         start = time.time()
         self.actions.wait_for_element_visible(self.__chart_loaded)
         elapsed = time.time() - start
@@ -74,7 +68,7 @@ class Chart(BaseTrade):
         logger.debug(f"- Render time: {elapsed} sec")
         return round(elapsed, 2)
 
-    def get_chart_render_time(self, timeframe):
+    def get_timeframe_render_time(self, timeframe):
         # Get initial O value
         current_o_value = self.actions.get_attribute(self.__chart_loaded, "value")
         logger.debug(f"Initial O value: {current_o_value}")
@@ -101,3 +95,7 @@ class Chart(BaseTrade):
         return 10
 
     # ------------------------ VERIFY ------------------------ #
+
+    @staticmethod
+    def verify_render_time(actual, expected):
+        soft_assert(actual <= expected, True, error_message=f"Actual render time: {actual!r} sec, Expected: {expected!r} sec")

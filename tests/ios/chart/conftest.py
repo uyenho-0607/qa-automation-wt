@@ -5,6 +5,7 @@ from src.utils.logging_utils import logger
 
 @pytest.fixture(scope="package", autouse=True)
 def login_WT_app(ios):
+    breakpoint()
 
     is_logged_in = ios.home_screen.wait_for_loaded()
     if is_logged_in:

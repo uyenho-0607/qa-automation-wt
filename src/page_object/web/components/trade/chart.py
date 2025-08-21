@@ -1,5 +1,6 @@
 import time
 
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -54,7 +55,7 @@ class Chart(BaseTrade):
         self.exit_chart_iframe()
 
         # todo: enhance later
-        if timeframe not in ChartTimeframe.display_list():
+        if timeframe not in ChartTimeframe.mt4_list():
             self.open_timeframe_opt()
 
         self.actions.click(cook_element(self.__timeframe_selector, timeframe.locator_map()))
@@ -71,7 +72,7 @@ class Chart(BaseTrade):
 
             elapsed = round(time.time() - start, 2)
 
-        except TimeoutError:
+        except TimeoutException:
             logger.warning("- Timeout exceeds 10 sec")
             elapsed = 10
 

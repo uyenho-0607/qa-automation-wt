@@ -189,7 +189,7 @@ def pytest_runtest_makereport(item, call):
     driver = DriverList.all_drivers.get(platform)
     allure_dir = RuntimeConfig.allure_dir
 
-    # Start recording at the beginning of the test
+    # Start recording at the beginning of the test`
     if driver and report.when == "setup":
         if platform in ['android', 'ios']:
             if allure_dir and os.path.exists(ROOTDIR / allure_dir):
@@ -209,7 +209,7 @@ def pytest_runtest_makereport(item, call):
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             log_step_to_allure()  # show test steps on allure
 
-            if driver and RuntimeConfig.platform in ["android", "ios"]:
+            if driver and RuntimeConfig.platform in ["android", "ios"] and not RuntimeConfig.argo_cd:
                 try:
                     # Attach video for mobile
                     attach_video(driver)
@@ -232,7 +232,7 @@ def pytest_runtest_makereport(item, call):
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_video_folder():
-    if RuntimeConfig.platform in ["android", "ios"] and Config.config.allure_dir:
+    if RuntimeConfig.platform in ["android", "ios"] and RuntimeConfig.allure_dir:
         if os.path.exists(VIDEO_DIR):
             shutil.rmtree(VIDEO_DIR)
 

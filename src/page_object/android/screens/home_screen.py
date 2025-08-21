@@ -35,7 +35,7 @@ class HomeScreen(BaseScreen):
 
     __symbol_search_selector = (AppiumBy.XPATH, resource_id("symbol-search-selector"))
     __txt_symbol_search = (AppiumBy.XPATH, resource_id("symbol-input-search"))
-    __item_search_result = (AppiumBy.XPATH, "//*[@resource-id='watchlist-symbol' and @text='{}']")
+    __item_search_result = (AppiumBy.XPATH, "//*[@resource-id='watchlist-symbol' and contains(@text, '{}')]")
     __items_search_result = (AppiumBy.XPATH, resource_id('symbol-input-search-items'))
     __search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']")
     __btn_delete_search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']/following-sibling::android.widget.TextView")

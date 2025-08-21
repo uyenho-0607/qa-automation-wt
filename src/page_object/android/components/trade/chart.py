@@ -6,6 +6,7 @@ from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import ChartTimeframe
 from src.page_object.android.components.trade.base_trade import BaseTrade
+from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
@@ -27,9 +28,9 @@ class Chart(BaseTrade):
     def select_timeframe(self, timeframe: ChartTimeframe):
         self.open_timeframe_opt()
 
-        locator = cook_element(self.__timeframe, timeframe)
+        locator = cook_element(self.__timeframe, timeframe.locator_map())
         if self.actions.is_element_displayed(locator):
-            self.actions.click(cook_element(self.__timeframe, timeframe))
+            self.actions.click(locator)
             return
 
         self.actions.scroll_down()
@@ -52,3 +53,7 @@ class Chart(BaseTrade):
         return elapsed
 
     # ------------------------ VERIFY ------------------------ #
+
+    @staticmethod
+    def verify_render_time(actual, expected):
+        soft_assert(actual <= expected, True, error_message=f"Actual render time: {actual!r} sec, Expected: {expected!r} sec")

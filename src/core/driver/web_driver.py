@@ -1,7 +1,6 @@
 import builtins
 import json
 import os
-import time
 
 import boto3
 from botocore.config import Config
@@ -74,7 +73,7 @@ class WebDriver:
                             if method == 'Network.requestWillBeSent':
                                 request_id = response['params']['requestId']
                                 url = response['params']['request']['url']
-                                if 'v3/candlestick' in url:
+                                if '/candlestick' in url:
                                     cls._request_times[request_id] = {
                                         'url': url,
                                         'start_time': response['params']['timestamp'],

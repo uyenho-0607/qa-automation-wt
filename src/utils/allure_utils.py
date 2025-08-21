@@ -1,5 +1,4 @@
 import base64
-import glob
 import json
 import os
 import re
@@ -27,19 +26,43 @@ def attach_session_video():
 
 
 def save_recorded_video(video_raw):
-    """Save recorded videos for android"""
-    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
+    """Save recorded videos for android with compression"""
+    # Save original video first
+    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}_raw.mp4")
+    compressed_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
 
+    # Write original video
     with open(raw_path, "wb") as f:
         f.write(base64.b64decode(video_raw))
 
-    return raw_path
+    try:
+        # Compress video using ffmpeg with these optimizations:
+        # -vf scale=480:-1 : scale width to 480px, height auto to maintain aspect ratio
+        # -c:v libx264 : use H.264 codec
+        # -crf 28 : constant rate factor (23-28 is good balance, higher = more compression)
+        # -preset veryfast : faster encoding
+        # -y : overwrite output file if exists
+        os.system(f'ffmpeg -i {raw_path} -vf scale=480:-1 -c:v libx264 -crf 28 -preset veryfast -y {compressed_path}')
+        
+        # Remove raw video if compression successful
+        if os.path.exists(compressed_path) and os.path.getsize(compressed_path) > 0:
+            os.remove(raw_path)
+            return compressed_path
+        
+        # Fallback to raw video if compression fails
+        logger.warning("Video compression failed, using raw video")
+        return raw_path
+            
+    except Exception as e:
+        logger.error(f"Error compressing video: {str(e)}")
+        return raw_path
 
 
 def attach_video(driver):
     """attach video to allure report"""
     if not RuntimeConfig.is_web():
         video_data = driver.stop_recording_screen()
+        logger.debug("- Stop recording video")
         video_path = save_recorded_video(video_data)
         allure.attach.file(
             video_path,
