@@ -34,28 +34,23 @@ def save_recorded_video(video_raw):
     # Write original video
     with open(raw_path, "wb") as f:
         f.write(base64.b64decode(video_raw))
+    if RuntimeConfig.platform == "android":
+        try:
+            os.system(f"ffmpeg -i {raw_path} -vf scale=480:270 {compressed_path}")
 
-    try:
-        # Compress video using ffmpeg with these optimizations:
-        # -vf scale=480:-1 : scale width to 480px, height auto to maintain aspect ratio
-        # -c:v libx264 : use H.264 codec
-        # -crf 28 : constant rate factor (23-28 is good balance, higher = more compression)
-        # -preset veryfast : faster encoding
-        # -y : overwrite output file if exists
-        os.system(f'ffmpeg -i {raw_path} -vf scale=480:-1 -c:v libx264 -crf 28 -preset veryfast -y {compressed_path}')
-        
-        # Remove raw video if compression successful
-        if os.path.exists(compressed_path) and os.path.getsize(compressed_path) > 0:
-            os.remove(raw_path)
-            return compressed_path
-        
-        # Fallback to raw video if compression fails
-        logger.warning("Video compression failed, using raw video")
-        return raw_path
-            
-    except Exception as e:
-        logger.error(f"Error compressing video: {str(e)}")
-        return raw_path
+            # Remove raw video if compression successful
+            if os.path.exists(compressed_path) and os.path.getsize(compressed_path) > 0:
+                os.remove(raw_path)
+                return compressed_path
+
+            # Fallback to raw video if compression fails
+            logger.warning("Video compression failed, using raw video")
+            return raw_path
+
+        except Exception as e:
+            logger.error(f"Error compressing video")
+            return raw_path
+    return raw_path
 
 
 def attach_video(driver):
@@ -186,7 +181,7 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                         data["steps"][-1]["attachments"].extend(list(
                             filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                         ))
-            
+
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
     """Process broken test status and update steps."""
@@ -318,7 +313,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     res = comparison_result
     tolerance_info = res.get("tolerance_info", {})
-    
+
     # Determine if we should show tolerance columns
     show_tolerance = tolerance_percent is not None and tolerance_fields
 
@@ -401,7 +396,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         is_redundant = key in res.get("redundant", [])
         is_different = key in res.get("diff", [])
         has_tolerance = key in tolerance_info
-        
+
         # Determine highlight class based on field status
         if is_missing:
             highlight_class = "missing"
@@ -413,7 +408,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         elif has_tolerance:
             tolerance_data = tolerance_info[key]
             diff_percent = float(tolerance_data["diff_percent"]) if tolerance_data["diff_percent"] else 0
-            
+
             # Only highlight if there's an actual difference (diff > 0)
             if diff_percent > 0:
                 if diff_percent <= tolerance_percent:

@@ -3,7 +3,6 @@ import os
 import subprocess
 
 from appium import webdriver
-from appium.options.ios import XCUITestOptions
 from appium.options.android import UiAutomator2Options
 from appium.options.ios import XCUITestOptions
 from appium.webdriver.appium_service import AppiumService
@@ -96,15 +95,22 @@ class AppiumDriver:
         options.platform_name = "iOS"
         options.udid = Config.mobile().device_udid or get_connected_device()
         options.bundle_id = Config.mobile().app_id
-        options.auto_accept_alerts = True
+
+        # Keep the app state (NO fresh install)
         options.no_reset = False
         options.full_reset = False
+
+        # Prevent Appium from killing app unnecessarily
+        options.set_capability("appium:dontStopAppOnReset", True)
+        options.set_capability("appium:shouldTerminateApp", False)
+
         options.use_prebuilt_wda = True
         options.new_command_timeout = 30000
-        options.set_capability("appium:dontStopAppOnReset", False)
-        options.set_capability("appium:shouldTerminateApp", True)
-        options.set_capability("wdaStartupRetries", 2)
-        options.set_capability("wdaStartupRetryInterval", 20000)
+        options.auto_accept_alerts = True
+        options.set_capability("waitForQuiescence", False)
+        options.set_capability("wdaStartupRetries", 4)
+        options.set_capability("wdaStartupRetryInterval", 40000)
+        options.set_capability("appium:clearSystemFiles", True)
 
         if not cls._appium_service:
             cls.start_appium_service()
@@ -116,6 +122,7 @@ class AppiumDriver:
 
             DriverList.all_drivers["ios"] = driver
             logger.info("- iOS driver init !")
+
             return driver
 
         except WebDriverException as error:
