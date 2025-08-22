@@ -13,12 +13,6 @@ EXP_TIME = RuntimeConfig.charttime
 SYMBOLS = "XAGUSD"
 
 
-# SYMBOLS = {
-#     Client.LIRUNEX: "XAGUSD",
-#     Client.TRANSACT_CLOUD: "XAGUSD"
-# }
-
-
 def test_default(android):
     logger.info(f"Step 1: Get default render time")
     elapsed = android.trade_screen.chart.get_default_render_time()

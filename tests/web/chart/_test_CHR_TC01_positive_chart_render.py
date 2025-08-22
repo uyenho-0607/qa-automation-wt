@@ -21,14 +21,16 @@ def test_default(web):
     logger.info(f"Verify first render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
     web.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
 
-    for idx, timeframe in enumerate(timeframe_list):
-        time.sleep(1)
 
-        logger.info(f"Step {idx + 1}: Check render time for: {timeframe.value!r}")
-        elapsed = web.trade_page.chart.get_timeframe_render_time(timeframe)
+@pytest.mark.parametrize("timeframe", timeframe_list)
+def test_timeframe(web, timeframe):
+    time.sleep(2)
 
-        logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
-        web.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
+    logger.info(f"Step 1: Select and get chart render time for timeframe: {timeframe.value!r}")
+    elapsed = web.trade_page.chart.get_timeframe_render_time(timeframe)
+
+    logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
+    web.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
 
 
 def test_select_timeframe_repeatedly(web):
@@ -42,6 +44,7 @@ def test_select_timeframe_repeatedly(web):
             time.sleep(1)
 
             logger.info(f"Step: Continue select timeframe: {timeframe.value!r}")
+            # logger.info(f"Step: Select timeframe: {timeframe.value!r} - ROUND: {round_idx}")
             elapsed = web.trade_page.chart.get_timeframe_render_time(timeframe)
 
             logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
@@ -56,7 +59,6 @@ def cleanup_chart(web):
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test(web):
-
     logger.info("- Search and select symbol")
     web.home_page.search_and_select_symbol(SYMBOLS)
     web.trade_page.chart.wait_for_symbol_selected(SYMBOLS)

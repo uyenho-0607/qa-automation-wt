@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from src.core.actions.mobile_actions import MobileActions

@@ -48,10 +48,18 @@ class Chart(BaseTrade):
         start = time.time()
         self.actions.wait_for_element_invisible(self.__chart_loading, timeout=EXPLICIT_WAIT)
         elapsed = round(time.time() - start, 2)
+
+        # if elapsed > 2:
+        #     # retry to make sure the time is correct
+        #     self.select_timeframe(ChartTimeframe.random_values(except_val=timeframe))
+        #     self.select_timeframe(timeframe)
+        #     start = time.time()
+        #     self.actions.wait_for_element_invisible(self.__chart_loading, timeout=EXPLICIT_WAIT)
+        #     elapsed = round(time.time() - start - 0.5, 2) # todo: enhance later - this number is a reasonable delta for appium delay
+
         logger.debug(f"- Render time: {elapsed} sec")
 
         return elapsed
-
     # ------------------------ VERIFY ------------------------ #
 
     @staticmethod

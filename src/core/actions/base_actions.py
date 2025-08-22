@@ -68,7 +68,7 @@ class BaseActions:
         return None
 
     def find_elements(
-            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT
+            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, show_log=True
     ) -> list[WebElement]:
         """
         ------ Find list of elements using WebDriverWait using condition "presence_of_all_elements_located" ------
@@ -77,11 +77,11 @@ class BaseActions:
         :return: list[WebElement] or empty list (case not found)
         """
         try:
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
 
         except StaleElementReferenceException:
             logger.warning("StaleElementReferenceException finding elements, retry...")
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
 
         return res or []
 
@@ -195,7 +195,7 @@ class BaseActions:
     ) -> None:
         """Wait for element to be invisible, NO exception will be raised if element is not found"""
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout=timeout)
-        ele = self.find_element(locator, SHORT_WAIT, raise_exception=False, show_log=False)
+        ele = self.find_element(locator, 1, raise_exception=False, show_log=False)
 
         if ele:
             try:

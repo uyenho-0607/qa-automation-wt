@@ -37,6 +37,7 @@ class LoginScreen(BaseScreen):
 
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
+        time.sleep(1)
         self.actions.click(cook_element(self.__tab_account_type, account_type))
 
     def select_language(self, language: Language):
@@ -56,7 +57,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=5):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=6):
             self.actions.click(self.__btn_skip)
 
         if language:

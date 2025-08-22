@@ -4,7 +4,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
@@ -56,7 +56,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=EXPLICIT_WAIT):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=QUICK_WAIT):
             self.actions.click(self.__btn_skip)
 
         if language:

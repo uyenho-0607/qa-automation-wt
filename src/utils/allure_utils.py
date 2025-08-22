@@ -26,36 +26,18 @@ def attach_session_video():
 
 
 def save_recorded_video(video_raw):
-    """Save recorded videos for android with compression"""
-    # Save original video first
-    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}_raw.mp4")
-    compressed_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
-
-    # Write original video
-    with open(raw_path, "wb") as f:
-        f.write(base64.b64decode(video_raw))
+    """Save recorded videos for Android/iOS without compression"""
+    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
 
     try:
-        # Compress video using ffmpeg with these optimizations:
-        # -vf scale=480:-1 : scale width to 480px, height auto to maintain aspect ratio
-        # -c:v libx264 : use H.264 codec
-        # -crf 28 : constant rate factor (23-28 is good balance, higher = more compression)
-        # -preset veryfast : faster encoding
-        # -y : overwrite output file if exists
-        os.system(f'ffmpeg -i {raw_path} -vf scale=480:-1 -c:v libx264 -crf 28 -preset veryfast -y {compressed_path}')
-        
-        # Remove raw video if compression successful
-        if os.path.exists(compressed_path) and os.path.getsize(compressed_path) > 0:
-            os.remove(raw_path)
-            return compressed_path
-        
-        # Fallback to raw video if compression fails
-        logger.warning("Video compression failed, using raw video")
+        # Write original video
+        with open(raw_path, "wb") as f:
+            f.write(base64.b64decode(video_raw))
         return raw_path
-            
+
     except Exception as e:
-        logger.error(f"Error compressing video: {str(e)}")
-        return raw_path
+        logger.error(f"Failed to save video: {e}")
+        return None
 
 
 def attach_video(driver):
@@ -113,7 +95,7 @@ def custom_allure_report(allure_dir: str) -> None:
             _add_attachments_prop(data)  # add empty attachments prop for each test report
             _remove_zero_duration(data)
             _attach_table_details(data)  # add verify tables
-            _attach_verify_details(data) # add verify details text
+            _attach_verify_details(data)  # add verify details text
 
             if data.get("status", "") == "failed":
                 _process_failed_status(data)  # Process failed status if any
@@ -186,7 +168,7 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                         data["steps"][-1]["attachments"].extend(list(
                             filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                         ))
-            
+
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
     """Process broken test status and update steps."""
@@ -205,7 +187,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     if data.get("attachments"):
 
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary" , "setup"]]
+        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
@@ -265,6 +247,7 @@ def _attach_table_details(data: Dict[str, Any]):
                 if not table_attachments:
                     break
 
+
 def _attach_verify_details(data: Dict[str, Any]):
     detail_attachments = list(
         filter(lambda x: "verification details" in x["name"].lower(), data.get("attachments", []))
@@ -289,7 +272,6 @@ def _attach_verify_details(data: Dict[str, Any]):
 
 
 def _clean_log_files(allure_dir):
-
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     logger_prefix = re.compile(r'pythonLog:[^:\s]+\.py:\d+\s*-?\s*')
     allure_results_dir = ROOTDIR / allure_dir
@@ -318,7 +300,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     res = comparison_result
     tolerance_info = res.get("tolerance_info", {})
-    
+
     # Determine if we should show tolerance columns
     show_tolerance = tolerance_percent is not None and tolerance_fields
 
@@ -401,7 +383,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         is_redundant = key in res.get("redundant", [])
         is_different = key in res.get("diff", [])
         has_tolerance = key in tolerance_info
-        
+
         # Determine highlight class based on field status
         if is_missing:
             highlight_class = "missing"
@@ -413,7 +395,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         elif has_tolerance:
             tolerance_data = tolerance_info[key]
             diff_percent = float(tolerance_data["diff_percent"]) if tolerance_data["diff_percent"] else 0
-            
+
             # Only highlight if there's an actual difference (diff > 0)
             if diff_percent > 0:
                 if diff_percent <= tolerance_percent:
@@ -451,6 +433,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     html += "</table>"
     allure.attach(html, name=title, attachment_type=allure.attachment_type.HTML)
+
 
 def log_verification_result(actual: any, expected: any, res: bool, desc: str = "", name="Verification Details"):
     """Log verification results in a structured way."""

@@ -21,15 +21,16 @@ def test_default(web_app):
     logger.info(f"Verify first render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
     web_app.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
 
-    for idx, timeframe in enumerate(timeframe_list):
-        time.sleep(1)
 
-        logger.info(f"Step {idx + 1}: Select and get chart render time for timeframe: {timeframe.value!r}")
-        elapsed = web_app.trade_page.chart.get_timeframe_render_time(timeframe)
+@pytest.mark.parametrize("timeframe", timeframe_list)
+def test_timeframe(web_app, timeframe):
+    time.sleep(1)
 
-        logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
-        web_app.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
+    logger.info(f"Step 1: Select and get chart render time for timeframe: {timeframe.value!r}")
+    elapsed = web_app.trade_page.chart.get_timeframe_render_time(timeframe)
 
+    logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
+    web_app.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
 
 
 def test_select_timeframe_repeatedly(web_app):

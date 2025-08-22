@@ -194,7 +194,7 @@ def pytest_runtest_makereport(item, call):
         if platform in ['android', 'ios']:
             if allure_dir and os.path.exists(ROOTDIR / allure_dir):
                 try:
-                    driver.start_recording_screen(options={"bit_rate": 200000, "video_size": "480x270"})
+                    driver.start_recording_screen(videoQuality="medium", videoFps="15")
                     logger.debug(f"Started screen recording for {platform} test")
 
                 except Exception as e:
