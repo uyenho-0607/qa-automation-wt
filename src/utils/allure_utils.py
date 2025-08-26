@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import re
+import subprocess
 import time
 import uuid
 from pathlib import Path
@@ -26,26 +27,57 @@ def attach_session_video():
 
 
 def save_recorded_video(video_raw):
-    """Save recorded videos for Android/iOS without compression"""
-    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
+    """
+    Save a recorded Appium video (Android/iOS).
+    - For iOS: Normalize speed based on actual test duration.
+    - Compress video for smaller size.
+    """
+    timestamp = round(time.time())
+    raw_path = os.path.join(VIDEO_DIR, f"test_video_{timestamp}_raw.mp4")
+    compressed_path = os.path.join(VIDEO_DIR, f"test_video_{timestamp}.mp4")
 
+    # Save raw Base64 video
     try:
-        # Write original video
         with open(raw_path, "wb") as f:
             f.write(base64.b64decode(video_raw))
+        logger.info(f"Raw video saved: {raw_path}")
+
+    except Exception as e:
+        logger.error(f"Failed to save raw video: {e}")
+        return None
+
+    try:
+        cmd_ffmpeg = [
+            "ffmpeg", "-i", raw_path,
+            "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+            "-vcodec", "libx264", "-crf", "28",
+            compressed_path
+        ]
+
+        subprocess.run(cmd_ffmpeg, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Remove raw if compression successful
+        if os.path.exists(compressed_path) and os.path.getsize(compressed_path) > 0:
+            os.remove(raw_path)
+            return compressed_path
+
+        # Fallback to raw if compression fails
+        logger.warning("Video compression failed, using raw video")
         return raw_path
 
     except Exception as e:
-        logger.error(f"Failed to save video: {e}")
-        return None
+        logger.error(f"Error compressing/normalizing video: {e}")
+        return raw_path
 
 
 def attach_video(driver):
-    """attach video to allure report"""
+    """Attach video to Allure report"""
     if not RuntimeConfig.is_web():
         video_data = driver.stop_recording_screen()
-        logger.debug("- Stop recording video")
         video_path = save_recorded_video(video_data)
+        # Attach to Allure
+        # with open(video_path, "rb") as f:
+        #     allure.attach(f.read(), name="Screen Recording", attachment_type=allure.attachment_type.MP4)
         allure.attach.file(
             video_path,
             name="Screen Recording",
@@ -74,7 +106,6 @@ def log_step_to_allure():
 def custom_allure_report(allure_dir: str) -> None:
     """Process and customize Allure test result files in the specified directory."""
     allure_dir_path = ROOTDIR / allure_dir
-
     # clean all log files
     _clean_log_files(allure_dir)
 
@@ -92,8 +123,8 @@ def custom_allure_report(allure_dir: str) -> None:
                 _remove_skipped_tests(file_path)
                 continue
 
+            _process_test_time(data)
             _add_attachments_prop(data)  # add empty attachments prop for each test report
-            _remove_zero_duration(data)
             _attach_table_details(data)  # add verify tables
             _attach_verify_details(data)  # add verify details text
 
@@ -115,6 +146,28 @@ def custom_allure_report(allure_dir: str) -> None:
             continue
 
 
+def _process_test_time(data: Dict[str, Any]):
+    if not data.get("steps"):
+        return
+
+    test_id = [item["value"] for item in data["labels"] if item["name"] == "as_id"][0]
+    filtered_step = [StepLogs.steps_with_time[key] for key in StepLogs.steps_with_time if key == test_id]
+    if not filtered_step:
+        return
+
+    steps_map = {s["name"].lower(): s for s in data["steps"]}
+    step_info = filtered_step[0]
+
+    # Update steps
+    for idx, (step_msg, step_time) in enumerate(step_info):
+        allure_step = steps_map.get(step_msg.lower())
+        if allure_step:
+            allure_step["start"] = step_time
+            allure_step["stop"] = step_info[idx + 1][-1]
+
+    StepLogs.steps_with_time.pop(test_id)
+
+
 def _remove_skipped_tests(file_path):
     try:
         os.remove(file_path)
@@ -127,47 +180,83 @@ def _add_attachments_prop(data: Dict[str, Any]) -> None:
         item["attachments"] = []
 
 
+# def _process_failed_status(data: Dict[str, Any]) -> None:
+#     """Process failed test status and update steps."""
+#     if not data.get("steps"):
+#         return
+#
+#     failed_logs = StepLogs.all_failed_logs[:]
+#     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
+#     v_steps = [item for item in data["steps"]]
+#
+#     should_break = False
+#     while failed_logs and not should_break:
+#         for failed_step, msg_detail in failed_logs:
+#             if failed_step == "end_test":
+#                 StepLogs.all_failed_logs.pop(0)
+#                 should_break = True
+#                 break
+#
+#             for index, v_step in enumerate(v_steps):
+#                 step_name = v_step.get("name", "").lower()
+#
+#                 if step_name == failed_step.lower():
+#                     StepLogs.all_failed_logs.pop(0)
+#
+#                     if "verify" in step_name:
+#                         v_step["status"] = "failed"
+#                         v_step["statusDetails"] = dict(message=msg_detail)
+#                         del v_steps[:index + 1]
+#
+#                         # Attach screenshot if available
+#                         if failed_attachments:
+#                             v_step["attachments"].extend(failed_attachments[:1])
+#                             del failed_attachments[:1]
+#
+#                         break  # Move to next failed_log after first match
+#
+#                     else:  # this is a broken step
+#                         v_step["status"] = "broken"
+#                         # data["status"] = "broken"
+#                         data["steps"][-1]["attachments"].extend(list(
+#                             filter(lambda x: x["name"] == "broken", data.get("attachments", []))
+#                         ))
+
+
 def _process_failed_status(data: Dict[str, Any]) -> None:
     """Process failed test status and update steps."""
     if not data.get("steps"):
         return
 
-    failed_logs = StepLogs.all_failed_logs[:]
+    test_id = [item["value"] for item in data["labels"] if item["name"] == "as_id"][0]
+    filtered_logs = [StepLogs.failed_logs_dict[key] for key in StepLogs.failed_logs_dict if key == test_id]
+
+    if not filtered_logs:
+        return
+
+    steps_map = {s["name"].lower(): s for s in data["steps"]}
+    failed_logs = filtered_logs[0]
+
     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
-    v_steps = [item for item in data["steps"]]
 
-    should_break = False
-    while failed_logs and not should_break:
-        for failed_step, msg_detail in failed_logs:
-            if failed_step == "end_test":
-                StepLogs.all_failed_logs.pop(0)
-                should_break = True
-                break
+    for failed_step, msg_detail in failed_logs:
+        v_step = steps_map.get(failed_step.lower())
 
-            for index, v_step in enumerate(v_steps):
-                step_name = v_step.get("name", "").lower()
+        if v_step:
+            if "verify" in v_step["name"].lower():
+                v_step["status"] = "failed"
+                v_step["statusDetails"] = dict(message=msg_detail)
 
-                if step_name == failed_step.lower():
-                    StepLogs.all_failed_logs.pop(0)
+                # Attach screenshot if available
+                if failed_attachments:
+                    v_step["attachments"].extend(failed_attachments[:1])
+                    del failed_attachments[:1]
 
-                    if "verify" in step_name:
-                        v_step["status"] = "failed"
-                        v_step["statusDetails"] = dict(message=msg_detail)
-                        del v_steps[:index + 1]
-
-                        # Attach screenshot if available
-                        if failed_attachments:
-                            v_step["attachments"].extend(failed_attachments[:1])
-                            del failed_attachments[:1]
-
-                        break  # Move to next failed_log after first match
-
-                    else:  # this is a broken step
-                        v_step["status"] = "broken"
-                        # data["status"] = "broken"
-                        data["steps"][-1]["attachments"].extend(list(
-                            filter(lambda x: x["name"] == "broken", data.get("attachments", []))
-                        ))
+            else:  # this is a broken step
+                v_step["status"] = "broken"
+                data["steps"][-1]["attachments"].extend(list(
+                    filter(lambda x: x["name"] == "broken", data.get("attachments", []))
+                ))
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
@@ -215,14 +304,6 @@ def _add_check_icon(data):
 
             if item["status"] == "failed":
                 item["name"] = f"{FAILED_ICON} {item['name']}"
-
-
-def _remove_zero_duration(data: Dict[str, Any]):
-    for item in data.get("steps", []):
-        start = item.get("start", 0)
-        stop = item.get("stop", 0)
-        if stop == start:
-            item["stop"] += 1
 
 
 def _attach_table_details(data: Dict[str, Any]):

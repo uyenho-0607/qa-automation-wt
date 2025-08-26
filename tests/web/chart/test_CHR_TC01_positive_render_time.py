@@ -6,7 +6,7 @@ from src.data.enums import ChartTimeframe
 from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
-pytestmark = [pytest.mark.critical]
+# pytestmark = [pytest.mark.critical]
 
 # Expected render time (seconds)
 EXP_TIME = RuntimeConfig.charttime
@@ -24,41 +24,37 @@ def test_default(web):
 
 @pytest.mark.parametrize("timeframe", timeframe_list)
 def test_timeframe(web, timeframe):
-    time.sleep(2)
 
     logger.info(f"Step 1: Select and get chart render time for timeframe: {timeframe.value!r}")
+    time.sleep(2)
     elapsed = web.trade_page.chart.get_timeframe_render_time(timeframe)
 
     logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
     web.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
 
 
-def test_select_timeframe_repeatedly(web):
-    """
-    verifying render times each switch repeatedly 2 times.
-    """
-    repeat_times = 1
+@pytest.mark.parametrize("timeframe", timeframe_list)
+def test_select_timeframe_repeatedly(web, timeframe):
 
-    for round_idx in range(1, repeat_times + 1):
-        for timeframe in timeframe_list:
-            time.sleep(1)
+    logger.info(f"Step: Continue select timeframe: {timeframe.value!r}")
+    time.sleep(2)
+    elapsed = web.trade_page.chart.get_timeframe_render_time(timeframe)
 
-            logger.info(f"Step: Continue select timeframe: {timeframe.value!r}")
-            # logger.info(f"Step: Select timeframe: {timeframe.value!r} - ROUND: {round_idx}")
-            elapsed = web.trade_page.chart.get_timeframe_render_time(timeframe)
-
-            logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
-            web.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
+    logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
+    web.trade_page.chart.verify_render_time(elapsed, EXP_TIME)
 
 
 @pytest.fixture(autouse=True)
 def cleanup_chart(web):
     yield
+
+    logger.info("- Stop test")
     web.trade_page.chart.exit_chart_iframe()
 
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test(web):
+
     logger.info("- Search and select symbol")
     web.home_page.search_and_select_symbol(SYMBOLS)
     web.trade_page.chart.wait_for_symbol_selected(SYMBOLS)

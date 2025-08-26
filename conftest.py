@@ -1,14 +1,17 @@
+import builtins
 import os.path
 import shutil
+import time
 
 import allure
 import pytest
 from allure_commons.types import Severity
+from allure_commons.utils import uuid4, now
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
-from src.data.enums import Server, AccountType
+from src.data.enums import Server, AccountType, Client
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
 from src.utils.logging_utils import logger
@@ -30,7 +33,7 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
     parser.addoption("--num_requests", default="", help="Number of Requests to test percentile")
 
-    parser.addoption("--cd", default=False, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
 
 
 def pytest_configure(config):
@@ -65,8 +68,8 @@ def pytest_sessionstart(session: pytest.Session):
     server = session.config.getoption("server")
     account = session.config.getoption("account")
 
-    # if account == AccountType.LIVE and client == Client.LIRUNEX:
-    #     account = "crm"
+    if account == AccountType.LIVE and client == Client.LIRUNEX:
+        account = "crm"
 
     if client not in MULTI_OMS:
         server = Server.MT5
@@ -114,6 +117,13 @@ def pytest_collection_modifyitems(config, items):
 def pytest_runtest_setup(item: pytest.Item):
     """Setup test and configure Allure reporting"""
 
+    # setup for recording real test time
+    custom_testid = f"testid-{uuid4()}"
+    allure.dynamic.id(custom_testid)
+    StepLogs.TEST_ID = custom_testid
+    StepLogs.init_test_logs()
+
+    # update runtime config
     server = RuntimeConfig.server
     account = RuntimeConfig.account
 
@@ -191,10 +201,11 @@ def pytest_runtest_makereport(item, call):
 
     # Start recording at the beginning of the test`
     if driver and report.when == "setup":
-        if platform in ['android', 'ios']:
+        if platform in ['android', 'ios'] and not RuntimeConfig.argo_cd:
             if allure_dir and os.path.exists(ROOTDIR / allure_dir):
                 try:
-                    driver.start_recording_screen(videoQuality="medium", videoFps="15")
+                    driver.start_recording_screen(videoFps="60")
+                    builtins.test_start_time = time.time()
                     logger.debug(f"Started screen recording for {platform} test")
 
                 except Exception as e:
@@ -206,6 +217,9 @@ def pytest_runtest_makereport(item, call):
 
     # Handle test completion
     if report.when == "call":
+        if StepLogs.steps_with_time.get(StepLogs.TEST_ID):
+            StepLogs.steps_with_time[StepLogs.TEST_ID].append(("stop", now()))
+
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             log_step_to_allure()  # show test steps on allure
 
@@ -219,9 +233,6 @@ def pytest_runtest_makereport(item, call):
             if "web" in RuntimeConfig.platform.lower():
                 logger.debug("- Attach session video")
                 attach_session_video()
-
-        if report.failed and "FAILURE" in report.longreprtext:
-            StepLogs.all_failed_logs.append(("end_test", ""))
 
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):

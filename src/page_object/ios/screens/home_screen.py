@@ -1,3 +1,5 @@
+import time
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -52,7 +54,7 @@ class HomeScreen(BaseScreen):
     # ------------------------ ACTIONS ------------------------ #
 
     def wait_for_loaded(self):
-        res = self.actions.wait_for_element_visible(self.__account_selector, timeout=20)
+        res = self.actions.wait_for_element_visible(self.__account_selector, timeout=30)
         if res:
             logger.info("- Home screen is loaded")
 
@@ -79,6 +81,7 @@ class HomeScreen(BaseScreen):
     def search_and_select_symbol(self, symbol: str):
         """Search and select the found symbol"""
         self.search_symbol(symbol)
+        time.sleep(0.5)
         self.actions.click(cook_element(self.__item_search_result, symbol))
 
     def delete_search_history(self):

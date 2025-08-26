@@ -339,7 +339,7 @@ def soft_assert(
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
+                StepLogs.add_failed_log(failed_step, validation_err_msg)
 
         # Return the comparison result for the decorator to use
         return res
@@ -356,6 +356,6 @@ def soft_assert(
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
+                StepLogs.add_failed_log(failed_step, validation_err_msg)
 
         return res

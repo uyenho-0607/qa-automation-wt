@@ -1,6 +1,11 @@
+import re
+import threading
 import time
+from time import sleep
 
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.common import StaleElementReferenceException
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import ChartTimeframe
@@ -10,11 +15,8 @@ from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
-OHLC = {}
-
 
 class Chart(BaseTrade):
-    INIT_OCHL = {}
 
     def __init__(self, actions: MobileActions):
         super().__init__(actions)
@@ -22,12 +24,11 @@ class Chart(BaseTrade):
     # ------------------------ LOCATORS ------------------------ #
     __candlestick = (AppiumBy.XPATH, "(//XCUIElementTypeOther[@name='Candlestick '])[1]")
     __timeframe = (AppiumBy.XPATH, "(//XCUIElementTypeOther[@name='4H '])[1]")
-    __chart_loaded = (AppiumBy.XPATH, "//*[starts-with(@name, 'O: ')]")
-    __chart_ohlc = (
-        AppiumBy.XPATH,
-        "//*[starts-with(@name, 'O: ') or starts-with(@name, 'H: ') or starts-with(@name, 'L: ') or starts-with(@name, 'C: ')]",
-    )
     __symbol_over_view = (AppiumBy.IOS_PREDICATE, "name == 'symbol-overview-id' AND label == '{}'")
+    __chart_open = (AppiumBy.XPATH, "//*[starts-with(@name, 'O: ')]")
+    __chart_high = (AppiumBy.XPATH, "//*[starts-with(@name, 'H: ')]")
+    __chart_low = (AppiumBy.XPATH, "//*[starts-with(@name, 'L: ')]")
+    __chart_close = (AppiumBy.XPATH, "//*[starts-with(@name, 'C: ')]")
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -37,6 +38,23 @@ class Chart(BaseTrade):
     def open_candlestick_opt(self):
         self.actions.click_by_offset(self.__candlestick, -22, 10, raise_exception=False)
 
+    def _get_initial_ohlc_values(self):
+        """
+        Get initial OHLC values from chart elements.
+        Assumes we have individual locators for O, H, L, C.
+        Returns a dict: {"o": value, "h": value, "l": value, "c": value}
+        """
+        try:
+            return {
+                "o": self.actions.get_attribute(self.__chart_open, "name"),
+                "h": self.actions.get_attribute(self.__chart_high, "name"),
+                "l": self.actions.get_attribute(self.__chart_low, "name"),
+                "c": self.actions.get_attribute(self.__chart_close, "name"),
+            }
+        except Exception as e:
+            logger.error(f"Error getting initial OHLC values: {e}")
+            return {"o": None, "h": None, "l": None, "c": None}
+
     def select_timeframe(self, timeframe: ChartTimeframe):
         match timeframe:
             case ChartTimeframe.one_min:
@@ -44,13 +62,13 @@ class Chart(BaseTrade):
             case ChartTimeframe.five_min:
                 y_percent = 0.55 if RuntimeConfig.is_mt4() else 0.35
             case ChartTimeframe.ten_min:
-                y_percent = 0.45
+                y_percent = 0.43
             case ChartTimeframe.fifteen_min:
                 y_percent = 0.6 if RuntimeConfig.is_mt4() else 0.47
             case ChartTimeframe.twenty_min:
                 y_percent = 0.5
             case ChartTimeframe.thirty_min:
-                y_percent = 0.55
+                y_percent = 0.55 if not RuntimeConfig.is_mt4() else 0.65
             case ChartTimeframe.one_hour:
                 y_percent = 0.7 if RuntimeConfig.is_mt4() else 0.6
             case ChartTimeframe.two_hour:
@@ -75,124 +93,65 @@ class Chart(BaseTrade):
         self.actions.click_screen_position(y_percent=y_percent)
         logger.debug(f"- timeframe: {timeframe!r} selected")
 
-    def get_ohlc_values(self):
-        """Get current OHLC values as plain text (fresh each time)."""
-        ohlc_values = {}
-        try:
-            ohlc_elements = self.actions.find_elements(self.__chart_ohlc, timeout=0.5, show_log=False)
-            for element in ohlc_elements:
-                text = (
-                    element.get_attribute("name")
-                    or element.get_attribute("label")
-                    or element.get_attribute("value")
-                )
-                if not text:
-                    continue
-
-                if text.startswith("O: "):
-                    ohlc_values["O"] = text
-
-                elif text.startswith("H: "):
-                    ohlc_values["H"] = text
-
-                elif text.startswith("L: "):
-                    ohlc_values["L"] = text
-
-                elif text.startswith("C: "):
-                    ohlc_values["C"] = text
-
-        except Exception as e:
-            logger.debug(f"Failed to find OHLC elements: {type(e).__name__}")
-
-        # Always update INIT_OCHL if values exist
-        if ohlc_values:
-            Chart.INIT_OCHL = ohlc_values.copy()
-            logger.debug(f"- Updated INIT_OCHL: {Chart.INIT_OCHL}")
-
-        return ohlc_values
-
     def get_default_render_time(self, max_wait: int = 10):
         """Measure initial chart render time by waiting for first OHLC values."""
         start = time.time()
 
         while time.time() - start < max_wait:
-            ohlc_values = self.get_ohlc_values()
-            if ohlc_values:
-                elapsed = round(time.time() - start, 2)
-                logger.debug(f"- Found OHLC values: {ohlc_values}")
-                logger.debug(f"- Initial render time: {elapsed} sec")
-                return elapsed
-            time.sleep(0.2)
+            self.actions.wait_for_element_visible(self.__chart_open)
+            elapsed = round(time.time() - start, 2)
+            logger.debug(f"- Initial render time: {elapsed} sec")
+            return elapsed
 
         logger.debug("- Chart render time is >10")
         return max_wait
 
-    def get_timeframe_render_time(
-        self, timeframe, max_wait: int = 10, max_retries: int = 3, expected_time: int = RuntimeConfig.charttime
-    ):
+
+    def get_timeframe_render_time(self, timeframe):
+
+        logger.debug(f"- Switching to timeframe: {timeframe}")
+        init_o_value = self.actions.get_attribute(self.__chart_open, "name")
+
+        self.open_candlestick_opt()
+        self.select_timeframe(timeframe)
+        elapsed = self._get_chart_render_time(init_o_value)
+
+        return elapsed
+
+    def _get_chart_render_time(self, init_o_value: str):
         """
-        Measure render time after switching timeframe by detecting OHLC value changes.
-        Uses INIT_OCHL if available, otherwise fetches a new one.
-        Retries if:
-          - No change detected within max_wait, OR
-          - Detected render time > expected_time
-        On retry, switches to a different timeframe first, then back to the target one.
+        Measure time for 'O:' value to change in the chart.
+        init_o_value: initial value of 'O:' (e.g., '25,202.48')
+        Returns: elapsed time (float) or timeout (float)
         """
+        timeout = 10
+        poll_interval = 0.05
+        start = time.time()
+        sleep_time = 0
 
-        fallback_timeframe = "1m" if timeframe != "1m" else "5m"
+        # Precompile regex for better performance
+        pattern = re.compile(r'name="O:\s([\d,.]+)"')
 
-        for attempt in range(1, max_retries + 1):
-            # Use INIT_OCHL if available, otherwise fetch new
-            current_ohlc = Chart.INIT_OCHL if Chart.INIT_OCHL else self.get_ohlc_values()
-            logger.debug(f"[Attempt {attempt}] Measuring render for {timeframe}")
+        logger.info("- Start calculating render time")
+        while time.time() - start < timeout:
+            xml = self.actions._driver.page_source
 
-            # Select timeframe
-            self.open_candlestick_opt()
-            self.select_timeframe(timeframe)
+            # Extract O value
+            match = pattern.search(xml)
+            if match:
+                current_o = f"O: {match.group(1)}"
+                logger.debug(f"- Current O value: {current_o}")
 
-            start = time.time()
-
-            while time.time() - start < max_wait:
-                time.sleep(0.2)
-                new_ohlc = self.get_ohlc_values()
-
-                if not new_ohlc or not current_ohlc:
-                    continue
-
-                changed = [
-                    k
-                    for k in ["O", "H", "L", "C"]
-                    if new_ohlc.get(k) and current_ohlc.get(k) and new_ohlc[k] != current_ohlc[k]
-                ]
-
-                if changed:
+                # Compare with initial value
+                if current_o != init_o_value:
                     elapsed = round(time.time() - start, 2)
-                    logger.debug(f"↳ OHLC changed ({changed}), render time={elapsed}s")
-
-                    if elapsed > expected_time and attempt < max_retries:
-                        logger.debug(
-                            f"↳ Too slow (> {expected_time}s), retrying with bounce {fallback_timeframe}"
-                        )
-                        self.open_candlestick_opt()
-                        self.select_timeframe(
-                            ChartTimeframe.one_min
-                            if timeframe != ChartTimeframe.one_min
-                            else ChartTimeframe.five_min
-                        )
-                        time.sleep(1)
-                        break  # retry outer loop
+                    logger.debug(f"- O value changed from {init_o_value} to {current_o} -> elapsed: {elapsed!r}")
                     return elapsed
 
-            if attempt < max_retries:
-                logger.debug(f"↳ No change within {max_wait}s, retrying with bounce {fallback_timeframe}")
-                self.open_candlestick_opt()
-                self.select_timeframe(
-                    ChartTimeframe.one_min if timeframe != ChartTimeframe.one_min else ChartTimeframe.five_min
-                )
-                time.sleep(1)
+            time.sleep(poll_interval)
+            sleep_time += poll_interval
 
-        logger.debug(f"↳ Fallback return: {max_wait}s (max wait exceeded)")
-        return max_wait
+        return timeout - sleep_time - 1
 
     # ------------------------ VERIFY ------------------------ #
 

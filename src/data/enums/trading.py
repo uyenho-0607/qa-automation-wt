@@ -129,15 +129,15 @@ class ChartTimeframe(BaseEnum):
     @classmethod
     def mt4_list(cls):
         display_list = [
-            cls.one_min,
-            cls.five_min,
+            cls.one_month,
             cls.fifteen_min,
-            cls.thirty_min,
             cls.one_hour,
-            cls.four_hour,
-            cls.one_day,
+            cls.thirty_min,
             cls.one_week,
-            cls.one_month
+            cls.one_min,
+            cls.four_hour,
+            cls.five_min,
+            cls.one_day,
         ]
         return display_list
 
@@ -180,6 +180,7 @@ class ChartTimeframe(BaseEnum):
 
     def get_timeframe(self):
         timeframe_map = {
+            ChartTimeframe.one_min: "PERIOD_M1",
             ChartTimeframe.five_min: "PERIOD_M5",
             ChartTimeframe.ten_min: "PERIOD_M10",
             ChartTimeframe.fifteen_min: "PERIOD_M15",

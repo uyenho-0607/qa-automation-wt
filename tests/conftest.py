@@ -8,7 +8,7 @@ from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
-@pytest.fixture(scope="package")
+@pytest.fixture(scope="package", autouse=True)
 def symbol():
     symbols = ObjSymbol().get_symbols()
     logger.debug(f"- Symbols getting result: {symbols}")

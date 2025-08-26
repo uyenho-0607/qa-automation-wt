@@ -60,7 +60,7 @@ class BaseActions:
 
         if raise_exception:
             if StepLogs.test_steps:
-                StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                StepLogs.add_failed_log(StepLogs.test_steps[-1])
                 attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
             raise Exception(f"Element with locator {locator} not found")

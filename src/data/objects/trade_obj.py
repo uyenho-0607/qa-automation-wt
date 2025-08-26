@@ -36,7 +36,6 @@ class ObjTrade(BaseObj):
 
         self.trade_type = trade_type
         self.order_type = order_type
-        # self.symbol = symbol or random.choice(get_symbols())
         self.symbol = symbol or random.choice(ObjSymbol().get_symbols())
         self.expiry = expiry or Expiry.sample_values(self.order_type)
         self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)

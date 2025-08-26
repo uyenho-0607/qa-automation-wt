@@ -103,8 +103,8 @@ def handle_stale_element(func):
                 return func(self, *args, **kwargs)
             except (StaleElementReferenceException, ElementNotInteractableException, ElementClickInterceptedException) as e:
                 # Clear any broken steps that might have been added from the previous attempt
-                if StepLogs.broken_steps and attempt < max_retries + 1:
-                    StepLogs.broken_steps.pop()
+                # if StepLogs.broken_steps and attempt < max_retries + 1:
+                #     StepLogs.broken_steps.pop()
 
                 if attempt < max_retries:
                     logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
@@ -113,9 +113,9 @@ def handle_stale_element(func):
                 else:
                     # Final attempt failed, re-raise the exception
                     logger.error(f"{type(e).__name__} for locator {args[0]} after {max_retries + 1} attempts")
+
                     if raise_exception and StepLogs.test_steps:
-                        logger.debug("- Capture broken info")
-                        StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                        StepLogs.add_failed_log(StepLogs.test_steps[-1])
                         attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
                         raise e
