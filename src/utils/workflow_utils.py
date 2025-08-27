@@ -1,13 +1,17 @@
 import logging
 import os
+import socket
 import subprocess
+import time
 from collections import defaultdict
 from pathlib import Path
 from shutil import which
 from typing import List, Dict, Optional
 
+import gspread.exceptions
+import requests.exceptions
 from gspread import authorize
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 from src.data.consts import ROOTDIR
 from src.utils.logging_utils import logger
@@ -17,6 +21,7 @@ google_sa_creds = os.getenv('GOOGLE_SA_CREDENTIALS')
 
 class GoogleSheetsAPI:
     _sheet_data = None
+
     def __init__(self, keyfile: Optional[Path] = None):
         self.keyfile = keyfile or (ROOTDIR / google_sa_creds) if google_sa_creds else ROOTDIR / "ggsheet_key.json"
         self.client = self._init_client()
@@ -26,15 +31,42 @@ class GoogleSheetsAPI:
             "https://www.googleapis.com/auth/spreadsheets",
             "https://www.googleapis.com/auth/drive",
         ]
-        creds = ServiceAccountCredentials.from_json_keyfile_name(str(self.keyfile), scopes)
-        client = authorize(creds)
+        creds = Credentials.from_service_account_file(str(self.keyfile), scopes=scopes)
+        # client = authorize(creds)
+        client = gspread.authorize(creds)
         return client
+
+    @staticmethod
+    def _retry(func, *args, **kwargs):
+        retries = 5
+        for attempt in range(retries):
+            try:
+                return func(*args, **kwargs)
+            except (requests.exceptions.RequestException, socket.gaierror) as e:
+                wait = retries ** attempt
+                logger.debug(f"- Retry request in {wait}s....")
+                time.sleep(wait)
+
+        raise Exception("Max retries exceeded")
 
     def _load_sheets(self, sheet_url: str):
         """Load all sheets in a spreadsheet by URL."""
         if not self._sheet_data:
-            logger.debug("- Loading sheet data from url")
-            self._sheet_data = self.client.open_by_url(sheet_url).worksheets()
+
+            for attempt in range(5):
+
+                logger.debug(f"- Loading sheet data from url (attempt:{attempt + 1})")
+                try:
+                    self._sheet_data = self.client.open_by_url(sheet_url).worksheets()
+                    return self._sheet_data
+
+                except (requests.exceptions.RequestException, socket.gaierror, gspread.exceptions.APIError) as e:
+
+                    logger.debug(f"- Request exception: {e}, retrying...")
+                    wait = 2 ** attempt
+                    time.sleep(wait)
+
+            raise Exception("Max retries attempts! Failed to load sheet data")
 
         return self._sheet_data
 
@@ -193,13 +225,14 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
         assigned.append(account_copy)
     return assigned
 
-if __name__ == '__main__':
-    # ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
-    # accounts = ggapi.get_accounts(
-    #     "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
-    #     ["decode"], "demo"
-    # )
 
-    dirs = collect_critical_folders(platform="web-app")
-    # res = assign_dirs_to_accounts(accounts[::-1], dirs)
-    print(dirs)
+# if __name__ == '__main__':
+#     ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
+#     accounts = ggapi.get_accounts(
+#         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
+#         ["decode"], "demo"
+#     )
+#
+#     dirs = collect_critical_folders(platform="web-app")
+#     res = assign_dirs_to_accounts(accounts[::-1], dirs)
+#     print(accounts)

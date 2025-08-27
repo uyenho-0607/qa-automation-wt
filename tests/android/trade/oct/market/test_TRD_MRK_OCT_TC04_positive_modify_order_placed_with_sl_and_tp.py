@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
 )
 def test(android, symbol, create_order_data, sl_type, tp_type, cancel_edit_order):
     # handle parameters
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, indicate=SLTPType.sample_values())
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
     tab = AssetTabs.OPEN_POSITION
     # -------------------
 

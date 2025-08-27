@@ -15,7 +15,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web, market_obj, create_order_data, sl_type, tp_type, close_edit_confirm_modal):
-    trade_object = market_obj(indicate=SLTPType.random_values())
+    trade_object = market_obj()
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP)")
