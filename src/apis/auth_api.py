@@ -36,7 +36,6 @@ class AuthAPI(BaseAPI):
             }
 
             resp = self.post(
-                # endpoint=self.endpoints[self.client][self.account_type],
                 endpoint=self.endpoints.get(self.client, self.endpoints.get(Client.TRANSACT_CLOUD))[self.account_type],
                 payload=payload
             )
