@@ -33,11 +33,15 @@ class ObjSymbol:
 
         if not ObjSymbol.all_symbols:
             logger.info("- Getting Symbols data")
-            resp = APIClient().market.get_watchlist_items(WatchListTab.CRYPTO, get_symbols=False)
-            # Filter out only symbols with trading status
-            cls.all_symbols = [
-                item for item in resp if item['type'] == WatchListTab.CRYPTO.upper() and item['status'] == 'TRADING'
-            ]
+            resp = APIClient().market.get_watchlist_items(WatchListTab.ALL, get_symbols=False)
+
+            # filter out crypto symbols
+            symbols = [item for item in resp if item["type"] == WatchListTab.CRYPTO.upper() and item['status'] == 'TRADING']
+            if not symbols:
+                # continue to get other symbol type
+                symbols = [item for item in resp if item["type"] == WatchListTab.FOREX.upper() and item['status'] == 'TRADING']
+
+            cls.all_symbols = symbols
 
             if not cls.all_symbols:
                 # handle bugs status of symbols display as OFF QUOTE for all symbols

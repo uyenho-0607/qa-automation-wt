@@ -13,7 +13,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web, stop_obj, create_order_data, sl_type, tp_type, close_edit_confirm_modal):
-    trade_object = stop_obj(indicate=SLTPType.sample_values())
+    trade_object = stop_obj()
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")

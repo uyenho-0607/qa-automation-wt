@@ -15,7 +15,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web, create_order_data, sl_type, tp_type, close_edit_confirm_modal, limit_obj):
-    trade_object = limit_obj(indicate=SLTPType.sample_values())
+    trade_object = limit_obj()
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")
     create_order_data(trade_object)
