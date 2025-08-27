@@ -1,8 +1,8 @@
 import base64
-import glob
 import json
 import os
 import re
+import subprocess
 import time
 import uuid
 from pathlib import Path
@@ -22,26 +22,62 @@ from src.utils.logging_utils import logger
 def attach_session_video():
     driver = DriverList.all_drivers.get(RuntimeConfig.platform.lower())
     if driver:
-        # s3_video_url = f'<a href="{GRID_VIDEO_URL}/{Config.config.env}/videos/{driver.session_id}.mp4">Session Video</a>'
         s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
         allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
 
 
 def save_recorded_video(video_raw):
-    """Save recorded videos for android"""
-    raw_path = os.path.join(VIDEO_DIR, f"test_video_{round(time.time())}.mp4")
+    """
+    Save a recorded Appium video (Android/iOS).
+    - For iOS: Normalize speed based on actual test duration.
+    - Compress video for smaller size.
+    """
+    timestamp = round(time.time())
+    raw_path = os.path.join(VIDEO_DIR, f"test_video_{timestamp}_raw.mp4")
+    compressed_path = os.path.join(VIDEO_DIR, f"test_video_{timestamp}.mp4")
 
-    with open(raw_path, "wb") as f:
-        f.write(base64.b64decode(video_raw))
+    # Save raw Base64 video
+    try:
+        with open(raw_path, "wb") as f:
+            f.write(base64.b64decode(video_raw))
+        logger.info(f"Raw video saved: {raw_path}")
 
-    return raw_path
+    except Exception as e:
+        logger.error(f"Failed to save raw video: {e}")
+        return None
+
+    try:
+        cmd_ffmpeg = [
+            "ffmpeg", "-i", raw_path,
+            "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+            "-vcodec", "libx264", "-crf", "28",
+            compressed_path
+        ]
+
+        subprocess.run(cmd_ffmpeg, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        # Remove raw if compression successful
+        if os.path.exists(compressed_path) and os.path.getsize(compressed_path) > 0:
+            os.remove(raw_path)
+            return compressed_path
+
+        # Fallback to raw if compression fails
+        logger.warning("Video compression failed, using raw video")
+        return raw_path
+
+    except Exception as e:
+        logger.error(f"Error compressing/normalizing video: {e}")
+        return raw_path
 
 
 def attach_video(driver):
-    """attach video to allure report"""
+    """Attach video to Allure report"""
     if not RuntimeConfig.is_web():
         video_data = driver.stop_recording_screen()
         video_path = save_recorded_video(video_data)
+        # Attach to Allure
+        # with open(video_path, "rb") as f:
+        #     allure.attach(f.read(), name="Screen Recording", attachment_type=allure.attachment_type.MP4)
         allure.attach.file(
             video_path,
             name="Screen Recording",
@@ -70,7 +106,6 @@ def log_step_to_allure():
 def custom_allure_report(allure_dir: str) -> None:
     """Process and customize Allure test result files in the specified directory."""
     allure_dir_path = ROOTDIR / allure_dir
-
     # clean all log files
     _clean_log_files(allure_dir)
 
@@ -88,10 +123,10 @@ def custom_allure_report(allure_dir: str) -> None:
                 _remove_skipped_tests(file_path)
                 continue
 
+            _process_test_time(data)
             _add_attachments_prop(data)  # add empty attachments prop for each test report
-            _remove_zero_duration(data)
             _attach_table_details(data)  # add verify tables
-            _attach_verify_details(data) # add verify details text
+            _attach_verify_details(data)  # add verify details text
 
             if data.get("status", "") == "failed":
                 _process_failed_status(data)  # Process failed status if any
@@ -111,6 +146,28 @@ def custom_allure_report(allure_dir: str) -> None:
             continue
 
 
+def _process_test_time(data: Dict[str, Any]):
+    if not data.get("steps"):
+        return
+
+    test_id = [item["value"] for item in data["labels"] if item["name"] == "as_id"][0]
+    filtered_step = [StepLogs.steps_with_time[key] for key in StepLogs.steps_with_time if key == test_id]
+    if not filtered_step:
+        return
+
+    steps_map = {s["name"].lower(): s for s in data["steps"]}
+    step_info = filtered_step[0]
+
+    # Update steps
+    for idx, (step_msg, step_time) in enumerate(step_info):
+        allure_step = steps_map.get(step_msg.lower())
+        if allure_step:
+            allure_step["start"] = step_time
+            allure_step["stop"] = step_info[idx + 1][-1]
+
+    StepLogs.steps_with_time.pop(test_id)
+
+
 def _remove_skipped_tests(file_path):
     try:
         os.remove(file_path)
@@ -123,48 +180,84 @@ def _add_attachments_prop(data: Dict[str, Any]) -> None:
         item["attachments"] = []
 
 
+# def _process_failed_status(data: Dict[str, Any]) -> None:
+#     """Process failed test status and update steps."""
+#     if not data.get("steps"):
+#         return
+#
+#     failed_logs = StepLogs.all_failed_logs[:]
+#     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
+#     v_steps = [item for item in data["steps"]]
+#
+#     should_break = False
+#     while failed_logs and not should_break:
+#         for failed_step, msg_detail in failed_logs:
+#             if failed_step == "end_test":
+#                 StepLogs.all_failed_logs.pop(0)
+#                 should_break = True
+#                 break
+#
+#             for index, v_step in enumerate(v_steps):
+#                 step_name = v_step.get("name", "").lower()
+#
+#                 if step_name == failed_step.lower():
+#                     StepLogs.all_failed_logs.pop(0)
+#
+#                     if "verify" in step_name:
+#                         v_step["status"] = "failed"
+#                         v_step["statusDetails"] = dict(message=msg_detail)
+#                         del v_steps[:index + 1]
+#
+#                         # Attach screenshot if available
+#                         if failed_attachments:
+#                             v_step["attachments"].extend(failed_attachments[:1])
+#                             del failed_attachments[:1]
+#
+#                         break  # Move to next failed_log after first match
+#
+#                     else:  # this is a broken step
+#                         v_step["status"] = "broken"
+#                         # data["status"] = "broken"
+#                         data["steps"][-1]["attachments"].extend(list(
+#                             filter(lambda x: x["name"] == "broken", data.get("attachments", []))
+#                         ))
+
+
 def _process_failed_status(data: Dict[str, Any]) -> None:
     """Process failed test status and update steps."""
     if not data.get("steps"):
         return
 
-    failed_logs = StepLogs.all_failed_logs[:]
+    test_id = [item["value"] for item in data["labels"] if item["name"] == "as_id"][0]
+    filtered_logs = [StepLogs.failed_logs_dict[key] for key in StepLogs.failed_logs_dict if key == test_id]
+
+    if not filtered_logs:
+        return
+
+    steps_map = {s["name"].lower(): s for s in data["steps"]}
+    failed_logs = filtered_logs[0]
+
     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
-    v_steps = [item for item in data["steps"]]
 
-    should_break = False
-    while failed_logs and not should_break:
-        for failed_step, msg_detail in failed_logs:
-            if failed_step == "end_test":
-                StepLogs.all_failed_logs.pop(0)
-                should_break = True
-                break
+    for failed_step, msg_detail in failed_logs:
+        v_step = steps_map.get(failed_step.lower())
 
-            for index, v_step in enumerate(v_steps):
-                step_name = v_step.get("name", "").lower()
+        if v_step:
+            if "verify" in v_step["name"].lower():
+                v_step["status"] = "failed"
+                v_step["statusDetails"] = dict(message=msg_detail)
 
-                if step_name == failed_step.lower():
-                    StepLogs.all_failed_logs.pop(0)
+                # Attach screenshot if available
+                if failed_attachments:
+                    v_step["attachments"].extend(failed_attachments[:1])
+                    del failed_attachments[:1]
 
-                    if "verify" in step_name:
-                        v_step["status"] = "failed"
-                        v_step["statusDetails"] = dict(message=msg_detail)
-                        del v_steps[:index + 1]
+            else:  # this is a broken step
+                v_step["status"] = "broken"
+                data["steps"][-1]["attachments"].extend(list(
+                    filter(lambda x: x["name"] == "broken", data.get("attachments", []))
+                ))
 
-                        # Attach screenshot if available
-                        if failed_attachments:
-                            v_step["attachments"].extend(failed_attachments[:1])
-                            del failed_attachments[:1]
-
-                        break  # Move to next failed_log after first match
-
-                    else:  # this is a broken step
-                        v_step["status"] = "broken"
-                        # data["status"] = "broken"
-                        data["steps"][-1]["attachments"].extend(list(
-                            filter(lambda x: x["name"] == "broken", data.get("attachments", []))
-                        ))
-            
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
     """Process broken test status and update steps."""
@@ -183,7 +276,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     if data.get("attachments"):
 
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary" , "setup"]]
+        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
@@ -213,14 +306,6 @@ def _add_check_icon(data):
                 item["name"] = f"{FAILED_ICON} {item['name']}"
 
 
-def _remove_zero_duration(data: Dict[str, Any]):
-    for item in data.get("steps", []):
-        start = item.get("start", 0)
-        stop = item.get("stop", 0)
-        if stop == start:
-            item["stop"] += 1
-
-
 def _attach_table_details(data: Dict[str, Any]):
     table_attachments = list(
         filter(lambda x: "table" in x["name"].lower(), data.get("attachments", []))
@@ -242,6 +327,7 @@ def _attach_table_details(data: Dict[str, Any]):
 
                 if not table_attachments:
                     break
+
 
 def _attach_verify_details(data: Dict[str, Any]):
     detail_attachments = list(
@@ -267,7 +353,6 @@ def _attach_verify_details(data: Dict[str, Any]):
 
 
 def _clean_log_files(allure_dir):
-
     ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
     logger_prefix = re.compile(r'pythonLog:[^:\s]+\.py:\d+\s*-?\s*')
     allure_results_dir = ROOTDIR / allure_dir
@@ -296,7 +381,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     res = comparison_result
     tolerance_info = res.get("tolerance_info", {})
-    
+
     # Determine if we should show tolerance columns
     show_tolerance = tolerance_percent is not None and tolerance_fields
 
@@ -379,7 +464,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         is_redundant = key in res.get("redundant", [])
         is_different = key in res.get("diff", [])
         has_tolerance = key in tolerance_info
-        
+
         # Determine highlight class based on field status
         if is_missing:
             highlight_class = "missing"
@@ -391,7 +476,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
         elif has_tolerance:
             tolerance_data = tolerance_info[key]
             diff_percent = float(tolerance_data["diff_percent"]) if tolerance_data["diff_percent"] else 0
-            
+
             # Only highlight if there's an actual difference (diff > 0)
             if diff_percent > 0:
                 if diff_percent <= tolerance_percent:
@@ -429,6 +514,7 @@ def attach_verify_table(actual: dict, expected: dict, tolerance_percent: float =
 
     html += "</table>"
     allure.attach(html, name=title, attachment_type=allure.attachment_type.HTML)
+
 
 def log_verification_result(actual: any, expected: any, res: bool, desc: str = "", name="Verification Details"):
     """Log verification results in a structured way."""

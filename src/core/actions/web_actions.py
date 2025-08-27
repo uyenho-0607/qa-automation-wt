@@ -7,11 +7,12 @@ from selenium.common import TimeoutException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.actions.base_actions import BaseActions
-from src.core.decorators import handle_stale_element
+from src.core.decorators import handle_stale_element, log_requests
 from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
 from src.utils.assert_utils import soft_assert
 from src.utils.logging_utils import logger
@@ -23,6 +24,14 @@ class WebActions(BaseActions):
         self._action_chains = ActionChains(self._driver)
 
     # ------- ACTIONS ------ #
+
+    @log_requests
+    def test_wait(self, locator):
+        self._wait.until(
+            lambda d: "display: none;" == d.find_element(*locator).get_attribute("style"),
+            message="Chart container still showing loading state after timeout"
+        )
+
 
     # @handle_stale_element
     def _send_key_action_chains(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
@@ -43,6 +52,7 @@ class WebActions(BaseActions):
             element.send_keys(str(value))
 
     @handle_stale_element
+    @log_requests
     def send_keys(self, locator, value, use_action_chain=False, timeout=EXPLICIT_WAIT):
 
         max_retries = 3
@@ -63,6 +73,7 @@ class WebActions(BaseActions):
             logger.debug(f"- Resent value: {sent_value!r}")
 
     @handle_stale_element
+    @log_requests
     def click_by_offset(
             self,
             locator: tuple[str, str],
@@ -99,24 +110,29 @@ class WebActions(BaseActions):
 
         return res
 
+    @log_requests
     def goto(self, url):
         """Navigate to a URL and wait for the page to be fully loaded."""
         self._driver.get(url)
 
+    @log_requests
     def refresh(self):
         self._driver.refresh()
 
     def get_current_url(self):
         return self._driver.current_url
 
+    @log_requests
     def scroll_to_element(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
         element = self.find_element(locator, timeout)
         self._driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
 
+    @log_requests
     def scroll_picker_down(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
         wheel = self.find_element(locator, timeout)
         self._action_chains.click_and_hold(wheel).move_by_offset(0, -50).release().pause(0.5).perform()
 
+    @log_requests
     def scroll_container_down(self, locator: tuple[str, str], scroll_step: float = 0.5):
         """Scroll a container element down by a smaller step to avoid missing items"""
         try:
@@ -129,6 +145,7 @@ class WebActions(BaseActions):
         except Exception as e:
             logger.warning(f"Error scrolling container {locator}: {e}")
 
+    @log_requests
     def drag_element_horizontal(self, locator: tuple[str, str], direction:Literal["left", "right"] | str = "left", timeout=EXPLICIT_WAIT):
         x_offset = -200 if direction == "left" else 200
 
@@ -157,6 +174,14 @@ class WebActions(BaseActions):
                 logger.error(f"Unexpected error for URL '{url}': {type(e).__name__}")
 
         return self._driver.current_url
+
+    @log_requests
+    def switch_to_iframe(self):
+        iframe = self._wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
+        self._driver.switch_to.frame(iframe)
+
+    def switch_to_default(self):
+        self._driver.switch_to.default_content()
 
     # ------- VERIFY ------ #
 

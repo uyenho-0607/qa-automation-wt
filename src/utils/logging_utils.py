@@ -8,7 +8,7 @@ def record_steps_log(func):
     def wrapper(*args, **kwargs):
         msg, *_ = args
         if any(item in str(msg).lower() for item in ("step", "steps", "verify")):
-            StepLogs.test_steps.append(msg)
+            StepLogs.add_step(msg)
         return func(*args, **kwargs)
 
     return wrapper

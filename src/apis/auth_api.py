@@ -23,7 +23,7 @@ class AuthAPI(BaseAPI):
         self.userid = userid
         self.password = password
         self.client = RuntimeConfig.client
-        self.account_type = RuntimeConfig.account
+        self.account_type = RuntimeConfig.account or AccountType.LIVE
         self.get_token()
 
     def get_token(self):

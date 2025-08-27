@@ -49,9 +49,9 @@ class HomePage(BasePage):
     __search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-history'))
     __btn_delete_search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-history-delete'))
     __item_search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-items-symbol'))
-    __item_search_history_by_text = (By.XPATH, "//*[@data-testid='symbol-input-search-items-symbol' and text()='{}']")
+    __item_search_history_by_text = (By.XPATH, "//*[@data-testid='symbol-input-search-items-symbol' and contains(text(), '{}')]")
 
-    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[text()='{}']")
+    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[contains(text(), '{}')]")
     __items_search_result = (By.CSS_SELECTOR, data_testid('symbol-input-search-items'))
     __empty_message = (By.CSS_SELECTOR, "div[data-testid='symbol-dropdown-result'] > div[data-testid='empty-message']")
 
@@ -92,10 +92,10 @@ class HomePage(BasePage):
 
     def select_item_from_search_result(self, symbol: str):
         self.actions.click(cook_element(self.__item_search_result, symbol))
-        time.sleep(1)
 
     def search_and_select_symbol(self, symbol):
         self.search_symbol(symbol)
+        time.sleep(1)
         self.select_item_from_search_result(symbol)
 
     def delete_search_history(self, check_displayed=True):

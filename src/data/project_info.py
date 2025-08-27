@@ -1,15 +1,39 @@
+from allure_commons.utils import now
+
+
+class StepLogs:
+    steps_with_time = {}
+    test_steps = []
+    broken_steps = []
+    all_failed_logs = []
+    failed_logs_dict = {}
+
+    TEST_ID = ""
+
+    @classmethod
+    def init_test_logs(cls):
+        cls.steps_with_time[cls.TEST_ID] = []
+        cls.failed_logs_dict[cls.TEST_ID] = []
+
+    @classmethod
+    def add_step(cls, msg_log):
+        cls.test_steps.append(msg_log)
+        cls.steps_with_time[cls.TEST_ID].append((msg_log, now()))
+
+    @classmethod
+    def clean_step(cls):
+        cls.test_steps = []
+
+    @classmethod
+    def add_failed_log(cls, msg_log, failed_detail=""):
+        cls.all_failed_logs.append((msg_log, failed_detail))
+        cls.failed_logs_dict[cls.TEST_ID].append((msg_log, failed_detail))
+
 class DriverList:
     web_driver = []
     android_driver = []
     ios_driver = []
     all_drivers = {}
-
-
-class StepLogs:
-    test_steps = []
-    broken_steps = []
-    all_failed_logs = []
-    failed_logs_dict = {}
 
 
 class RuntimeConfig:
@@ -29,6 +53,9 @@ class RuntimeConfig:
     url: str = ""
 
     headers: dict = {}
+
+    charttime: int = 2
+    num_requests: int = 50
 
     @classmethod
     def is_non_oms(cls):

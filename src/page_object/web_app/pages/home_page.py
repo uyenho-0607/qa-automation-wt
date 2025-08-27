@@ -39,7 +39,7 @@ class HomePage(BasePage):
 
     __icon_search = (By.CSS_SELECTOR, data_testid("symbol-search-selector"))
     __txt_symbol_search = (By.CSS_SELECTOR, data_testid('symbol-input-search'))
-    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[text()='{}']")
+    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[contains(text(), '{}')]")
     __items_search_result = (By.CSS_SELECTOR, data_testid('symbol-input-search-items'))
     __btn_search_cancel = (By.CSS_SELECTOR, data_testid("symbol-input-search-cancel"))
     __notification_selector = (By.CSS_SELECTOR, data_testid("notification-selector"))

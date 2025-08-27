@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.core.decorators import handle_stale_element
+from src.core.decorators import handle_stale_element, log_requests
 from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_screenshot
@@ -60,7 +60,7 @@ class BaseActions:
 
         if raise_exception:
             if StepLogs.test_steps:
-                StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                StepLogs.add_failed_log(StepLogs.test_steps[-1])
                 attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
             raise Exception(f"Element with locator {locator} not found")
@@ -68,7 +68,7 @@ class BaseActions:
         return None
 
     def find_elements(
-            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT
+            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, show_log=True
     ) -> list[WebElement]:
         """
         ------ Find list of elements using WebDriverWait using condition "presence_of_all_elements_located" ------
@@ -77,14 +77,15 @@ class BaseActions:
         :return: list[WebElement] or empty list (case not found)
         """
         try:
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
 
         except StaleElementReferenceException:
             logger.warning("StaleElementReferenceException finding elements, retry...")
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
 
         return res or []
 
+    @log_requests
     @handle_stale_element
     def click(
             self,
@@ -102,6 +103,7 @@ class BaseActions:
         if element:
             element.click()
 
+    @log_requests
     @handle_stale_element
     def javascript_click(
             self,
@@ -193,7 +195,7 @@ class BaseActions:
     ) -> None:
         """Wait for element to be invisible, NO exception will be raised if element is not found"""
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout=timeout)
-        ele = self.find_element(locator, SHORT_WAIT, raise_exception=False, show_log=False)
+        ele = self.find_element(locator, 1, raise_exception=False, show_log=False)
 
         if ele:
             try:
@@ -201,15 +203,17 @@ class BaseActions:
             except Exception:
                 pass
 
+    @log_requests
     def wait_for_element_visible(
             self,
             locator: tuple[str, str],
             timeout=EXPLICIT_WAIT,
-    ) -> None:
+    ) -> bool:
         """Wait for element to be visible, NO exception will be raised if element is not found"""
-        self.find_element(
+        res = self.find_element(
             locator, timeout, cond=EC.visibility_of_element_located, raise_exception=False, show_log=True
         )
+        return bool(res)
 
     def is_element_displayed(self, locator: tuple[str, str], timeout=QUICK_WAIT, is_display=True, show_log=False) -> bool:
         """Check if element is displayed, NO exception will be raised if element is not found"""

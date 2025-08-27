@@ -44,8 +44,7 @@ class ObjSymbol:
             cls.all_symbols = symbols
             if not cls.all_symbols:
                 # handle bugs status of symbols display as OFF QUOTE for all symbols
-                cls.all_symbols = [item for item in resp if item['symbol'] in cls.CRYPTO.get(RuntimeConfig.client, cls.CRYPTO[Client.TRANSACT_CLOUD]).get(RuntimeConfig.server, {})
-                                   ]
+                cls.all_symbols = [item for item in resp if item['symbol'] in cls.CRYPTO.get(RuntimeConfig.client, cls.CRYPTO[Client.TRANSACT_CLOUD]).get(RuntimeConfig.server, {})]
             # Filter symbols with small prices (to avoid insufficient balance)
             filtered_price = [item for item in cls.all_symbols if item['ask'] < cls.threshold]
             cls.symbols_data = filtered_price or cls.all_symbols
@@ -67,7 +66,9 @@ class ObjSymbol:
                 point_step = 10 ** -decimal
                 cls.symbols_details[symbol] = dict(point_step=point_step, decimal=decimal)
                 return cls.symbols_details[symbol]
+
             else:
-                raise ValueError(f"Symbol: {symbol!r} not found !!!")
+                cls.symbols_details[symbol] =  dict(point_step=0, decimal=0)
+                # raise ValueError(f"Symbol: {symbol!r} not found !!!")
 
         return cls.symbols_details[symbol]
