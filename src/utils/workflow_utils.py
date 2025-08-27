@@ -10,7 +10,6 @@ from typing import List, Dict, Optional
 
 import gspread.exceptions
 import requests.exceptions
-from gspread import authorize
 from google.oauth2.service_account import Credentials
 
 from src.data.consts import ROOTDIR
@@ -60,7 +59,7 @@ class GoogleSheetsAPI:
                     self._sheet_data = self.client.open_by_url(sheet_url).worksheets()
                     return self._sheet_data
 
-                except (requests.exceptions.RequestException, socket.gaierror, gspread.exceptions.APIError) as e:
+                except Exception as e:
 
                     logger.debug(f"- Request exception: {e}, retrying...")
                     wait = 2 ** attempt
