@@ -15,7 +15,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(android, symbol, create_order_data, sl_type, tp_type):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, indicate=SLTPType.sample_values())
+    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
     # -------------------
 
