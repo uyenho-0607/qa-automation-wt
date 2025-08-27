@@ -14,7 +14,7 @@ from src.utils.logging_utils import logger
 )
 def test(android, symbol, get_asset_tab_amount, trade_type, create_order_data):
     # -------------------
-    trade_object = ObjTrade(trade_type, OrderType.MARKET, symbol=symbol, indicate=SLTPType.sample_values())
+    trade_object = ObjTrade(trade_type, OrderType.MARKET, symbol=symbol)
     tab_amount = get_asset_tab_amount(AssetTabs.OPEN_POSITION)
     # -------------------
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")

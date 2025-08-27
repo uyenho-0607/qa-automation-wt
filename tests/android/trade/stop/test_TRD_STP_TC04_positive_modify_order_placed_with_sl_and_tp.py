@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(android, symbol, create_order_data, sl_type, tp_type, close_edit_confirmation):
-    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol, indicate=SLTPType.sample_values())
+    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")
