@@ -81,7 +81,6 @@ class WebDriver:
                 raise ValueError(f"Invalid browser value: {browser!r} !!!")
 
         setattr(builtins, "web_driver", driver)
-        # driver.set_window_position(0, -800)
         driver.maximize_window()
         DriverList.all_drivers[RuntimeConfig.platform] = driver
         return driver
