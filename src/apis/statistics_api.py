@@ -1,6 +1,7 @@
 from src.apis.api_base import BaseAPI
 from src.data.enums import AccSummary, AccInfo
 from src.data.project_info import RuntimeConfig
+from src.utils.logging_utils import logger
 
 
 class StatisticsAPI(BaseAPI):
@@ -10,7 +11,9 @@ class StatisticsAPI(BaseAPI):
         super().__init__(headers=RuntimeConfig.headers)
 
     def get_account_statistics(self, get_acc_balance=False, get_asset_acc=False):
+        logger.info("[API] GET account statistic")
         resp = self.get(endpoint=self._endpoint)
+
         if get_acc_balance:
             acc_info = resp["accountBalance"]
             account_overview = {

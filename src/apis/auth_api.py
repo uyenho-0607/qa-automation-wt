@@ -2,6 +2,7 @@ from src.apis.api_base import BaseAPI
 from src.core.config_manager import Config
 from src.data.enums import Client, AccountType
 from src.data.project_info import RuntimeConfig
+from src.utils.logging_utils import logger
 
 
 class AuthAPI(BaseAPI):
@@ -34,7 +35,7 @@ class AuthAPI(BaseAPI):
                 "password": self.password or credentials.password,
                 "userId": self.userid or credentials.username
             }
-
+            logger.info("[API] Login auto client")
             resp = self.post(
                 endpoint=self.endpoints.get(self.client, self.endpoints.get(Client.TRANSACT_CLOUD))[self.account_type],
                 payload=payload

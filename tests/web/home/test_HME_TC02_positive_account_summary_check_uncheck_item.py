@@ -28,22 +28,22 @@ def test_multiple_items(web):
     items = random.sample(AccSummary.checkbox_list(), 4)
     display_logs = ', '.join(item.value for item in items)
 
-    logger.info(f"Step 1: Uncheck: {display_logs}")
+    logger.info(f"Step 1: Uncheck: {display_logs!r}")
     web.home_page.check_uncheck_balance_items(items, check=False)
 
-    logger.info(f"Verify {display_logs} is not displayed")
+    logger.info(f"Verify {display_logs!r} are not displayed")
     web.home_page.verify_acc_balance_items_displayed(items, is_display=False)
 
-    logger.info(f"Step 2: Check: {display_logs}")
+    logger.info(f"Step 2: Check: {display_logs!r}")
     web.home_page.check_uncheck_balance_items(items, check=True)
 
-    logger.info(f"Verify {display_logs} is displayed")
+    logger.info(f"Verify {display_logs!r} are displayed")
     web.home_page.verify_acc_balance_items_displayed(items)
 
 
 @pytest.fixture(autouse=True)
 def teardown(web):
     yield
-    logger.info("- Show all account summary items")
+    logger.info("[Cleanup] Show all account summary items")
     web.home_page.check_uncheck_balance_items(AccSummary.checkbox_list())
 

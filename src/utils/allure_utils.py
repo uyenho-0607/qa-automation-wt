@@ -11,19 +11,10 @@ from typing import Dict, Any
 import allure
 from pytest_selenium import driver
 
-from src.data.consts import GRID_VIDEO_URL
 from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
-from src.data.project_info import DriverList
 from src.data.project_info import StepLogs, RuntimeConfig
 from src.utils.common_utils import convert_timestamp
 from src.utils.logging_utils import logger
-
-
-def attach_session_video():
-    driver = DriverList.all_drivers.get(RuntimeConfig.platform.lower())
-    if driver:
-        s3_video_url = f'<a href="{GRID_VIDEO_URL}/videos/{driver.session_id}.mp4">Session Video</a>'
-        allure.attach(s3_video_url, name="Screen Recording", attachment_type=allure.attachment_type.HTML)
 
 
 def save_recorded_video(video_raw):
@@ -76,8 +67,6 @@ def attach_video(driver):
         video_data = driver.stop_recording_screen()
         video_path = save_recorded_video(video_data)
         # Attach to Allure
-        # with open(video_path, "rb") as f:
-        #     allure.attach(f.read(), name="Screen Recording", attachment_type=allure.attachment_type.MP4)
         allure.attach.file(
             video_path,
             name="Screen Recording",
@@ -178,49 +167,6 @@ def _remove_skipped_tests(file_path):
 def _add_attachments_prop(data: Dict[str, Any]) -> None:
     for item in data.get("steps", []):
         item["attachments"] = []
-
-
-# def _process_failed_status(data: Dict[str, Any]) -> None:
-#     """Process failed test status and update steps."""
-#     if not data.get("steps"):
-#         return
-#
-#     failed_logs = StepLogs.all_failed_logs[:]
-#     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
-#     v_steps = [item for item in data["steps"]]
-#
-#     should_break = False
-#     while failed_logs and not should_break:
-#         for failed_step, msg_detail in failed_logs:
-#             if failed_step == "end_test":
-#                 StepLogs.all_failed_logs.pop(0)
-#                 should_break = True
-#                 break
-#
-#             for index, v_step in enumerate(v_steps):
-#                 step_name = v_step.get("name", "").lower()
-#
-#                 if step_name == failed_step.lower():
-#                     StepLogs.all_failed_logs.pop(0)
-#
-#                     if "verify" in step_name:
-#                         v_step["status"] = "failed"
-#                         v_step["statusDetails"] = dict(message=msg_detail)
-#                         del v_steps[:index + 1]
-#
-#                         # Attach screenshot if available
-#                         if failed_attachments:
-#                             v_step["attachments"].extend(failed_attachments[:1])
-#                             del failed_attachments[:1]
-#
-#                         break  # Move to next failed_log after first match
-#
-#                     else:  # this is a broken step
-#                         v_step["status"] = "broken"
-#                         # data["status"] = "broken"
-#                         data["steps"][-1]["attachments"].extend(list(
-#                             filter(lambda x: x["name"] == "broken", data.get("attachments", []))
-#                         ))
 
 
 def _process_failed_status(data: Dict[str, Any]) -> None:

@@ -19,19 +19,16 @@ class DriverManager:
                 _driver = WebDriver.init_driver(
                     browser=kwargs.get("browser", RuntimeConfig.browser),
                     headless=kwargs.get("headless", RuntimeConfig.headless),
-                    enable_cdp=True
+                    enable_cdp=False
                 )
-                logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver
 
             case "ios":
                 _driver = AppiumDriver.init_ios_driver()
-                logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver
 
             case "android":
                 _driver = AppiumDriver.init_android_driver()
-                logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver
 
             case _:
@@ -51,4 +48,4 @@ class DriverManager:
                 AppiumDriver.quit_mobile_driver("android")
 
             case _:
-                raise ValueError(f"Invalid platform: {platform}")
+                logger.warning(f"- Invalid platform provided: {platform!r}")

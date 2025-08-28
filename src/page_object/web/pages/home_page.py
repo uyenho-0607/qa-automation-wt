@@ -57,7 +57,10 @@ class HomePage(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
     def is_logged_in(self):
-        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Login successfully, Home Page is displayed" if res else f"- Login failed, Home Page is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
+        return res
 
     def toggle_account_selector(self, open=True):
         is_open = self.actions.is_element_displayed(self.__account_balance_item)
@@ -74,12 +77,14 @@ class HomePage(BasePage):
         account_item = account_item if isinstance(account_item, list) else [account_item]
 
         for item in account_item:
-            logger.debug(f"{'Check' if check else 'Uncheck'} {item} balance summary")
             locator = cook_element(self.__chb_acc_summary, item)
             is_checked = " checked" in self.actions.get_attribute(locator, "class")
 
             if is_checked != check:
+                logger.debug(f"{'Check' if check else 'Uncheck'} {item}")
                 self.actions.click(locator)
+            else:
+                logger.debug(f"{item} already {'Check' if check else 'Uncheck'} ")
 
         self.toggle_balance_summary(open=False)
 

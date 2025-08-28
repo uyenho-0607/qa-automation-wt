@@ -65,24 +65,21 @@ class BasePage:
 
     def wait_for_spin_loader(self, timeout: int = 5):
         """Wait for the loader to be invisible."""
-        logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
-            logger.info("- Waiting for spin loader to disappear...")
+            logger.debug("- Wait for loading icon to disappear...")
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=30)
 
     def refresh_page(self):
+        logger.debug("- Refresh page...")
         self.actions.refresh()
         self.wait_for_spin_loader()
-
-    def wait_for_alert_error_disappear(self):
-        if self.actions.is_element_displayed(self.__alert_error, timeout=QUICK_WAIT):
-            self.actions.wait_for_element_invisible(self.__alert_error)
 
     def is_current_page(self, url_path: URLPaths):
         return f"/{url_path.lower()}" in self.actions.get_current_url()
 
     def get_server_device_time(self, trade_object, convert_time=True):
         server_time = self.actions.get_text(self.__server_time, timeout=QUICK_WAIT)
+
         logger.debug(f"- Server/ Device time: {server_time!r}")
         server_time = server_time if not convert_time else convert_strtime(server_time)
 
@@ -93,7 +90,7 @@ class BasePage:
             trade_object.close_date = server_time
 
     # ------------------------ VERIFY ------------------------ #
-    def verify_page_url(self, url_path: str=None, custom_url="", timeout: int = EXPLICIT_WAIT):
+    def verify_page_url(self, url_path: str = None, custom_url="", timeout: int = EXPLICIT_WAIT):
         """Verify that the current URL matches the expected page URL."""
         expected_url = Config.url_path(url_path) if url_path is not None else custom_url
         self.actions.verify_site_url(expected_url, timeout=timeout)

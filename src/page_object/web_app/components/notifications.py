@@ -82,11 +82,11 @@ class Notifications(BasePage):
         logger.debug("- Fetching notification title")
         actual_title = self.actions.get_text(self.__noti_title, timeout=QUICK_WAIT)
 
-        logger.debug(f"- Check noti des - {expected_des!r}")
+        logger.debug(f"> Check noti des = {expected_des!r}")
         compare_noti_with_tolerance(actual_des, expected_des)
 
         if actual_title:
-            logger.debug(f"- Check noti title - {expected_title!r}")
+            logger.debug(f"> Check noti title - {expected_title!r}")
             soft_assert(actual_title, expected_title)
 
     def verify_notification_result(self, expected_result: str | list, close=False):

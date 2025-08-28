@@ -6,7 +6,7 @@ from typing import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, WARNING_ICON
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.trade.base_trade import BaseTrade
@@ -73,8 +73,9 @@ class PlaceOrderPanel(BaseTrade):
     # ------------------------ HELPER METHODS ------------------------ #
     def _get_volume_info_value(self) -> str:
         """Get current volume/units value from UI."""
-        logger.debug("- Get units value")
-        return self.actions.get_text(self.__volume_info_value)
+        units = self.actions.get_text(self.__volume_info_value)
+        logger.debug(f"- Units value: {units!r}")
+        return units
 
     def _get_input_sl(self) -> str:
         """Get current stop loss value from input field."""
@@ -185,51 +186,82 @@ class PlaceOrderPanel(BaseTrade):
         if self.actions.is_element_displayed(self.__swap_volume):
             self.actions.click(self.__swap_volume)
 
-    def _select_trade_type(self, trade_type: TradeType) -> None:
+    def _select_trade_type(self, trade_type: TradeType, retries=3) -> None:
         """Select trade type (BUY/SELL)."""
-        locator = cook_element(self.__btn_trade, trade_type.lower())
-        logger.debug(f"- Select trade type: {trade_type.upper()!r}")
-        self.actions.click(locator)
 
-    def _select_order_type(self, order_type: OrderType) -> None:
-        """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
-        locator = cook_element(self.__opt_order_type, locator_format(order_type))
+        logger.debug(f"- Select trade type: {trade_type.upper()!r}")
+        locator = cook_element(self.__btn_trade, trade_type.lower())
+
         if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
-            logger.debug(f"- Order Type {order_type.value!r} already selected")
+            logger.debug(f"> Trade Type: {trade_type.value} selected")
             return
 
+        if retries <= 0:
+            logger.error(f"- {WARNING_ICON} Failed to select trade type: {trade_type.value!r}")
+
+        self.actions.click(locator)
+        time.sleep(1)
+
+        # recursive call
+        self._select_trade_type(trade_type, retries - 1)
+
+    def _select_order_type(self, order_type: OrderType, retries=3) -> None:
+        """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
         logger.debug(f"- Select order type: {order_type.capitalize()!r}")
+        locator = cook_element(self.__opt_order_type, locator_format(order_type))
+
+        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
+            logger.debug(f"> Order Type {order_type.value!r} selected")
+            return
+
+        if retries <= 0:
+            logger.error(f"- {WARNING_ICON} Failed to select order_type: {order_type.value!r}")
+
         self.actions.click(self.__drp_order_type)
         time.sleep(1)
         self.actions.click(locator)
 
-    def _select_fill_policy(self, fill_policy: FillPolicy | str) -> str | None:
-        """Select fill policy for the order. Return selected fill_policy."""
-        locator = cook_element(self.__opt_fill_policy, locator_format(fill_policy))
-        is_selected = "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT)
+        # Recursive call
+        self._select_order_type(order_type, retries - 1)
 
-        if is_selected:
-            logger.debug(f"- Fill Policy: {fill_policy.capitalize()!r} already selected")
+    def _select_fill_policy(self, fill_policy: FillPolicy | str, retries=3) -> str | None:
+        """Select fill policy for the order. Return selected fill_policy."""
+        logger.debug(f"- Select Fill Policy: {fill_policy.capitalize()!r}")
+        locator = cook_element(self.__opt_fill_policy, locator_format(fill_policy))
+
+        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
+            logger.debug(f"> Fill Policy: {fill_policy.capitalize()!r} selected")
             return
 
-        logger.debug(f"- Select Fill Policy: {fill_policy.capitalize()!r}")
+        if retries <= 0:
+            logger.error(f"- {WARNING_ICON} Failed to select Fill Policy: {fill_policy.value!r}")
+
         self.actions.click(self.__drp_fill_policy)
         self.actions.click(cook_element(self.__opt_fill_policy, locator_format(fill_policy)))
 
-    def _select_expiry(self, expiry: Expiry | str) -> str | None:
+        # Recursive call
+        self._select_fill_policy(fill_policy, retries - 1)
+
+    def _select_expiry(self, expiry: Expiry | str, retries=3) -> str | None:
         """Select expiry for the order. Return selected expiry."""
+        logger.debug(f"- Select expiry: {expiry.capitalize()!r}")
+
         if expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower():
-            logger.debug(f"- Expiry: {expiry!r} already selected")
+            logger.debug(f"> Expiry: {expiry!r} selected")
             return
 
-        logger.debug(f"- Select expiry: {expiry.capitalize()!r}")
+        if retries <= 0:
+            logger.error(f"- {WARNING_ICON} Failed to select Expiry: {expiry.value!r}")
+
         self.actions.click(self.__drp_expiry)
         self.actions.click(cook_element(self.__opt_expiry, locator_format(expiry)))
 
         if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-            logger.debug(f"- Select expiry date")
+            logger.debug(f"> Select expiry date")
             self.actions.click(self.__expiry_trade)
             self.actions.click(self.__expiry_last_date)
+
+        self._select_expiry(expiry, retries - 1)
 
     def _click_place_order_btn(self) -> None:
         """Click place order button."""
@@ -322,11 +354,11 @@ class PlaceOrderPanel(BaseTrade):
 
         if sl_type == SLTPType.POINTS:
             stop_loss = self._get_input_sl()
-            trade_object.sl_type = sl_type # update sl_type for define tolerance fields
+            trade_object.sl_type = sl_type  # update sl_type for define tolerance fields
 
         if tp_type == SLTPType.POINTS:
             take_profit = self._get_input_tp()
-            trade_object.tp_type = tp_type # update sl_type for define tolerance fields
+            trade_object.tp_type = tp_type  # update sl_type for define tolerance fields
 
         # Load input data into trade_object
         volume, units = (units, volume) if swap_to_units else (volume, units)

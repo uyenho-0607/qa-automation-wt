@@ -1,7 +1,5 @@
 from pathlib import Path
 
-from src.data.enums import Client
-
 # Framework Paths
 ROOTDIR = Path(__file__).parent.parent.parent
 CONFIG_DIR = ROOTDIR / "config"
@@ -21,7 +19,12 @@ QUICK_WAIT = 0.5
 
 CHECK_ICON = "✔"
 FAILED_ICON = "✘"
+CHECK_ICON_COLOR = "✅"
+FAILED_ICON_COLOR = "❌"
+WARNING_ICON = "❗"
+SEND_ICON = "➡️"
+RECEIVE_ICON = "⬅️"
 
 WEB_APP_DEVICE = "iPhone 14 Pro Max"
 
-MULTI_OMS = [Client.LIRUNEX]
+MULTI_OMS = ["lirunex"]

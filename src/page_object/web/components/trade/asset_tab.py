@@ -5,7 +5,7 @@ from typing import Optional, List, Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, WARNING_ICON
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts, SLTPType, Expiry, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -90,6 +90,7 @@ class AssetTab(BaseTrade):
         """Get current displaying symbols"""
         self.wait_for_spin_loader()
         symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()))
+        logger.debug(f"- Current symbols: {', '.join(symbols)!r}")
         return symbols
 
     def get_order_ids(self, tab: AssetTabs) -> List[str]:
@@ -138,7 +139,7 @@ class AssetTab(BaseTrade):
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""
         self.actions.wait_for_element_visible(
-            cook_element(self.__tab_amount, locator_format(tab), expected_amount), timeout=20
+            cook_element(self.__tab_amount, locator_format(tab), expected_amount), timeout=EXPLICIT_WAIT
         )
 
     def _click_action_btn(self, tab: AssetTabs, order_id=0, action: Literal["close", "edit", "track"] = "close") -> None:
@@ -173,7 +174,11 @@ class AssetTab(BaseTrade):
 
             self.get_server_device_time(trade_object)  # update close time
 
-        logger.debug(f"Closing order: {order_id!r}")
+        if order_id:
+            logger.debug(f"- Close order with ID: {order_id!r}")
+        else:
+            logger.debug("- Close latest order")
+
         self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
 
         if confirm:
@@ -181,18 +186,6 @@ class AssetTab(BaseTrade):
 
         if wait:
             self.wait_for_spin_loader()
-
-        # if order_id and confirm:
-        #     # Retry to make sure the order is closed
-        #     locator = cook_element(self.__btn_actions_by_id, order_id, AssetTabs.OPEN_POSITION, "close")
-        #     logger.debug("- Checking if the position is closed")
-        #     for attempt in range(3):
-        #         if not self.actions.is_element_displayed(locator, timeout=QUICK_WAIT):
-        #             break
-        #         logger.warning(f"- The order is not closed yet, retrying... (attempt {attempt + 1}/3)")
-        #         self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
-        #         time.sleep(0.5)
-        #         self.confirm_close_order()
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
         new_created_obj = ObjTrade(**{k: v for k, v in close_obj.items() if k != "order_id"})
@@ -321,23 +314,23 @@ class AssetTab(BaseTrade):
         """
         # Recursive stop condition
         if retry_count >= max_retries:
-            logger.error(f"Failed to display edit confirm modal after {max_retries} attempts")
+            logger.error(f" {WARNING_ICON} Failed to display edit confirm modal after {max_retries} attempts")
             return
 
         if retry_count > 0:
             # Log debug message
-            logger.warning(f"Retry {retry_count}/{max_retries} - Edit confirm modal not displayed yet")
+            logger.warning(f"- Edit confirm modal not displayed yet, retrying (Attempt:{retry_count}/{max_retries})")
             time.sleep(1)
 
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
         tab = AssetTabs.get_tab(order_type)
 
-        logger.debug("Click Edit Button")
+        logger.debug("- Click Edit Button")
         self._click_action_btn(tab, trade_object.get('order_id'), "edit")
 
         # Get edit price to calculate prices
         edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self.__trade_modals.get_edit_price()
-        logger.debug(f"- Edit price is {edit_price!r}")
+        logger.debug(f"> Edit price: {edit_price!r}")
 
         # calculate SL and TP
         stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()

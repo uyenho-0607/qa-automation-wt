@@ -65,21 +65,18 @@ class Chart(BaseTrade):
         # Switch to iframe for checking loading state
         self.actions.switch_to_iframe()
         start = time.time()
-        try:
-            self.actions._wait.until(
-                lambda d: "display: none;" == d.find_element(*self.__chart_container).get_attribute("style"),
-                message="Chart container still showing loading state after timeout"
-            )
+        timeout = 10
+        while time.time() - start < timeout:
+            attr = self.actions.get_attribute(self.__chart_container, "style")
+            if "display: none;" == attr:
+                elapsed = round(time.time() - start, 2)
+                logger.debug(f"- Chart render time: {elapsed!r} sec")
+                self.actions.switch_to_default()
+                return elapsed
 
-            elapsed = round(time.time() - start, 2)
-
-        except TimeoutException:
-            logger.warning("- Timeout exceeds 10 sec")
-            elapsed = 10
-
-        # Switch back to main frame to ensure requests are captured
+        logger.warning("- Chart render time is greater than 10 sec, stop waiting")
         self.actions.switch_to_default()
-        return elapsed
+        return 10
 
     def get_default_render_time(self):
         return self._get_render_time()

@@ -13,7 +13,7 @@ from src.core.driver.driver_manager import DriverManager
 from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
 from src.data.enums import Server, AccountType, Client
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
-from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, attach_session_video
+from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
 from src.utils.logging_utils import logger
 
 
@@ -107,6 +107,13 @@ def pytest_sessionstart(session: pytest.Session):
     if session.config.getoption("num_requests"):
         RuntimeConfig.num_requests = int(session.config.getoption("num_requests"))
 
+    # setup video folder
+    if RuntimeConfig.platform in ["android", "ios"] and RuntimeConfig.allure_dir:
+        if os.path.exists(VIDEO_DIR):
+            shutil.rmtree(VIDEO_DIR)
+
+        os.makedirs(VIDEO_DIR)
+
 
 def pytest_collection_modifyitems(config, items):
     for item in items:
@@ -158,15 +165,13 @@ def pytest_runtest_setup(item: pytest.Item):
 
     print("\x00")  # print a non-printable character to break a new line on console
     logger.info(f"- Running test case: {item.parent.name} - [{server}] - [{account}] ")
-    logger.debug(f"- user: {Config.credentials().username!r}")
+    logger.debug(f"- User: {Config.credentials().username!r}")
 
 
 def pytest_sessionfinish(session: pytest.Session):
     logger.debug("===== pytest_sessionfinish ==== ")
 
-    if RuntimeConfig.platform != "api":
-        DriverManager.quit_driver(RuntimeConfig.platform)
-
+    DriverManager.quit_driver(RuntimeConfig.platform)
     allure_dir = RuntimeConfig.allure_dir
 
     if allure_dir and os.path.exists(ROOTDIR / allure_dir):
@@ -230,21 +235,8 @@ def pytest_runtest_makereport(item, call):
                 except Exception as e:
                     logger.error(f"Failed to handle video recording: {str(e)}")
 
-            if "web" in RuntimeConfig.platform.lower():
-                logger.debug("- Attach session video")
-                attach_session_video()
-
     if report.when == "teardown":
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             if report.failed and driver:
                 attach_screenshot(driver, name="teardown")
                 logger.error(f"Test teardown failed: {report.longreprtext}")
-
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_video_folder():
-    if RuntimeConfig.platform in ["android", "ios"] and RuntimeConfig.allure_dir:
-        if os.path.exists(VIDEO_DIR):
-            shutil.rmtree(VIDEO_DIR)
-
-        os.makedirs(VIDEO_DIR)

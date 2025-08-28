@@ -1,6 +1,5 @@
 import time
 
-from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -30,7 +29,6 @@ class Chart(BaseTrade):
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_chart(self, fullscreen=True, timeout=SHORT_WAIT):
-
         if fullscreen and self.actions.is_element_displayed(self.__chart_toggle_fullscreen, timeout=timeout):
             self.actions.click(self.__chart_toggle_fullscreen)
 
@@ -54,7 +52,6 @@ class Chart(BaseTrade):
         logger.debug(f"- Select Timeframe: {timeframe!r}")
         self.exit_chart_iframe()
 
-        # todo: enhance later
         if timeframe not in ChartTimeframe.mt4_list():
             self.open_timeframe_opt()
 
@@ -62,21 +59,17 @@ class Chart(BaseTrade):
 
     def _get_render_time(self):
         self.actions.switch_to_iframe()
+        timeout = 10
         start = time.time()
-        try:
-            self.actions.test_wait(self.__chart_container)
-            # self.actions._wait.until(
-            #     lambda d: "display: none;" == d.find_element(*self.__chart_container).get_attribute("style"),
-            #     message="Chart container still showing loading state after timeout"
-            # )
+        while time.time() - start < timeout:
+            attr = self.actions.get_attribute(self.__chart_container, "style")
+            if "display: none;" == attr:
+                elapsed = round(time.time() - start, 2)
+                logger.debug(f"- Chart render time: {elapsed!r}s")
+                return elapsed
 
-            elapsed = round(time.time() - start, 2)
-
-        except TimeoutException:
-            logger.warning("- Timeout exceeds 10 sec")
-            elapsed = 10
-
-        return elapsed
+        logger.warning("Chart render time is over 10 sec, stop waiting")
+        return 10
 
     def get_default_render_time(self):
         return self._get_render_time()

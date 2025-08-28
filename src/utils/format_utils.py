@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from requests import Response
 
+from src.data.consts import SEND_ICON, RECEIVE_ICON
 from src.utils.logging_utils import logger
 
 
@@ -208,6 +209,7 @@ def format_request_log(resp: Response, log_resp=False) -> str:
         try:
             data = json.loads(resp.request.body)
             json_data = json.dumps(data)  # compact form
+
         except Exception:
             json_data = resp.request.body.decode() if isinstance(resp.request.body, bytes) else resp.request.body
 
@@ -218,15 +220,15 @@ def format_request_log(resp: Response, log_resp=False) -> str:
     # Format response content
     try:
         content = resp.json()
-        if isinstance(content.get("result"), list) and len(content.get("result")) > 3:
-            left_resp = len(content["result"]) - 3
-            content["result"] = content["result"][:3] + [f"... ({left_resp} more)"]
+        if isinstance(content.get("result"), list) and len(content.get("result")) > 2:
+            left_resp = len(content["result"]) - 2
+            content["result"] = content["result"][:2] + [f"... ({left_resp} more)"]
 
         response_text = json.dumps(content, indent=4)
     except ValueError:
         response_text = resp.text.strip()
 
     if log_resp:
-        return f"\n{curl_command}\n\n{response_text}\n"
+        return f"{SEND_ICON}  Request Sent: \n{curl_command}\n\n {RECEIVE_ICON}  Response Received: \n{response_text}\n\n"
 
-    return f"\n{curl_command}\n"
+    return f"{SEND_ICON}  Request Sent: \n{curl_command}\n\n"

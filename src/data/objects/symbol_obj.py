@@ -32,7 +32,6 @@ class ObjSymbol:
         from src.apis.api_client import APIClient
 
         if not ObjSymbol.all_symbols:
-            logger.info("- Getting Symbols data")
             resp = APIClient().market.get_watchlist_items(WatchListTab.ALL, get_symbols=False)
 
             # filter out crypto symbols

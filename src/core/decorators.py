@@ -7,11 +7,11 @@ import requests
 from selenium.common import StaleElementReferenceException, ElementNotInteractableException, \
     ElementClickInterceptedException
 
+from src.data.consts import WARNING_ICON
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_verify_table, log_verification_result, attach_screenshot
 from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
-
 
 def log_requests(func):
     """Decorator to log candlestick requests using Chrome DevTools Protocol"""
@@ -102,12 +102,9 @@ def handle_stale_element(func):
             try:
                 return func(self, *args, **kwargs)
             except (StaleElementReferenceException, ElementNotInteractableException, ElementClickInterceptedException) as e:
-                # Clear any broken steps that might have been added from the previous attempt
-                # if StepLogs.broken_steps and attempt < max_retries + 1:
-                #     StepLogs.broken_steps.pop()
 
                 if attempt < max_retries:
-                    logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
+                    logger.warning(f"{WARNING_ICON} {type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
                     continue
 
                 else:
@@ -147,6 +144,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
             bound_args.apply_defaults()  # This applies default values
             all_args = bound_args.arguments
             parse_result = all_args.get("parse_result", True)
+            log_resp = all_args.get("log_resp", True)
 
             for attempt in range(max_retries + 1):  # +1 for initial attempt
                 try:
@@ -154,13 +152,9 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
                     # Execute the API request
                     response = func(self, *args, **kwargs)
 
-                    # log request sending info
-                    logger.info("==============================================")
-                    logger.info(f"[API] - Response time: {round(response.elapsed.total_seconds(), 2)} sec - Status code: {response.status_code}")
-
                     # Handle successful response
                     if response.ok:
-                        logger.debug(f"{format_request_log(response, log_resp=True)}")
+                        logger.debug(f"{format_request_log(response, log_resp=log_resp)}")
 
                         if parse_result:
                             # Parse JSON response safely
@@ -169,7 +163,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
                                 return result.get("result", result) if response.text.strip() else []
 
                             except json.JSONDecodeError as e:
-                                logger.warning(f"Failed to parse JSON response: {e}")
+                                # logger.warning(f"Failed to parse JSON response: {e}")
                                 return response.text if response.text else []
                         else:
                             return response

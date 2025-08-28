@@ -19,7 +19,7 @@ ios_udid: ""
 
 
 lirunex:
-  base_url: https://lirunex-mb.webtrader-release-sit.s20ip12.com
+  base_url: https://lirunex-global-mb.webtrader-release-sit.s20ip12.com
   bo_url: https://lirunex-backoffice.webtrader-release-sit.s20ip12.com/backoffice
   api_url: https://lirunex-mb.webtrader-release-sit.s20ip12.com/api
 
@@ -36,7 +36,7 @@ lirunex:
 
   mobile:
     app_package: com.aquariux.wt.sit.lirunex
-    app_bundle: ...
+    app_bundle: com.aquariux.wt.sit.lirunex
 
 transactCloud:
   base_url: https://transactcloudmt5-mb.webtrader-release-sit.s20ip12.com
@@ -50,4 +50,4 @@ transactCloud:
 
   mobile:
     app_package: com.aquariux.wt.sit.transactcloudmt5
-    app_bundle: ...
+    app_bundle: com.aquariux.wt.sit.transactcloudmt5

@@ -1,5 +1,6 @@
 from src.apis.api_base import BaseAPI
 from src.data.enums import AssetTabs, OrderType
+from src.utils.logging_utils import logger
 
 
 class OrderAPI(BaseAPI):
@@ -17,6 +18,7 @@ class OrderAPI(BaseAPI):
         :param order_type: return open orders if order type is Market, else >> pending
         :return: Return market/ pending orders count for a specific symbol/ all symbols
         """
+        logger.debug(f"[API] Get order amount (order_type:{order_type.value})")
         resp = self.get(endpoint=self._counts_endpoint, params={"symbol": symbol} if symbol else {})
         key = "market" if order_type == OrderType.MARKET else "pending"
 
@@ -38,6 +40,8 @@ class OrderAPI(BaseAPI):
         tab = AssetTabs.get_tab(order_type)
 
         endpoint = self._pending_endpoint if tab == AssetTabs.PENDING_ORDER else self._open_endpoint
+
+        logger.info(f"[API] Get order details ({'All' if not symbol else f'symbol:{symbol}'})")
         resp = self.get(endpoint, {"symbol": symbol})
 
         if order_id:
