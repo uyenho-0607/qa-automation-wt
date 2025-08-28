@@ -6,8 +6,6 @@ CONFIG_DIR = ROOTDIR / "config"
 VIDEO_DIR = ROOTDIR / ".videos"
 SRC_DIR = ROOTDIR / "src"
 DATA_DIR = SRC_DIR / "data"
-GRID_SERVER = "http://aqdev:aq123@selenium-grid.aquariux.dev/wd/hub"
-GRID_VIDEO_URL = "https://selenium-grid-videos.aquariux.dev"
 
 # Timeouts (in seconds)
 EXPLICIT_WAIT = 10
