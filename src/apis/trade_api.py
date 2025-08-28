@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from src.apis.api_base import BaseAPI
 from src.apis.market_api import MarketAPI
 from src.apis.order_api import OrderAPI
-from src.data.consts import FAILED_ICON_COLOR
+from src.data.consts import FAILED_ICON_COLOR, CHECK_ICON_COLOR
 from src.data.enums import Expiry, TradeType, OrderType, SLTPType, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
@@ -146,6 +146,9 @@ class TradeAPI(BaseAPI):
 
                 logger.debug("[API] Place order")
                 response = self.post(endpoint, payload)
+
+                if response.get("clOrdId"):
+                    logger.info(f"[API] Order placed successfully, orderID: {response['clOrdId']} {CHECK_ICON_COLOR}")
 
                 # Update trade object with response data
                 self._update_trade_object(trade_object, payload, response, update_price)

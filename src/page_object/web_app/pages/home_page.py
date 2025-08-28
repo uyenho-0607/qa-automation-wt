@@ -52,7 +52,10 @@ class HomePage(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
     def is_logged_in(self):
-        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Login successfully, Home Page is displayed" if res else f"- Login failed, Home Page is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
+        return res
     
     def open_my_account(self, open=True):
         is_open = self.my_account_modal.is_open()

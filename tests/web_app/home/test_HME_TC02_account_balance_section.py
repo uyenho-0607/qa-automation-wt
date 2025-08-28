@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from src.utils.logging_utils import logger
@@ -5,6 +7,8 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 def test(web_app, teardown):
+    time.sleep(1)
+
     logger.info("Step 1: Open My Account modal")
     web_app.home_page.open_my_account()
 
@@ -36,5 +40,5 @@ def test(web_app, teardown):
 @pytest.fixture
 def teardown(web_app):
     yield
-    logger.info("- Close My Account modal")
+    logger.info("[Cleanup] Close My Account modal (if open)")
     web_app.home_page.my_account_modal.close()

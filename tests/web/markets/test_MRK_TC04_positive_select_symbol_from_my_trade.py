@@ -48,7 +48,7 @@ def setup_test(web):
 
     selected_symbol = random.choice(symbols)
 
-    logger.info(f"- Setup Summary: random symbol from My Trade: {selected_symbol!r}")
+    logger.info(f">> Setup Summary: random symbol from My Trade: {selected_symbol!r}")
     logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield selected_symbol

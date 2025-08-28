@@ -52,14 +52,13 @@ class WebActions(BaseActions):
 
         # Fall back
         sent_value = element.get_attribute("value")
-        # logger.debug(f"- Sent value: {sent_value!r}")
 
-        while sent_value != str(value) and max_retries:
-            logger.debug(f"> Sent value: {value}, Input value: {value} Retry sending: {value!r}")
+        while str(sent_value) != str(value) and max_retries:
+            logger.warning(f"> Sent value: {sent_value} != Input value: {value}. Retry sending: {value!r}")
             send_key_func(value, element=element)
             max_retries -= 1
             sent_value = element.get_attribute("value")
-            logger.debug(f"- Resent value: {sent_value!r}")
+            logger.debug(f"> Resent value: {sent_value!r}")
 
     @handle_stale_element
     @log_requests

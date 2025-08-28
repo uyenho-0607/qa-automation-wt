@@ -31,8 +31,6 @@ def pytest_addoption(parser: pytest.Parser):
 
     # for testing chart render time
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
-    parser.addoption("--num_requests", default="", help="Number of Requests to test percentile")
-
     parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
 
 

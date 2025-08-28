@@ -47,7 +47,7 @@ def setup_pre_selected_tab(symbol):
         logger.info("- Send API request to delete all starred symbols")
         APIClient().market.delete_starred_symbols()
 
-    logger.info(f"- Setup Summary: pre-selected tab: {pre_selected_tab.value!r}")
+    logger.info(f">> Setup Summary: pre-selected tab: {pre_selected_tab.value!r}")
     logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield pre_selected_tab

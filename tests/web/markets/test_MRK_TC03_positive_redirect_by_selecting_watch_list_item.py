@@ -55,7 +55,7 @@ def setup_test(web):
         logger.info(f"- Get symbol from watchlist tab: {tab!r}")
         watchlist_symbol[tab] = web.markets_page.watch_list.get_current_symbols(tab)
 
-    logger.info(f"- Setup Summary: Watch List Symbol: {format_dict_to_string(watchlist_symbol)}")
+    logger.info(f">> Setup Summary: Watch List Symbol: {format_dict_to_string(watchlist_symbol)}")
     logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield watchlist_symbol

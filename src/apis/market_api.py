@@ -20,8 +20,10 @@ class MarketAPI(BaseAPI):
         super().__init__()
 
     def get_symbol_details(self, symbol: str):
+        fields_to_show = ["symbol", "digits", "decimal", "pointStep", "ask", "bid", "contractSize"]
+
         logger.debug(f"[API] Get symbol details (symbol:{symbol})")
-        resp = self.get(endpoint=self._symbol_details, params={"symbol": symbol})
+        resp = self.get(endpoint=self._symbol_details, params={"symbol": symbol}, fields_to_show=fields_to_show)
         return resp
 
     def get_watchlist_items(self, tab: WatchListTab, get_symbols=True):
@@ -31,7 +33,7 @@ class MarketAPI(BaseAPI):
             _endpoint = self._all
 
         logger.debug(f"[API] Get watchlist symbols (tab:{tab.value})")
-        resp = self.get(_endpoint, params={"code": self.watchlist_map.get(tab)})
+        resp = self.get(_endpoint, params={"code": self.watchlist_map.get(tab)}, fields_to_show=["symbol", "type", "status"])
 
         if get_symbols:
             res = [item["symbol"] for item in resp]

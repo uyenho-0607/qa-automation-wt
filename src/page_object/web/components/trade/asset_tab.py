@@ -55,7 +55,8 @@ class AssetTab(BaseTrade):
     __table_headers = (By.XPATH, "//*[@data-testid='asset-{}-table-header']//th[text()='{}']")
 
     __col_symbol = (By.CSS_SELECTOR, data_testid('asset-{}-column-symbol'))
-    __col_order_ids = (By.CSS_SELECTOR, data_testid('asset-{}-column-order-id'))
+    __col_order_ids_by_tab = (By.CSS_SELECTOR, data_testid('asset-{}-column-order-id'))
+    __col_order_ids = (By.CSS_SELECTOR, "*[data-testid$='-column-order-id']")
 
     __first_item = (By.CSS_SELECTOR, "tr:first-of-type *[data-testid*='asset-{}-column']")
     __item_by_id = (By.XPATH, "//*[@data-testid='asset-{}-column-order-id' and text()='{}']")
@@ -77,14 +78,19 @@ class AssetTab(BaseTrade):
         """Get the number of items in the specified tab."""
         time.sleep(2)
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
-        return extract_asset_tab_number(amount)
+        res = extract_asset_tab_number(amount)
+        logger.debug(f"> Tab amount: {res} ({tab.value})")
+        return res
 
-    def get_last_order_id(self, trade_object: ObjTrade) -> str:
+    def get_last_order_id(self, trade_object: ObjTrade = None) -> str:
         """Get the latest order ID from the specified tab and update value into trade_object."""
         self.wait_for_spin_loader(timeout=SHORT_WAIT)
-        tab = AssetTabs.get_tab(trade_object.order_type)
-        trade_object.order_id = self.actions.get_text(cook_element(self.__col_order_ids, tab.col_locator()))
-        return trade_object.order_id
+        order_id = self.actions.get_text(self.__col_order_ids)
+
+        if trade_object:
+            trade_object.order_id = order_id
+
+        return order_id
 
     def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
         """Get current displaying symbols"""
@@ -95,7 +101,7 @@ class AssetTab(BaseTrade):
 
     def get_order_ids(self, tab: AssetTabs) -> List[str]:
         """Get a list of displaying order IDs in the specified tab."""
-        order_ids = self.actions.get_text_elements(cook_element(self.__col_order_ids, tab.col_locator()))
+        order_ids = self.actions.get_text_elements(cook_element(self.__col_order_ids_by_tab, tab.col_locator()))
         return order_ids
 
     def get_item_data(self, tab: AssetTabs, order_id=None, trade_object: ObjTrade = None):
@@ -124,7 +130,7 @@ class AssetTab(BaseTrade):
     def select_tab(self, tab: AssetTabs) -> None:
         """Select the specified asset tab."""
         if self._is_tab_selected(tab):
-            logger.debug("- Tab already selected")
+            logger.debug("> Tab already selected")
             return
 
         logger.debug(f"- Select asset tab: {tab.capitalize()}")
@@ -162,30 +168,24 @@ class AssetTab(BaseTrade):
         not wait or self.wait_for_spin_loader()
 
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=False) -> None:
-        order_id = order_id or (trade_object.get('order_id') if trade_object else 0)
 
+        # define order_id value
+        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else self.get_last_order_id(trade_object)
+
+        # update closed info for trade_object if provided
         if trade_object:
-            if not trade_object.get("order_id"):  # update date latest order_id for trade_object
-                trade_object["order_id"] = self.get_last_order_id(trade_object)
-
-            if not trade_object.get("current_price"):  # update current price for trade_object
+            if not trade_object.get("current_price"):
                 item_data = self.get_item_data(tab=AssetTabs.get_tab(trade_object.order_type), order_id=order_id)
                 trade_object["current_price"] = item_data["current_price"]
 
-            self.get_server_device_time(trade_object)  # update close time
+            # update close time
+            self.get_server_device_time(trade_object)
 
-        if order_id:
-            logger.debug(f"- Close order with ID: {order_id!r}")
-        else:
-            logger.debug("- Close latest order")
-
+        logger.debug(f"- Close order with ID: {order_id!r}")
         self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
 
-        if confirm:
-            self.confirm_close_order()
-
-        if wait:
-            self.wait_for_spin_loader()
+        not confirm or self.confirm_close_order()
+        not wait or self.wait_for_spin_loader()
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
         new_created_obj = ObjTrade(**{k: v for k, v in close_obj.items() if k != "order_id"})

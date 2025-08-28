@@ -5,6 +5,7 @@ import pytest
 from src.apis.api_client import APIClient
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
+from src.data.consts import FAILED_ICON_COLOR
 from src.utils.logging_utils import logger
 
 
@@ -49,6 +50,9 @@ def login_member_site(web):
 
         else:
             break
+
+    if not max_attempts and not web.home_page.is_logged_in():
+        raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
 
     logger.info(f"{'=' * 10} Setup Login - Done {'=' * 10}")
 

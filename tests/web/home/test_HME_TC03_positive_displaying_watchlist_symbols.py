@@ -56,8 +56,8 @@ def setup_test():
 
         else:
 
-            logger.info(f"- Prepare symbol data for checking tab {WatchListTab.FAVOURITES.value!r}")
-            symbols = ObjSymbol.get_symbols(get_all=True)
+            logger.info(f"- Prepare starred symbols for checking tab {WatchListTab.FAVOURITES.value!r}")
+            symbols = ObjSymbol().get_symbols(get_all=True)
             _list_symbol = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
 
             for symbol in _list_symbol:
@@ -66,7 +66,7 @@ def setup_test():
 
             symbols = _list_symbol
 
-        logger.info(f"- Setup Summary: List symbols should be displayed in tab: {tab.value!r} - {', '.join(symbols)!r}")
+        logger.info(f">> Setup Summary: List symbols should be displayed in tab: {tab.value!r} - {', '.join(symbols)!r}")
         logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
         return symbols

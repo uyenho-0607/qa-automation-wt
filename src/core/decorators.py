@@ -145,6 +145,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
             all_args = bound_args.arguments
             parse_result = all_args.get("parse_result", True)
             log_resp = all_args.get("log_resp", True)
+            fields_to_show = all_args.get("fields_to_show", None)
 
             for attempt in range(max_retries + 1):  # +1 for initial attempt
                 try:
@@ -154,7 +155,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
 
                     # Handle successful response
                     if response.ok:
-                        logger.debug(f"{format_request_log(response, log_resp=log_resp)}")
+                        logger.debug(f"{format_request_log(response, log_resp=log_resp, fields_to_show=fields_to_show)}")
 
                         if parse_result:
                             # Parse JSON response safely
