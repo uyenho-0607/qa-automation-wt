@@ -102,9 +102,6 @@ def pytest_sessionstart(session: pytest.Session):
     if session.config.getoption("charttime"):
         RuntimeConfig.charttime = int(session.config.getoption("charttime"))
 
-    if session.config.getoption("num_requests"):
-        RuntimeConfig.num_requests = int(session.config.getoption("num_requests"))
-
     # setup video folder
     if RuntimeConfig.platform in ["android", "ios"] and RuntimeConfig.allure_dir:
         if os.path.exists(VIDEO_DIR):
