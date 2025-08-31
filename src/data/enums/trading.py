@@ -101,25 +101,96 @@ class FillPolicy(BaseEnum):
 
         return cls.RETURN
 
+
 class ChartTimeframe(BaseEnum):
     one_min = "1min"
     five_min = "5min"
+    ten_min = "10min"
     fifteen_min = "15min"
+    twenty_min = "20min"
     thirty_min = "30min"
     one_hour = "1h"
+    two_hour = "2h"
+    three_hour = "3h"
     four_hour = "4h"
+    six_hour = "6h"
     one_day = "1d"
     one_week = "1w"
     one_month = "1M"
+
+    @classmethod
+    def list_values(cls, except_val=None):
+        if RuntimeConfig.is_mt4():
+            return cls.mt4_list()
+
+        except_val = except_val if isinstance(except_val, list) else [except_val]
+        return [item for item in ChartTimeframe if item not in except_val]
+
+    @classmethod
+    def mt4_list(cls):
+        display_list = [
+            cls.one_month,
+            cls.fifteen_min,
+            cls.one_hour,
+            cls.thirty_min,
+            cls.one_week,
+            cls.one_min,
+            cls.four_hour,
+            cls.five_min,
+            cls.one_day,
+        ]
+        return display_list
+
+    def locator_map(self):
+        if RuntimeConfig.is_web():
+            map_dict = {
+                self.one_min: "1min",
+                self.five_min: "5min",
+                self.ten_min: "10 minutes",
+                self.fifteen_min: "15min",
+                self.twenty_min: "20 minutes",
+                self.thirty_min: "30min",
+                self.one_hour: "1H",
+                self.two_hour: "2 hours",
+                self.three_hour: "3 hours",
+                self.four_hour: "4H",
+                self.six_hour: "6 hours",
+                self.one_day: "1D",
+                self.one_week: "1W",
+                self.one_month: "1M"
+            }
+        else:
+            map_dict = {
+                self.one_min: "1m",
+                self.five_min: "5m",
+                self.ten_min: "10m",
+                self.fifteen_min: "15m",
+                self.twenty_min: "20m",
+                self.thirty_min: "30m",
+                self.one_hour: "1H",
+                self.two_hour: "2H",
+                self.three_hour: "3H",
+                self.four_hour: "4H",
+                self.six_hour: "6H",
+                self.one_day: "1D",
+                self.one_week: "1W",
+                self.one_month: "1M"
+            }
+        return map_dict.get(self, self)
 
     def get_timeframe(self):
         timeframe_map = {
             ChartTimeframe.one_min: "PERIOD_M1",
             ChartTimeframe.five_min: "PERIOD_M5",
+            ChartTimeframe.ten_min: "PERIOD_M10",
             ChartTimeframe.fifteen_min: "PERIOD_M15",
+            ChartTimeframe.twenty_min: "PERIOD_M20",
             ChartTimeframe.thirty_min: "PERIOD_M30",
             ChartTimeframe.one_hour: "PERIOD_H1",
+            ChartTimeframe.two_hour: "PERIOD_H2",
+            ChartTimeframe.three_hour: "PERIOD_H3",
             ChartTimeframe.four_hour: "PERIOD_H4",
+            ChartTimeframe.six_hour: "PERIOD_H6",
             ChartTimeframe.one_day: "PERIOD_D1",
             ChartTimeframe.one_week: "PERIOD_W1",
             ChartTimeframe.one_month: "PERIOD_MN1"

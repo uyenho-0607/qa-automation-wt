@@ -49,15 +49,18 @@ class HomePage(BasePage):
     __search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-history'))
     __btn_delete_search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-history-delete'))
     __item_search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-items-symbol'))
-    __item_search_history_by_text = (By.XPATH, "//*[@data-testid='symbol-input-search-items-symbol' and text()='{}']")
+    __item_search_history_by_text = (By.XPATH, "//*[@data-testid='symbol-input-search-items-symbol' and contains(text(), '{}')]")
 
-    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[text()='{}']")
+    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[contains(text(), '{}')]")
     __items_search_result = (By.CSS_SELECTOR, data_testid('symbol-input-search-items'))
     __empty_message = (By.CSS_SELECTOR, "div[data-testid='symbol-dropdown-result'] > div[data-testid='empty-message']")
 
     # ------------------------ ACTIONS ------------------------ #
     def is_logged_in(self):
-        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Login successfully, Home Page is displayed" if res else f"- Login failed, Home Page is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
+        return res
 
     def toggle_account_selector(self, open=True):
         is_open = self.actions.is_element_displayed(self.__account_balance_item)
@@ -74,12 +77,14 @@ class HomePage(BasePage):
         account_item = account_item if isinstance(account_item, list) else [account_item]
 
         for item in account_item:
-            logger.debug(f"{'Check' if check else 'Uncheck'} {item} balance summary")
             locator = cook_element(self.__chb_acc_summary, item)
             is_checked = " checked" in self.actions.get_attribute(locator, "class")
 
             if is_checked != check:
+                logger.debug(f"{'Check' if check else 'Uncheck'} {item}")
                 self.actions.click(locator)
+            else:
+                logger.debug(f"{item} already {'Check' if check else 'Uncheck'} ")
 
         self.toggle_balance_summary(open=False)
 
@@ -92,10 +97,10 @@ class HomePage(BasePage):
 
     def select_item_from_search_result(self, symbol: str):
         self.actions.click(cook_element(self.__item_search_result, symbol))
-        time.sleep(1)
 
     def search_and_select_symbol(self, symbol):
         self.search_symbol(symbol)
+        time.sleep(1)
         self.select_item_from_search_result(symbol)
 
     def delete_search_history(self, check_displayed=True):

@@ -1,9 +1,11 @@
+import operator
 import re
 from typing import Any
 
 import pytest_check as check
 
 from src.core.decorators import attach_table_details
+from src.data.consts import FAILED_ICON_COLOR
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import DriverList, StepLogs
 from src.utils import DotDict
@@ -45,6 +47,7 @@ def compare_with_tolerance(
         baseline = abs(expected)
         diff_percent = diff / baseline  # fraction (e.g., 0.005 = 0.5%)
         tolerance_value = tol_frac * baseline
+
     else:
         # expected is zero: only allow exact match
         if diff == 0:
@@ -55,10 +58,10 @@ def compare_with_tolerance(
 
     # convert to percent for human-readable
     diff_percent = diff_percent * 100
-    if diff:
-        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
-
     res = abs(diff) <= abs(tolerance_value)
+
+    if diff and not res:
+        logger.warning(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
 
     return res if not get_diff else dict(
         res=res,
@@ -73,7 +76,8 @@ def compare_dict(
         expected: dict | DotDict,
         tolerance_percent: float = None,
         tolerance_fields: list[str] = None,
-        field_tolerances: dict[str, float] = None
+        field_tolerances: dict[str, float] = None,
+        cus_operator = None
 ):
     """
     Compare two dictionaries with optional tolerance for specified fields.
@@ -84,6 +88,7 @@ def compare_dict(
         tolerance_fields: List of field names to apply global tolerance to
         field_tolerances: Dictionary mapping field names to specific tolerance percentages
                          e.g., {'price': 0.1, 'volume': 0.5} - overrides global tolerance
+        cus_operator: custom compare operator
     """
 
     all_res = []
@@ -111,7 +116,7 @@ def compare_dict(
             tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
 
         else:
-            res = act == exp
+            res = act == exp if not cus_operator else cus_operator(act, exp)
 
         all_res.append(res)
         if not res:
@@ -292,10 +297,11 @@ def soft_assert(
     __tracebackhide__ = True
 
     check_func = check_contain if check_contains else check_equal
-    validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
+    validation_err_msg = f"\n {FAILED_ICON_COLOR} Validation Failed ! "
     tolerance = kwargs.get("tolerance")
     tolerance_fields = kwargs.get("tolerance_fields", [])
     field_tolerances = kwargs.get("field_tolerances")
+    cus_operator = kwargs.get("cus_operator")
 
     if isinstance(actual, dict) and isinstance(expected, dict):
         if check_contains:
@@ -307,7 +313,7 @@ def soft_assert(
         if field_tolerances:
             logger.debug(f"Field-specific tolerances: {field_tolerances}")
 
-        res = compare_dict(actual, expected, tolerance_percent=tolerance, tolerance_fields=tolerance_fields, field_tolerances=field_tolerances)
+        res = compare_dict(actual, expected, cus_operator=cus_operator, tolerance_percent=tolerance, tolerance_fields=tolerance_fields, field_tolerances=field_tolerances)
 
         if res["missing"]:
             validation_err_msg += f"\n>>> Missing Fields: {res['missing']}"
@@ -335,7 +341,7 @@ def soft_assert(
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
+                StepLogs.add_failed_log(failed_step, validation_err_msg)
 
         # Return the comparison result for the decorator to use
         return res
@@ -352,6 +358,6 @@ def soft_assert(
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
+                StepLogs.add_failed_log(failed_step, validation_err_msg)
 
         return res

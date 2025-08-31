@@ -39,7 +39,7 @@ class HomePage(BasePage):
 
     __icon_search = (By.CSS_SELECTOR, data_testid("symbol-search-selector"))
     __txt_symbol_search = (By.CSS_SELECTOR, data_testid('symbol-input-search'))
-    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[text()='{}']")
+    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[contains(text(), '{}')]")
     __items_search_result = (By.CSS_SELECTOR, data_testid('symbol-input-search-items'))
     __btn_search_cancel = (By.CSS_SELECTOR, data_testid("symbol-input-search-cancel"))
     __notification_selector = (By.CSS_SELECTOR, data_testid("notification-selector"))
@@ -52,7 +52,10 @@ class HomePage(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
     def is_logged_in(self):
-        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Login successfully, Home Page is displayed" if res else f"- Login failed, Home Page is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
+        return res
     
     def open_my_account(self, open=True):
         is_open = self.my_account_modal.is_open()

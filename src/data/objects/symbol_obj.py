@@ -1,6 +1,4 @@
-from src.data.enums import WatchListTab, Client, Server
-from src.data.project_info import RuntimeConfig
-from src.utils.logging_utils import logger
+from src.data.enums import WatchListTab
 
 
 class ObjSymbol:
@@ -8,20 +6,6 @@ class ObjSymbol:
     symbols_data = None
     symbols_details = {}
     threshold = 100  # prioritize symbols with cheaper price
-
-    # default list to use when resp getting symbols has bugs (status of symbol displays 'OFFQUOTE')
-    CRYPTO = {
-        Client.TRANSACT_CLOUD: {
-            Server.MT5: ["BAKE.USD", "AXS.USD", "DASH.USD"]
-        },
-        Client.LIRUNEX: {
-            Server.MT5: ["DASHUSD.std", "XRPUSD.std"],
-            Server.MT4: ["DASHUSD.std", "XRPUSD.std"]
-        },
-        Client.DECODE: {
-            Server.MT5: ["BAKEUSD.d", "AXSUSD.d", "DOGEUSD.d"]
-        }
-    }
 
     def __init__(self):
         self._init_symbols()
@@ -32,24 +16,25 @@ class ObjSymbol:
         from src.apis.api_client import APIClient
 
         if not ObjSymbol.all_symbols:
-            logger.info("- Getting Symbols data")
             resp = APIClient().market.get_watchlist_items(WatchListTab.ALL, get_symbols=False)
+            trading_symbols = [item for item in resp if item["status"] == "TRADING"]
 
-            # filter out crypto symbols
-            symbols = [item for item in resp if item["type"] == WatchListTab.CRYPTO.upper() and item['status'] == 'TRADING']
-            if not symbols:
-                # continue to get other symbol type
-                symbols = [item for item in resp if item["type"] == WatchListTab.FOREX.upper() and item['status'] == 'TRADING']
+            if not trading_symbols:
+                raise RuntimeError("No trading symbols available (all symbols are OFF QUOTE).")
+
+
+            for symbol_type in [WatchListTab.CRYPTO, WatchListTab.FOREX, WatchListTab.COMMODITIES, WatchListTab.INDEX, WatchListTab.SHARES]:
+                symbols = [item for item in trading_symbols if item["type"] == symbol_type.upper()]
+
+                if symbols:
+                    break
 
             cls.all_symbols = symbols
 
-            if not cls.all_symbols:
-                # handle bugs status of symbols display as OFF QUOTE for all symbols
-                cls.all_symbols = [item for item in resp if item['symbol'] in cls.CRYPTO.get(RuntimeConfig.client, cls.CRYPTO[Client.TRANSACT_CLOUD]).get(RuntimeConfig.server, {})
-                                   ]
             # Filter symbols with small prices (to avoid insufficient balance)
             filtered_price = [item for item in cls.all_symbols if item['ask'] < cls.threshold]
             cls.symbols_data = filtered_price or cls.all_symbols
+
         return cls.symbols_data
 
     @classmethod
@@ -68,7 +53,8 @@ class ObjSymbol:
                 point_step = 10 ** -decimal
                 cls.symbols_details[symbol] = dict(point_step=point_step, decimal=decimal)
                 return cls.symbols_details[symbol]
+
             else:
-                raise ValueError(f"Symbol: {symbol!r} not found !!!")
+                cls.symbols_details[symbol] =  dict(point_step=0, decimal=0)
 
         return cls.symbols_details[symbol]

@@ -5,8 +5,8 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
-from src.core.decorators import handle_stale_element
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT
+from src.core.decorators import handle_stale_element, log_requests
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT, CHECK_ICON_COLOR, FAILED_ICON_COLOR, WARNING_ICON
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_screenshot
 from src.utils.assert_utils import soft_assert
@@ -53,14 +53,14 @@ class BaseActions:
 
         except (TimeoutException, NoSuchElementException) as e:
             if show_log:
-                logger.warning(f"Element not found for {locator}: {type(e).__name__} after {timeout}(s)")
+                logger.warning(f"{WARNING_ICON} Element not found for {locator}: {type(e).__name__} after {timeout}(s)")
 
         except Exception as e:
             logger.error(f"Unexpected error for {locator}: {type(e).__name__}")
 
         if raise_exception:
             if StepLogs.test_steps:
-                StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                StepLogs.add_failed_log(StepLogs.test_steps[-1])
                 attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
             raise Exception(f"Element with locator {locator} not found")
@@ -68,7 +68,7 @@ class BaseActions:
         return None
 
     def find_elements(
-            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT
+            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, show_log=True
     ) -> list[WebElement]:
         """
         ------ Find list of elements using WebDriverWait using condition "presence_of_all_elements_located" ------
@@ -77,14 +77,15 @@ class BaseActions:
         :return: list[WebElement] or empty list (case not found)
         """
         try:
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
 
         except StaleElementReferenceException:
             logger.warning("StaleElementReferenceException finding elements, retry...")
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False)
+            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
 
         return res or []
 
+    @log_requests
     @handle_stale_element
     def click(
             self,
@@ -102,6 +103,7 @@ class BaseActions:
         if element:
             element.click()
 
+    @log_requests
     @handle_stale_element
     def javascript_click(
             self,
@@ -181,7 +183,7 @@ class BaseActions:
         """Get text from element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         if not element:
-            logger.debug("- Retry getting text again")
+            # logger.debug("- Retry getting text again")
             element = self.find_element(locator, QUICK_WAIT, raise_exception=raise_exception, show_log=show_log)
 
         return element.text.strip() if element else ""
@@ -190,26 +192,29 @@ class BaseActions:
             self,
             locator: tuple[str, str],
             timeout: float | int = EXPLICIT_WAIT,
-    ) -> None:
+    ) -> WebElement | None:
         """Wait for element to be invisible, NO exception will be raised if element is not found"""
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout=timeout)
-        ele = self.find_element(locator, SHORT_WAIT, raise_exception=False, show_log=False)
+        try:
+            res = wait.until(EC.invisibility_of_element_located(locator))
+            logger.debug(f"> Check invisibility of element {locator}: {CHECK_ICON_COLOR if bool(res) else FAILED_ICON_COLOR}")
+            return res
 
-        if ele:
-            try:
-                wait.until(EC.invisibility_of_element_located(locator))
-            except Exception:
-                pass
+        except TimeoutException:
+            logger.warning(f"{WARNING_ICON} Element {locator} still display after {timeout} sec")
+            return None
 
+    @log_requests
     def wait_for_element_visible(
             self,
             locator: tuple[str, str],
             timeout=EXPLICIT_WAIT,
-    ) -> None:
+    ) -> bool:
         """Wait for element to be visible, NO exception will be raised if element is not found"""
-        self.find_element(
+        res = self.find_element(
             locator, timeout, cond=EC.visibility_of_element_located, raise_exception=False, show_log=True
         )
+        return bool(res)
 
     def is_element_displayed(self, locator: tuple[str, str], timeout=QUICK_WAIT, is_display=True, show_log=False) -> bool:
         """Check if element is displayed, NO exception will be raised if element is not found"""
@@ -219,11 +224,8 @@ class BaseActions:
 
         element = self.find_element(locator, timeout, raise_exception=False, show_log=show_log)
         res = bool(element)
-        return res if is_display else not res
 
-    def is_element_clickable(self, locator: tuple[str, str], timeout=SHORT_WAIT) -> bool:
-        res = self.find_element(locator, timeout, cond=EC.element_to_be_clickable, raise_exception=False, show_log=False)
-        return bool(res)
+        return res if is_display else not res
 
     def is_element_enabled(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT) -> bool:
         """Check if element is enabled."""
@@ -249,6 +251,7 @@ class BaseActions:
         # wait for the first locator with full timeout
         res = self.is_element_displayed(locators[0], timeout=timeout, is_display=is_display, show_log=is_display)
         all_res.append(res)
+
         if not res:
             failed_locator.append(locators[0])
 
@@ -258,6 +261,8 @@ class BaseActions:
             all_res.append(res)
             if not res:
                 failed_locator.append(_locator)
+
+        logger.debug(f"> Check {'elements_displayed' if is_display else 'elements_not_displayed'}: {CHECK_ICON_COLOR if all(all_res) else FAILED_ICON_COLOR}")
 
         soft_assert(
             all(all_res), True,

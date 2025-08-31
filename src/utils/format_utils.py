@@ -5,6 +5,7 @@ from typing import Dict, Any
 
 from requests import Response
 
+from src.data.consts import SEND_ICON, RECEIVE_ICON
 from src.utils.logging_utils import logger
 
 
@@ -196,7 +197,7 @@ def format_dict_to_string(
     return f"\n{indent_str}{border}\n" + "\n".join(formatted_lines) + f"\n{indent_str}{border}"
 
 
-def format_request_log(resp: Response, log_resp=False) -> str:
+def format_request(resp: Response):
     # Format request content
     method = resp.request.method.upper()
     lines = [f"curl --location --request {method} '{resp.request.url}'"]
@@ -208,25 +209,70 @@ def format_request_log(resp: Response, log_resp=False) -> str:
         try:
             data = json.loads(resp.request.body)
             json_data = json.dumps(data)  # compact form
+
         except Exception:
             json_data = resp.request.body.decode() if isinstance(resp.request.body, bytes) else resp.request.body
 
         lines.append(f"--data-raw '{json_data}'")
 
     curl_command = " \n".join(lines)
+    return curl_command
 
-    # Format response content
+def format_response(resp: Response, fields_to_show: list[str] = None):
+    """Format response content with optional field filtering for both list and dictionary responses.
+    Args:
+        resp: Response object to format
+        fields_to_show: Optional list of field names to include in the output. If None, all fields will be shown.
+    """
     try:
         content = resp.json()
-        if isinstance(content.get("result"), list) and len(content.get("result")) > 3:
-            left_resp = len(content["result"]) - 3
-            content["result"] = content["result"][:3] + [f"... ({left_resp} more)"]
+        
+        # Handle both list and dictionary responses with field filtering
+        if "result" in content:
+            result = content["result"]
+            
+            if isinstance(result, list):
+                # Handle list responses
+                if fields_to_show and len(result) > 0 and isinstance(result[0], dict):
+                    filtered_result = []
+                    for item in result:
+                        # Get requested fields
+                        filtered_item = {k: item[k] for k in fields_to_show if k in item}
+                        # Add ellipsis if there are more fields than shown
+                        if len(item) > len(filtered_item):
+                            filtered_item["..."] = f"({len(item) - len(filtered_item)} more fields)"
+                        filtered_result.append(filtered_item)
+                    result = filtered_result
+                
+                # Truncate long lists
+                if len(result) > 3:
+                    left_resp = len(result) - 3
+                    content["result"] = result[:3] + [f"... ({left_resp} more)"]
+                else:
+                    content["result"] = result
+            
+            elif isinstance(result, dict) and fields_to_show:
+                # Handle dictionary responses
+                filtered_result = {k: result[k] for k in fields_to_show if k in result}
+                # Add ellipsis if there are more fields than shown
+                if len(result) > len(filtered_result):
+                    filtered_result["..."] = f"({len(result) - len(filtered_result)} more fields)"
+                content["result"] = filtered_result
 
         response_text = json.dumps(content, indent=4)
+
     except ValueError:
         response_text = resp.text.strip()
 
-    if log_resp:
-        return f"\n{curl_command}\n\n{response_text}\n"
+    return response_text
 
-    return f"\n{curl_command}\n"
+def format_request_log(resp: Response, log_resp=False, fields_to_show=None) -> str:
+
+    # Format request content
+    request = format_request(resp)
+    response = format_response(resp, fields_to_show)
+
+    if log_resp:
+        return f"{SEND_ICON}  Request Sent: \n{request}\n\n {RECEIVE_ICON}  Response Received: \n{response}\n\n"
+
+    return f"{SEND_ICON}  Request Sent: \n{request}\n\n"

@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from src.core.actions.mobile_actions import MobileActions
@@ -24,9 +26,19 @@ def android():
 
 @pytest.fixture(scope="package")
 def login_wt_app(android):
+    max_retries = 3
+
     logger.info(f"- Login to WT App")
     android.login_screen.login(wait=True)
     android.home_screen.feature_anm_modal.got_it()
+
+    logger.info("- Check if login success")
+    while not android.home_screen.is_logged_in() and max_retries:
+        max_retries -= 1
+
+        logger.debug("- Retry Login")
+        android.login_screen.login(wait=True)
+        android.home_screen.feature_anm_modal.got_it()
 
 
 @pytest.fixture

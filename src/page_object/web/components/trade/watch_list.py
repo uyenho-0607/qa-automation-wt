@@ -154,15 +154,17 @@ class WatchList(BaseTrade):
         if tab:
             self.select_tab(tab)
 
-        elements = self.actions.find_elements(self.__items)
-        if elements:
-            res = [ele.text.strip() for ele in elements]
-            return [item for item in res if item]
-        return []
+        res = self.actions.get_text_elements(self.__items)
+        return res
 
     def get_random_symbol(self, tab=None):
+        res = None
         cur_symbols = self.get_current_symbols(tab)
-        return random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols)/2)])
+        if cur_symbols:
+            res = random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols)/2)])
+            logger.debug(f"- Selected symbol: {res!r}")
+
+        return res
 
     def get_last_symbol(self, tab: WatchListTab | list[WatchListTab], store_data: DotDict = None):
         """Get latest symbol of each input tab (tab can be str or list)"""

@@ -1,3 +1,6 @@
+import time
+
+from selenium.common import TimeoutException
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -6,6 +9,7 @@ from src.data.enums.trading import ChartTimeframe
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, data_testid
+from src.utils.logging_utils import logger
 
 
 class Chart(BaseTrade):
@@ -17,12 +21,13 @@ class Chart(BaseTrade):
     __chart_exit_fullscreen = (By.CSS_SELECTOR, data_testid('chart-exit-fullscreen'))
     __tab_trade = (By.CSS_SELECTOR, data_testid('tab-trade'))
     __btn_close_trade = (By.CSS_SELECTOR, data_testid('chart-trade-button-close'))
-    __timeframe_selector = (By.XPATH, "//div[text()='{}']")
     __symbol_overview = (By.XPATH, "//div[@data-testid='symbol-overview-id' and contains(text(), '{}')]")
+    __timeframe_selector = (By.XPATH, "//div[text()='{}']")
+    __candle_stick = (By.XPATH, "//div[text()='Candlestick']")
+    __chart_container = (By.XPATH, "//*[@id='chart-root']//div[@class='fullscreen-loader-container']")
 
     # ------------------------ ACTIONS ------------------------ #
     def toggle_chart(self, fullscreen=True, timeout=SHORT_WAIT):
-
         if fullscreen and self.actions.is_element_displayed(self.__chart_toggle_fullscreen, timeout=timeout):
             self.actions.click(self.__chart_toggle_fullscreen)
 
@@ -35,8 +40,55 @@ class Chart(BaseTrade):
     def close_trade_tab(self):
         self.actions.click(self.__btn_close_trade)
 
+    def open_timeframe_opt(self):
+        self.actions.click_by_offset(self.__candle_stick, x_offset=-50)
+
+    def is_symbol_selected(self, symbol, timeout=5):
+        res = self.actions.wait_for_element_visible(cook_element(self.__symbol_overview, symbol), timeout=timeout)
+        return res
+
     def select_timeframe(self, timeframe: ChartTimeframe):
-        self.actions.click(cook_element(self.__timeframe_selector, timeframe))
+        # Switch to main frame to ensure requests are captured
+        self.actions.switch_to_default()
+        self.open_timeframe_opt()
+
+        logger.debug(f"- Select Timeframe: {timeframe!r}")
+        locator = cook_element(self.__timeframe_selector, timeframe.locator_map())
+        if self.actions.is_element_displayed(locator):
+            self.actions.click(locator)
+            return
+
+        self.actions.scroll_to_element(locator)
+        self.actions.click(locator)
+
+    def _get_render_time(self):
+        # Switch to iframe for checking loading state
+        self.actions.switch_to_iframe()
+        start = time.time()
+        timeout = 10
+        while time.time() - start < timeout:
+            attr = self.actions.get_attribute(self.__chart_container, "style")
+            if "display: none;" == attr:
+                elapsed = round(time.time() - start, 2)
+                logger.debug(f"- Chart render time: {elapsed!r} sec")
+                self.actions.switch_to_default()
+                return elapsed
+
+        logger.warning("- Chart render time is greater than 10 sec, stop waiting")
+        self.actions.switch_to_default()
+        return 10
+
+    def get_default_render_time(self):
+        return self._get_render_time()
+
+    def get_timeframe_render_time(self, timeframe):
+        # Switch to main frame before selecting timeframe
+        self.actions.switch_to_default()
+        self.select_timeframe(timeframe)
+        return self._get_render_time()
+
+    def exit_chart_iframe(self):
+        self.actions.switch_to_default()
 
     # ------------------------ VERIFY ------------------------ #
 
@@ -47,3 +99,7 @@ class Chart(BaseTrade):
 
     def verify_symbol_selected(self, symbol):
         self.actions.verify_element_displayed(cook_element(self.__symbol_overview, symbol))
+
+    @staticmethod
+    def verify_render_time(actual, expected):
+        soft_assert(actual <= expected, True, error_message=f"Actual render time: {actual!r} sec, Expected: {expected!r} sec")

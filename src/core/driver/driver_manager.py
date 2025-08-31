@@ -19,23 +19,20 @@ class DriverManager:
                 _driver = WebDriver.init_driver(
                     browser=kwargs.get("browser", RuntimeConfig.browser),
                     headless=kwargs.get("headless", RuntimeConfig.headless),
+                    enable_cdp=False
                 )
-                logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver
 
             case "ios":
-                logger.warning("iOS driver initialization not implemented yet")
-                return None
+                _driver = AppiumDriver.init_ios_driver()
+                return _driver
 
             case "android":
                 _driver = AppiumDriver.init_android_driver()
-                logger.debug(f"- Driver session id: {_driver.session_id!r}")
                 return _driver
 
             case _:
                 raise ValueError(f"Invalid platform: {platform}")
-
-
 
     @classmethod
     def quit_driver(cls, platform=None):
@@ -45,10 +42,10 @@ class DriverManager:
                 WebDriver.quit()
 
             case "ios":
-                logger.warning("iOS driver quit not implemented yet")
+                AppiumDriver.quit_mobile_driver("ios")
 
             case "android":
-                AppiumDriver.quit_android_driver()
+                AppiumDriver.quit_mobile_driver("android")
 
             case _:
-                raise ValueError(f"Invalid platform: {platform}")
+                logger.warning(f"- Invalid platform provided: {platform!r}")
