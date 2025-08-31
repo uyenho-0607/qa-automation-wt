@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from src.apis.api_base import BaseAPI
 from src.apis.market_api import MarketAPI
 from src.apis.order_api import OrderAPI
+from src.data.consts import FAILED_ICON_COLOR, CHECK_ICON_COLOR
 from src.data.enums import Expiry, TradeType, OrderType, SLTPType, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
@@ -29,7 +30,6 @@ class TradeAPI(BaseAPI):
     def _get_symbol_details(self, symbol) -> DotDict:
         """Get and cache symbol details for calculating trade parameters."""
         if symbol not in self._symbol_details:
-            logger.debug(f"Getting symbol details for {symbol!r}")
             resp = self._market_api.get_symbol_details(symbol=symbol)
 
             self._symbol_details[symbol] = DotDict({
@@ -70,8 +70,7 @@ class TradeAPI(BaseAPI):
 
         # Calculate trade parameters
         indicate = trade_object.get("indicate", SLTPType.PRICE)
-        trade_params = calculate_trading_params(current_price, trade_type, order_type, sl_type=indicate.lower(),
-                                                tp_type=indicate.lower())
+        trade_params = calculate_trading_params(current_price, trade_type, order_type, sl_type=indicate.lower(), tp_type=indicate.lower())
 
         # Build base payload
         payload = {
@@ -119,21 +118,13 @@ class TradeAPI(BaseAPI):
         # Get actual price from order details
         if update_price:
 
-            logger.debug("Getting placed order details for updating prices")
             order_details = self._order_api.get_orders_details(trade_object.symbol, trade_object.order_type, payload["order_id"])
 
             # Update entry price with actual executed price
             if trade_object.order_type == OrderType.MARKET:
                 payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjTrade.DECIMAL)
-            # Update SL/TP if using points
-            if payload.pop("indicate", "").lower() == SLTPType.POINTS.lower():
-                payload["stop_loss"] = format_with_decimal(
-                    order_details.get("stopLoss") or "--", symbol_details.point_step
-                )
-                payload["take_profit"] = format_with_decimal(
-                    order_details.get("takeProfit") or "--", symbol_details.point_step
-                )
-             # update current price
+
+            # update current price
             payload["current_price"] = order_details.get("currentPrice")
 
         # Update the trade object
@@ -153,8 +144,11 @@ class TradeAPI(BaseAPI):
                 # Build fresh payload for each attempt (in case price calculations were invalid)
                 payload = self._build_payload(trade_object)
 
-                # Make the API call (server errors are handled by @after_request decorator)
+                logger.debug("[API] Place order")
                 response = self.post(endpoint, payload)
+
+                if response.get("clOrdId"):
+                    logger.info(f"[API] Order placed successfully, orderID: {response['clOrdId']} {CHECK_ICON_COLOR}")
 
                 # Update trade object with response data
                 self._update_trade_object(trade_object, payload, response, update_price)
@@ -166,10 +160,10 @@ class TradeAPI(BaseAPI):
                 logger.warning(f"Client error on attempt {attempt + 1}/{max_retries}: {str(e)}")
 
                 if attempt < max_retries - 1:
-                    logger.debug(f"Retrying with fresh payload...")
+                    logger.debug(f"Place order failed! Retrying with fresh payload...")
                     continue
                 else:
-                    logger.error(f"Failed after {max_retries} attempts with fresh payloads")
+                    logger.error(f"{FAILED_ICON_COLOR} Place order failed after {max_retries} attempts")
                     raise
         return None
 
@@ -182,5 +176,5 @@ class TradeAPI(BaseAPI):
         :return: API response
         """
         endpoint = self._bulk_open_order if tab == AssetTabs.OPEN_POSITION else self._bulk_pending_order
+        logger.debug(f"[API] Bulk {'Close' if endpoint == self._bulk_open_order else 'Delete'} orders")
         return self.put(endpoint, orders)
-

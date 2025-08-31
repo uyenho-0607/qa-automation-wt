@@ -42,7 +42,7 @@ class Notifications(BasePage):
 
     def close_noti_banner(self):
         with suppress(Exception):
-            self.actions.click(self.__btn_close, timeout=QUICK_WAIT, raise_exception=False)
+            self.actions.click(self.__btn_close, timeout=1, raise_exception=False, show_log=False)
 
     def get_open_position_order_id(self, trade_object: DotDict, amount=1):
         self.toggle_notification(timeout=1)
@@ -60,18 +60,21 @@ class Notifications(BasePage):
     # ------------------------ VERIFY ------------------------ #
     def verify_notification_banner(self, expected_title, expected_des=None, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        logger.debug("- Fetching notification description")
-        actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
-        logger.debug("- Fetching notification title")
-        actual_title = self.actions.get_text(self.__noti_title, timeout=QUICK_WAIT)
+        if expected_des:
+            logger.debug("- Fetching notification description")
+            actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
-        logger.debug(f"- Check noti des - {expected_des!r}")
-        compare_noti_with_tolerance(actual_des, expected_des)
+            logger.debug(f"> Check noti des = {expected_des!r}")
+            compare_noti_with_tolerance(actual_des, expected_des)
 
-        if actual_title:
-            logger.debug(f"- Check noti title - {expected_title!r}")
-            soft_assert(actual_title, expected_title)
+        if expected_title:
+            logger.debug("- Fetching notification title")
+            actual_title = self.actions.get_text(self.__noti_title, timeout=QUICK_WAIT if expected_des else timeout)
+
+            if not expected_des or actual_title:
+                logger.debug(f"> Check noti title - {expected_title!r}")
+                soft_assert(actual_title, expected_title)
 
         self.close_noti_banner()
 

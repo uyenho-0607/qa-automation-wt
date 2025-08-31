@@ -8,7 +8,6 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 def test(web_app, setup_test):
-    # acc_details = setup_test
 
     logger.info("Step 1: Open My Account modal")
     web_app.home_page.open_my_account()
@@ -23,14 +22,14 @@ def test(web_app, setup_test):
 
 @pytest.fixture
 def setup_test(web_app, symbol):
-    logger.info("- Place order to make sure account has Margin Level")
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
-    APIClient().trade.post_order(trade_object)
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
 
-    # logger.info("- Get account details API details")
-    # account_details = APIClient().user.get_user_account()
+    logger.info("- Place order to make sure account has Margin Level")
+    APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
+
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield
 
-    logger.info("- Close My Account modal")
+    logger.info("[Cleanup] Close My Account modal (if open)")
     web_app.home_page.my_account_modal.close()

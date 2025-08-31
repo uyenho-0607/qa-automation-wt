@@ -36,13 +36,18 @@ def setup_pre_selected_tab(symbol):
     mark_star = bool(random.randint(0, 1))
     pre_selected_tab = WatchListTab.TOP_GAINER
 
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+
     if mark_star:
-        logger.info(f"- Mark star symbol: {symbol!r}")
+        logger.info(f"- Send API request to mark star symbol: {symbol!r}")
         APIClient().market.post_starred_symbol(symbol)
         pre_selected_tab = WatchListTab.FAVOURITES
 
     else:
-        logger.info("- Delete all starred symbols")
+        logger.info("- Send API request to delete all starred symbols")
         APIClient().market.delete_starred_symbols()
+
+    logger.info(f">> Setup Summary: pre-selected tab: {pre_selected_tab.value!r}")
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield pre_selected_tab

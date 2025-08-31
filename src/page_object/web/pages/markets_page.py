@@ -4,11 +4,10 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
 from src.data.enums import MarketsSection, WatchListTab, TradeType
 from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.trade.watch_list import WatchList
-from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import locator_format
@@ -23,20 +22,6 @@ class MarketsPage(BasePage):
     # ------------------------ LOCATORS ------------------------ #
     __symbol_row = (By.CSS_SELECTOR, data_testid('{}-symbol'))  # symbol-row from MarketsSection
     __symbol_row_text = (By.XPATH, "//div[@data-testid='{}-symbol' and text()='{}']")
-
-    # __my_trade_symbol = (By.CSS_SELECTOR, data_testid('portfolio-row-symbol'))
-    # __my_trade_symbol_by_text = (By.XPATH, "//div[@data-testid='portfolio-row-symbol' and text()='{}']")
-    # __my_trade_order_type = (By.CSS_SELECTOR, data_testid('portfolio-row-order-type'))
-    #
-    # __top_picks_symbol = (By.CSS_SELECTOR, data_testid('top-picks-symbol'))
-    # __top_picks_symbol_by_text = (By.XPATH, "//div[@data-testid='top-picks-symbol' and text()='{}']")
-    #
-    # __top_gainer_symbol = (By.CSS_SELECTOR, data_testid('top-gainer-symbol'))
-    # __top_gainer_symbol_by_text = (By.XPATH, "//div[@data-testid='top-gainer-symbol' and text()='{}']")
-    #
-    # __signal_symbol = (By.CSS_SELECTOR, data_testid('signal-row-symbol'))
-    # __signal_symbol_by_text = (By.XPATH, "//div[@data-testid='signal-row-symbol' and text()='{}']")
-
     __news_content = (By.CSS_SELECTOR, data_testid('market-news-content-text'))
 
     __redirect_arrow = (
@@ -57,8 +42,8 @@ class MarketsPage(BasePage):
     __btn_close_preference = (By.CSS_SELECTOR, data_testid('symbol-preference-close'))
 
     # ------------------------ ACTIONS ------------------------ #
-    def get_symbols(self, section: MarketsSection):
-        symbols = self.actions.get_text_elements(cook_element(self.__symbol_row, locator_format(section.symbol_row())))
+    def get_symbols(self, section: MarketsSection, timeout=EXPLICIT_WAIT):
+        symbols = self.actions.get_text_elements(cook_element(self.__symbol_row, locator_format(section.symbol_row())), timeout=timeout)
         return symbols
 
     def click_arrow_icon(self, arrow: MarketsSection):
@@ -70,10 +55,6 @@ class MarketsPage(BasePage):
 
         logger.debug(f"- Select symbol {symbol} from section: {section!r}")
         self.actions.click(cook_element(locator, locator_format(section.symbol_row()), symbol))
-
-        if not symbol:
-            # GET and return the selected symbol
-            symbol = self.actions.get_text(cook_element(locator, locator_format(section.symbol_row())))
 
         return symbol
 
@@ -131,5 +112,5 @@ class MarketsPage(BasePage):
     # ------------------------ VERIFY ------------------------ #
     def verify_my_trade_list(self, symbols: str | list):
         symbols = symbols if isinstance(symbols, list) else [symbols]
-        actual = self.get_symbols(MarketsSection.MY_TRADE)
+        actual = self.get_symbols(MarketsSection.MY_TRADE, timeout=EXPLICIT_WAIT)
         soft_assert(actual, symbols)

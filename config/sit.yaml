@@ -19,9 +19,8 @@ ios_udid: ""
 
 
 lirunex:
-  base_url: https://lirunex-mb.webtrader-sit.s20ip12.com
+  base_url: https://lirunex-global-mb.webtrader-sit.s20ip12.com
   bo_url: https://lirunex-backoffice.webtrader-sit.s20ip12.com/backoffice
-  api_url: https://lirunex-mb.webtrader-sit.s20ip12.com/api
 
   credentials:
     mt4:
@@ -41,7 +40,6 @@ lirunex:
 transactCloud:
   base_url: https://transactcloudmt5-mb.webtrader-sit.s20ip12.com
   bo_url: https://transactcloudmt5-backoffice.webtrader-sit.s20ip12.com/backoffice/
-  api_url: https://transactcloudmt5-mb.webtrader-sit.s20ip12.com/api
 
   credentials:
     mt5:

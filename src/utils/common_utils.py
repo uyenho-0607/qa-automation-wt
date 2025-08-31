@@ -116,12 +116,12 @@ def move_days_from_now(days: int, backward: bool = True, milli_sec: bool = True)
     return timestamp * 1000 if milli_sec else timestamp
 
 
-def convert_strtime(str_time: str) -> float:
+def convert_strtime(str_time: str | float):
     """Interpret input as UTC and return POSIX timestamp."""
     dt_obj = datetime.strptime(str_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
     return dt_obj.timestamp()
 
-def convert_timestamp(timestamp: float | int) -> str:
+def convert_timestamp(timestamp: float | int):
     """Convert POSIX timestamp to UTC string (no +00:00 in output)."""
     dt_utc = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     return dt_utc.strftime("%Y-%m-%d %H:%M:%S")

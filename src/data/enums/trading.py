@@ -119,17 +119,25 @@ class ChartTimeframe(BaseEnum):
     one_month = "1M"
 
     @classmethod
-    def display_list(cls):
+    def list_values(cls, except_val=None):
+        if RuntimeConfig.is_mt4():
+            return cls.mt4_list()
+
+        except_val = except_val if isinstance(except_val, list) else [except_val]
+        return [item for item in ChartTimeframe if item not in except_val]
+
+    @classmethod
+    def mt4_list(cls):
         display_list = [
-            cls.one_min,
-            cls.five_min,
+            cls.one_month,
             cls.fifteen_min,
-            cls.thirty_min,
             cls.one_hour,
-            cls.four_hour,
-            cls.one_day,
+            cls.thirty_min,
             cls.one_week,
-            cls.one_month
+            cls.one_min,
+            cls.four_hour,
+            cls.five_min,
+            cls.one_day,
         ]
         return display_list
 

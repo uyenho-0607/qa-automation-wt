@@ -6,7 +6,7 @@ from src.page_object.web.base_page import BasePage
 from src.page_object.web.components.modals.trading_modals import TradingModals
 from src.page_object.web.components.trade.asset_tab import AssetTab
 from src.page_object.web.components.trade.watch_list import WatchList
-from src.utils.assert_utils import soft_assert, compare_with_tolerance
+from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
 from src.utils.logging_utils import logger
@@ -54,17 +54,26 @@ class AssetsPage(BasePage):
         }
         soft_assert(actual, expected)
 
-    def verify_account_balance_summary(self, exp_data, acc_items: AccInfo = None, tolerance=0):
+    def verify_account_balance_summary(
+            self, exp_data, acc_items: AccInfo = None,
+            tolerance=0,
+            tolerance_fields: list = None,
+            tolerance_fields_specific: dict = None
+    ):
         """Verify the asset account dashboard details"""
 
-        if acc_items:
-            acc_items = acc_items if isinstance(acc_items, list) else [acc_items]
-        else:
-            acc_items = AccInfo.list_values()
-        for item in acc_items:
-            actual = format_acc_balance(self.actions.get_text(cook_element(self.__acc_item, item)))
-            expected = round(exp_data.get(item), 2)
+        acc_items = acc_items or AccInfo.list_values()
+        acc_items = acc_items if isinstance(acc_items, list) else [acc_items]
 
-            logger.info(f"- Checking {item.value!r}")
-            res = compare_with_tolerance(actual, expected, tolerance)
-            soft_assert(res, True, error_message=f"Actual: {actual}, Expected: {expected}, Tolerance: {tolerance}%")
+        compare_dict = {"actual": {}, "exp": {}}
+
+        for item in acc_items:
+            compare_dict["actual"][item] = format_acc_balance(self.actions.get_text(cook_element(self.__acc_item, item)))
+            compare_dict["exp"][item] = round(exp_data.get(item), 2)
+
+        soft_assert(
+            compare_dict["actual"], compare_dict["exp"],
+            tolerance=tolerance,
+            tolerance_fields=tolerance_fields,
+            field_tolerances=tolerance_fields_specific
+        )

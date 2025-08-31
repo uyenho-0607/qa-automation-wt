@@ -1,14 +1,13 @@
 import builtins
 import json
 import os
-import time
 
 import boto3
 from botocore.config import Config
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions, FirefoxOptions, SafariOptions
 
-from src.data.consts import GRID_SERVER, WEB_APP_DEVICE
+from src.data.consts import WEB_APP_DEVICE
 from src.data.project_info import DriverList, RuntimeConfig
 from src.utils.logging_utils import logger
 
@@ -58,8 +57,7 @@ class WebDriver:
 
                     driver = webdriver.Remote(command_executor=testgrid_url, options=options)
                 else:
-                    # driver = webdriver.Chrome(options=options)
-                    driver = webdriver.Remote(command_executor=GRID_SERVER, options=options)
+                    driver = webdriver.Chrome(options=options)
 
                 # --- If CDP enabled, attach logging ---
                 if enable_cdp:
@@ -74,7 +72,7 @@ class WebDriver:
                             if method == 'Network.requestWillBeSent':
                                 request_id = response['params']['requestId']
                                 url = response['params']['request']['url']
-                                if 'v3/candlestick' in url:
+                                if '/candlestick' in url:
                                     cls._request_times[request_id] = {
                                         'url': url,
                                         'start_time': response['params']['timestamp'],
@@ -122,13 +120,13 @@ class WebDriver:
                 options = FirefoxOptions()
                 if headless:
                     options.add_argument("--headless")
-                driver = webdriver.Remote(command_executor=GRID_SERVER, options=options)
+                driver = webdriver.Firefox(options=options)
 
             case "safari":
                 options = SafariOptions()
                 if headless:
                     options.add_argument("--headless")
-                driver = webdriver.Remote(command_executor=GRID_SERVER, options=options)
+                driver = webdriver.Safari(options=options)
 
             case _:
                 raise ValueError(f"Invalid browser value: {browser!r} !!!")
@@ -144,4 +142,5 @@ class WebDriver:
         if DriverList.all_drivers.get(RuntimeConfig.platform):
             DriverList.all_drivers[RuntimeConfig.platform].quit()
             DriverList.all_drivers[RuntimeConfig.platform] = None
+
         cls._request_times.clear()

@@ -15,7 +15,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(web_app, market_obj, create_order_data, sl_type, tp_type, cancel_all):
-    trade_object = market_obj(indicate=SLTPType.sample_values())
+    trade_object = market_obj()
     tab = AssetTabs.OPEN_POSITION
     # -------------------
 

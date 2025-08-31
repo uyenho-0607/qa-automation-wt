@@ -51,17 +51,21 @@ class BasePage:
     __alert_box_close = (By.CSS_SELECTOR, data_testid("notification-box-close"))
     __btn_nav_back = (By.CSS_SELECTOR, data_testid("navigation-back-button"))
     __spin_loader = (By.CSS_SELECTOR, data_testid("spin-loader"))
-    __btn_confirm = (By.XPATH, "//*[text()='Confirm']")
-    __btn_cancel = (By.XPATH, "//*[text()='Cancel']")
+    __btn_confirm = (By.XPATH, "//*[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='confirm']")
+    __btn_cancel = (By.XPATH, "//*[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
     __home_nav_option = (By.CSS_SELECTOR, data_testid("side-bar-option-{}"))
 
     # ------------------------ ACTIONS ------------------------ #
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
         self.actions.goto(Config.urls(site))
 
+    def refresh_page(self):
+        logger.debug("- Refresh page...")
+        self.actions.refresh()
+        self.wait_for_spin_loader()
+
     def wait_for_spin_loader(self, timeout: int | float = 5):
         """Wait for the loader to be invisible."""
-        logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
             logger.debug("- Wait for spin loader to disappear")
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=30)
@@ -78,7 +82,7 @@ class BasePage:
         max_retries = 5
         while self.actions.is_element_displayed(self.__btn_cancel) and max_retries:
             logger.debug("- Click cancel btn")
-            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
+            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT, show_log=False)
             max_retries -= 1
 
     def close_alert_box(self):

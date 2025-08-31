@@ -26,30 +26,30 @@ class BaseAPI:
     
     @staticmethod
     def api_url():
-        return Config.config.api_url if not RuntimeConfig.url else f"{RuntimeConfig.url}/api"
+        return f"{Config.config.base_url}/api" if not RuntimeConfig.url else f"{RuntimeConfig.url}/api"
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def get(self, endpoint: str, params: dict = None, parse_result=True):
+    def get(self, endpoint: str, params: dict = None, log_resp=True, fields_to_show=None):
         resp = self.session.get(url=f"{self.api_url()}{endpoint}", headers=self.headers, params=params or {})
         return resp
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def post(self, endpoint: str, payload: dict = None, parse_result=True):
+    def post(self, endpoint: str, payload: dict = None, log_resp=True, fields_to_show=None):
         resp = self.session.post(url=f"{self.api_url()}{endpoint}", headers=self.headers, json=payload)
         return resp
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def put(self, endpoint: str, payload: dict = None, parse_result=True):
-        resp = self.session.put(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
+    def put(self, endpoint: str, payload: dict = None, log_resp=True, fields_to_show=None):
+        resp = self.session.put(url=f"{self.api_url()}{endpoint}", headers=self.headers, json=payload)
         return resp
     
     @after_request(max_retries=3, base_delay=1.0, max_delay=10)
-    def delete(self, endpoint: str,  params: dict = None, parse_result=True):
+    def delete(self, endpoint: str,  params: dict = None, log_resp=True, fields_to_show=None):
         resp = self.session.delete(url=f"{self.api_url()}{endpoint}", params=params, headers=self.headers)
         return resp
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def patch(self, endpoint: str, payload: dict = None, parse_result=True):
+    def patch(self, endpoint: str, payload: dict = None, log_resp=True, fields_to_show=None):
         resp = self.session.patch(url=f"{self.api_url()}{endpoint}", headers=self.headers, json=payload)
         return resp
 

@@ -73,21 +73,24 @@ class Notifications(BasePage):
 
     # ------------------------ VERIFY ------------------------ #
 
-    def verify_notification_banner(self, expected_title, expected_des, timeout=EXPLICIT_WAIT):
+    def verify_notification_banner(self, expected_title="", expected_des="", timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        # Execute sequentially instead of in parallel to avoid Device Farm connection pool issues
-        logger.debug("- Fetching notification description")
-        actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
-        logger.debug("- Fetching notification title")
-        actual_title = self.actions.get_text(self.__noti_title, timeout=QUICK_WAIT)
+        if expected_des:
+            logger.debug("- Fetching notification description")
+            actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
 
-        logger.debug(f"- Check noti des - {expected_des!r}")
-        compare_noti_with_tolerance(actual_des, expected_des)
+            logger.debug(f"> Check noti des = {expected_des!r}")
+            compare_noti_with_tolerance(actual_des, expected_des)
 
-        if actual_title:
-            logger.debug(f"- Check noti title - {expected_title!r}")
-            soft_assert(actual_title, expected_title)
+        if expected_title:
+            timeout = EXPLICIT_WAIT if not expected_des else QUICK_WAIT
+            logger.debug("- Fetching notification title")
+            actual_title = self.actions.get_text(self.__noti_title, timeout=timeout)
+
+            if not expected_des or actual_title:
+                logger.debug(f"> Check noti title - {expected_title!r}")
+                soft_assert(actual_title, expected_title)
 
     def verify_notification_result(self, expected_result: str | list, close=False):
         self.open_noti_box()

@@ -6,6 +6,7 @@ import pytest
 from src.apis.api_client import APIClient
 from src.data.enums import Features, WatchListTab
 from src.utils import DotDict
+from src.utils.format_utils import format_dict_to_string
 from src.utils.logging_utils import logger
 
 
@@ -24,13 +25,13 @@ def test(web, setup_test, check_tab):
     logger.info("Verify page is redirected to Trade Page")
     web.trade_page.verify_page_url()
 
-    logger.info(f"Verify Tab ALL on Trade Page is selected")
+    logger.info(f"Verify Tab ALL in Trade Page is selected")
     web.trade_page.watch_list.verify_tab_selected(WatchListTab.ALL)
 
-    logger.info(f"Verify symbol {select_symbol} is selected")
+    logger.info(f"Verify symbol {select_symbol!r} is selected in watchlist")
     web.trade_page.watch_list.verify_symbol_selected(select_symbol)
 
-    logger.info("Verify symbol is displayed on chart")
+    logger.info(f"Verify symbol {select_symbol!r} is displayed on chart")
     web.trade_page.chart.verify_symbol_selected(select_symbol)
 
 
@@ -39,17 +40,22 @@ def setup_test(web):
     watchlist_tabs = WatchListTab.sub_tabs() + [WatchListTab.ALL, WatchListTab.FAVOURITES]
     watchlist_symbol = DotDict()
 
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
     logger.info("- Navigate to Market Page")
     web.home_page.navigate_to(Features.MARKETS, wait=True)
 
-    logger.info("- POST starred symbols")
     time.sleep(2)
     symbols = web.markets_page.watch_list.get_current_symbols()
+
+    logger.info(f"- Send API request to mark star symbols: {', '.join(symbols[:5])}")
     for _symbol in symbols[:5]:
         APIClient().market.post_starred_symbol(_symbol)
 
     for tab in watchlist_tabs:
-        logger.info(f"- Get watchlist symbol from tab: {tab!r}")
+        logger.info(f"- Get symbol from watchlist tab: {tab!r}")
         watchlist_symbol[tab] = web.markets_page.watch_list.get_current_symbols(tab)
+
+    logger.info(f">> Setup Summary: Watch List Symbol: {format_dict_to_string(watchlist_symbol)}")
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield watchlist_symbol

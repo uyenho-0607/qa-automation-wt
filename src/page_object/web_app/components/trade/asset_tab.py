@@ -33,7 +33,8 @@ class AssetTab(BaseTrade):
     __tab_amount = (By.XPATH, "//div[@data-testid='tab-asset-order-type-{}' and contains(normalize-space(), '({})')]")
 
     __item_by_id = (By.XPATH, "//div[@data-testid='asset-{}-list-item-order-no' and contains(normalize-space(), '{}')]")
-    __order_id_items = (By.XPATH, "//div[@data-testid='asset-{}-list-item-order-no']")
+    __order_id_items = (By.CSS_SELECTOR, "*[data-testid$='-list-item-order-no']")
+
     __expand_items = (By.CSS_SELECTOR, data_testid('asset-{}-list-item-expand'))
     __expand_item_by_id = (
         By.XPATH,
@@ -69,11 +70,15 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, trade_object: ObjTrade) -> None:
+    def get_last_order_id(self, trade_object: ObjTrade = None) -> int:
         """Get the latest order ID from the specified tab and update value into trade_object"""
-        tab = AssetTabs.get_tab(trade_object.order_type)
-        res = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator()))
-        trade_object.order_id = res.split(": ")[-1] if res else 0
+        order_id = self.actions.get_text(self.__order_id_items)
+        order_id = order_id.split(": ")[-1] if order_id else 0
+
+        if trade_object:
+            trade_object.order_id = order_id
+
+        return order_id
 
     def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade) -> Dict[str, Any]:
         """Get detailed data for an expanded item in the specified tab."""
@@ -153,15 +158,13 @@ class AssetTab(BaseTrade):
         not confirm or self.confirm_delete_order()
 
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=True) -> None:
-        if trade_object:
-            trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
+        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else self.get_last_order_id(trade_object)
 
-        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
+        logger.debug(f"- Close order with ID: {order_id!r}")
         self.click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
 
         if confirm:
-            if trade_object:
-                self.get_current_price(trade_object)
+            not trade_object or self.get_current_price(trade_object)
             self.confirm_close_order()
 
         not wait or self.wait_for_spin_loader()

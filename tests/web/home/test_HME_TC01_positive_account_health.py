@@ -13,13 +13,13 @@ def test(web, setup_teardown):
     logger.info("Step 1: Open account dropdown details")
     web.home_page.toggle_account_selector()
 
-    logger.info("Verify account dropdown info")
+    logger.info("Verify account dropdown info against API data")
     web.home_page.verify_account_dropdown_details(acc_details)
 
     logger.info("Step 2: Close account dropdown details")
     web.home_page.toggle_account_selector(open=False)
 
-    logger.info("Verify account details")
+    logger.info("Verify account details in Home Page against API data")
     web.home_page.verify_account_details(acc_details)
 
     logger.info("Step 3: Toggle balance summary and show all account summary items")
@@ -42,20 +42,23 @@ def test(web, setup_teardown):
 @pytest.fixture
 def setup_teardown(web, symbol):
 
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+
     logger.info("- Place order to make sure account has Margin Level")
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
-    APIClient().trade.post_order(trade_object)
+    APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
 
     logger.info("- Refresh Page to load data")
     web.home_page.refresh_page()
 
-    logger.info("- Get account details API details")
+    logger.info("- Send API to get account statistic and details")
     account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     account_details = APIClient().user.get_user_account()
 
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
+
     yield account_summary, account_details
 
-    logger.info("- Show all account summary items")
+    logger.info("[Cleanup] Show all account summary items")
     web.home_page.check_uncheck_balance_items(AccSummary.checkbox_list())
 
 

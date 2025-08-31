@@ -4,6 +4,7 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import WatchListTab, Features
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
@@ -38,37 +39,35 @@ def test(web_app, tab, setup_test):
 def setup_test(web_app):
     def _handler(tab):
 
+        logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+
         if tab != WatchListTab.FAVOURITES:
             logger.info(f"- Get symbols should be displayed in tab: {tab}")
             symbols = APIClient().market.get_watchlist_items(tab, get_symbols=True)
 
             # Filter and sample symbols to avoid excessive scrolling
-            if symbols and len(symbols) > 50:
-                # Filter out symbols starting with letters that are at the end of alphabet to avoid long scrolling times
-                problematic_letters = ['U', 'V', 'W', 'X', 'Y', 'Z']
-                filtered_symbols = [sym for sym in symbols if not any(sym.startswith(letter) for letter in problematic_letters)]
+            if symbols and len(symbols) > 10:
+                # filter out symbols placed at the end of the list
+                filtered_symbol = [sym for sym in symbols if not any(sym.startswith(letter) for letter in ['U', 'V', 'W', 'X', 'Y', 'Z'])]
+                if filtered_symbol:
+                    symbols = filtered_symbol
 
-                # If we have enough filtered symbols, use them; otherwise fall back to original
-                if len(filtered_symbols) >= 10:
-                    logger.info(f"- Filtered out symbols starting with {problematic_letters} to avoid scrolling issues")
-                    symbols = filtered_symbols
-
-                # Sample a reasonable number of symbols for testing (max 15)
-                symbols = random.sample(symbols, 10)
+                symbols = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
 
         else:
-            _list_symbol = APIClient().market.get_watchlist_items(WatchListTab.FAVOURITES, get_symbols=True)
 
-            if not _list_symbol:
-                web_app.home_page.watch_list.select_tab(WatchListTab.ALL)
+            logger.info(f"- Prepare starred symbols for checking tab {WatchListTab.FAVOURITES.value!r}")
+            symbols = ObjSymbol().get_symbols(get_all=True)
+            _list_symbol = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
 
-                symbols = APIClient().market.get_watchlist_items(WatchListTab.ALL, get_symbols=True)
-                _list_symbol = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
-                for symbol in _list_symbol:
-                    logger.info(f"- Mark star symbol: {symbol!r}")
-                    APIClient().market.post_starred_symbol(symbol)
+            for symbol in _list_symbol:
+                logger.info(f"- Mark star symbol: {symbol!r}")
+                APIClient().market.post_starred_symbol(symbol)
 
             symbols = _list_symbol
+
+        logger.info(f">> Setup Summary: List symbols should be displayed in tab: {tab.value!r} - {', '.join(symbols)!r}")
+        logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
         return symbols
 
@@ -79,5 +78,5 @@ def setup_test(web_app):
 def cleanup(tab):
     yield
     if tab == WatchListTab.FAVOURITES:
-        logger.info(f"- Delete all star symbols")
+        logger.info(f"[Cleanup] Delete all star symbols")
         APIClient().market.delete_starred_symbols()

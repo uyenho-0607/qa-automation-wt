@@ -24,16 +24,6 @@ class WebActions(BaseActions):
         self._action_chains = ActionChains(self._driver)
 
     # ------- ACTIONS ------ #
-
-    @log_requests
-    def test_wait(self, locator):
-        self._wait.until(
-            lambda d: "display: none;" == d.find_element(*locator).get_attribute("style"),
-            message="Chart container still showing loading state after timeout"
-        )
-
-
-    # @handle_stale_element
     def _send_key_action_chains(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
         if locator:
             element = self.find_element(locator, timeout)
@@ -42,7 +32,6 @@ class WebActions(BaseActions):
             self._action_chains.double_click(element).send_keys(Keys.DELETE).perform()
             self._action_chains.send_keys_to_element(element, str(value)).perform()
 
-    # @handle_stale_element
     def _send_keys(self, value, locator: tuple[str, str] = None, element: WebElement = None, timeout=EXPLICIT_WAIT):
         if locator:
             element = self.find_element(locator, timeout)
@@ -63,14 +52,13 @@ class WebActions(BaseActions):
 
         # Fall back
         sent_value = element.get_attribute("value")
-        logger.debug(f"- Sent value: {sent_value!r}")
 
-        while sent_value != str(value) and max_retries:
-            logger.debug(f"- Resend: {value!r}")
+        while str(sent_value) != str(value) and max_retries:
+            logger.warning(f"> Sent value: {sent_value} != Input value: {value}. Retry sending: {value!r}")
             send_key_func(value, element=element)
             max_retries -= 1
             sent_value = element.get_attribute("value")
-            logger.debug(f"- Resent value: {sent_value!r}")
+            logger.debug(f"> Resent value: {sent_value!r}")
 
     @handle_stale_element
     @log_requests
@@ -103,7 +91,7 @@ class WebActions(BaseActions):
         res = element.get_attribute("value") if element else ""
 
         if retry:
-            logger.debug("- Retry getting value")
+            # logger.debug("- Retry getting value")
             time.sleep(1)
             element = self.find_element(locator, QUICK_WAIT, raise_exception=False, show_log=False)
             res = element.get_attribute("value") if element else ""
@@ -175,7 +163,6 @@ class WebActions(BaseActions):
 
         return self._driver.current_url
 
-    @log_requests
     def switch_to_iframe(self):
         iframe = self._wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
         self._driver.switch_to.frame(iframe)
