@@ -270,7 +270,8 @@ class WatchList(BaseTrade):
         super().verify_empty_message(self.__empty_message, UIMessages.NO_ITEM_AVAILABLE)
 
     def verify_tabs_displayed(self):
-        expected_tabs = WatchListTab.parent_tabs() + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
+        expected_tabs = [item.value for item in WatchListTab.parent_tabs()] + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
+
         actual_tabs = self.actions.get_text_elements(self.__all_tabs)
         soft_assert(sorted(actual_tabs), sorted(expected_tabs))
 

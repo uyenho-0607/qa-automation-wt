@@ -90,6 +90,7 @@ class AssetTab(BaseTrade):
         if trade_object:
             trade_object.order_id = order_id
 
+        logger.debug(f"> Latest order_id: {order_id}")
         return order_id
 
     def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
@@ -170,7 +171,9 @@ class AssetTab(BaseTrade):
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=False) -> None:
 
         # define order_id value
-        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else self.get_last_order_id(trade_object)
+        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
+        if not order_id:
+            order_id = self.get_last_order_id(trade_object)
 
         # update closed info for trade_object if provided
         if trade_object:

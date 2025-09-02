@@ -77,7 +77,7 @@ class AssetTab(BaseTrade):
 
         if trade_object:
             trade_object.order_id = order_id
-
+        logger.debug(f"> Latest order_id: {order_id!r}")
         return order_id
 
     def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade) -> Dict[str, Any]:
@@ -158,7 +158,9 @@ class AssetTab(BaseTrade):
         not confirm or self.confirm_delete_order()
 
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=True) -> None:
-        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else self.get_last_order_id(trade_object)
+        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
+        if not order_id:
+            order_id = self.get_last_order_id(trade_object)
 
         logger.debug(f"- Close order with ID: {order_id!r}")
         self.click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")

@@ -35,6 +35,7 @@ class TradingModals(BaseTrade):
 
     __drp_edit_expiry = (By.CSS_SELECTOR, data_testid('edit-dropdown-expiry'))
     __opt_edit_expiry = (By.CSS_SELECTOR, data_testid('edit-dropdown-expiry-{}'))
+    __btn_next_calendar = (By.CSS_SELECTOR, "button[class*='next'][class*='calendar']")
     __txt_edit_expiry_date = (By.CSS_SELECTOR, data_testid('edit-input-expiry-date'))
     __expiry_last_date = (By.XPATH, "(//button[contains(@class, 'month-view')])[last()]")
 
@@ -155,6 +156,7 @@ class TradingModals(BaseTrade):
         if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
             logger.debug("> Select expiry date")
             self.actions.click(self.__txt_edit_expiry_date)
+            self.actions.click(self.__btn_next_calendar)
             self.actions.click(self.__expiry_last_date)
 
     # Control buttons
