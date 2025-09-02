@@ -102,9 +102,6 @@ class LoginPage(BasePage):
         if account_type == AccountType.DEMO or RuntimeConfig.is_non_oms():
             err_msg = UIMessages.LOGIN_INVALID_CREDENTIALS
 
-        if RuntimeConfig.is_prod(): # sometimes prod can show 'Trading general error. Please try again later.'
-            other_msg = UIMessages.TRADING_GENERAL_ERRORS
-
         super().verify_alert_error_message(err_msg, other_msg)
 
     def verify_account_tabs_is_displayed(self):
