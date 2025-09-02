@@ -245,9 +245,9 @@ def format_response(resp: Response, fields_to_show: list[str] = None):
                     result = filtered_result
                 
                 # Truncate long lists
-                if len(result) > 3:
-                    left_resp = len(result) - 3
-                    content["result"] = result[:3] + [f"... ({left_resp} more)"]
+                if len(result) > 5:
+                    left_resp = len(result) - 5
+                    content["result"] = result[:5] + [f"... ({left_resp} more)"]
                 else:
                     content["result"] = result
             
