@@ -4,8 +4,8 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import Features, WatchListTab
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
@@ -39,7 +39,7 @@ def test(ios):
 
 @pytest.fixture(autouse=True)
 def mark_symbol():
-    star_symbol = random.choice(get_symbols())
+    star_symbol = random.choice(ObjSymbol().get_symbols(get_all=True))
     logger.info(f"- Mark star symbol: {star_symbol!r}")
     APIClient().market.post_starred_symbol(star_symbol)
 
