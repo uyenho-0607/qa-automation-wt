@@ -64,6 +64,7 @@ class PlaceOrderPanel(BaseTrade):
     __drp_expiry = (By.CSS_SELECTOR, data_testid('trade-dropdown-expiry'))
     __opt_expiry = (By.CSS_SELECTOR, data_testid('trade-dropdown-expiry-{}'))
     __expiry_trade = (By.CSS_SELECTOR, data_testid('trade-input-expiry-date'))
+    __btn_next_calendar = (By.CSS_SELECTOR, "button[class*='next'][class*='calendar']")
     __expiry_last_date = (By.XPATH, "(//button[contains(@class, 'month-view')])[last()]")
 
     # MT5 specific elements
@@ -259,6 +260,7 @@ class PlaceOrderPanel(BaseTrade):
         if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
             logger.debug(f"> Select expiry date")
             self.actions.click(self.__expiry_trade)
+            self.actions.click(self.__btn_next_calendar)
             self.actions.click(self.__expiry_last_date)
 
         self._select_expiry(expiry, retries - 1)
