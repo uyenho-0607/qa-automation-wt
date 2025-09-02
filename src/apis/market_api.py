@@ -20,7 +20,7 @@ class MarketAPI(BaseAPI):
         super().__init__()
 
     def get_symbol_details(self, symbol: str):
-        fields_to_show = ["symbol", "digits", "decimal", "pointStep", "ask", "bid", "contractSize"]
+        fields_to_show = ["symbol", "decimal", "pointStep", "contractSize"]
 
         logger.debug(f"[API] Get symbol details (symbol:{symbol})")
         resp = self.get(endpoint=self._symbol_details, params={"symbol": symbol}, fields_to_show=fields_to_show)
