@@ -35,7 +35,7 @@ def test(web_app, setup_test):
     web_app.home_page.navigate_to(Features.ASSETS, wait=True)
 
     logger.info(f"Verify My Trade list is not changed ({', '.join(symbols)})")
-    web_app.assets_page.verify_mytrade_items(symbols[::-1])
+    web_app.assets_page.verify_mytrade_items(symbols)
 
 
 @pytest.fixture
