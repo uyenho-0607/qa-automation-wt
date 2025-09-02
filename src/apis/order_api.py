@@ -42,7 +42,7 @@ class OrderAPI(BaseAPI):
         endpoint = self._pending_endpoint if tab == AssetTabs.PENDING_ORDER else self._open_endpoint
 
         logger.info(f"[API] Get order details ({'All' if not symbol else f'symbol:{symbol}'})")
-        resp = self.get(endpoint, {"symbol": symbol}, fields_to_show=["orderId", "symbol", "takeProfit", "stopLoss", "profit", "openPrice", "currentPrice"])
+        resp = self.get(endpoint, {"symbol": symbol}, fields_to_show=["orderId", "symbol", "takeProfit", "stopLoss"])
 
         if order_id:
             # return order details by order_id
