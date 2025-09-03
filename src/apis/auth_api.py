@@ -1,3 +1,5 @@
+import requests
+
 from src.apis.api_base import BaseAPI
 from src.core.config_manager import Config
 from src.data.enums import Client, AccountType
@@ -28,6 +30,9 @@ class AuthAPI(BaseAPI):
         self.get_token()
 
     def get_token(self):
+        if RuntimeConfig.platform in ["android", "ios"]:
+            self.check_ip()
+
         if "Authorization" not in RuntimeConfig.headers:
             credentials = Config.credentials()
             payload = {
@@ -46,3 +51,10 @@ class AuthAPI(BaseAPI):
             return self.__headers
 
         return self.__headers
+
+    @staticmethod
+    def check_ip():
+        url = "https://checkip.amazonaws.com/"
+        response = requests.get(url)
+        logger.info(f">>>>> IP amazonaws: {response.text.strip()}")
+        return response.text.strip()
