@@ -68,6 +68,13 @@ class AppiumDriver:
 
         if cd:
             options.app = DEVICEFARM_APP_PATH
+            options.set_capability(
+                "proxy", {
+                    "proxyType": "manual",
+                    "httpProxy": "http://proxy-public.dev.k8ns.net:3128",
+                    "sslProxy": "http://proxy-public.dev.k8ns.net:3128"
+                }
+            )
 
         if not cls._appium_service and not cd:
             cls.start_appium_service()
