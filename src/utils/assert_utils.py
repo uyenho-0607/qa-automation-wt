@@ -95,7 +95,7 @@ def compare_dict(
     diff_keys = []
     tolerance_info = {}
 
-    logger.debug(f"- Compare dict: {format_dict_to_string(expected=expected, actual=actual)}")
+    logger.debug(f"> Compare data: {format_dict_to_string(expected=expected, actual=actual)}")
     # compare if length of two dicts are the same
     all_res.append(set(actual.keys()) == set(expected.keys()))
 
