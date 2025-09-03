@@ -218,7 +218,7 @@ class TradingModals(BaseTrade):
         if "size" in actual:
             actual["volume"] = actual.pop("size")
 
-        logger.debug(f"- Actual: {format_dict_to_string(actual)}")
+        # logger.debug(f"- Actual: {format_dict_to_string(actual)}")
         return actual
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
