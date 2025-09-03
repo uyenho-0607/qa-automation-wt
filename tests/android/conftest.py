@@ -2,6 +2,7 @@ import time
 
 import pytest
 
+from src.apis.api_client import APIClient
 from src.core.actions.mobile_actions import MobileActions
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
@@ -13,9 +14,9 @@ from src.utils.logging_utils import logger
 def android():
     logger.info("- Init Android driver")
     DriverManager.get_driver()
-    actions = MobileActions()
+    APIClient()
 
-    yield AndroidContainer(actions)
+    yield AndroidContainer()
 
     logger.info("- Clean up Android driver")
     DriverManager.quit_driver()
