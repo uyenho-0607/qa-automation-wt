@@ -243,8 +243,8 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Customize test's properties
     data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
-    data["historyId"] = _generate_history_id(data['fullName'])
-
+    # data["historyId"] = _generate_history_id(data['fullName'])
+    data["historyId"] = uuid.uuid4().hex
 
 def _add_check_icon(data):
     for item in data.get("steps", []):
