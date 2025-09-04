@@ -1,3 +1,4 @@
+from src.data.consts import ISSUE_SYMBOLS
 from src.data.enums import WatchListTab
 
 
@@ -29,7 +30,7 @@ class ObjSymbol:
                 if symbols:
                     break
 
-            cls.all_symbols = symbols
+            cls.all_symbols = [item for item in symbols if item['symbol'] not in ISSUE_SYMBOLS]
 
             # Filter symbols with small prices (to avoid insufficient balance)
             filtered_price = [item for item in cls.all_symbols if item['ask'] < cls.threshold]

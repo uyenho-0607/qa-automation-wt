@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import json
 import os
 import re
@@ -218,6 +219,10 @@ def _process_broken_status(data: Dict[str, Any]) -> None:
 
 def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     """Clean up attachments and customize report details."""
+
+    def _generate_history_id(test_identifier: str) -> str:
+        return hashlib.md5(test_identifier.encode("utf-8")).hexdigest()
+
     # Clean up attachments and status details
     if data.get("attachments"):
 
@@ -231,6 +236,16 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Remove trace
     data.get("statusDetails", {}).pop("trace", None)
+    if data.get("statusDetails") and data.get("status") == "failed":
+        data["statusDetails"]["message"] = "AssertionError: \n\n"
+        all_errors = [(s["statusDetails"]["message"], s["name"]) for s in data["steps"] if "message" in s.get("statusDetails", {})]
+
+        for error, step_name in all_errors:
+            data["statusDetails"]["message"] += f"{step_name}:{error}\n\n"
+
+        # remove v_step details for filtering categories
+        for s in data.get("steps"):
+            s.pop("statusDetails", None)
 
     # Customize test case name
     data["name"] = data["fullName"].split(".")[-1].replace("#test", "")
@@ -238,8 +253,8 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Customize test's properties
     data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
+    # data["historyId"] = _generate_history_id(data['fullName'])
     data["historyId"] = uuid.uuid4().hex
-
 
 def _add_check_icon(data):
     for item in data.get("steps", []):

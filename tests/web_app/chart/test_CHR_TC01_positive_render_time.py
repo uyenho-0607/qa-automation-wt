@@ -1,17 +1,18 @@
+import random
 import time
 
 import pytest
 
-from src.data.enums import ChartTimeframe, Client
+from src.data.enums import ChartTimeframe
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
-# pytestmark = [pytest.mark.critical]
+pytestmark = [pytest.mark.critical]
 
 # Expected render time (seconds)
 EXP_TIME = RuntimeConfig.charttime
-SYMBOLS = {Client.LIRUNEX: "BTCUSD", Client.TRANSACT_CLOUD: "BTC.USD"}
-timeframe_list = ChartTimeframe.list_values()
+timeframe_list = ChartTimeframe.crit_list()
 
 
 def test_default(web_app):
@@ -53,6 +54,8 @@ def cleanup_chart(web_app):
 @pytest.fixture(scope="module", autouse=True)
 def setup_test(web_app):
 
-    logger.info(f"- Search and select symbol: {SYMBOLS[RuntimeConfig.client]}")
-    web_app.home_page.search_and_select_symbol(SYMBOLS[RuntimeConfig.client])
+    select_symbol = random.choice(ObjSymbol().get_symbols(get_all=True))
+
+    logger.info(f"- Search and select symbol: {select_symbol}")
+    web_app.home_page.search_and_select_symbol(select_symbol)
 

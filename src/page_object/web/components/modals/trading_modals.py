@@ -213,12 +213,12 @@ class TradingModals(BaseTrade):
 
         actual['symbol'] = self.actions.get_text(self.__edit_confirm_symbol)
         actual['order_type'] = self.actions.get_text(self.__edit_confirm_order_type)
-        actual['order_no'] = self.actions.get_text(self.__edit_confirm_order_id)
+        actual['order_no'] = self.actions.get_text(self.__edit_confirm_order_id).split(": ")[-1].strip()
 
         if "size" in actual:
             actual["volume"] = actual.pop("size")
 
-        logger.debug(f"- Actual: {format_dict_to_string(actual)}")
+        # logger.debug(f"- Actual: {format_dict_to_string(actual)}")
         return actual
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #

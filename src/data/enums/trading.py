@@ -141,6 +141,10 @@ class ChartTimeframe(BaseEnum):
         ]
         return display_list
 
+    @classmethod
+    def crit_list(cls):
+        return [cls.one_min, cls.five_min, cls.fifteen_min, cls.one_hour, cls.four_hour]
+
     def locator_map(self):
         if RuntimeConfig.is_web():
             map_dict = {
