@@ -33,7 +33,7 @@ class MarketAPI(BaseAPI):
             _endpoint = self._all
 
         logger.debug(f"[API] Get watchlist symbols (tab:{tab.value})")
-        resp = self.get(_endpoint, params={"code": self.watchlist_map.get(tab)}, fields_to_show=["symbol", "type", "status"])
+        resp = self.get(_endpoint, params={"code": self.watchlist_map.get(tab)}, fields_to_show=["symbol", "type", "status"], truncate_len=10)
 
         if get_symbols:
             res = [item["symbol"] for item in resp]

@@ -218,7 +218,7 @@ def format_request(resp: Response):
     curl_command = " \n".join(lines)
     return curl_command
 
-def format_response(resp: Response, fields_to_show: list[str] = None):
+def format_response(resp: Response, fields_to_show: list[str] = None, truncate_len: int = 5):
     """Format response content with optional field filtering for both list and dictionary responses.
     Args:
         resp: Response object to format
@@ -245,9 +245,9 @@ def format_response(resp: Response, fields_to_show: list[str] = None):
                     result = filtered_result
                 
                 # Truncate long lists
-                if len(result) > 5:
-                    left_resp = len(result) - 5
-                    content["result"] = result[:5] + [f"... ({left_resp} more)"]
+                if len(result) > truncate_len:
+                    left_resp = len(result) - truncate_len
+                    content["result"] = result[:truncate_len] + [f"... ({left_resp} more)"]
                 else:
                     content["result"] = result
             
@@ -266,11 +266,11 @@ def format_response(resp: Response, fields_to_show: list[str] = None):
 
     return response_text
 
-def format_request_log(resp: Response, log_resp=False, fields_to_show=None) -> str:
+def format_request_log(resp: Response, log_resp=False, fields_to_show=None, truncate_len=5) -> str:
 
     # Format request content
     request = format_request(resp)
-    response = format_response(resp, fields_to_show)
+    response = format_response(resp, fields_to_show, truncate_len)
 
     if log_resp:
         return f"{SEND_ICON}  Request Sent: \n{request}\n\n {RECEIVE_ICON}  Response Received: \n{response}\n\n"

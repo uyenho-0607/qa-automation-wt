@@ -36,7 +36,7 @@ def test(web, tab, setup_test):
 
 
 @pytest.fixture
-def setup_test():
+def setup_test(web):
     def _handler(tab):
 
         logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
@@ -52,7 +52,7 @@ def setup_test():
                 if filtered_symbol:
                     symbols = filtered_symbol
 
-                symbols = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
+            symbols = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
 
         else:
 
@@ -65,6 +65,7 @@ def setup_test():
                 APIClient().market.post_starred_symbol(symbol)
 
             symbols = _list_symbol
+            web.home_page.refresh_page()
 
         logger.info(f">> Setup Summary: List symbols should be displayed in tab: {tab.value!r} - {', '.join(symbols)!r}")
         logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
