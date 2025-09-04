@@ -1,3 +1,5 @@
+from contextlib import suppress
+
 import pytest
 
 from src.apis.api_client import APIClient
@@ -36,19 +38,19 @@ def login_member_site(web_app):
     logger.info("- Check if logged in success")
     for attempt in range(max_attempts):
         if not web_app.home_page.is_logged_in():
-            logger.warning(f"- Login failed, refresh page and login again (attempt: {attempt + 1}")
+            logger.warning(f"- Login failed, refresh page and login again (attempt: {attempt + 1})")
             web_app.login_page.refresh_page()
 
-            logger.info("- Perform login again")
-            web_app.login_page.login(wait=True)
-            web_app.home_page.feature_anm_modal.got_it(timeout=3)
+            with suppress(Exception):
+                logger.info("- Perform login again")
+                web_app.login_page.login(wait=True)
+                web_app.home_page.feature_anm_modal.got_it(timeout=3)
 
-            max_attempts -= 1
         else:
             break
 
-    if not max_attempts and not web_app.home_page.is_logged_in():
-        raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
+        if attempt == max_attempts - 1 and not web_app.home_page.is_logged_in():
+            raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
 
     logger.info(f"{'=' * 10} Setup Login - Done {'=' * 10}")
 
