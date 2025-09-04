@@ -1,4 +1,5 @@
 import time
+from contextlib import suppress
 
 import pytest
 
@@ -38,21 +39,20 @@ def login_member_site(web):
     for attempt in range(max_attempts):
         if not web.home_page.is_logged_in():
 
-            logger.warning(f"- Login failed, refresh page and login again (attempt: {attempt + 1}")
+            logger.warning(f"- Login failed, refresh page and login again (attempt: {attempt + 1})")
             web.login_page.refresh_page()
             time.sleep(3)
 
-            logger.info("- Perform login again")
-            web.login_page.login(wait=True)
-            web.home_page.feature_announcement_modal.got_it()
-
-            max_attempts -= 1
+            with suppress(Exception):
+                logger.info("- Perform login again")
+                web.login_page.login(wait=True)
+                web.home_page.feature_announcement_modal.got_it()
 
         else:
             break
 
-    if not max_attempts and not web.home_page.is_logged_in():
-        raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
+        if attempt == max_attempts - 1 and not web.home_page.is_logged_in():
+            raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
 
     logger.info(f"{'=' * 10} Setup Login - Done {'=' * 10}")
 
