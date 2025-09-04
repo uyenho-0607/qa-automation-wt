@@ -147,6 +147,7 @@ def after_request(base_delay=1.0, max_delay=10.0, max_retries=3):
             apply_retries = all_args.get("apply_retries", True)
             fields_to_show = all_args.get("fields_to_show", None)
             parse_result = all_args.get("parse_result", True)
+            truncate_len = all_args.get("truncate_len", 5)
 
             def _parse_result(resp):
                 if not parse_result:
@@ -162,7 +163,7 @@ def after_request(base_delay=1.0, max_delay=10.0, max_retries=3):
 
             if not apply_retries:
                 response = func(self, *args, **kwargs)
-                logger.debug(f"{format_request_log(response, log_resp=True, fields_to_show=fields_to_show)}")
+                logger.debug(f"{format_request_log(response, log_resp=True, fields_to_show=fields_to_show, truncate_len=truncate_len)}")
 
                 return _parse_result(response)
 
@@ -170,7 +171,7 @@ def after_request(base_delay=1.0, max_delay=10.0, max_retries=3):
             for attempt in range(max_retries):
                 try:
                     response = func(self, *args, **kwargs)
-                    logger.debug(f"{format_request_log(response, log_resp=True, fields_to_show=fields_to_show)}")
+                    logger.debug(f"{format_request_log(response, log_resp=True, fields_to_show=fields_to_show, truncate_len=truncate_len)}")
 
                     return _parse_result(response)
 
