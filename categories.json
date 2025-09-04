@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Server Errors",
+    "matchedStatuses": [
+      "failed",
+      "broken"
+    ],
+    "messageRegex": "(?is).*(server error|trading general error).*"
+  },
+  {
+    "name": "Validation Errors",
+    "matchedStatuses": [
+      "failed"
+    ],
+    "messageRegex": "(?is).*validation failed.*"
+  }
+]
