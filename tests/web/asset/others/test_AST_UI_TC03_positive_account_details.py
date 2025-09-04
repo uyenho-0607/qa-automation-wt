@@ -36,7 +36,7 @@ def test(web, setup_test, disable_OCT):
     acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + sum_profit
     acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + sum_profit
 
-    logger.info(f"Verify Acc Balance vs Profit Loss are changed ~{sum_profit!r}")
+    logger.info(f"Verify Acc Balance and Profit Loss are changed: {sum_profit!r}")
     web.assets_page.verify_account_balance_summary(
         acc_balance,
         acc_items=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS],

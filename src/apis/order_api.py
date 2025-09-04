@@ -1,4 +1,5 @@
 from src.apis.api_base import BaseAPI
+from src.data.consts import ISSUE_SYMBOLS
 from src.data.enums import AssetTabs, OrderType
 from src.utils.logging_utils import logger
 
@@ -43,6 +44,7 @@ class OrderAPI(BaseAPI):
 
         logger.info(f"[API] Get order details ({'All' if not symbol else f'symbol:{symbol}'})")
         resp = self.get(endpoint, {"symbol": symbol}, fields_to_show=["orderId", "symbol", "takeProfit", "stopLoss"])
+        resp = [item for item in resp if item['symbol'] not in ISSUE_SYMBOLS]
 
         if order_id:
             # return order details by order_id
