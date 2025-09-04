@@ -140,7 +140,7 @@ class ObjTrade(BaseObj):
 
         # Add order ID if requested
         if include_order_id:
-            details["order_no"] = f"Order No. : {self.get('order_id', 0)}"
+            details["order_no"] = f"{self.get('order_id', 0)}"
 
         details |= {
             "order_type": self._get_order_type(),

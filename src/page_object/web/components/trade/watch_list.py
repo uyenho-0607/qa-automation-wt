@@ -111,7 +111,7 @@ class WatchList(BaseTrade):
         last_count = 0
         not_found_time = 0
         max_scroll_attempts = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
-        logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
+        # logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
         while scroll_attempts < max_scroll_attempts:
             # Get current visible symbols

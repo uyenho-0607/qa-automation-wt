@@ -1,18 +1,18 @@
+import random
 import time
 
 import pytest
 
 from src.data.enums import ChartTimeframe
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
-# pytestmark = [pytest.mark.critical]
+pytestmark = [pytest.mark.critical]
 
 # Expected render time (seconds)
 EXP_TIME = RuntimeConfig.charttime
-SYMBOLS = "AUDCAD"
-timeframe_list = ChartTimeframe.list_values()
-
+timeframe_list = ChartTimeframe.crit_list()
 
 def test_default(web):
     logger.info(f"Step 1: Get default render time")
@@ -47,14 +47,13 @@ def test_select_timeframe_repeatedly(web, timeframe):
 @pytest.fixture(autouse=True)
 def cleanup_chart(web):
     yield
-
-    logger.info("- Stop test")
     web.trade_page.chart.exit_chart_iframe()
 
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test(web):
+    select_symbol = random.choice(ObjSymbol().get_symbols(get_all=True))
 
-    logger.info("- Search and select symbol")
-    web.home_page.search_and_select_symbol(SYMBOLS)
-    web.trade_page.chart.wait_for_symbol_selected(SYMBOLS)
+    logger.info(f"- Search and select symbol: {select_symbol!r}")
+    web.home_page.search_and_select_symbol(select_symbol)
+    web.trade_page.chart.wait_for_symbol_selected(select_symbol)

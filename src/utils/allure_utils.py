@@ -236,6 +236,16 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Remove trace
     data.get("statusDetails", {}).pop("trace", None)
+    if data.get("statusDetails") and data.get("status") == "failed":
+        data["statusDetails"]["message"] = "AssertionError: \n\n"
+        all_errors = [(s["statusDetails"]["message"], s["name"]) for s in data["steps"] if "message" in s.get("statusDetails", {})]
+
+        for error, step_name in all_errors:
+            data["statusDetails"]["message"] += f"{step_name}:{error}\n\n"
+
+        # remove v_step details for filtering categories
+        for s in data.get("steps"):
+            s.pop("statusDetails", None)
 
     # Customize test case name
     data["name"] = data["fullName"].split(".")[-1].replace("#test", "")

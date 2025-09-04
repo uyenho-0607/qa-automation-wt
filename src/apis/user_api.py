@@ -33,7 +33,7 @@ class UserAPI(BaseAPI):
 
     def get_user_account(self, get_acc=True):
         logger.debug("[API] Get user account")
-        resp = self.get(endpoint=self._user_account, log_resp=False)
+        resp = self.get(endpoint=self._user_account, fields_to_show=["tradingAccounts"])
 
         if get_acc:
             account = resp["tradingAccounts"][0]
@@ -46,7 +46,6 @@ class UserAPI(BaseAPI):
                 "leverage": account["leverage"]
             }
 
-            logger.debug(f"- User Account extracted from response: {format_dict_to_string(extract_acc)}")
             return extract_acc
 
         return resp

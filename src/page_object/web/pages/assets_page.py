@@ -9,7 +9,6 @@ from src.page_object.web.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
-from src.utils.logging_utils import logger
 
 
 class AssetsPage(BasePage):
