@@ -40,7 +40,7 @@ def test(web, disable_OCT, setup_test):
     logger.info(f"Step {step_idx + 2}: Place Pending Order for symbol: {order_list[-1]}")
     trade_obj = ObjTrade(symbol=order_list[-1], order_type=OrderType.LIMIT)
 
-    web.markets_page.select_symbol(MarketsSection.MY_TRADE, order_list[-1])
+    web.markets_page.select_symbol(MarketsSection.MY_TRADE, order_list[-1], wait=True)
     web.trade_page.place_order_panel.place_order(trade_obj, submit=True)
     web.home_page.notifications.close_noti_banner()
     web.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
