@@ -22,10 +22,45 @@ def setup(login_member_site, web, symbol, disable_OCT):
     logger.info(f"{'=' * 10} Setup Trade Package - Done {'=' * 10}")
 
 
+@pytest.fixture
+def market_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def limit_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def stop_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def stop_limit_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
 @pytest.fixture(scope="package")
 def create_order_data(web, get_asset_tab_amount, symbol):
     def _handler(trade_object, update_price=True):
-
         tab = AssetTabs.get_tab(trade_object.order_type)
 
         logger.info(f"- Select tab: {tab.value.title()}")

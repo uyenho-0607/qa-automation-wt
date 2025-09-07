@@ -41,8 +41,5 @@ def test(web, stop_obj, get_asset_tab_amount, sl_type, tp_type, close_confirm_mo
     logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
-    # logger.info(f"Step 5: Select tab: {tab.value.title()!r}")
-    # web.trade_page.asset_tab.select_tab(tab)
-
     logger.info(f"Verify {tab.value.title()} item details in Asset Tab")
     web.trade_page.asset_tab.verify_item_data(trade_object, wait=True)

@@ -43,7 +43,9 @@ class MarketsPage(BasePage):
 
     # ------------------------ ACTIONS ------------------------ #
     def get_symbols(self, section: MarketsSection, timeout=EXPLICIT_WAIT):
-        symbols = self.actions.get_text_elements(cook_element(self.__symbol_row, locator_format(section.symbol_row())), timeout=timeout)
+        symbols = self.actions.get_text_elements(
+            cook_element(self.__symbol_row, locator_format(section.symbol_row())), timeout=timeout
+        )
         return symbols
 
     def click_arrow_icon(self, arrow: MarketsSection):
