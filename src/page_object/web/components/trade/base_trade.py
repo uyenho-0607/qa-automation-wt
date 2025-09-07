@@ -57,7 +57,9 @@ class BaseTrade(BasePage):
         if order_type == OrderType.MARKET:
             trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
 
-        current_price = self.actions.get_text(cook_element(self.__live_price, trade_type.lower()), timeout=timeout)
+        current_price = self.actions.get_text(
+            cook_element(self.__live_price, trade_type.lower()), timeout=timeout, show_log=False
+        )
         trade_object.current_price = current_price
 
     # One Click Trading Modal Actions

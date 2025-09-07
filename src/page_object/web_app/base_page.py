@@ -64,11 +64,11 @@ class BasePage:
         self.actions.refresh()
         self.wait_for_spin_loader()
 
-    def wait_for_spin_loader(self, timeout: int | float = 5):
+    def wait_for_spin_loader(self, timeout: int | float = 20):
         """Wait for the loader to be invisible."""
-        if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=5):
             logger.debug("- Wait for spin loader to disappear")
-            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=15)
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def navigate_to(self, feature: Features, wait=False):
         self.actions.click(cook_element(self.__home_nav_option, feature.lower()))

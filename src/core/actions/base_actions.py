@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 from src.core.decorators import handle_stale_element, log_requests
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT, IMPLICIT_WAIT, CHECK_ICON_COLOR, FAILED_ICON_COLOR, WARNING_ICON
+from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, IMPLICIT_WAIT, CHECK_ICON_COLOR, FAILED_ICON_COLOR, WARNING_ICON
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_screenshot
 from src.utils.assert_utils import soft_assert
@@ -166,7 +166,7 @@ class BaseActions:
         return element.get_attribute(attribute) if element else None
 
     @handle_stale_element
-    def get_text_elements(self, locator, timeout=SHORT_WAIT):
+    def get_text_elements(self, locator, timeout=EXPLICIT_WAIT):
         """Get text of elements having same locator"""
         elements = self.find_elements(locator, timeout)
         res = [ele.text.strip() if ele else "" for ele in elements]
@@ -176,14 +176,13 @@ class BaseActions:
     def get_text(
             self,
             locator: tuple[str, str],
-            timeout=SHORT_WAIT,
+            timeout=EXPLICIT_WAIT,
             raise_exception=False,
             show_log=True,
     ) -> str:
         """Get text from element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         if not element:
-            # logger.debug("- Retry getting text again")
             element = self.find_element(locator, QUICK_WAIT, raise_exception=raise_exception, show_log=show_log)
 
         return element.text.strip() if element else ""

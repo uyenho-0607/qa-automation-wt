@@ -533,3 +533,10 @@ class PlaceOrderPanel(BaseTrade):
         not submit or self.confirm_trade()
 
 # ------------------------ VERIFY ------------------------ #
+    def verify_oct_mode(self, enable=True):
+
+        logger.info(f"- Check button OCT is {'enabled' if enable else 'disabled'}")
+        self.actions.verify_element_displayed(self.__toggle_oct_checked if enable else self.__toggle_oct)
+
+        logger.info(f"- Check OCT tab is {'displayed' if enable else 'not displayed'}")
+        self.actions.verify_element_displayed(self.__tab_oct, is_display=enable)

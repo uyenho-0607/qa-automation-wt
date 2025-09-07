@@ -65,8 +65,8 @@ def setup_test(web, symbol):
     cur_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
 
     if not cur_orders:
+        logger.info("- No market order, placing new order using API")
         for _ in range(close_amount):
-            logger.info("- No market order, placing new order using API")
             APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
             time.sleep(1)
 
