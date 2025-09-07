@@ -61,7 +61,7 @@ class BasePage:
     def navigate_to(self, feature: Features, wait=False):
         """Navigate to a specific feature using the sidebar"""
         self.actions.click(cook_element(self.__side_bar_option, feature.lower()))
-        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
+        not wait or self.wait_for_spin_loader()
 
     def wait_for_spin_loader(self, timeout: int = 20):
         """Wait for the loader to be invisible."""

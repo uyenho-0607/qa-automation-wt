@@ -17,11 +17,11 @@ from src.utils.logging_utils import logger
         SLTPType.random_values(amount=2)
     ]
 )
-def test(web, market_obj, sl_type, tp_type, ):
+def test(web, market_obj, sl_type, tp_type, get_asset_tab_amount):
     trade_object = market_obj()
 
     logger.info("Step 1: Get tab amount")
-    tab_amount = web.trade_page.asset_tab.get_tab_amount(AssetTabs.OPEN_POSITION)
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 2: Place {trade_object.trade_type} order for {trade_object.symbol!r} (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
     web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, submit=False)
