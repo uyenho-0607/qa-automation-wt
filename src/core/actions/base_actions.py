@@ -163,7 +163,7 @@ class BaseActions:
             locator, timeout, EC.presence_of_element_located,
             raise_exception=raise_exception, show_log=show_log
         )
-        return element.get_attribute(attribute) if element else None
+        return element.get_attribute(attribute) if element else ""
 
     @handle_stale_element
     def get_text_elements(self, locator, timeout=EXPLICIT_WAIT):

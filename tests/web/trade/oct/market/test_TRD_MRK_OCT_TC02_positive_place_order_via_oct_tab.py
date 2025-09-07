@@ -6,11 +6,11 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web, market_obj):
+def test(web, market_obj, get_asset_tab_amount):
     trade_obj = market_obj()
 
     logger.info("Step 1: Get tab amount")
-    tab_amount = web.trade_page.asset_tab.get_tab_amount(AssetTabs.OPEN_POSITION)
+    tab_amount = get_asset_tab_amount(trade_obj.order_type)
 
     logger.info(f"Step 2: Place {trade_obj.trade_type.upper()} Market Order from OCT tab (tab:{tab_amount})")
     web.trade_page.place_order_panel.place_oct_order(trade_obj)

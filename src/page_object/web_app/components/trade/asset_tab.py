@@ -66,7 +66,7 @@ class AssetTab(BaseTrade):
 
     def get_tab_amount(self, tab: AssetTabs, wait=True) -> int:
         """Get the number of items in the specified tab."""
-        not wait or self.wait_for_spin_loader(timeout=3)
+        not wait or self.wait_for_spin_loader()
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
@@ -135,7 +135,7 @@ class AssetTab(BaseTrade):
                 tab_locator = AssetTabs.HISTORY
 
         self.actions.click(cook_element(self.__tab, locator_format(tab_locator)))
-        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
+        not wait or self.wait_for_spin_loader()
 
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""

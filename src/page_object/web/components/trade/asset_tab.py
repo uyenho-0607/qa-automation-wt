@@ -84,7 +84,7 @@ class AssetTab(BaseTrade):
 
     def get_last_order_id(self, trade_object: ObjTrade = None) -> str:
         """Get the latest order ID from the specified tab and update value into trade_object."""
-        self.wait_for_spin_loader(timeout=SHORT_WAIT)
+        self.wait_for_spin_loader()
         order_id = self.actions.get_text(self.__col_order_ids)
 
         if trade_object:

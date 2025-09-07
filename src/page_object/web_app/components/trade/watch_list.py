@@ -35,12 +35,12 @@ class WatchList(BaseTrade):
             logger.debug("- Tab is subtab, select tab ALL first")
             # self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
             self.actions.javascript_click(cook_element(self.__tab, WatchListTab.ALL))
-            self.wait_for_spin_loader(timeout=3)
+            self.wait_for_spin_loader()
             max_retries -= 1
             is_display = self.actions.is_element_displayed(locator)
 
         self.actions.click(locator)
-        not wait or self.wait_for_spin_loader(timeout=timeout)
+        not wait or self.wait_for_spin_loader()
 
     def get_current_symbols(self):
         res = self.actions.get_text_elements(self.__items)

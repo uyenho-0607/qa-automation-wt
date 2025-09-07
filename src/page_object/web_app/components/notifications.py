@@ -57,7 +57,7 @@ class Notifications(BasePage):
     def open_noti_box(self, wait=True):
         if self.actions.is_element_displayed(self.__noti_selector):
             self.actions.click(self.__noti_selector)
-        not wait or self.wait_for_spin_loader(timeout=3)
+        not wait or self.wait_for_spin_loader()
 
     def close_noti_banner(self):
         with suppress(Exception):

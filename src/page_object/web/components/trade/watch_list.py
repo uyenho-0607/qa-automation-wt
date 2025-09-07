@@ -69,7 +69,7 @@ class WatchList(BaseTrade):
 
         logger.info(f"- Select tab: {tab.value.title()!r}")
         self.actions.click(self.__get_tab_locator(tab))
-        not wait or self.wait_for_spin_loader(timeout=3)
+        not wait or self.wait_for_spin_loader()
 
         if self.__is_tab_selected(tab):
             logger.debug(f"- Tab {tab.value.title()} is selected")

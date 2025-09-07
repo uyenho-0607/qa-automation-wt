@@ -80,7 +80,7 @@ class LoginPage(BasePage):
         self.actions.click(self.__btn_login)
 
         if wait:
-            self.wait_for_spin_loader(timeout=SHORT_WAIT)
+            self.wait_for_spin_loader()
 
     # ------------------------ VERIFY ------------------------ #
     def verify_language(self, language: Language):

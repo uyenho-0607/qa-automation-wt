@@ -121,7 +121,7 @@ class AssetTab(BaseTrade):
                 tab_locator = AssetTabs.HISTORY
 
         self.actions.click(cook_element(self.__tab, locator_format(tab_locator)))
-        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
+        not wait or self.wait_for_spin_loader()
 
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""

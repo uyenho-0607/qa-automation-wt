@@ -51,12 +51,13 @@ class MarketsPage(BasePage):
     def click_arrow_icon(self, arrow: MarketsSection):
         self.actions.click(cook_element(self.__redirect_arrow, arrow))
 
-    def select_symbol(self, section: MarketsSection | str, symbol: str = ""):
+    def select_symbol(self, section: MarketsSection | str, symbol: str = "", wait=False):
         """Select latest symbol from Section"""
         locator = self.__symbol_row if not symbol else self.__symbol_row_text
 
         logger.debug(f"- Select symbol {symbol} from section: {section!r}")
         self.actions.click(cook_element(locator, locator_format(section.symbol_row()), symbol))
+        not wait or self.wait_for_spin_loader()
 
         return symbol
 
