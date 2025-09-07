@@ -193,7 +193,7 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         locator = cook_element(self.__btn_trade, trade_type.lower())
 
-        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT):
+        if "selected" in self.actions.get_attribute(locator, "class", timeout=QUICK_WAIT, raise_exception=False, show_log=False):
             logger.debug(f"> Trade Type: {trade_type.value} selected")
             return
 
