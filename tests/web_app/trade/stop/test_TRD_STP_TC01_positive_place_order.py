@@ -34,11 +34,11 @@ def test(web_app, cancel_all, sl_type, tp_type, stop_obj, get_asset_tab_amount):
     logger.info(f"Verify order submitted notification banner")
     web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
-    logger.info(f"Verify Pending Order tab amount increased to {tab_amount + 1}")
-    web_app.trade_page.asset_tab.verify_tab_amount(tab, tab_amount + 1)
-
     logger.info("Step 4: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(tab)
+
+    logger.info(f"Verify Pending Order tab amount increased to {tab_amount + 1}")
+    web_app.trade_page.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
     logger.info(f"Verify order details in Pending Order tab")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)

@@ -96,7 +96,7 @@ class AssetTab(BaseTrade):
     def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
         """Get current displaying symbols"""
         self.wait_for_spin_loader()
-        symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()))
+        symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()), timeout=EXPLICIT_WAIT)
         logger.debug(f"- Current symbols: {', '.join(symbols)!r}")
         return symbols
 
@@ -158,6 +158,7 @@ class AssetTab(BaseTrade):
         if not trade_object.get("order_id"):
             self.get_last_order_id(trade_object)
 
+        logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
         self._click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
         not confirm or self.confirm_delete_order()
         not wait or self.wait_for_spin_loader()
