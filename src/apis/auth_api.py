@@ -1,7 +1,10 @@
+import requests
+
 from src.apis.api_base import BaseAPI
 from src.core.config_manager import Config
 from src.data.enums import Client, AccountType
 from src.data.project_info import RuntimeConfig
+from src.utils.logging_utils import logger
 
 
 class AuthAPI(BaseAPI):
@@ -10,6 +13,7 @@ class AuthAPI(BaseAPI):
     endpoints = {
         Client.LIRUNEX: {
             AccountType.CRM: "/auth/v1/company/login",
+            AccountType.LIVE: "/auth/v2/company/live/login",
             AccountType.DEMO: "/auth/v2/company/demo/login"
         },
         Client.TRANSACT_CLOUD: {
@@ -23,10 +27,13 @@ class AuthAPI(BaseAPI):
         self.userid = userid
         self.password = password
         self.client = RuntimeConfig.client
-        self.account_type = RuntimeConfig.account
+        self.account_type = RuntimeConfig.account or AccountType.LIVE
         self.get_token()
 
     def get_token(self):
+        if RuntimeConfig.platform in ["android", "ios"]:
+            self.check_ip()
+
         if "Authorization" not in RuntimeConfig.headers:
             credentials = Config.credentials()
             payload = {
@@ -34,9 +41,9 @@ class AuthAPI(BaseAPI):
                 "password": self.password or credentials.password,
                 "userId": self.userid or credentials.username
             }
-
+            logger.info("[API] Login auto client")
             resp = self.post(
-                endpoint=self.endpoints[self.client][self.account_type],
+                endpoint=self.endpoints.get(self.client, self.endpoints.get(Client.TRANSACT_CLOUD))[self.account_type],
                 payload=payload
             )
 
@@ -45,3 +52,10 @@ class AuthAPI(BaseAPI):
             return self.__headers
 
         return self.__headers
+
+    @staticmethod
+    def check_ip():
+        url = "https://checkip.amazonaws.com/"
+        response = requests.get(url)
+        logger.info(f">>>>> IP amazonaws: {response.text.strip()}")
+        return response.text.strip()

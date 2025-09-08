@@ -1,10 +1,10 @@
 import random
 from typing import Dict, Any, Optional, Tuple
 
-from src.data.consts import get_symbols, get_symbol_details
 from src.data.enums import SLTPType
 from src.data.enums import TradeType, OrderType, Expiry, FillPolicy, AssetTabs
 from src.data.objects.base_obj import BaseObj
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.project_info import RuntimeConfig
 from src.utils.format_utils import format_str_prices, remove_comma, get_decimal, is_integer
 
@@ -36,7 +36,7 @@ class ObjTrade(BaseObj):
 
         self.trade_type = trade_type
         self.order_type = order_type
-        self.symbol = symbol or random.choice(get_symbols())
+        self.symbol = symbol or random.choice(ObjSymbol().get_symbols())
         self.expiry = expiry or Expiry.sample_values(self.order_type)
         self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)
         self._update_symbol_details(self.symbol)
@@ -44,7 +44,8 @@ class ObjTrade(BaseObj):
 
     @staticmethod
     def _update_symbol_details(symbol):
-        symbol_details = get_symbol_details(symbol)
+        # symbol_details = get_symbol_details(symbol)
+        symbol_details = ObjSymbol().get_symbol_details(symbol)
         ObjTrade.POINT_STEP = symbol_details["point_step"]
         ObjTrade.DECIMAL = symbol_details["decimal"]
 
@@ -139,7 +140,7 @@ class ObjTrade(BaseObj):
 
         # Add order ID if requested
         if include_order_id:
-            details["order_no"] = f"Order No. : {self.get('order_id', 0)}"
+            details["order_no"] = f"{self.get('order_id', 0)}"
 
         details |= {
             "order_type": self._get_order_type(),
@@ -195,7 +196,7 @@ class ObjTrade(BaseObj):
 
         # Add tab-specific details
         if tab == AssetTabs.PENDING_ORDER:
-            details["pending_price" if RuntimeConfig.is_web() else "stop_limit_price"] = (
+            details["pending_price" if RuntimeConfig.platform != "web-app" else "stop_limit_price"] = (
                 None if RuntimeConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
             )
 

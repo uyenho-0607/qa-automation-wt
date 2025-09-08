@@ -23,30 +23,34 @@ class BaseAPI:
         session.mount("https://", adapter)
 
         return session
+    
+    @staticmethod
+    def api_url():
+        return f"{Config.config.base_url}/api" if not RuntimeConfig.url else f"{RuntimeConfig.url}/api"
 
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def get(self, endpoint: str, params: dict = None):
-        resp = self.session.get(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, params=params or {})
+    @after_request(base_delay=1.0, max_delay=10.0)
+    def get(self, endpoint: str, params: dict = None, fields_to_show=None, apply_retries=True, parse_result=True, truncate_len=5):
+        resp = self.session.get(url=f"{self.api_url()}{endpoint}", headers=self.headers, params=params or {})
         return resp
 
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def post(self, endpoint: str, payload: dict = None):
-        resp = self.session.post(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
+    @after_request(base_delay=1.0, max_delay=10.0)
+    def post(self, endpoint: str, payload: dict = None, fields_to_show=None, apply_retries=True, parse_result=True, truncate_len=5):
+        resp = self.session.post(url=f"{self.api_url()}{endpoint}", headers=self.headers, json=payload)
         return resp
 
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def put(self, endpoint: str, payload: dict = None):
-        resp = self.session.put(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, data=payload)
+    @after_request(base_delay=1.0, max_delay=10.0)
+    def put(self, endpoint: str, payload: dict = None, fields_to_show=None, apply_retries=True, parse_result=True, truncate_len=5):
+        resp = self.session.put(url=f"{self.api_url()}{endpoint}", headers=self.headers, json=payload)
         return resp
     
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10)
-    def delete(self, endpoint: str,  params: dict = None):
-        resp = self.session.delete(url=f"{Config.config.api_url}{endpoint}", params=params, headers=self.headers)
+    @after_request(base_delay=1.0, max_delay=10)
+    def delete(self, endpoint: str,  params: dict = None, fields_to_show=None, apply_retries=True, parse_result=True, truncate_len=5):
+        resp = self.session.delete(url=f"{self.api_url()}{endpoint}", params=params, headers=self.headers)
         return resp
 
-    @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def patch(self, endpoint: str, payload: dict = None):
-        resp = self.session.patch(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
+    @after_request(base_delay=1.0, max_delay=10.0)
+    def patch(self, endpoint: str, payload: dict = None, fields_to_show=None, apply_retries=True, parse_result=True, truncate_len=5):
+        resp = self.session.patch(url=f"{self.api_url()}{endpoint}", headers=self.headers, json=payload)
         return resp
 
     def __del__(self):

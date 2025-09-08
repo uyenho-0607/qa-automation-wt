@@ -2,7 +2,7 @@ from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
+from src.data.consts import QUICK_WAIT
 from src.data.enums import Features
 from src.data.enums import URLSites
 from src.utils.assert_utils import soft_assert
@@ -51,20 +51,24 @@ class BasePage:
     __alert_box_close = (By.CSS_SELECTOR, data_testid("notification-box-close"))
     __btn_nav_back = (By.CSS_SELECTOR, data_testid("navigation-back-button"))
     __spin_loader = (By.CSS_SELECTOR, data_testid("spin-loader"))
-    __btn_confirm = (By.XPATH, "//*[text()='Confirm']")
-    __btn_cancel = (By.XPATH, "//*[text()='Cancel']")
+    __btn_confirm = (By.XPATH, "//*[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='confirm']")
+    __btn_cancel = (By.XPATH, "//*[translate(normalize-space(text()), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
     __home_nav_option = (By.CSS_SELECTOR, data_testid("side-bar-option-{}"))
 
     # ------------------------ ACTIONS ------------------------ #
     def goto(self, site: URLSites | str = URLSites.MEMBER_SITE):
         self.actions.goto(Config.urls(site))
 
-    def wait_for_spin_loader(self, timeout: int | float = 5):
+    def refresh_page(self):
+        logger.debug("- Refresh page...")
+        self.actions.refresh()
+        self.wait_for_spin_loader()
+
+    def wait_for_spin_loader(self, timeout: int | float = 20):
         """Wait for the loader to be invisible."""
-        logger.debug("- Waiting for spin loader...")
-        if self.actions.is_element_displayed(self.__spin_loader, timeout=timeout):
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=5):
             logger.debug("- Wait for spin loader to disappear")
-            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=30)
+            self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def navigate_to(self, feature: Features, wait=False):
         self.actions.click(cook_element(self.__home_nav_option, feature.lower()))
@@ -78,7 +82,7 @@ class BasePage:
         max_retries = 5
         while self.actions.is_element_displayed(self.__btn_cancel) and max_retries:
             logger.debug("- Click cancel btn")
-            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT)
+            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT, show_log=False)
             max_retries -= 1
 
     def close_alert_box(self):
@@ -87,7 +91,7 @@ class BasePage:
     # ------------------------ VERIFY ------------------------ #
     def verify_alert_error_message(self, expected_message, other_msg=None):
         """Verify the error alert message."""
-        actual_err = self.actions.get_text(self.__alert_desc)
+        actual_err = self.actions.get_text(self.__alert_desc, timeout=20)
         if not other_msg:
             soft_assert(actual_err, expected_message)
 

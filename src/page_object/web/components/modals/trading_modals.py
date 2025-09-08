@@ -35,6 +35,7 @@ class TradingModals(BaseTrade):
 
     __drp_edit_expiry = (By.CSS_SELECTOR, data_testid('edit-dropdown-expiry'))
     __opt_edit_expiry = (By.CSS_SELECTOR, data_testid('edit-dropdown-expiry-{}'))
+    __btn_next_calendar = (By.CSS_SELECTOR, "button[class*='next'][class*='calendar']")
     __txt_edit_expiry_date = (By.CSS_SELECTOR, data_testid('edit-input-expiry-date'))
     __expiry_last_date = (By.XPATH, "(//button[contains(@class, 'month-view')])[last()]")
 
@@ -57,50 +58,39 @@ class TradingModals(BaseTrade):
 
     # ------------------------------------------------ ACTIONS ------------------------------------------------ #
 
-    def is_edit_confirm_modal_displayed(self):
-        return self.actions.is_element_displayed(self.__edit_confirm_symbol, timeout=SHORT_WAIT)
+    def is_edit_confirm_modal_displayed(self, timeout: int | float = SHORT_WAIT):
+        return self.actions.is_element_displayed(self.__edit_confirm_symbol, timeout=timeout)
 
     def close_trade_confirm_modal(self, timeout=QUICK_WAIT):
         self.actions.click(self.__btn_cancel_trade, timeout=timeout, raise_exception=False, show_log=False)
 
     # Edit Confirmation Modal Actions
     def close_edit_confirm_modal(self, timeout=QUICK_WAIT):
-        self.actions.click_by_offset(self.__edit_confirm_order_id, x_offset=173, y_offset=-12, timeout=timeout, raise_exception=False)
-        self.actions.click_by_offset(
-            self.__edit_confirm_order_type, 300, 20, timeout=timeout, raise_exception=False
-        )
+        self.actions.click_by_offset(self.__edit_confirm_order_id, 173, -12, timeout=timeout, raise_exception=False, show_log=False)
+        self.actions.click_by_offset(self.__edit_confirm_order_type, 300, 20, timeout=timeout, raise_exception=False, show_log=False)
 
-    def click_edit_order_btn(self, retries=3):
+    def click_edit_order_btn(self, retries=3, oct_mode=False):
         """Click the edit order button."""
-        attempt = 0
-        while attempt < retries:
-            logger.debug(f"- Click edit order button (Attempt {attempt + 1})")
-            time.sleep(2)
+        logger.debug(f"Click edit order button")
+        if oct_mode:
             self.actions.click(self.__btn_edit_order)
+            return True
 
-            if not self.actions.is_element_displayed(self.__btn_confirm_update_order, is_display=False):
-                return  # Success
+        for attempt in range(1, retries + 1):
+            logger.debug(f"Attempt {attempt} - Clicking edit order button")
+            self.actions.click(self.__btn_edit_order, raise_exception=False, timeout=QUICK_WAIT)
 
-            attempt += 1
+            logger.debug("- Check if confirm edit modal displayed")
+            if self.is_edit_confirm_modal_displayed(timeout=QUICK_WAIT):
+                return True
 
         logger.warning("- Max retries exceeded for clicking edit order button")
+        return False
 
-    def confirm_update_order(self, wait=False, retries=3):
+    def confirm_update_order(self, wait=False):
         """Click the confirm update order button."""
-        attempt = 0
-        while attempt < retries:
-            logger.debug(f"- Confirm update order (Attempt {attempt + 1})")
-            self.actions.click(self.__btn_confirm_update_order)
-            if wait:
-                self.wait_for_spin_loader(timeout=SHORT_WAIT)
-            time.sleep(1)
-
-            if not self.actions.is_element_displayed(self.__btn_confirm_update_order):
-                return  # Success
-
-            attempt += 1
-
-        logger.warning("- Max retries exceeded for confirming update order")
+        self.actions.javascript_click(self.__btn_confirm_update_order)
+        not wait or self.wait_for_spin_loader()
 
     def get_edit_price(self, order_type: OrderType | str = None):
         """Return current price of the symbol"""
@@ -117,25 +107,25 @@ class TradingModals(BaseTrade):
         locator = cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower())
         self.actions.click(locator)
         res = self.actions.get_value(locator, retry=True)
-        logger.debug(f"- Edit SL: {res!r}")
+        logger.debug(f"- Edit SL PRICE: {res!r}")
         return res
 
     def get_edit_tp(self):
         locator = cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower())
         self.actions.click(locator)
         res = self.actions.get_value(locator, retry=True)
-        logger.debug(f"- Edit TP: {res!r}")
+        logger.debug(f"- Edit TP PRICE: {res!r}")
         return res
 
     def input_edit_sl(self, value, sl_type: SLTPType = SLTPType.PRICE):
-        logger.debug(f"Input edit SL: {value} - type: {sl_type.lower()}")
+        logger.debug(f"- Input edit SL: {value} - type: {sl_type.lower()}")
         locator = cook_element(self.__txt_edit_sl, sl_type.lower())
         self.actions.clear_field(locator)
         # time.sleep(1)
         self.actions.send_keys(locator, value)
 
     def input_edit_tp(self, value, tp_type: SLTPType = SLTPType.PRICE):
-        logger.debug(f"Input edit TP: {value} - type: {tp_type.lower()}")
+        logger.debug(f"- Input edit TP: {value} - type: {tp_type.lower()}")
         locator = cook_element(self.__txt_edit_tp, tp_type.lower())
         self.actions.clear_field(locator)
         # time.sleep(1)
@@ -145,27 +135,28 @@ class TradingModals(BaseTrade):
         if not order_type or order_type == OrderType.MARKET:
             return
 
-        logger.debug(f"Input edit price: {value}")
+        logger.debug(f"- Input edit price: {value}")
         self.actions.send_keys(self.__txt_edit_price, value)
 
     def input_edit_stp_price(self, value, order_type: OrderType | str = None):
         if not order_type or not order_type.is_stp_limit():
             return
 
-        logger.debug(f"Input edit STP price: {value}")
+        logger.debug(f"- Input edit STP price: {value}")
         self.actions.send_keys(self.__txt_edit_stp_price, value)
 
     def select_expiry(self, expiry):
         if not expiry:
             return
 
-        logger.debug(f"Select expiry: {expiry}")
+        logger.debug(f"- Select expiry: {expiry}")
         self.actions.click(self.__drp_edit_expiry)
         self.actions.click(cook_element(self.__opt_edit_expiry, locator_format(expiry)))
 
         if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-            logger.debug("Select expiry date")
+            logger.debug("> Select expiry date")
             self.actions.click(self.__txt_edit_expiry_date)
+            self.actions.click(self.__btn_next_calendar)
             self.actions.click(self.__expiry_last_date)
 
     # Control buttons
@@ -222,12 +213,12 @@ class TradingModals(BaseTrade):
 
         actual['symbol'] = self.actions.get_text(self.__edit_confirm_symbol)
         actual['order_type'] = self.actions.get_text(self.__edit_confirm_order_type)
-        actual['order_no'] = self.actions.get_text(self.__edit_confirm_order_id)
+        actual['order_no'] = self.actions.get_text(self.__edit_confirm_order_id).split(": ")[-1].strip()
 
         if "size" in actual:
             actual["volume"] = actual.pop("size")
 
-        logger.debug(f"- Actual: {format_dict_to_string(actual)}")
+        # logger.debug(f"- Actual: {format_dict_to_string(actual)}")
         return actual
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
@@ -238,11 +229,9 @@ class TradingModals(BaseTrade):
             expected["price"] = expected.pop("entry_price", None)
 
         actual = self._get_trade_confirmation()
-        # actual = {k: v for k, v in actual.items() if k in expected}
         soft_assert(actual, expected, check_contains=True, tolerance=1, tolerance_fields=trade_object.tolerance_fields())
 
     def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
         expected = trade_object.trade_edit_confirm_details()
         actual = self._get_edit_trade_confirmation()
-        # actual = {k: v for k, v in actual.items() if k in expected}
         soft_assert(actual, expected, check_contains=True, tolerance=1, tolerance_fields=trade_object.tolerance_fields())

@@ -7,10 +7,32 @@ import requests
 from selenium.common import StaleElementReferenceException, ElementNotInteractableException, \
     ElementClickInterceptedException
 
+from src.data.consts import WARNING_ICON, FAILED_ICON
 from src.data.project_info import StepLogs
 from src.utils.allure_utils import attach_verify_table, log_verification_result, attach_screenshot
 from src.utils.format_utils import format_request_log
 from src.utils.logging_utils import logger
+
+
+def log_requests(func):
+    """Decorator to log candlestick requests using Chrome DevTools Protocol"""
+
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        # Get logs before action
+        if hasattr(self._driver, 'get_performance_logs'):
+            self._driver.get_performance_logs()
+
+        # Execute the action
+        result = func(self, *args, **kwargs)
+
+        # Get logs after action
+        if hasattr(self._driver, 'get_performance_logs'):
+            self._driver.get_performance_logs()
+
+        return result
+
+    return wrapper
 
 
 def attach_table_details(func):
@@ -83,21 +105,17 @@ def handle_stale_element(func):
             try:
                 return func(self, *args, **kwargs)
             except (StaleElementReferenceException, ElementNotInteractableException, ElementClickInterceptedException) as e:
-                # Clear any broken steps that might have been added from the previous attempt
-                if StepLogs.broken_steps and attempt < max_retries + 1:
-                    StepLogs.broken_steps.pop()
 
                 if attempt < max_retries:
-                    logger.warning(f"{type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
-                    time.sleep(1)
+                    logger.warning(f"{WARNING_ICON} {type(e).__name__} for locator {args[0]} (attempt {attempt + 1}/{max_retries + 1}), retrying...")
                     continue
 
                 else:
                     # Final attempt failed, re-raise the exception
                     logger.error(f"{type(e).__name__} for locator {args[0]} after {max_retries + 1} attempts")
+
                     if raise_exception and StepLogs.test_steps:
-                        logger.debug("- Capture broken info")
-                        StepLogs.all_failed_logs.append((StepLogs.test_steps[-1], ""))
+                        StepLogs.add_failed_log(StepLogs.test_steps[-1])
                         attach_screenshot(self._driver, name="broken")  # Capture broken screenshot
 
                         raise e
@@ -106,14 +124,13 @@ def handle_stale_element(func):
     return wrapper
 
 
-def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
+def after_request(base_delay=1.0, max_delay=10.0, max_retries=3):
     """
-    Enhanced decorator for handling API requests with retry logic and proper error handling.
-    
+    Decorator to handle API requests with optional retry logic.
     Args:
-        max_retries (int): Maximum number of retry attempts
-        base_delay (float): Base delay in seconds for exponential backoff
-        max_delay (float): Maximum delay in seconds
+        base_delay (float): Base delay for exponential backoff.
+        max_delay (float): Maximum delay between retries.
+        max_retries (int): Maximum retry attempts.
     """
 
     def decorator(func):
@@ -121,64 +138,63 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
         def wrapper(self, *args, **kwargs):
             __tracebackhide__ = True
 
-            last_exception = None
+            # Extract optional arguments
+            sig = inspect.signature(func)
+            bound_args = sig.bind(self, *args, **kwargs)
+            bound_args.apply_defaults()
+            all_args = bound_args.arguments
 
-            for attempt in range(max_retries + 1):  # +1 for initial attempt
+            # Get options with defaults
+            apply_retries = all_args.get("apply_retries", True)
+            fields_to_show = all_args.get("fields_to_show", None)
+            parse_result = all_args.get("parse_result", True)
+            truncate_len = all_args.get("truncate_len", 5)
+
+            def _parse_result(resp):
+                if not parse_result:
+                    return resp
+
                 try:
-                    # Execute the API request
+                    res = resp.json()
+                    return res.get("result", res) if resp.text.strip() else []
+                except (json.JSONDecodeError, AttributeError):
+                    return getattr(resp, "text", resp)
+
+            # Handle single request without retries
+            if not apply_retries:
+                response = func(self, *args, **kwargs)
+                logger.debug(f"{format_request_log(response, log_resp=True, fields_to_show=fields_to_show, truncate_len=truncate_len)}")
+                return _parse_result(response)
+
+            # Handle requests with retries
+            for attempt in range(max_retries):
+                try:
                     response = func(self, *args, **kwargs)
+                    logger.debug(f"{format_request_log(response, log_resp=True, fields_to_show=fields_to_show, truncate_len=truncate_len)}")
 
-                    # Handle successful response
                     if response.ok:
-                        logger.debug(f"{format_request_log(response, log_resp=False)}")
+                        return _parse_result(response)
 
-                        # Parse JSON response safely
-                        try:
-                            result = response.json()
-                            return result.get("result", result) if response.text.strip() else []
+                    # Handle failed response
+                    if attempt == max_retries - 1:
+                        error_msg = f"{FAILED_ICON} API request failed with status_code: {response.status_code} - {response.text.strip()}"
+                        logger.error(error_msg)
+                        raise requests.exceptions.RequestException(error_msg)
 
-                        except json.JSONDecodeError as e:
-                            logger.warning(f"Failed to parse JSON response: {e}")
-                            return response.text if response.text else []
+                    delay = min(base_delay * (2 ** attempt), max_delay)
+                    logger.warning(f"Request failed (attempt {attempt + 1}/{max_retries}), status_code: {response.status_code} - {response.text.strip()}, retrying in {delay:2f}s...")
+                    time.sleep(delay)
 
-                    # Handle server errors (5xx) - always retry
-                    elif response.status_code >= 400:
-                        logger.warning(f"Server error (attempt {attempt + 1}/{max_retries + 1}): "
-                                       f"{format_request_log(response, log_resp=True)}")
+                except Exception as e:
+                    # Handle exceptions during request
+                    if attempt == max_retries - 1:
+                        raise e
 
-                        if attempt < max_retries:
-                            delay = min(base_delay * (2 ** attempt), max_delay)
-                            logger.debug(f"Retrying in {delay:.2f} seconds...")
-                            time.sleep(delay)
-                            continue
-                        else:
-                            raise requests.RequestException(f"Server error after {max_retries + 1} attempts: {response.status_code}")
+                    delay = min(base_delay * (2 ** attempt), max_delay)
+                    logger.warning(f"Request failed (attempt {attempt + 1}/{max_retries}), retrying in {delay:.2f}s. Error: {e}")
+                    time.sleep(delay)
 
-                    # Handle client errors (4xx) - don't retry
-                    else:
-                        logger.error(f"Client error: {format_request_log(response, log_resp=True)}")
-                        raise Exception(f"API request failed with status {response.status_code}: {response.text}")
-
-                except (requests.RequestException, Exception) as e:
-                    last_exception = e
-
-                    # Only retry on server errors or network issues
-                    if isinstance(e, requests.RequestException) and attempt < max_retries:
-                        delay = min(base_delay * (2 ** attempt), max_delay)
-                        logger.debug(f"Request failed (attempt {attempt + 1}/{max_retries + 1}), "
-                                     f"retrying in {delay:.2f} seconds... Error: {str(e)}")
-                        time.sleep(delay)
-                        continue
-                    else:
-                        # Don't retry on client errors or after max retries
-                        break
-
-            # If we get here, all retries failed
-            if last_exception:
-                raise last_exception
-
-            # This should never be reached, but just in case
-            raise Exception("Unexpected error in after_request decorator")
+            return None
 
         return wrapper
 

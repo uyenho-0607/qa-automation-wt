@@ -125,7 +125,7 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.scroll_to_element(self.__drp_expiry)
         is_selected = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
         if is_selected:
-            logger.debug(f"- Expiry: {expiry!r} already selected")
+            logger.debug(f"> Expiry: {expiry!r} already selected")
             return
 
         logger.debug(f"- Select expiry: {expiry.title()!r}")

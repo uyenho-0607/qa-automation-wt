@@ -1,9 +1,8 @@
 import pytest
 
 from src.data.enums import AssetTabs
-from src.data.enums import SLTPType, OrderType
+from src.data.enums import SLTPType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -40,7 +39,7 @@ def test(web_app, stop_limit_obj, edit_field, sl_type, tp_type, create_order_dat
     web_app.trade_page.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info("Step 5: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)

@@ -24,3 +24,8 @@ pytest-rerunfailures
 boto3
 botocore
 pandas
+
+# pipeline
+gspread
+oauth2client
+

@@ -35,12 +35,12 @@ class WatchList(BaseTrade):
             logger.debug("- Tab is subtab, select tab ALL first")
             # self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
             self.actions.javascript_click(cook_element(self.__tab, WatchListTab.ALL))
-            self.wait_for_spin_loader(timeout=3)
+            self.wait_for_spin_loader()
             max_retries -= 1
             is_display = self.actions.is_element_displayed(locator)
 
         self.actions.click(locator)
-        not wait or self.wait_for_spin_loader(timeout=timeout)
+        not wait or self.wait_for_spin_loader()
 
     def get_current_symbols(self):
         res = self.actions.get_text_elements(self.__items)
@@ -68,7 +68,7 @@ class WatchList(BaseTrade):
         last_count = 0
         max_scroll_attempts = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
         no_new_symbol = 0
-        logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
+        # logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
         while scroll_attempts < max_scroll_attempts:
             # Get current visible symbols

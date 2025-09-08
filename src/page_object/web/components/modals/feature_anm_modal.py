@@ -21,8 +21,8 @@ class FeatureAnnouncementModal(BasePage):
         Clicks the 'Got it' button on the feature announcement modal.
         Will continue clicking if multiple announcements are present.
         """
-        logger.debug("- Checking feature anm modal")
         while self.actions.is_element_displayed(self.__btn_got_it, timeout=EXPLICIT_WAIT):
+            # logger.debug("- Click btn got it")
             self.actions.click(self.__btn_got_it)
 
     def try_it_now(self):

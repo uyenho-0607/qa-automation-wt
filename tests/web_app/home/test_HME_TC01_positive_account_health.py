@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from src.apis.api_client import APIClient
@@ -10,12 +8,12 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 def test(web_app, setup_test):
-    exp_account_summary, acc_details = setup_test
 
     logger.info("Step 1: Open My Account modal")
     web_app.home_page.open_my_account()
 
     logger.info("Verify account summary against api data")
+    exp_account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     web_app.home_page.my_account_modal.verify_account_info(exp_account_summary)
 
     logger.info(f"Verify Available Account = {exp_account_summary.get(AccSummary.BALANCE)}")
@@ -24,15 +22,14 @@ def test(web_app, setup_test):
 
 @pytest.fixture
 def setup_test(web_app, symbol):
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+
     logger.info("- Place order to make sure account has Margin Level")
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
-    APIClient().trade.post_order(trade_object)
+    APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
 
-    logger.info("- Get account details API details")
-    account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
-    account_details = APIClient().user.get_user_account()
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
-    yield account_summary, account_details
+    yield
 
-    logger.info("- Close My Account modal")
+    logger.info("[Cleanup] Close My Account modal (if open)")
     web_app.home_page.my_account_modal.close()

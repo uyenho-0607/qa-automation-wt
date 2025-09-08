@@ -1,5 +1,6 @@
 from src.apis.api_base import BaseAPI
 from src.data.enums import WatchListTab
+from src.utils.logging_utils import logger
 
 
 class MarketAPI(BaseAPI):
@@ -19,7 +20,10 @@ class MarketAPI(BaseAPI):
         super().__init__()
 
     def get_symbol_details(self, symbol: str):
-        resp = self.get(endpoint=self._symbol_details, params={"symbol": symbol})
+        fields_to_show = ["symbol", "decimal", "pointStep", "contractSize"]
+
+        logger.debug(f"[API] Get symbol details (symbol:{symbol})")
+        resp = self.get(endpoint=self._symbol_details, params={"symbol": symbol}, fields_to_show=fields_to_show)
         return resp
 
     def get_watchlist_items(self, tab: WatchListTab, get_symbols=True):
@@ -28,10 +32,12 @@ class MarketAPI(BaseAPI):
         if tab == WatchListTab.ALL or tab in WatchListTab.sub_tabs():
             _endpoint = self._all
 
-        resp = self.get(_endpoint, params={"code": self.watchlist_map.get(tab)})
+        logger.debug(f"[API] Get watchlist symbols (tab:{tab.value})")
+        resp = self.get(_endpoint, params={"code": self.watchlist_map.get(tab)}, fields_to_show=["symbol", "type", "status"], truncate_len=10)
 
         if get_symbols:
             res = [item["symbol"] for item in resp]
+
             if tab in WatchListTab.sub_tabs():
                 res = [item["symbol"] for item in resp if item["type"] in tab.name.upper()]
 
@@ -45,11 +51,13 @@ class MarketAPI(BaseAPI):
             # delete all current starred symbols
             symbols = self.get_watchlist_items(WatchListTab.FAVOURITES)
 
+        logger.debug(f"[API] Unstar symbols: {', '.join(symbols)}")
         for symbol in symbols:
             self.delete(self._watchlist, {"symbol": symbol})
 
     def post_starred_symbol(self, symbol: str):
         payload = {"symbol": symbol}
+        logger.debug(f"[API] Mark star symbol: {symbol}")
         resp = self.post(self._watchlist, payload)
         return resp
 

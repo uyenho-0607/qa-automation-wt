@@ -1,5 +1,7 @@
 from src.apis.api_base import BaseAPI
 from src.data.enums import AssetTabs
+from src.utils.format_utils import format_dict_to_string
+from src.utils.logging_utils import logger
 
 
 class UserAPI(BaseAPI):
@@ -16,6 +18,7 @@ class UserAPI(BaseAPI):
             "type": "OCT_ENABLE",
             "value": "true" if enable else "false"
         }
+        logger.debug(f"[API] Set ONE_CLICK_TRADING (enable:{enable!r})")
         resp = self.patch(self._oct_endpoint, payload)
         return resp
 
@@ -24,19 +27,25 @@ class UserAPI(BaseAPI):
             "orderType": asset_tab.name,
             "hiddenColumnList": []
         }
+        logger.debug(f"[API] Show all column preferences (tab:{asset_tab.value})")
         resp = self.patch(self._hide_order_endpoint, payload)
         return resp
 
     def get_user_account(self, get_acc=True):
-        resp = self.get(endpoint=self._user_account)
+        logger.debug("[API] Get user account")
+        resp = self.get(endpoint=self._user_account, fields_to_show=["tradingAccounts"])
+
         if get_acc:
             account = resp["tradingAccounts"][0]
 
-            return {
+            extract_acc = {
                 "id": account["metatraderId"],
                 "name": account["accountName"],
                 "type": account["accountType"],
                 "currency": account["baseCurrency"],
                 "leverage": account["leverage"]
             }
+
+            return extract_acc
+
         return resp

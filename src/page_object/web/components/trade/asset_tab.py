@@ -5,7 +5,7 @@ from typing import Optional, List, Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, LONG_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, WARNING_ICON
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts, SLTPType, Expiry, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -55,7 +55,8 @@ class AssetTab(BaseTrade):
     __table_headers = (By.XPATH, "//*[@data-testid='asset-{}-table-header']//th[text()='{}']")
 
     __col_symbol = (By.CSS_SELECTOR, data_testid('asset-{}-column-symbol'))
-    __col_order_ids = (By.CSS_SELECTOR, data_testid('asset-{}-column-order-id'))
+    __col_order_ids_by_tab = (By.CSS_SELECTOR, data_testid('asset-{}-column-order-id'))
+    __col_order_ids = (By.CSS_SELECTOR, "*[data-testid$='-column-order-id']")
 
     __first_item = (By.CSS_SELECTOR, "tr:first-of-type *[data-testid*='asset-{}-column']")
     __item_by_id = (By.XPATH, "//*[@data-testid='asset-{}-column-order-id' and text()='{}']")
@@ -77,18 +78,31 @@ class AssetTab(BaseTrade):
         """Get the number of items in the specified tab."""
         time.sleep(2)
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
-        return extract_asset_tab_number(amount)
+        res = extract_asset_tab_number(amount)
+        logger.debug(f"> Tab amount: {res} ({tab.value})")
+        return res
 
-    def get_last_order_id(self, trade_object: ObjTrade) -> str:
+    def get_last_order_id(self, trade_object: ObjTrade = None) -> str:
         """Get the latest order ID from the specified tab and update value into trade_object."""
-        self.wait_for_spin_loader(timeout=SHORT_WAIT)
-        tab = AssetTabs.get_tab(trade_object.order_type)
-        trade_object.order_id = self.actions.get_text(cook_element(self.__col_order_ids, tab.col_locator()))
-        return trade_object.order_id
+        self.wait_for_spin_loader()
+        order_id = self.actions.get_text(self.__col_order_ids)
+
+        if trade_object:
+            trade_object.order_id = order_id
+
+        logger.debug(f"> Latest order_id: {order_id}")
+        return order_id
+
+    def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
+        """Get current displaying symbols"""
+        self.wait_for_spin_loader()
+        symbols = self.actions.get_text_elements(cook_element(self.__col_symbol, tab.col_locator()), timeout=EXPLICIT_WAIT)
+        logger.debug(f"- Current symbols: {', '.join(symbols)!r}")
+        return symbols
 
     def get_order_ids(self, tab: AssetTabs) -> List[str]:
         """Get a list of displaying order IDs in the specified tab."""
-        order_ids = self.actions.get_text_elements(cook_element(self.__col_order_ids, tab.col_locator()))
+        order_ids = self.actions.get_text_elements(cook_element(self.__col_order_ids_by_tab, tab.col_locator()))
         return order_ids
 
     def get_item_data(self, tab: AssetTabs, order_id=None, trade_object: ObjTrade = None):
@@ -117,7 +131,7 @@ class AssetTab(BaseTrade):
     def select_tab(self, tab: AssetTabs) -> None:
         """Select the specified asset tab."""
         if self._is_tab_selected(tab):
-            logger.debug("- Tab already selected")
+            logger.debug("> Tab already selected")
             return
 
         logger.debug(f"- Select asset tab: {tab.capitalize()}")
@@ -132,7 +146,7 @@ class AssetTab(BaseTrade):
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""
         self.actions.wait_for_element_visible(
-            cook_element(self.__tab_amount, locator_format(tab), expected_amount), timeout=20
+            cook_element(self.__tab_amount, locator_format(tab), expected_amount), timeout=EXPLICIT_WAIT
         )
 
     def _click_action_btn(self, tab: AssetTabs, order_id=0, action: Literal["close", "edit", "track"] = "close") -> None:
@@ -144,6 +158,7 @@ class AssetTab(BaseTrade):
         if not trade_object.get("order_id"):
             self.get_last_order_id(trade_object)
 
+        logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
         self._click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
         not confirm or self.confirm_delete_order()
         not wait or self.wait_for_spin_loader()
@@ -155,16 +170,25 @@ class AssetTab(BaseTrade):
         not wait or self.wait_for_spin_loader()
 
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=False) -> None:
+
+        # define order_id value
+        order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
+        if not order_id:
+            order_id = self.get_last_order_id(trade_object)
+
+        # update closed info for trade_object if provided
         if trade_object:
-            trade_object.get("order_id") or self.get_last_order_id(trade_object)  # update order_id for trade_object
+            if not trade_object.get("current_price"):
+                item_data = self.get_item_data(tab=AssetTabs.get_tab(trade_object.order_type), order_id=order_id)
+                trade_object["current_price"] = item_data["current_price"]
 
-        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id or trade_object.get('order_id'), "close")
+            # update close time
+            self.get_server_device_time(trade_object)
 
-        if confirm:
-            if trade_object:
-                self.get_server_device_time(trade_object)  # update close time
-            self.confirm_close_order()
+        logger.debug(f"- Close order with ID: {order_id!r}")
+        self._click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
 
+        not confirm or self.confirm_close_order()
         not wait or self.wait_for_spin_loader()
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
@@ -279,65 +303,76 @@ class AssetTab(BaseTrade):
             confirm=False,
             retry_count=0,
             max_retries=3,
-            oct=False,
-
+            oct_mode=False,
     ):
         """
-        Modify stop loss/ take profit/ fill policy/ Expiry
-        trade_object: should contain trade_type and order_type
-        sl_type: Price or Points
-        tp_type: Price or Points
-        expiry: one by default, give this value if modifying expiry
-        retry_count: Current retry attempt (used internally for recursion)
-        max_retries: Maximum number of retry attempts
-        oct: if is True, not checking the edit confirmation modal display
+        Modify stop loss / take profit / fill policy / expiry.
+        :param trade_object: should contain trade_type and order_type
+        :param sl_type: Price or Points
+        :param tp_type: Price or Points
+        :param expiry: expiry value if modifying expiry
+        :param confirm: whether to confirm after edit
+        :param retry_count: current retry attempt (used internally for recursion)
+        :param max_retries: maximum number of retry attempts
+        :param oct_mode: if True, skip checking edit confirmation modal display
         """
+        # Recursive stop condition
         if retry_count >= max_retries:
-            logger.error(f"Failed to display edit confirm modal after {max_retries} attempts")
+            logger.error(f" {WARNING_ICON} Failed to display edit confirm modal after {max_retries} attempts")
+            return
 
-        # Log retry attempts (skip for first attempt)
         if retry_count > 0:
-            logger.warning(f"Edit confirm modal not displayed, retrying... ({retry_count}/{max_retries})")
-            time.sleep(1)  # Wait before retrying
-
-        tab = AssetTabs.get_tab(trade_object.order_type)
-        self._click_action_btn(tab, trade_object.get('order_id'), "edit")
+            # Log debug message
+            logger.warning(f"- Edit confirm modal not displayed yet, retrying (Attempt:{retry_count}/{max_retries})")
+            time.sleep(1)
 
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self.__trade_modals.get_edit_price()
+        tab = AssetTabs.get_tab(order_type)
 
-        logger.debug(f"- Edit price is {edit_price!r}")
+        logger.debug("- Click Edit Button")
+        self._click_action_btn(tab, trade_object.get('order_id'), "edit")
+
+        # Get edit price to calculate prices
+        edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self.__trade_modals.get_edit_price()
+        logger.debug(f"> Edit price: {edit_price!r}")
+
+        # calculate SL and TP
         stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
 
+        # Handle input SL
         if sl_type:
             self.__trade_modals.input_edit_sl(stop_loss, sl_type)
+            # Get price value in case of POINT
             if sl_type == SLTPType.POINTS:
                 stop_loss = self.__trade_modals.get_edit_sl()
-                trade_object.sl_type = sl_type
+                trade_object.sl_type = sl_type  # update sl_type to TradeObject for updating tolerance fields
+            trade_object.stop_loss = stop_loss  # update final input price value
 
-            trade_object.stop_loss = stop_loss
-
+        # Handle input TP
         if tp_type:
             self.__trade_modals.input_edit_tp(take_profit, tp_type)
+            # Get price value in case of POINT
             if tp_type == SLTPType.POINTS:
                 take_profit = self.__trade_modals.get_edit_tp()
-                trade_object.tp_type = tp_type
+                trade_object.tp_type = tp_type  # update tp_type to TradeObject for updating tolerance fields
+            trade_object.take_profit = take_profit  # update final input price value
 
-            trade_object.take_profit = take_profit
-
+        # Handle select Expiry
         if expiry:
             self.__trade_modals.select_expiry(expiry)
             trade_object.expiry = expiry
 
-        self.__trade_modals.click_edit_order_btn()
+        # Handle click edit order button
+        res_click = self.__trade_modals.click_edit_order_btn(oct_mode=oct_mode)
 
-        # check if edit confirm modal is displayed
-        if not oct and not self.__trade_modals.is_edit_confirm_modal_displayed():
-            # Recursive call with incremented retry count
-            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
+        # Retry in case sometimes the edit model is closed
+        if not res_click:
+            logger.warning("- Edit modal is disappear, retry modifying order...")
+            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries, oct_mode)
 
-        # Success case - confirm modal is displayed
-        not confirm or self.__trade_modals.confirm_update_order()
+        # Success case
+        if confirm:
+            self.__trade_modals.confirm_update_order()
 
     def modify_invalid_order(
             self,
@@ -368,15 +403,13 @@ class AssetTab(BaseTrade):
             stp_price = get_stop_price(self.__trade_modals.get_edit_price(order_type), trade_type, True)
             self.__trade_modals.input_edit_stp_price(stp_price, order_type)
 
-        invalid_sl_tp = get_sl_tp(
-            self.__trade_modals.get_edit_price(order_type), trade_type, True
-        )
+        sl, tp = get_sl_tp(
+            self.__trade_modals.get_edit_price(order_type), trade_type, is_invalid=True
+        ).values()
         if stop_loss:
-            sl = invalid_sl_tp.sl.price
             self.__trade_modals.input_edit_sl(sl)
 
         if take_profit:
-            tp = invalid_sl_tp.tp.price
             self.__trade_modals.input_edit_tp(tp)
 
         self.__trade_modals.click_edit_order_btn()

@@ -3,14 +3,62 @@ import builtins
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
 
+from src.core.config_manager import Config
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
 from src.data.consts import EXPLICIT_WAIT
+from src.data.project_info import RuntimeConfig
 
 
 class MobileActions(BaseActions):
     def __init__(self, driver=None):
-        super().__init__(driver or builtins.android_driver)
+        super().__init__(driver or getattr(builtins, 'android_driver') or getattr(builtins, 'ios_driver'))
+        self._action_builder = ActionBuilder(self._driver)
+
+    def click_screen_position(self, x_percent=0.5, y_percent=0.5):
+        """Click at a position by percentage of screen size.
+        Example: (0.5, 0.5) = middle of screen.
+        """
+        size = self._driver.get_window_size()
+        width = size["width"]
+        height = size["height"]
+
+        x = int(width * x_percent)
+        y = int(height * y_percent)
+
+        finger = PointerInput("touch", "finger1")
+        actions = ActionBuilder(self._driver, mouse=finger)
+        actions.pointer_action.move_to_location(x=x, y=y)
+        actions.pointer_action.pointer_down()
+        actions.pointer_action.pause(0.1)
+        actions.pointer_action.release()
+        actions.perform()
+
+    @handle_stale_element
+    def click_by_offset(
+            self,
+            locator: tuple[str, str],
+            x_offset=0, y_offset=0,
+            timeout=EXPLICIT_WAIT,
+            raise_exception=True,
+            show_log=True
+    ) -> None:
+        # Base location of the element
+        element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
+
+        if element:
+            rect = element.rect
+            x = rect['x'] + x_offset
+            y = rect['y'] + y_offset
+
+            # Create touch pointer
+            finger = PointerInput("touch", "finger1")
+            actions = ActionBuilder(self._driver, mouse=finger)
+            actions.pointer_action.move_to_location(x=x, y=y)
+            actions.pointer_action.pointer_down()
+            actions.pointer_action.pause(0.1)
+            actions.pointer_action.release()
+            actions.perform()
 
     @handle_stale_element
     def send_keys(
@@ -19,8 +67,12 @@ class MobileActions(BaseActions):
             timeout=EXPLICIT_WAIT,
             raise_exception=True,
             show_log=True,
-            hide_keyboard=True
+            hide_keyboard=True,
+            platform=None
     ):
+
+        platform = platform or RuntimeConfig.platform
+
         """Send keys to an element."""
         element = self.find_element(locator, timeout, raise_exception=raise_exception, show_log=show_log)
         if element and value is not None:
@@ -29,7 +81,10 @@ class MobileActions(BaseActions):
             element.send_keys(str(value))
 
             if hide_keyboard:
-                self.hide_keyboard()
+                if platform == "android":
+                    self.hide_keyboard()
+                else:
+                    element.send_keys("\n")
 
     def get_content_desc(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT):
         return self.get_attribute(locator, "content-desc", timeout=timeout)

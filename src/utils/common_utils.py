@@ -1,9 +1,11 @@
 import subprocess
 import xml.dom.minidom
 from datetime import datetime, timedelta, timezone
+
 from src.data.consts import ROOTDIR
 from src.data.enums import Language
 from src.data.project_info import DriverList, RuntimeConfig
+from src.utils.logging_utils import logger
 
 
 def log_page_source(name="page_source"):
@@ -20,16 +22,21 @@ def log_page_source(name="page_source"):
 def get_connected_device(platform=None):
     platform = platform or RuntimeConfig.platform
     if platform == "android":
+        logger.info("Trying to get Android device")
         result = subprocess.run(['adb', 'devices'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = result.stdout.strip().split('\n')[1:]  # Skip the first line
         for line in lines:
             if line.strip() and 'device' in line:
                 return line.split()[0]  # Return the device ID
-    else:
-        # Not Implement for IOS yet
-        pass
+    else: # IOS
+        logger.info("Trying to get iOS device")
+        result = subprocess.run(['idevice_id', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        lines = result.stdout.strip().split('\n')
+        for line in lines:
+            if line.strip():
+                return line.strip()
 
-    return None
+    return None # No device found
 
 
 def cook_element(element: tuple, *custom):
@@ -109,12 +116,12 @@ def move_days_from_now(days: int, backward: bool = True, milli_sec: bool = True)
     return timestamp * 1000 if milli_sec else timestamp
 
 
-def convert_strtime(str_time: str) -> float:
+def convert_strtime(str_time: str | float):
     """Interpret input as UTC and return POSIX timestamp."""
     dt_obj = datetime.strptime(str_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
     return dt_obj.timestamp()
 
-def convert_timestamp(timestamp: float | int) -> str:
+def convert_timestamp(timestamp: float | int):
     """Convert POSIX timestamp to UTC string (no +00:00 in output)."""
     dt_utc = datetime.fromtimestamp(timestamp, tz=timezone.utc)
     return dt_utc.strftime("%Y-%m-%d %H:%M:%S")

@@ -11,17 +11,56 @@ from src.utils.logging_utils import logger
 
 @pytest.fixture(scope="package", autouse=True)
 def setup(login_member_site, web, symbol, disable_OCT):
+    logger.info(f"{'=' * 10} Setup Trade Package - Start {'=' * 10}")
 
-    logger.info("- Select Trade Page")
+    logger.info("- Navigate to Trade Page")
     web.home_page.navigate_to(Features.TRADE)
 
     logger.info(f"- Search and select symbol: {symbol}")
     web.home_page.search_and_select_symbol(symbol)
 
+    logger.info(f"{'=' * 10} Setup Trade Package - Done {'=' * 10}")
+
+
+@pytest.fixture
+def market_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def limit_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def stop_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def stop_limit_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
 @pytest.fixture(scope="package")
 def create_order_data(web, get_asset_tab_amount, symbol):
     def _handler(trade_object, update_price=True):
-
         tab = AssetTabs.get_tab(trade_object.order_type)
 
         logger.info(f"- Select tab: {tab.value.title()}")
@@ -30,7 +69,7 @@ def create_order_data(web, get_asset_tab_amount, symbol):
         logger.info("- Get tab amount")
         tab_amount = web.trade_page.asset_tab.get_tab_amount(tab)
 
-        logger.info(f"- POST {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order")
+        logger.info(f"- Send API to place {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order (tab_amount:{tab_amount})")
         res = APIClient().trade.post_order(trade_object, update_price=update_price)
 
         # wait for loading new created data

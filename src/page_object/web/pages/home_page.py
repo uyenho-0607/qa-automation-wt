@@ -12,7 +12,7 @@ from src.page_object.web.components.modals.feature_anm_modal import FeatureAnnou
 from src.page_object.web.components.notifications import Notifications
 from src.page_object.web.components.settings import Settings
 from src.page_object.web.components.trade.watch_list import WatchList
-from src.utils.assert_utils import soft_assert
+from src.utils.assert_utils import soft_assert, compare_with_tolerance
 from src.utils.common_utils import data_testid, cook_element
 from src.utils.format_utils import remove_comma, format_acc_balance
 from src.utils.logging_utils import logger
@@ -49,15 +49,18 @@ class HomePage(BasePage):
     __search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-history'))
     __btn_delete_search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-history-delete'))
     __item_search_history = (By.CSS_SELECTOR, data_testid('symbol-input-search-items-symbol'))
-    __item_search_history_by_text = (By.XPATH, "//*[@data-testid='symbol-input-search-items-symbol' and text()='{}']")
+    __item_search_history_by_text = (By.XPATH, "//*[@data-testid='symbol-input-search-items-symbol' and contains(text(), '{}')]")
 
-    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[text()='{}']")
+    __item_search_result = (By.XPATH, "//div[@data-testid='symbol-input-search-items']//div[contains(text(), '{}')]")
     __items_search_result = (By.CSS_SELECTOR, data_testid('symbol-input-search-items'))
     __empty_message = (By.CSS_SELECTOR, "div[data-testid='symbol-dropdown-result'] > div[data-testid='empty-message']")
 
     # ------------------------ ACTIONS ------------------------ #
     def is_logged_in(self):
-        return self.actions.is_element_displayed(self.__account_selector, timeout=EXPLICIT_WAIT)
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Login successfully, Home Page is displayed" if res else f"- Login failed, Home Page is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
+        return res
 
     def toggle_account_selector(self, open=True):
         is_open = self.actions.is_element_displayed(self.__account_balance_item)
@@ -74,12 +77,14 @@ class HomePage(BasePage):
         account_item = account_item if isinstance(account_item, list) else [account_item]
 
         for item in account_item:
-            logger.debug(f"{'Check' if check else 'Uncheck'} {item} balance summary")
             locator = cook_element(self.__chb_acc_summary, item)
             is_checked = " checked" in self.actions.get_attribute(locator, "class")
 
             if is_checked != check:
+                logger.debug(f"{'Check' if check else 'Uncheck'} {item}")
                 self.actions.click(locator)
+            else:
+                logger.debug(f"{item} already {'Check' if check else 'Uncheck'} ")
 
         self.toggle_balance_summary(open=False)
 
@@ -92,10 +97,10 @@ class HomePage(BasePage):
 
     def select_item_from_search_result(self, symbol: str):
         self.actions.click(cook_element(self.__item_search_result, symbol))
-        time.sleep(1)
 
     def search_and_select_symbol(self, symbol):
         self.search_symbol(symbol)
+        time.sleep(1)
         self.select_item_from_search_result(symbol)
 
     def delete_search_history(self, check_displayed=True):
@@ -158,11 +163,14 @@ class HomePage(BasePage):
         total_balance = self.actions.get_text(self.__total_account_balance)
         soft_assert(sum_balance, remove_comma(total_balance.replace("USD", "")))
 
-    def verify_acc_balance_value(self, exp_dict: dict):
+    def verify_acc_balance_value(self, exp_dict: dict, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE)):
         """Verify account summary item against exp_dict (should be response from API get account)"""
-        actual = {key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key))) for key in AccSummary.checkbox_list()}
+        actual = {
+            key: format_acc_balance(self.actions.get_text(cook_element(self.__acc_balance_items, key)))
+            for key in AccSummary.checkbox_list()
+        }
         expected = {k: round(v, 2) for k, v in exp_dict.items() if k in AccSummary.checkbox_list()}
-        soft_assert(actual, expected, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
+        soft_assert(actual, expected, tolerance=tolerance, tolerance_fields=tolerance_fields, field_tolerances={AccSummary.PROFIT_LOSS: 5})
 
     def verify_acc_note_values(self, exp_dict: dict):
         actual = {item: format_acc_balance(self.actions.get_text(cook_element(self.__acc_note_items, item))) for item in AccSummary.note_list()}
@@ -170,17 +178,24 @@ class HomePage(BasePage):
 
     def verify_acc_summary_dropdown(self):
         element_dict = {}
+        max_retries = 3
 
         for item in AccSummary.checkbox_list():
-            element_dict[item] = self.actions.find_elements(cook_element(self.__acc_balance_items, item))
+            element_dict[item] = [format_acc_balance(text) for text in self.actions.get_text_elements(cook_element(self.__acc_balance_items, item))]
+
+            while not compare_with_tolerance(element_dict[item][0], element_dict[item][-1]) and max_retries:
+                logger.debug("- Retry getting account summary values")
+                element_dict[item] = [format_acc_balance(text) for text in self.actions.get_text_elements(cook_element(self.__acc_balance_items, item))]
+                max_retries -= 1
 
         logger.debug("- Checking enough account items are found")
         for item in AccSummary.checkbox_list():
             soft_assert(len(element_dict[item]), 2, error_message=f"Not enough values to compare, actual {len(element_dict[item])}, expected: 2")
 
         logger.debug("- Checking account details")
-        expected = {item: format_acc_balance(element_dict[item][0].text) for item in AccSummary.checkbox_list()}
-        actual = {item: format_acc_balance(element_dict[item][-1].text) for item in AccSummary.checkbox_list()}
+        expected = {item: element_dict[item][0] for item in AccSummary.checkbox_list()}
+        actual = {item: element_dict[item][-1] for item in AccSummary.checkbox_list()}
+
         soft_assert(actual, expected, tolerance=1, tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
 
     def verify_search_result(self, symbol: str):

@@ -3,14 +3,21 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import OrderType
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
-@pytest.fixture(scope="package", autouse=True)
+@pytest.fixture(scope="package", autouse=False)
 def symbol():
-    return random.choice(get_symbols())
+    logger.info(f"{'=' * 10} Setup Symbol Data - Start {'=' * 10}")
+
+    logger.info("- Get and select symbol to use through test package")
+    logger.debug(f"- Filtered symbol list: {(symbols := ObjSymbol().get_symbols())}")
+    logger.debug(f"- Random selected symbol: {(select_symbol := random.choice(symbols))!r}")
+
+    logger.info(f"{'=' * 10} Setup Symbol Data - Done {'=' * 10}")
+    return select_symbol
 
 
 @pytest.fixture(scope="package")

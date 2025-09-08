@@ -4,10 +4,10 @@ import time
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import Features, WatchListTab
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
-    
+
 
 @pytest.mark.critical
 def test(android):
@@ -35,14 +35,15 @@ def test(android):
         if subtab != tabs[-1]:
             logger.info(f"Step {i + 4}: Navigate to Markets Screen")
             android.home_screen.navigate_to(Features.MARKETS)
-    
+
+
 @pytest.fixture(autouse=True)
 def mark_symbol():
-    star_symbol = random.choice(get_symbols())
+    star_symbol = random.choice(ObjSymbol().get_symbols(get_all=True))
     logger.info(f"- Mark star symbol: {star_symbol!r}")
     APIClient().market.post_starred_symbol(star_symbol)
-    
+
     yield
-    
+
     logger.info(f"- Delete all star symbols")
     APIClient().market.delete_starred_symbols()

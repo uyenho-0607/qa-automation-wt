@@ -1,9 +1,11 @@
+import operator
 import re
 from typing import Any
 
 import pytest_check as check
 
 from src.core.decorators import attach_table_details
+from src.data.consts import FAILED_ICON_COLOR
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import DriverList, StepLogs
 from src.utils import DotDict
@@ -12,62 +14,6 @@ from src.utils.format_utils import format_dict_to_string, remove_comma, format_s
 from src.utils.logging_utils import logger
 
 """Utilities"""
-
-
-def compare_dict_with_keymap(actual, expected, key: str, tolerance=None):
-    actual_map = {item[key]: item for item in actual}
-    expected_map = {item[key]: item for item in expected}
-
-    all_keys = set(actual_map) | set(expected_map)
-    mismatches = []
-    missing = []
-    redundant = []
-
-    for k in all_keys:
-        a_item = actual_map.get(k)
-        e_item = expected_map.get(k)
-
-        if a_item and e_item:
-            a_filtered = {ka: va for ka, va in a_item.items() if ka != key}
-            e_filtered = {ke: ve for ke, ve in e_item.items() if ke != key}
-
-            actual_diff = {}
-            expected_diff = {}
-
-            for subkey in e_filtered:
-                va = a_filtered.get(subkey)
-                ve = e_filtered.get(subkey)
-
-                if tolerance is not None:
-                    delta = round(abs(va - ve), ndigits=4)
-                    if delta <= tolerance:
-                        if delta:
-                            logger.debug(f"- Acceptable tolerance: {delta!r}")
-                        continue
-
-                if va != ve:
-                    actual_diff[subkey] = va
-                    expected_diff[subkey] = ve
-
-            if actual_diff:
-                mismatches.append({
-                    key: k,
-                    'actual': actual_diff,
-                    'expected': expected_diff
-                })
-
-        elif e_item and not a_item:
-            missing.append(k)
-
-        elif a_item and not e_item:
-            redundant.append(k)
-
-    return {
-        'result': not mismatches and not missing and not redundant,
-        'mismatches': mismatches,
-        'missing': missing,  # expected but not in actual
-        'redundant': redundant  # in actual but not in expected
-    }
 
 
 def compare_with_tolerance(
@@ -89,8 +35,7 @@ def compare_with_tolerance(
 
     if not is_float(expected) or not is_float(actual):
         logger.debug(f"- Expected/ Actual value is not in correct type, expected: {expected} - type: {type(expected)}, actual: {actual} - type: {type(actual)}")
-        res = False
-        return res if not get_diff else dict(res=res, diff="", diff_percent="", tolerance="")
+        return False if not get_diff else dict(res=False, diff="", diff_percent="", tolerance="")
 
     actual = float(actual)
     expected = float(expected)
@@ -102,6 +47,7 @@ def compare_with_tolerance(
         baseline = abs(expected)
         diff_percent = diff / baseline  # fraction (e.g., 0.005 = 0.5%)
         tolerance_value = tol_frac * baseline
+
     else:
         # expected is zero: only allow exact match
         if diff == 0:
@@ -112,14 +58,10 @@ def compare_with_tolerance(
 
     # convert to percent for human-readable
     diff_percent = diff_percent * 100
-
-
-    if diff:
-        logger.debug(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
-    # else:
-    #     logger.debug(f"Actual {actual!r} and expected {expected!r} are the same")
-
     res = abs(diff) <= abs(tolerance_value)
+
+    if diff and not res:
+        logger.warning(f"Expected: {expected}, Actual: {actual}, Tolerance: ±{tolerance_value:.6f} ({tolerance_percent}%), Diff: {diff:.6f}, Diff Percent: {diff_percent:.6f}%")
 
     return res if not get_diff else dict(
         res=res,
@@ -133,35 +75,48 @@ def compare_dict(
         actual: dict | DotDict,
         expected: dict | DotDict,
         tolerance_percent: float = None,
-        tolerance_fields: list[str] = None
+        tolerance_fields: list[str] = None,
+        field_tolerances: dict[str, float] = None,
+        cus_operator = None
 ):
     """
     Compare two dictionaries with optional tolerance for specified fields.
     Args:
         actual: Actual dictionary
         expected: Expected dictionary
-        tolerance_percent: Tolerance percent value for comparing numbers
-        tolerance_fields: List of field names to apply tolerance to
+        tolerance_percent: Global tolerance percent value for comparing numbers
+        tolerance_fields: List of field names to apply global tolerance to
+        field_tolerances: Dictionary mapping field names to specific tolerance percentages
+                         e.g., {'price': 0.1, 'volume': 0.5} - overrides global tolerance
+        cus_operator: custom compare operator
     """
 
     all_res = []
     diff_keys = []
     tolerance_info = {}
 
-    logger.debug(f"- Compare dict: {format_dict_to_string(expected=expected, actual=actual)}")
+    logger.debug(f"> Compare data: {format_dict_to_string(expected=expected, actual=actual)}")
     # compare if length of two dicts are the same
     all_res.append(set(actual.keys()) == set(expected.keys()))
 
     for key in expected:
         act, exp = actual.get(key, "MISSING"), expected[key]
 
-        if tolerance_percent is not None and key in tolerance_fields:
+        # Check if field has specific tolerance
+        if field_tolerances and key in field_tolerances:
+            field_tolerance = field_tolerances[key]
+            res_tolerance = compare_with_tolerance(act, exp, field_tolerance, get_diff=True)
+            res = res_tolerance["res"]
+            tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
+
+        # Check if field should use global tolerance
+        elif tolerance_percent is not None and tolerance_fields and key in tolerance_fields:
             res_tolerance = compare_with_tolerance(act, exp, tolerance_percent, get_diff=True)
             res = res_tolerance["res"]
             tolerance_info[key] = dict(diff_percent=res_tolerance["diff_percent"], tolerance=res_tolerance["tolerance"])
 
         else:
-            res = act == exp
+            res = act == exp if not cus_operator else cus_operator(act, exp)
 
         all_res.append(res)
         if not res:
@@ -178,7 +133,7 @@ def compare_dict(
         diff=[item for item in diff_keys if item not in missing + redundant]
     )
 
-    if tolerance_percent and tolerance_fields:
+    if (tolerance_percent and tolerance_fields) or field_tolerances:
         res_dict |= {"tolerance_info": tolerance_info}
 
     return res_dict
@@ -220,14 +175,13 @@ Notification Sample
 
 def extract_noti_prices(noti_content: str) -> dict:
     """Extract price value from notification text."""
-    # Pattern to match price after @ symbol (most common case)
     price_patterns = [
-        r'@\s*([\d,]+\.?\d*)',  # Price after @ symbol (handles commas)
-        r'Price:\s*([\d,]+\.?\d*)',  # Price after "Price:" (handles commas)
-        r'Entry Price:\s*([\d,]+\.?\d*)',  # Entry Price (handles commas)
-        r'Stop Loss:\s*([\d,]+\.?\d*)',  # Stop Loss (handles commas)
-        r'Take Profit:\s*([\d,]+\.?\d*)',  # Take Profit (handles commas)
-        r'Stop Limit Price:\s*([\d,]+\.?\d*)',  # Stop Limit Price (handles commas)
+        r'@\s*([\d,]+\.?\d*)',  # Price after @ symbol
+        r'\.\s+Price:\s*([\d,]+\.?\d*)',  # Exact ". Price:"
+        r'Entry Price:\s*([\d,]+\.?\d*)',
+        r'Stop Loss:\s*([\d,]+\.?\d*)',
+        r'Take Profit:\s*([\d,]+\.?\d*)',
+        r'Stop Limit Price:\s*([\d,]+\.?\d*)',
     ]
 
     res = {}
@@ -236,15 +190,20 @@ def extract_noti_prices(noti_content: str) -> dict:
         match = re.search(pattern, noti_content)
         if match:
             try:
-                # Remove commas before converting to float
                 price_str = match.group(1).replace(',', '')
 
-                key = "entry_price" if "@" in match.group(0) else match.group(0).split(": ")[0].lower().replace(" ", "_")
+                raw_key = match.group(0).split(":")[0]
+                raw_key = raw_key.strip().lstrip(".").strip()  # remove leading period if present
+                key = "entry_price" if "@" in match.group(0) else raw_key.lower().replace(" ", "_")
+
                 res[key] = float(price_str)
-
-
             except ValueError:
                 continue
+
+        # Remove duplicate "price" if "entry_price" exists
+        if "price" in res and "entry_price" in res:
+            res.pop("price", None)
+
     return res
 
 
@@ -258,27 +217,24 @@ def compare_noti_with_tolerance(
     # Extract prices from both messages
     actual_price = extract_noti_prices(actual)
     expected_price = extract_noti_prices(expected)
-    desc = ""
     decimal = ObjTrade.DECIMAL if is_banner else None
 
     if actual_price and expected_price:
-        compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price"])
+        compare_result = compare_dict(actual_price, expected_price, tolerance_percent=tolerance_percent, tolerance_fields=["stop_loss", "take_profit", "entry_price", "price"])
         res = compare_result["res"]
 
         if res:
-            desc += f"Tolerance: {tolerance_percent}% - \n"
             # Replace price in expected with actual price for string comparison
             pattern_key_mapping = {
                 r'@\s*[\d,]+\.?\d*': 'entry_price',
                 r'Entry Price:\s*[\d,]+\.?\d*': 'entry_price',
+                r'\.\s+Price:\s*([\d,]+\.?\d*)': 'price',
                 r'Stop Loss:\s*[\d,]+\.?\d*': 'stop_loss',
                 r'Take Profit:\s*[\d,]+\.?\d*': 'take_profit'
             }
 
-            processed_keys = set()  # Track which keys have been processed
-
             for pattern, key in pattern_key_mapping.items():
-                if key in expected_price and key in actual_price and key not in processed_keys:
+                if key in expected_price and key in actual_price:
                     # Only update if prices are different (within tolerance but not exactly the same)
                     if abs(actual_price[key] - expected_price[key]) > 0:
                         logger.debug(f"- Updating {key}: {expected_price[key]} -> {actual_price[key]}")
@@ -286,16 +242,8 @@ def compare_noti_with_tolerance(
                             re.search(r'[\d,]+\.?\d*', m.group(0)).group(0),
                             format_str_price(actual_price[key], decimal)
                         ), expected)
-                    # else:
-                    #     logger.debug(f"- Skipping {key}: values are identical ({actual_price[key]})")
 
-                    processed_keys.add(key)  # Mark this key as processed
-
-                    desc += f"Update price: {key}, from {expected_price[key]} -> {actual_price[key]}\n"
-
-            logger.debug(f"- Expected noti after adjust prices: {expected!r}")
-
-    soft_assert(actual, expected, log_details=True, desc=desc)
+    soft_assert(actual, expected, log_details=True)
 
 
 """Assertion"""
@@ -337,6 +285,10 @@ def soft_assert(
         expected: The expected value to compare against
         check_contains: If True, uses contains() instead of equal()
         error_message: Custom error message to display if check fails
+        **kwargs: Additional parameters including:
+            - tolerance: Global tolerance percentage for numeric fields
+            - tolerance_fields: List of field names to apply global tolerance to
+            - field_tolerances: Dict mapping field names to specific tolerance percentages
     Returns:
         bool: True if assertion passes, False otherwise
     Raises:
@@ -345,19 +297,23 @@ def soft_assert(
     __tracebackhide__ = True
 
     check_func = check_contain if check_contains else check_equal
-    validation_err_msg = f"\nValidation Failed ! {check_func.__name__.replace('_', ' ').upper()} "
+    validation_err_msg = f"\n {FAILED_ICON_COLOR} Validation Failed ! "
+    tolerance = kwargs.get("tolerance")
+    tolerance_fields = kwargs.get("tolerance_fields", [])
+    field_tolerances = kwargs.get("field_tolerances")
+    cus_operator = kwargs.get("cus_operator")
 
     if isinstance(actual, dict) and isinstance(expected, dict):
         if check_contains:
             actual = {k: v for k, v in actual.items() if k in expected}
 
-        tolerance = kwargs.get("tolerance")
-        tolerance_fields = kwargs.get("tolerance_fields", [])
-
         if tolerance is not None and tolerance_fields:
-            logger.debug(f"Tolerance: {tolerance}%, apply for fields: {tolerance_fields}")
+            logger.debug(f"Global tolerance: {tolerance}%, apply for fields: {tolerance_fields}")
 
-        res = compare_dict(actual, expected, tolerance_percent=tolerance, tolerance_fields=tolerance_fields)
+        if field_tolerances:
+            logger.debug(f"Field-specific tolerances: {field_tolerances}")
+
+        res = compare_dict(actual, expected, cus_operator=cus_operator, tolerance_percent=tolerance, tolerance_fields=tolerance_fields, field_tolerances=field_tolerances)
 
         if res["missing"]:
             validation_err_msg += f"\n>>> Missing Fields: {res['missing']}"
@@ -385,14 +341,14 @@ def soft_assert(
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
+                StepLogs.add_failed_log(failed_step, validation_err_msg)
 
         # Return the comparison result for the decorator to use
         return res
 
     else:
         validation_err_msg += (error_message or f"\n>>> Actual:   {actual!r} \n>>> Expected: {expected!r}")
-        res = check_func(actual, expected, validation_err_msg)
+        res = check_func(actual, expected, validation_err_msg) if not tolerance else compare_with_tolerance(actual, expected, tolerance)
 
         if not res:
             logger.error(validation_err_msg)
@@ -402,6 +358,6 @@ def soft_assert(
             # save failed verify step
             if StepLogs.test_steps:
                 failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-                StepLogs.all_failed_logs.append((failed_step, validation_err_msg))
+                StepLogs.add_failed_log(failed_step, validation_err_msg)
 
         return res

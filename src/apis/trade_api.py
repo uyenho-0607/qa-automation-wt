@@ -1,10 +1,13 @@
 import random
 from datetime import datetime, timedelta
 
+import requests
+
 from src.apis.api_base import BaseAPI
 from src.apis.market_api import MarketAPI
 from src.apis.order_api import OrderAPI
-from src.data.enums import Expiry, TradeType, OrderType, SLTPType
+from src.data.consts import CHECK_ICON_COLOR, WARNING_ICON, FAILED_ICON_COLOR
+from src.data.enums import Expiry, TradeType, OrderType, SLTPType, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
 from src.utils.format_utils import format_with_decimal
@@ -16,6 +19,9 @@ class TradeAPI(BaseAPI):
     """API client for placing trading orders"""
 
     _endpoint = "/trade/v2/"
+    _bulk_open_order = "/trade/v1/bulk"
+    _bulk_pending_order = "/trade/v1/limit/bulk"
+
     _symbol_details = DotDict()
 
     def __init__(self):
@@ -26,7 +32,6 @@ class TradeAPI(BaseAPI):
     def _get_symbol_details(self, symbol) -> DotDict:
         """Get and cache symbol details for calculating trade parameters."""
         if symbol not in self._symbol_details:
-            logger.debug(f"Getting symbol details for {symbol!r}")
             resp = self._market_api.get_symbol_details(symbol=symbol)
 
             self._symbol_details[symbol] = DotDict({
@@ -37,7 +42,7 @@ class TradeAPI(BaseAPI):
                     TradeType.SELL: float(format_with_decimal(resp["bid"], resp["pointStep"])) if resp["bid"] else resp["bid"]
                 }
             })
-        
+
         return self._symbol_details[symbol]
 
     @staticmethod
@@ -60,15 +65,15 @@ class TradeAPI(BaseAPI):
         symbol = trade_object.symbol
         trade_type = trade_object.trade_type
         order_type = trade_object.order_type
-        
+
         # Get symbol details and current price
         symbol_details = self._get_symbol_details(symbol)
         current_price = symbol_details.current_price[trade_type]
-        
+
         # Calculate trade parameters
         indicate = trade_object.get("indicate", SLTPType.PRICE)
         trade_params = calculate_trading_params(current_price, trade_type, order_type, sl_type=indicate.lower(), tp_type=indicate.lower())
-        
+
         # Build base payload
         payload = {
             "orderType": self._get_order_type_code(order_type, trade_type),
@@ -99,41 +104,43 @@ class TradeAPI(BaseAPI):
 
         # Update with response data
         payload["order_id"] = response["clOrdId"]
-        
+
         # Calculate units and volume
         payload["units"] = symbol_details.contract_size * payload["lotSize"]
         payload["volume"] = payload.pop("lotSize")
         payload["entry_price"] = str(payload.pop("price", 0))
-        
+
         # Handle stop limit price
         if "priceTrigger" in payload:
             payload["stop_limit_price"] = payload.pop("priceTrigger")
-        
+
         # Set default SL/TP values
         payload["stop_loss"] = payload.pop("stopLoss", "--")
         payload["take_profit"] = payload.pop("takeProfit", "--")
-        
-        # Get actual price from order details
+
+        # Get actual price from order details with retry mechanism
         if update_price:
+            max_retries = 3
+            retry_count = 0
 
-            logger.debug("Getting placed order details for updating prices")
-            order_details = self._order_api.get_orders_details(trade_object.symbol, trade_object.order_type, payload["order_id"])
+            while retry_count < max_retries:
+                order_details = self._order_api.get_orders_details(trade_object.symbol, trade_object.order_type, payload["order_id"])
+                if order_details:
+                    # Update entry price with actual executed price
+                    if trade_object.order_type == OrderType.MARKET:
+                        payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjTrade.DECIMAL)
 
-            # Update entry price with actual executed price
-            if trade_object.order_type == OrderType.MARKET:
-                payload["entry_price"] = round(order_details["openPrice"], ndigits=ObjTrade.DECIMAL)
-            
-            # Update SL/TP if using points
-            if payload.pop("indicate", "").lower() == SLTPType.POINTS.lower():
-                payload["stop_loss"] = format_with_decimal(
-                    order_details.get("stopLoss") or "--", symbol_details.point_step
-                )
-                payload["take_profit"] = format_with_decimal(
-                    order_details.get("takeProfit") or "--", symbol_details.point_step
-                )
-
-             # update current price
-            payload["current_price"] = order_details.get("currentPrice")
+                    # update current price
+                    payload["current_price"] = order_details.get("currentPrice")
+                    break
+                else:
+                    retry_count += 1
+                    if retry_count < max_retries:
+                        logger.warning(f"[API] {WARNING_ICON} Order details returned empty, retrying...")
+                    else:
+                        error_msg = f"[API] {FAILED_ICON_COLOR} Failed to get order details - order_id: {payload['order_id']}"
+                        logger.error(error_msg)
+                        raise requests.RequestException(error_msg)
 
         # Update the trade object
         trade_object.update(payload)
@@ -141,33 +148,55 @@ class TradeAPI(BaseAPI):
 
     def post_order(self, trade_object: ObjTrade, update_price=True):
         """Place a trading order."""
+
+        ignore_messages = ["Metatrader Insufficient Balance", "Not enough money"]
         max_retries = 3
-        
+
         # Determine endpoint
         order_type = OrderType.MARKET if trade_object.order_type == OrderType.MARKET else OrderType.LIMIT
         endpoint = f"{self._endpoint}{order_type.lower()}"
 
+        logger.debug("[API] Place order")
+
         for attempt in range(max_retries):
-            try:
-                # Build fresh payload for each attempt (in case price calculations were invalid)
-                payload = self._build_payload(trade_object)
 
-                # Make the API call (server errors are handled by @after_request decorator)
-                response = self.post(endpoint, payload)
+            payload = self._build_payload(trade_object)
+            response = self.post(endpoint, payload, apply_retries=False, parse_result=False)
+            response_json = response.json()
 
-                # Update trade object with response data
-                self._update_trade_object(trade_object, payload, response, update_price)
+            if not response.ok:
+                # place order failed, retry with fresh payload
+                if response_json.get("message") in ignore_messages:
+                    error_msg = f"[API] {FAILED_ICON_COLOR} Failed to place order - status_code: {response.status_code} - error: {response_json.get('message')}"
+                    logger.error(error_msg)
+                    raise requests.RequestException(error_msg)
 
-                return response
-
-            except Exception as e:
-                # Check if it's a client error (4xx) that might be due to invalid payload
-                logger.warning(f"Client error on attempt {attempt + 1}/{max_retries}: {str(e)}")
-                    
-                if attempt < max_retries - 1:
-                    logger.debug(f"Retrying with fresh payload...")
-                    continue
                 else:
-                    logger.error(f"Failed after {max_retries} attempts with fresh payloads")
-                    raise
+                    if attempt == max_retries - 1:
+                        error_msg = f"[API] {FAILED_ICON_COLOR} Failed to place order after {max_retries} attempts - status_code: {response.status_code} - error: {response_json.get('message')}"
+                        logger.error(error_msg)
+                        raise requests.RequestException(error_msg)
+
+                    logger.warning(f"[API] {WARNING_ICON} Attempt {attempt + 1}/{max_retries}: Failed to place order - status_code: {response.status_code} - error: {response_json.get('message')}")
+                    continue
+
+            logger.info(f"[API] Order placed successfully, orderID: {response_json['result']['clOrdId']} {CHECK_ICON_COLOR}")
+
+            # Update trade object with response data
+            self._update_trade_object(trade_object, payload, response_json.get('result'), update_price)
+
+            return response_json.get("result", response_json)
+
         return None
+
+    def bulk_close_orders(self, orders, tab: AssetTabs):
+        """
+        Bulk close multiple orders in one API call
+
+        :param orders: List of dicts with orderId, symbol, lotSize, fillPolicy
+        :param tab: Asset tab type from AssetTabs enum
+        :return: API response
+        """
+        endpoint = self._bulk_open_order if tab == AssetTabs.OPEN_POSITION else self._bulk_pending_order
+        logger.debug(f"[API] Bulk {'Close' if endpoint == self._bulk_open_order else 'Delete'} orders")
+        return self.put(endpoint, orders)

@@ -69,7 +69,7 @@ class WatchList(BaseTrade):
 
         logger.info(f"- Select tab: {tab.value.title()!r}")
         self.actions.click(self.__get_tab_locator(tab))
-        not wait or self.wait_for_spin_loader(timeout=3)
+        not wait or self.wait_for_spin_loader()
 
         if self.__is_tab_selected(tab):
             logger.debug(f"- Tab {tab.value.title()} is selected")
@@ -111,7 +111,7 @@ class WatchList(BaseTrade):
         last_count = 0
         not_found_time = 0
         max_scroll_attempts = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 100
-        logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
+        # logger.debug(f"- Max scroll attempts: {max_scroll_attempts!r}")
 
         while scroll_attempts < max_scroll_attempts:
             # Get current visible symbols
@@ -154,15 +154,17 @@ class WatchList(BaseTrade):
         if tab:
             self.select_tab(tab)
 
-        elements = self.actions.find_elements(self.__items)
-        if elements:
-            res = [ele.text.strip() for ele in elements]
-            return [item for item in res if item]
-        return []
+        res = self.actions.get_text_elements(self.__items)
+        return res
 
     def get_random_symbol(self, tab=None):
+        res = None
         cur_symbols = self.get_current_symbols(tab)
-        return random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols)/2)])
+        if cur_symbols:
+            res = random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols)/2)])
+            logger.debug(f"- Selected symbol: {res!r}")
+
+        return res
 
     def get_last_symbol(self, tab: WatchListTab | list[WatchListTab], store_data: DotDict = None):
         """Get latest symbol of each input tab (tab can be str or list)"""
@@ -268,7 +270,9 @@ class WatchList(BaseTrade):
         super().verify_empty_message(self.__empty_message, UIMessages.NO_ITEM_AVAILABLE)
 
     def verify_tabs_displayed(self):
-        expected_tabs = WatchListTab.parent_tabs() + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
+        expected_tabs = [item.value for item in WatchListTab.parent_tabs()] + [item.name.capitalize() for item in WatchListTab.sub_tabs()]
+        logger.debug(f"> Expected tabs: {', '.join(expected_tabs)!r}")
+
         actual_tabs = self.actions.get_text_elements(self.__all_tabs)
         soft_assert(sorted(actual_tabs), sorted(expected_tabs))
 

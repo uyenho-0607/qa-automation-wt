@@ -9,7 +9,6 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 def test(web, setup_pre_selected_tab):
-
     selected_tab = setup_pre_selected_tab
 
     logger.info("Step 1: Login with valid userid and password")
@@ -31,29 +30,24 @@ def test(web, setup_pre_selected_tab):
     logger.info("Verify Watch List Tabs displayed in correct order")
     web.trade_page.watch_list.verify_tabs_displayed()
 
-    # logger.info("Step 3: Logout")
-    # web.home_page.settings.logout()
-    #
-    # logger.info("Verify login page URL is correct")
-    # web.login_page.verify_page_url()
-    #
-    # logger.info("Verify login account tabs is displayed")
-    # web.login_page.verify_account_tabs_is_displayed()
-
 
 @pytest.fixture
 def setup_pre_selected_tab(symbol):
-
     mark_star = bool(random.randint(0, 1))
     pre_selected_tab = WatchListTab.TOP_GAINER
 
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+
     if mark_star:
-        logger.info(f"- Mark star symbol: {symbol!r}")
+        logger.info(f"- Send API request to mark star symbol: {symbol!r}")
         APIClient().market.post_starred_symbol(symbol)
         pre_selected_tab = WatchListTab.FAVOURITES
 
     else:
-        logger.info("- Delete all starred symbols")
+        logger.info("- Send API request to delete all starred symbols")
         APIClient().market.delete_starred_symbols()
+
+    logger.info(f">> Setup Summary: pre-selected tab: {pre_selected_tab.value!r}")
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield pre_selected_tab

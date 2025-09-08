@@ -1,8 +1,10 @@
+import time
+
 from appium.webdriver.common.appiumby import AppiumBy
 
-from src.data.consts import LONG_WAIT
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
+from src.data.consts import LONG_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
@@ -26,6 +28,7 @@ class LoginScreen(BaseScreen):
     __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
     __txt_user_id = (AppiumBy.XPATH, "//*[@resource-id='login-user-id']")
     __txt_password = (AppiumBy.XPATH, "//*[@resource-id='login-password']")
+    __btn_eye_mask = (AppiumBy.XPATH, "//*[@resource-id='input-password-hidden']")
     __btn_sign_in = (AppiumBy.XPATH, "//*[@resource-id='login-submit']")
     __lnk_reset_password = (AppiumBy.XPATH, "//*[@resource-id='reset-password-link']")
     __btn_sign_up = (AppiumBy.XPATH, "//*[@resource-id='login-account-signup']")
@@ -34,6 +37,7 @@ class LoginScreen(BaseScreen):
 
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
+        time.sleep(1)
         self.actions.click(cook_element(self.__tab_account_type, account_type))
 
     def select_language(self, language: Language):
@@ -53,7 +57,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=LONG_WAIT):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=6):
             self.actions.click(self.__btn_skip)
 
         if language:
@@ -62,12 +66,13 @@ class LoginScreen(BaseScreen):
         self.select_account_tab(account_type or RuntimeConfig.account)
         self.actions.send_keys(self.__txt_user_id, str(userid))
         self.actions.send_keys(self.__txt_password, str(password))
-        self.actions.click(self.__btn_sign_in)
+        self.actions.click(self.__btn_sign_in, raise_exception=False)
 
         if wait:
             self.wait_for_spin_loader()
 
-    def select_open_demo_account(self):
+    def click_open_demo_account(self):
+        time.sleep(1)
         self.select_account_tab(AccountType.DEMO)
         self.actions.click(self.__btn_sign_up)
 
@@ -91,10 +96,11 @@ class LoginScreen(BaseScreen):
         )
 
     def verify_account_autofill_value(self, userid, password):
-        actual_userid = self.actions.get_attribute(self.__txt_user_id, "value")
+        actual_userid = self.actions.get_attribute(self.__txt_user_id, "text")
         soft_assert(actual_userid, str(userid))
 
-        actual_password = self.actions.get_attribute(self.__txt_password, "value")
+        self.actions.click(self.__btn_eye_mask)
+        actual_password = self.actions.get_attribute(self.__txt_password, "text")
         soft_assert(actual_password, password)
     
     def verify_alert_error_message(self, account_type=None):

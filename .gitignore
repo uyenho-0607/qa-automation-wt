@@ -156,7 +156,12 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# Allure results
-allure-results
+# Allure results and reports
+allure-results/
+allure-*/
+allure-report/
+reports/*/report*/
 .idea/
 .idea/workspace.xml
+# Local Netlify folder
+.netlify

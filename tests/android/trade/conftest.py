@@ -27,16 +27,13 @@ def create_order_data(android):
         logger.info("- Wait for tab amount to increase")
         android.trade_screen.asset_tab.wait_for_tab_amount(AssetTabs.get_tab(trade_object.order_type), tab_amount + 1)
 
-        # Loading new created data
-        # android.trade_screen.navigate_to(Features.HOME)
-        # android.home_screen.navigate_to(Features.TRADE)
         return res
 
     return _handler
 
 
 @pytest.fixture(scope="package")
-def enabl_OCT(android):
+def enable_OCT(android):
     logger.info("- Send API to enable OCT")
     APIClient().user.patch_oct()
 

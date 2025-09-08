@@ -1,8 +1,7 @@
 import os
 
-from dotenv import load_dotenv
 from cryptography.fernet import Fernet
-
+from dotenv import load_dotenv
 
 """Generate a new key """
 

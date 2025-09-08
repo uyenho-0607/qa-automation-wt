@@ -1,5 +1,8 @@
+import time
+
 import pytest
 
+from src.apis.api_client import APIClient
 from src.core.actions.mobile_actions import MobileActions
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
@@ -11,9 +14,11 @@ from src.utils.logging_utils import logger
 def android():
     logger.info("- Init Android driver")
     DriverManager.get_driver()
-    actions = MobileActions()
 
-    yield AndroidContainer(actions)
+    logger.info("- Init API client")
+    APIClient()
+
+    yield AndroidContainer()
 
     logger.info("- Clean up Android driver")
     DriverManager.quit_driver()
@@ -24,9 +29,19 @@ def android():
 
 @pytest.fixture(scope="package")
 def login_wt_app(android):
+    max_retries = 3
+
     logger.info(f"- Login to WT App")
     android.login_screen.login(wait=True)
     android.home_screen.feature_anm_modal.got_it()
+
+    logger.info("- Check if login success")
+    while not android.home_screen.is_logged_in() and max_retries:
+        max_retries -= 1
+
+        logger.debug("- Retry Login")
+        android.login_screen.login(wait=True)
+        android.home_screen.feature_anm_modal.got_it()
 
 
 @pytest.fixture

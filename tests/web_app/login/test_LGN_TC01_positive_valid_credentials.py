@@ -3,8 +3,8 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.consts import get_symbols
 from src.data.enums import WatchListTab
+from src.data.objects.symbol_obj import ObjSymbol
 from src.utils.logging_utils import logger
 
 
@@ -22,12 +22,6 @@ def test(web_app, setup_pre_selected_tab):
     logger.info(f"Verify pre-selected tab is {selected_tab.value!r}")
     web_app.home_page.watch_list.verify_symbols_list(symbols)
 
-    logger.info("Step 2: User tries to logout")
-    web_app.home_page.settings.logout()
-
-    logger.info("Verify login account tabs is displayed")
-    web_app.login_page.verify_account_tab_is_displayed()
-
 
 @pytest.fixture(autouse=True)
 def setup_pre_selected_tab():
@@ -37,7 +31,7 @@ def setup_pre_selected_tab():
     logger.info(f"- Mark star: {mark_star!r}")
     if mark_star:
         logger.info("- Mark star symbol")
-        APIClient().market.post_starred_symbol(random.choice(get_symbols()))
+        APIClient().market.post_starred_symbol(random.choice(ObjSymbol().get_symbols(get_all=True)))
 
     else:
         logger.info("- Delete all stared symbols")

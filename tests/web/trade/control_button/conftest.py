@@ -1,5 +1,6 @@
 import pytest
 
+from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.utils import DotDict
@@ -16,8 +17,7 @@ def setup_close_position_test(web, get_asset_tab_amount, symbol):
 
     if not tab_amount:
         logger.info("- Place new order")
-        web.trade_page.place_order_panel.place_order(trade_object, submit=True)
-        web.home_page.notifications.close_noti_banner()
+        APIClient().trade.post_order(trade_object, update_price=False)
 
         logger.info("- Wait for asset tab amount increase")
         web.trade_page.asset_tab.wait_for_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)

@@ -1,6 +1,7 @@
 from appium.webdriver.common.appiumby import AppiumBy
+
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import SHORT_WAIT
+from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT, LONG_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
@@ -34,7 +35,7 @@ class HomeScreen(BaseScreen):
 
     __symbol_search_selector = (AppiumBy.XPATH, resource_id("symbol-search-selector"))
     __txt_symbol_search = (AppiumBy.XPATH, resource_id("symbol-input-search"))
-    __item_search_result = (AppiumBy.XPATH, "//*[@resource-id='watchlist-symbol' and @text='{}']")
+    __item_search_result = (AppiumBy.XPATH, "//*[@resource-id='watchlist-symbol' and contains(@text, '{}')]")
     __items_search_result = (AppiumBy.XPATH, resource_id('symbol-input-search-items'))
     __search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']")
     __btn_delete_search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']/following-sibling::android.widget.TextView")
@@ -45,6 +46,9 @@ class HomeScreen(BaseScreen):
     __empty_search_result = (AppiumBy.XPATH, "//android.widget.TextView[@text='No items available']")
 
     # ------------------------ ACTIONS ------------------------ #
+    def is_logged_in(self):
+        return self.actions.is_element_displayed(self.__account_selector, timeout=LONG_WAIT)
+
     def open_my_account(self, open=True):
         is_open = self.my_account_modal.is_open()
         if open != is_open:

@@ -4,7 +4,7 @@ from typing import Dict, Any
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import SHORT_WAIT
+from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT
 from src.data.enums import AssetTabs, BulkCloseOpts
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import RuntimeConfig
@@ -75,7 +75,10 @@ class AssetTab(BaseTrade):
 
     def get_last_order_id(self, trade_object: ObjTrade) -> None:
         """Get the latest order ID from the specified tab and update value into trade_object"""
-        res = self.actions.get_text(cook_element(self.__item_order_no, AssetTabs.get_tab(trade_object.order_type).col_locator()))
+        self.wait_for_spin_loader()
+        res = self.actions.get_text(
+            cook_element(self.__item_order_no, AssetTabs.get_tab(trade_object.order_type).col_locator()), timeout=EXPLICIT_WAIT
+        )
         trade_object.order_id = res.split(": ")[-1] if res else 0
 
     def get_expand_item_data(self, tab: AssetTabs, order_id: int = 0) -> Dict[str, Any]:
@@ -118,7 +121,7 @@ class AssetTab(BaseTrade):
                 tab_locator = AssetTabs.HISTORY
 
         self.actions.click(cook_element(self.__tab, locator_format(tab_locator)))
-        not wait or self.wait_for_spin_loader(timeout=SHORT_WAIT)
+        not wait or self.wait_for_spin_loader()
 
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""

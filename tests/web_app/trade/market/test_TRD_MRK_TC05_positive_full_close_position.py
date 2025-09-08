@@ -48,8 +48,8 @@ def test(web_app, symbol, get_asset_tab_amount, create_order_data):
 @pytest.fixture(autouse=True)
 def teardown(web_app, cancel_all):
     yield
-    logger.info("- Navigate to Trade screen")
+    logger.info("[Cleanup] Navigate to Trade screen")
     web_app.home_page.navigate_to(Features.TRADE)
 
-    logger.info("- Select Open Positions tab")
+    logger.info("[Cleanup] Select Open Positions tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.OPEN_POSITION)

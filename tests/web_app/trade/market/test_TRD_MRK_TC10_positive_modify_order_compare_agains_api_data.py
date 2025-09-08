@@ -2,7 +2,7 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs
-from src.data.enums import SLTPType, OrderType, Expiry
+from src.data.enums import SLTPType
 from src.utils.logging_utils import logger
 
 

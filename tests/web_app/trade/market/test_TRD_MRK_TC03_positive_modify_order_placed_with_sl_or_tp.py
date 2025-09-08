@@ -1,14 +1,10 @@
-import random
-
 import pytest
 
-from src.data.enums import AssetTabs, SLTPType, OrderType
+from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize(
     "exclude_field, update_field",
     [
@@ -43,7 +39,7 @@ def test(web_app, market_obj, get_asset_tab_amount, exclude_field, update_field,
     web_app.trade_page.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify order details after update")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)
