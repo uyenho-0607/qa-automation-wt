@@ -36,7 +36,7 @@ def test(web_app, market_obj, edit_field, sl_type, tp_type, create_order_data, c
     web_app.trade_page.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify order details after update")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)

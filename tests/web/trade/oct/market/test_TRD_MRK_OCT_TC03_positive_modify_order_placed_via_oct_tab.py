@@ -29,7 +29,7 @@ def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, market_obj
     web.trade_page.asset_tab.modify_order(trade_obj, sl_type=sl_type, tp_type=tp_type, oct_mode=True)
 
     logger.info("Verify notification banner updated message")
-    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_obj).order_updated_banner(**trade_obj))
+    web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_obj).order_updated_banner())
 
     logger.info(f"Verify order details after update")
     web.trade_page.asset_tab.verify_item_data(trade_obj, wait=True)

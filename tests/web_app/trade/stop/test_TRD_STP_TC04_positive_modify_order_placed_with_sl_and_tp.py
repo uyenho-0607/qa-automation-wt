@@ -37,7 +37,7 @@ def test(web_app, stop_obj, create_order_data, sl_type, tp_type, cancel_all):
     web_app.trade_page.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info("Step 5: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
