@@ -50,6 +50,8 @@ def login_member_site(web_app):
             break
 
         if attempt == max_attempts - 1 and not web_app.home_page.is_logged_in():
+            # login one more time to catch the screenshot
+            web_app.login_page.login()
             raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
 
     logger.info(f"{'=' * 10} Setup Login - Done {'=' * 10}")

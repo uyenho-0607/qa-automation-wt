@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import SLTPType, OrderType, Expiry, AssetTabs
@@ -8,10 +10,10 @@ from src.utils.logging_utils import logger
 @pytest.mark.critical
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
-    [
+    random.choices([
         ("SL, TP", SLTPType.PRICE, SLTPType.PRICE),
         ("SL, TP", SLTPType.POINTS, SLTPType.POINTS),
-    ]
+    ])
 )
 def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data, stop_limit_obj):
     trade_object = stop_limit_obj(stop_loss=0, take_profit=0)

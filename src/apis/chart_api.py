@@ -4,7 +4,7 @@ from src.utils.logging_utils import logger
 
 
 class ChartAPI(BaseAPI):
-    _candlestick_endpoint = "/chart/v1/candlestick"
+    _candlestick_endpoint = "/chart/v4/candlestick"
 
     def get_candlestick(
             self, symbol: str, timeframe: ChartTimeframe, from_time=None, to=None, **kwargs

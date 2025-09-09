@@ -13,6 +13,7 @@ class AuthAPI(BaseAPI):
     endpoints = {
         Client.LIRUNEX: {
             AccountType.CRM: "/auth/v1/company/login",
+            AccountType.LIVE: "/auth/v2/company/live/login",
             AccountType.DEMO: "/auth/v2/company/demo/login"
         },
         Client.TRANSACT_CLOUD: {

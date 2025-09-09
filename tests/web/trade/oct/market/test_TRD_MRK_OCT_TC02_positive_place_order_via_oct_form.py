@@ -1,5 +1,4 @@
 import pytest
-
 from src.data.enums import AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
@@ -26,4 +25,3 @@ def test(web, market_obj, get_asset_tab_amount):
 
     logger.info(f"Verify Open Position noti in Notification Box")
     web.home_page.notifications.verify_notification_result(ObjNoti(trade_obj).open_position_details(trade_obj.order_id))
-

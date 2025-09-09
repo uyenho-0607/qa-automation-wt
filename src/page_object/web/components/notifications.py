@@ -42,7 +42,7 @@ class Notifications(BasePage):
 
     def close_noti_banner(self):
         with suppress(Exception):
-            self.actions.click(self.__btn_close, timeout=1, raise_exception=False, show_log=False)
+            self.actions.click(self.__btn_close, timeout=SHORT_WAIT, raise_exception=False, show_log=False)
 
     def get_open_position_order_id(self, trade_object: DotDict, amount=1):
         self.toggle_notification(timeout=1)

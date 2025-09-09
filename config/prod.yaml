@@ -21,7 +21,6 @@ lirunex:
     app_package: com.aquariux.wt.lirunex
     app_bundle: ...
 
-# not yet updated
 dcodemarkets:
   base_url: https://webtrader.dcodemarkets.com
   api_url: https://webtrader.dcodemarkets.com/api
