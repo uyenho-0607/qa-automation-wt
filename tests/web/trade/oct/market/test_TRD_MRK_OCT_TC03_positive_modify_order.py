@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType
@@ -8,10 +10,10 @@ from src.utils.logging_utils import logger
 @pytest.mark.critical
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
-    [
+    random.choices([
         ("SL, TP", SLTPType.PRICE, SLTPType.PRICE),
         ("SL, TP", SLTPType.POINTS, SLTPType.POINTS),
-    ]
+    ])
 )
 def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, market_obj):
     trade_obj = market_obj()
@@ -21,6 +23,7 @@ def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, market_obj
 
     logger.info(f"Step 2: Place {trade_obj.trade_type.upper()} Market Order via OCT tab (tab:{tab_amount})")
     web.trade_page.place_order_panel.place_oct_order(trade_obj)
+    web.home_page.notifications.close_noti_banner()
 
     logger.info(f"Verify tab amount increased to: {tab_amount + 1}")
     web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
