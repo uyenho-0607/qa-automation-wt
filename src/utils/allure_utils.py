@@ -1,4 +1,5 @@
 import base64
+import builtins
 import hashlib
 import json
 import os
@@ -134,6 +135,30 @@ def custom_allure_report(allure_dir: str) -> None:
         except Exception as e:
             logger.error(f"Error processing file {os.path.basename(file_path)}: {str(type(e).__name__)}, {str(e)}")
             continue
+
+
+def delete_container_files(allure_dir):
+    def _strip_name(name: str | None) -> str | None:
+        return name.split("::", 1)[0] if name else None
+
+    own_fixtures = set(builtins.own_fixture)
+
+    for container_file in Path(allure_dir).glob("*-container.json"):
+        with open(container_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # safely extract names
+        before_name = data.get("befores", [{}])[0].get("name")
+        after_name = _strip_name(data.get("afters", [{}])[0].get("name")) if data.get("afters") else None
+
+        # delete if both are not in own fixtures
+        if (before_name not in own_fixtures) and (after_name not in own_fixtures):
+            os.remove(container_file)
+        else:
+            if after_name:
+                data["afters"][0]["name"] = after_name
+            with open(container_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def _process_test_time(data: Dict[str, Any]):
