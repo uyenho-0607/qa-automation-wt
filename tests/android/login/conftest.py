@@ -1,5 +1,6 @@
 import pytest
 
+from src.apis.api_client import APIClient
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.android_container import AndroidContainer
@@ -14,6 +15,8 @@ def android():
     """
     logger.info("Initializing Android driver")
     DriverManager.get_driver()
+
+    APIClient()
 
     yield AndroidContainer()
 

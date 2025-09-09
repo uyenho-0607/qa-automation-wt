@@ -33,6 +33,7 @@ class AuthAPI(BaseAPI):
     def get_token(self):
         if RuntimeConfig.platform in ["android", "ios"]:
             self.check_ip()
+            return
 
         if "Authorization" not in RuntimeConfig.headers:
             credentials = Config.credentials()
