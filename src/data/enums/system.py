@@ -56,3 +56,10 @@ class Server(BaseEnum):
     """Enum representing different trading servers."""
     MT4 = "mt4"
     MT5 = "mt5"
+
+
+class NotificationTab(BaseEnum):
+    """Enum representing different trading servers."""
+    ORDER = "Order"
+    SYSTEM = "System"
+    INFORMATION = "Information"

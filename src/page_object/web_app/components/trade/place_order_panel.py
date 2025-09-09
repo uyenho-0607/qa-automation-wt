@@ -5,8 +5,9 @@ from typing import Optional, Any
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element, data_testid
@@ -44,7 +45,7 @@ class PlaceOrderPanel(BaseTrade):
     __volume_info_value = (By.XPATH, "//input[@data-testid='trade-input-volume']/ancestor::div[1]/following-sibling::div/div[2]")
 
     # Order placement elements
-    __btn_trade = (By.CSS_SELECTOR, data_testid('trade-button-order-{}'))
+    __btn_trade = (By.XPATH, "(//div[@data-testid='trade-button-order-{}'])[last()]")
     __drp_order_type = (By.CSS_SELECTOR, data_testid('trade-dropdown-order-type'))
     __opt_order_type = (By.CSS_SELECTOR, data_testid('trade-dropdown-order-type-{}'))
     __btn_place_order = (By.CSS_SELECTOR, data_testid('trade-button-order'))
@@ -77,14 +78,20 @@ class PlaceOrderPanel(BaseTrade):
         return self.actions.get_value(locator)
 
     # ------------------------ ACTIONS ------------------------ #
-    def toggle_oct(self, enable: bool = True) -> None:
+    def toggle_oct(self, enable: bool = True, submit=True) -> None:
         """Enable/disable One-Click Trading."""
-        is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=1)
+        is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=SHORT_WAIT)
         if is_enabled != enable:
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
         if enable:
-            self.agree_and_continue()
+            if submit:
+                self.agree_and_continue()
+            else:
+                self.click_cancel_btn()
+
+    def open_pre_trade_details(self):
+        self.actions.click(self.__btn_pre_trade_details)
 
     def swap_to_units(self) -> None:
         """Swap to units display."""
@@ -95,6 +102,12 @@ class PlaceOrderPanel(BaseTrade):
         """Select trade type (BUY/SELL)."""
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         self.actions.click(cook_element(self.__btn_trade, trade_type.lower()))
+
+    def _select_oct_trade_type(self, trade_type: TradeType) -> None:
+        """Select trade type (BUY/SELL
+        )."""
+        logger.debug(f"- Select trade type: {trade_type.upper()!r}")
+        self.actions.click(cook_element(self.__btn_oct_trade, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
@@ -113,7 +126,7 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.scroll_to_element(self.__drp_fill_policy)
         is_selected = fill_policy.lower() in self.actions.get_text(self.__drp_fill_policy, timeout=QUICK_WAIT).lower()
         if is_selected:
-            logger.debug(f"- Fill Policy: {fill_policy!r} already selected")
+            logger.debug(f"- Fill Policy: {fill_policy!r} selected")
             return
 
         logger.debug(f"- Select fill policy: {fill_policy.capitalize()!r}")
@@ -125,7 +138,7 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.scroll_to_element(self.__drp_expiry)
         is_selected = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
         if is_selected:
-            logger.debug(f"> Expiry: {expiry!r} already selected")
+            logger.debug(f"> Expiry: {expiry!r} selected")
             return
 
         logger.debug(f"- Select expiry: {expiry.title()!r}")
@@ -280,4 +293,37 @@ class PlaceOrderPanel(BaseTrade):
             self.get_current_price(trade_object)
             self.confirm_trade()
 
+    def place_oct_order(self, trade_object: ObjTrade) -> None:
+
+        symbol_details = ObjSymbol().get_symbol_details(trade_object.symbol)
+        contract_size = symbol_details["contract_size"]
+
+        trade_type = trade_object.trade_type
+
+        # Input volume and get units
+        volume = self._input_volume()
+        units = volume * contract_size
+
+        # Prepare trade details
+        trade_details = {
+            'volume': format_str_price(volume),
+            'units': format_str_price(units),
+            'entry_price': self.get_live_price(trade_type, oct=True),
+            'stop_loss': '--',
+            'take_profit': '--'
+        }
+
+        logger.debug(f"- Order Summary: {format_dict_to_string(trade_details)}")
+        trade_object |= {k: v for k, v in trade_details.items()}
+
+        # Place Order
+        self._select_oct_trade_type(trade_type)
+
     # ------------------------ VERIFY ------------------------ #
+
+    def verify_oct_mode(self, enable=True):
+        logger.info(f"- Check OCT button is {'enabled' if enable else 'disabled'}")
+        self.actions.verify_element_displayed(self.__toggle_oct_checked if enable else self.__toggle_oct)
+
+        logger.info(f"- Check pre-trade details tab is {'displayed' if enable else 'not displayed'}")
+        self.actions.verify_element_displayed(self.__btn_pre_trade_details, is_display=enable)

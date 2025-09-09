@@ -48,6 +48,7 @@ class ObjTrade(BaseObj):
         symbol_details = ObjSymbol().get_symbol_details(symbol)
         ObjTrade.POINT_STEP = symbol_details["point_step"]
         ObjTrade.DECIMAL = symbol_details["decimal"]
+        ObjTrade.CONTRACT_SIZE = symbol_details["contract_size"]
 
     @classmethod
     def get_expiry_map(cls, expiry: Expiry | str) -> str:

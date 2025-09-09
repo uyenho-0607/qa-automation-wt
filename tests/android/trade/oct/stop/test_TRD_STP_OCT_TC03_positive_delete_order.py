@@ -6,18 +6,23 @@ from src.utils.logging_utils import logger
 
 
 def test(android, symbol, get_asset_tab_amount, cancel_delete_order, create_order_data):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
-    tab_amount = get_asset_tab_amount(trade_object.order_type)
     # ------------------- #
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order")
+    logger.info("Step 1: Get tab amount")
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
+
+    logger.info(f"Step 2: Place {trade_object.trade_type} Order")
     create_order_data(trade_object)
 
     logger.info(f"Verify {tab.title()} amount: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
-    logger.info("Step 2: Delete pending order")
+    logger.info(f"Step 3: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER, wait=True)
+
+    logger.info(f"Step 4: Delete pending order (ID:{trade_object.order_id})")
     android.trade_screen.asset_tab.delete_order(trade_object=trade_object, confirm=False)
 
     logger.info("Verify Delete order notification banner")

@@ -10,7 +10,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup(login_member_site, web, symbol, disable_OCT):
+def setup_trade_test(login_member_site, web, symbol):
     logger.info(f"{'=' * 10} Setup Trade Package - Start {'=' * 10}")
 
     logger.info("- Navigate to Trade Page")

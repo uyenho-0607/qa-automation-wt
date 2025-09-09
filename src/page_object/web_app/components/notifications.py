@@ -1,3 +1,4 @@
+import time
 from contextlib import suppress
 
 from selenium.webdriver.common.by import By
@@ -24,30 +25,34 @@ class Notifications(BasePage):
     __btn_close = (By.CSS_SELECTOR, data_testid('navigation-back-button'))
     __btn_close_banner = (By.CSS_SELECTOR, data_testid('notification-box-close'))
 
+    __noti_by_text = (By.XPATH, "//*[@data-testid='notification-list-result-item']//div[contains(text(), '{}')]")
     __noti_result = (By.XPATH, "//div[@data-testid='notification-list-result-item' and contains(normalize-space(), '{}')]")
 
     # Noti order details
     __noti_details_order_type = (By.CSS_SELECTOR, data_testid('notification-order-details-modal-order-type'))
     __noti_details_symbol = (
         By.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Symbol']/following-sibling::*[1]"
+        "//div[@data-testid='notification-order-details-label' and text()='Symbol']/following-sibling::*[1]"
     )
     __noti_details_volume = (
         By.XPATH,
-        "//*[@resource-id='notification-order-details-label' and (@text='Size' or @text='Volume')]/following-sibling::*[1]"
+        "//div[@data-testid='notification-order-details-label' and (text()='Size' or text='Volume')]/following-sibling::*[1]"
     )
     __noti_details_units = (
         By.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Units']/following-sibling::*[1]"
+        "//div[@data-testid='notification-order-details-label' and text()='Units']/following-sibling::*[1]"
     )
     __noti_details_stop_loss = (
         By.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Stop Loss']/following-sibling::*[1]"
+        "//div[@data-testid='notification-order-details-label' and text()='Stop Loss']/following-sibling::*[1]"
     )
     __noti_details_take_profit = (
         By.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Take Profit']/following-sibling::*[1]"
+        "//div[@data-testid='notification-order-details-label' and text()='Take Profit']/following-sibling::*[1]"
     )
+
+    #### SYSTEM ####
+    __system_tab = (By.XPATH, data_testid('tab-notification-type-system'))
 
     # ------------------------ ACTIONS ------------------------ #
     def close_noti_box(self):
@@ -61,7 +66,7 @@ class Notifications(BasePage):
 
     def close_noti_banner(self):
         with suppress(Exception):
-            self.actions.click(self.__btn_close, timeout=SHORT_WAIT, raise_exception=False)
+            self.actions.click(self.__btn_close_banner, timeout=SHORT_WAIT, raise_exception=False)
 
     def _get_open_position(self):
         noti = cook_element(self.__noti_result, "Open Position")
@@ -92,8 +97,17 @@ class Notifications(BasePage):
                 logger.debug(f"> Check noti title - {expected_title!r}")
                 soft_assert(actual_title, expected_title)
 
-    def verify_notification_result(self, expected_result: str | list, close=False):
+    def verify_notification_result(self, expected_result: str | list, is_system=False, close=False):
         self.open_noti_box()
+
+        if is_system:
+            time.sleep(0.5)
+            self.actions.click(self.__system_tab)
+            for noti in expected_result:
+                locator = cook_element(self.__noti_by_text, noti)
+                self.actions.verify_element_displayed(locator)
+            return
+
         if "Open Position" in expected_result:
             noti_res = self._get_open_position()
 
@@ -110,20 +124,20 @@ class Notifications(BasePage):
         if close:
             self.close_noti_box()
 
-    def verify_notification_details(self, trade_object: ObjTrade):
-        self.actions.click(self.__noti_list_items)
-
-        actual = {
-            "order_type": self.actions.get_text(self.__noti_details_order_type),
-            "symbol": self.actions.get_text(self.__noti_details_symbol),
-            "volume": self.actions.get_text(self.__noti_details_volume),
-            "units": self.actions.get_text(self.__noti_details_units),
-            "stop_loss": self.actions.get_text(self.__noti_details_stop_loss),
-            "take_profit": self.actions.get_text(self.__noti_details_take_profit),
-        }
-
-        expected = {k: v for k, v in trade_object.items() if k in actual}
-        expected["order_type"] = f"{trade_object.trade_type.upper()} ORDER"
-
-        logger.debug("- Verify notification item details")
-        soft_assert(actual, expected)
+    # def verify_notification_details(self, trade_object: ObjTrade):
+    #     self.actions.click(self.__noti_list_items)
+    #
+    #     actual = {
+    #         "order_type": self.actions.get_text(self.__noti_details_order_type),
+    #         "symbol": self.actions.get_text(self.__noti_details_symbol),
+    #         "volume": self.actions.get_text(self.__noti_details_volume),
+    #         "units": self.actions.get_text(self.__noti_details_units),
+    #         "stop_loss": self.actions.get_text(self.__noti_details_stop_loss),
+    #         "take_profit": self.actions.get_text(self.__noti_details_take_profit),
+    #     }
+    #
+    #     expected = {k: v for k, v in trade_object.items() if k in actual}
+    #     expected["order_type"] = f"{trade_object.trade_type.upper()} ORDER"
+    #
+    #     logger.debug("- Verify notification item details")
+    #     soft_assert(actual, expected)
