@@ -3,22 +3,20 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, Features, OrderType, WatchListTab
+from src.data.enums import AssetTabs, Features, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package", autouse=True)
 def setup_trade_test(login_wt_app, android, symbol):
+    logger.info(f"[Setup] Select symbol: {symbol!r}")
+    android.home_screen.search_and_select_symbol(symbol)
 
-    logger.info(f"- Select symbol: {symbol!r}")
-    android.home_screen.watch_list.select_tab(WatchListTab.CRYPTO)
-    android.home_screen.watch_list.select_symbol(symbol)
 
 @pytest.fixture
 def create_order_data(android):
     def _handler(trade_object):
-
         tab_amount = android.trade_screen.asset_tab.get_tab_amount(AssetTabs.get_tab(trade_object.order_type))
 
         logger.info(f"- POST {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order")
@@ -33,15 +31,25 @@ def create_order_data(android):
 
 
 @pytest.fixture(scope="package")
-def enable_OCT(android):
-    logger.info("- Send API to enable OCT")
-    APIClient().user.patch_oct()
+def enable_OCT(enable_OCT):
+    pass
 
 
 @pytest.fixture(scope="package")
-def disable_OCT(android):
-    logger.info("- Send API to disable OCT")
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(disable_OCT):
+    pass
+
+
+@pytest.fixture(scope="package")
+def swap_to_volume():
+    logger.info("[Setup] Send API to use volume")
+    APIClient().user.patch_swap_volume_units()
+
+
+@pytest.fixture(scope="package")
+def swap_to_units():
+    logger.info("[Setup] Send API to use units")
+    APIClient().user.patch_swap_volume_units(use_volume=False)
 
 
 @pytest.fixture

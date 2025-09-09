@@ -3,14 +3,14 @@ from typing import List, Literal
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.enums import CountryDialCode, DepositAmount
+from src.data.enums import SettingOptions, CountryDialCode, DepositAmount
 from src.data.objects.account_obj import ObjDemoAccount
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
-from src.utils.format_utils import format_str_price
+from src.utils.format_utils import locator_format, format_str_price
 from src.utils.logging_utils import logger
 
 
@@ -26,10 +26,13 @@ class DemoAccountModal(BaseScreen):
     def __init__(self, actions: MobileActions):
         super().__init__(actions)
 
-    # ======================== DEMO ACCOUNT CREATION ======================== #
-    # Locators
+    # ------------------------ LOCATORS ------------------------ #
+    __opt_setting = (AppiumBy.XPATH, "//*[@resource-id='setting-option-{}']")
+
+    # ======================== DEMO ACCOUNT CREATION LOCATORS ======================== #
     __txt_name = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-name']")
     __txt_email = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-email']")
+
     __drp_country_dial_code = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-dial-code']")
     __txt_country_search = (AppiumBy.XPATH, "//*[@resource-id='country-dial-code-search']")
     __item_country_dial_code = (
@@ -40,7 +43,6 @@ class DemoAccountModal(BaseScreen):
     __item_deposit = (AppiumBy.XPATH, "//*[@resource-id='deposit-dropdown-item' and @content-desc='{}']")
     __btn_agree_and_continue = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-confirm']")
     __field_validation = (AppiumBy.XPATH, "//*[@resource-id='input-field-validation']")
-    __btn_close = (AppiumBy.XPATH, "//*[@resource-id='modal-close-button']")
 
     # Actions
     def input_name(self, name: str):
@@ -92,30 +94,21 @@ class DemoAccountModal(BaseScreen):
     def verify_field_validation(
             self,
             fields: List[str],
-            validation_type: Literal["required", "invalid"] = "required",
-            check_agreement: bool = True  # New optional parameter
+            validation_type: Literal["required", "invalid"] = "required"
     ):
         """
         Verify error messages for form fields.
-
         Args:
             fields: List of field names to verify - ["name", "email", "phone number", "dial code", "agreement"]
             validation_type: Type of validation to verify ("required" or "invalid")
-            check_agreement: Whether to validate the "agreement" field or not (default True)
         """
-        # Normalize input fields (replace underscores with spaces)
-        fields = [" ".join(field.split("_")) for field in fields]
-
-        # Remove "agreement" field from fields if check_agreement is False
-        if not check_agreement and self.validation_fields.agreement in fields:
-            fields.remove(self.validation_fields.agreement)
-
         # Validate input fields
         valid_fields = (
             self.validation_fields.values() if validation_type == "required"
             else [self.validation_fields.email, self.validation_fields.phone_number]
         )
 
+        fields = [" ".join(field.split("_")) for field in fields]
         invalid_fields = [field for field in fields if field not in valid_fields]
         if invalid_fields:
             raise ValueError(f"Invalid fields: {invalid_fields}. Must be one of {valid_fields}")
@@ -123,9 +116,12 @@ class DemoAccountModal(BaseScreen):
         # Build expected error messages
         error_list = []
         if validation_type == "required":
-            if check_agreement and self.validation_fields.agreement in fields:
+            if self.validation_fields.agreement in fields:
                 error_list.append(UIMessages.ACCEPT_TERM_CONDITION)
                 fields.remove(self.validation_fields.agreement)
+
+            if self.validation_fields.dial_code in fields and self.validation_fields.phone_number in fields:
+                fields.remove(self.validation_fields.dial_code)
 
             error_list.extend(UIMessages.IS_REQUIRED.format(field.capitalize()) for field in fields)
 
@@ -136,7 +132,7 @@ class DemoAccountModal(BaseScreen):
             }
             error_list = [error_dict[field] for field in fields]
 
-        # Get actual error messages from UI
+        # Get actual error messages
         error_messages = [element.text.strip() for element in self.actions.find_elements(self.__field_validation)]
 
         # Verify expected errors are present
@@ -160,9 +156,12 @@ class DemoAccountModal(BaseScreen):
     __demo_acc_userid = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-value'][1]")
     __demo_acc_password = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-value'][2]")
     __demo_acc_name = (
-        AppiumBy.XPATH, "(//*[@text='Name']/following-sibling::*[@resource-id='demo-completion-value'])[1]"
+        AppiumBy.XPATH,
+        "//android.widget.TextView[@text='Name']/following-sibling::*[@resource-id='demo-completion-value'][1]"
     )
     __btn_sign_in_demo_acc_completion = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-sign-in']")
+    __btn_switch_to_demo_acc = (AppiumBy.XPATH, "//android.widget.TextView[@text='SWITCH TO DEMO ACCOUNT']")
+    __btn_demo_acc_completion_done = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-done']")
 
     # Actions
     def get_account_details(self) -> DotDict:
@@ -180,6 +179,15 @@ class DemoAccountModal(BaseScreen):
     def sign_in_from_completion(self):
         """Clicks the sign-in button on the demo account completion modal."""
         self.actions.click(self.__btn_sign_in_demo_acc_completion)
+
+    def switch_to_demo_account(self):
+        self.actions.click(self.__btn_switch_to_demo_acc)
+
+    def demo_creation_done(self):
+        self.actions.click(self.__btn_demo_acc_completion_done)
+        self.actions.verify_element_displayed(cook_element(
+            self.__opt_setting, locator_format(SettingOptions.OPEN_DEMO_ACCOUNT))
+        )
 
     # Verify
     def verify_ready_message(self):

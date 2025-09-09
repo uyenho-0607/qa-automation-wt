@@ -46,16 +46,21 @@ class ObjSymbol:
 
     @classmethod
     def get_symbol_details(cls, symbol):
+        from src.apis.api_client import APIClient
+
         if not cls.symbols_details.get(symbol):
+
+            symbol_detail = APIClient().market.get_symbol_details(symbol)
+            contract_size = symbol_detail.get('contractSize')
+
             symbol_item = [item for item in cls.all_symbols if item['symbol'] == symbol]
 
             if symbol_item:
                 decimal = symbol_item[0]['decimal']
                 point_step = 10 ** -decimal
-                cls.symbols_details[symbol] = dict(point_step=point_step, decimal=decimal)
+                cls.symbols_details[symbol] = dict(point_step=point_step, decimal=decimal, contract_size=contract_size)
                 return cls.symbols_details[symbol]
-
             else:
-                cls.symbols_details[symbol] =  dict(point_step=0, decimal=0)
+                cls.symbols_details[symbol] = dict(point_step=0, decimal=0, contract_size=0)
 
         return cls.symbols_details[symbol]

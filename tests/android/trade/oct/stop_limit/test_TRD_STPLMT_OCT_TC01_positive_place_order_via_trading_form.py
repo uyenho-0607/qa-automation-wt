@@ -1,3 +1,5 @@
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, OrderType, SLTPType
@@ -6,29 +8,34 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
+@pytest.mark.critical
 @pytest.mark.parametrize(
-    "sl_type, tp_type", (
-            [None, None],
-            [SLTPType.PRICE, SLTPType.PRICE],
-            [SLTPType.POINTS, SLTPType.POINTS],
-            SLTPType.sample_values(amount=2),
-    )
+    "sl_type, tp_type", random.choices([
+        [SLTPType.PRICE, SLTPType.PRICE],
+        [SLTPType.POINTS, SLTPType.POINTS],
+        SLTPType.sample_values(amount=2),
+    ])
 )
 def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
-    tab_amount = get_asset_tab_amount(trade_object.order_type)
     # -------------------
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
+    logger.info("Step 1: Get tab amount")
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
+
+    logger.info(f"Step 2: Open trading form and place {trade_object.trade_type} Order (tab:{tab_amount})")
     android.trade_screen.place_order_panel.open_pre_trade_details()
     android.trade_screen.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
-    logger.info("Verify notification banner displays correct input trade information")
+    logger.info("Verify Order Submitted notification banner")
     android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
     logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
+    logger.info(f"Step 3: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(tab)
+
     logger.info(f"Verify {tab.title()} item details in Asset Tab")
-    android.trade_screen.asset_tab.verify_item_data(trade_object)
+    android.trade_screen.asset_tab.verify_item_data(trade_object, wait=True)

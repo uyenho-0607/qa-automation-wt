@@ -24,12 +24,10 @@ lirunex:
 
   credentials:
     mt4:
-#      user_live: ...
       user_crm: mt4_automation40@mailinator.com
       user_demo: 2092010247
 
     mt5:
-#      user_live: 569200612
       user_crm: mt5_automation40@mailinator.com
       user_demo: 569202036
 

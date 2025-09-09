@@ -8,7 +8,10 @@ def test(android, symbol, setup_bulk_test, cancel_bulk_delete):
     expected_amount = 0 if len(order_ids) <= 30 else 30 - len(order_ids)
     # -------------------
 
-    logger.info(f"Step 1: Bulk delete orders")
+    logger.info(f"Step 1: Select Pending Orders tab")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+
+    logger.info(f"Step 2: Bulk delete orders")
     android.trade_screen.asset_tab.bulk_delete_orders()
 
     logger.info(f"Verify bulk delete notification banner")
