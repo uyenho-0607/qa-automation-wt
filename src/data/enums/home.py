@@ -36,6 +36,8 @@ class AccSummary(BaseEnum):
 
 
 class SettingOptions(BaseEnum):
+    LINK_SWITCH_TO_LIVE = "Link Switch To Live"
+    LINK_SWITCH_TO_DEMO = "Link Switch To Demo"
     SWITCH_TO_LIVE = "Switch To Live"
     SWITCH_TO_DEMO = "Switch To Demo"
     OPEN_DEMO_ACCOUNT = "Open Demo Account"
@@ -136,6 +138,9 @@ class MarketsSection(BaseEnum):
         }
         return map_dict.get(self, self)
 
+
 class SignalTab(BaseEnum):
     FAVOURITE = "Favourite"
     SIGNAL_LIST = "All"
+    FAVOURITE_SIGNAL = "Favourite Signals"
+    SIGNAL_LIST_TAB = "Signal List"

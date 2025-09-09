@@ -16,9 +16,9 @@ from src.utils.logging_utils import logger
     ])
 )
 def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data, limit_obj):
-    trade_object = limit_obj(stop_loss=0, take_profit=0)
+    trade_object = limit_obj()
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
+    logger.info(f"Step 1: Place {trade_object.trade_type} Order")
     create_order_data(trade_object, update_price=False)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")

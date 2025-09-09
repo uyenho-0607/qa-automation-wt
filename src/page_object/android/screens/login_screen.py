@@ -1,5 +1,3 @@
-import time
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -28,7 +26,7 @@ class LoginScreen(BaseScreen):
     __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
     __txt_user_id = (AppiumBy.XPATH, "//*[@resource-id='login-user-id']")
     __txt_password = (AppiumBy.XPATH, "//*[@resource-id='login-password']")
-    __btn_eye_mask = (AppiumBy.XPATH, "//*[@resource-id='input-password-hidden']")
+    __btn_eye_masked = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='input-password-hidden']")
     __btn_sign_in = (AppiumBy.XPATH, "//*[@resource-id='login-submit']")
     __lnk_reset_password = (AppiumBy.XPATH, "//*[@resource-id='reset-password-link']")
     __btn_sign_up = (AppiumBy.XPATH, "//*[@resource-id='login-account-signup']")
@@ -37,7 +35,6 @@ class LoginScreen(BaseScreen):
 
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
-        time.sleep(1)
         self.actions.click(cook_element(self.__tab_account_type, account_type))
 
     def select_language(self, language: Language):
@@ -57,7 +54,7 @@ class LoginScreen(BaseScreen):
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=6):
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=LONG_WAIT):
             self.actions.click(self.__btn_skip)
 
         if language:
@@ -66,13 +63,12 @@ class LoginScreen(BaseScreen):
         self.select_account_tab(account_type or RuntimeConfig.account)
         self.actions.send_keys(self.__txt_user_id, str(userid))
         self.actions.send_keys(self.__txt_password, str(password))
-        self.actions.click(self.__btn_sign_in, raise_exception=False)
+        self.actions.click(self.__btn_sign_in)
 
         if wait:
             self.wait_for_spin_loader()
 
-    def click_open_demo_account(self):
-        time.sleep(1)
+    def select_open_demo_account(self):
         self.select_account_tab(AccountType.DEMO)
         self.actions.click(self.__btn_sign_up)
 
@@ -85,21 +81,11 @@ class LoginScreen(BaseScreen):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)
         self.actions.verify_element_displayed(acc_tab_demo)
 
-    def verify_account_tab_is_selected(self, account_type: AccountType):
-        # verify 'selected' in class attribute of account tab
-        class_attr = self.actions.get_attribute(
-            cook_element(self.__tab_account_type, account_type), "class"
-        )
-        soft_assert(
-            "selected" in class_attr, True,
-            error_message=f"Demo account is not selected, class attribute: {class_attr!r}"
-        )
-
     def verify_account_autofill_value(self, userid, password):
         actual_userid = self.actions.get_attribute(self.__txt_user_id, "text")
         soft_assert(actual_userid, str(userid))
 
-        self.actions.click(self.__btn_eye_mask)
+        self.actions.click(self.__btn_eye_masked)
         actual_password = self.actions.get_attribute(self.__txt_password, "text")
         soft_assert(actual_password, password)
     

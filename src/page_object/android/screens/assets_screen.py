@@ -25,8 +25,8 @@ class AssetsScreen(BaseScreen):
     __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[3]")
     __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[3]")
     __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[3]")
-
     __item_watchlist = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
+    __view_transaction = (AppiumBy.XPATH, resource_id("asset-header-view-all"))
 
     # ------------------------ ACTIONS ------------------------ #
     def _get_acc_balance_info(self):
@@ -45,8 +45,8 @@ class AssetsScreen(BaseScreen):
         self.actions.scroll_down()
         return self.actions.get_text_elements(self.__item_watchlist)
 
-        # elements = self.actions.find_elements(self.__item_watchlist)
-        # return [ele.text.strip() for ele in elements]
+    def click_view_all_transaction(self):
+        self.actions.click(self.__view_transaction)
 
     # ------------------------ VERIFY ------------------------ #
     def verify_account_details(self, exp_data):
