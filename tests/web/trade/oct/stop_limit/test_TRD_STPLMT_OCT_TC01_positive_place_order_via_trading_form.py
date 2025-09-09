@@ -1,4 +1,5 @@
-import allure
+import random
+
 import pytest
 
 from src.data.enums import AssetTabs, SLTPType
@@ -6,19 +7,17 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-@allure.issue("https://aquariux.atlassian.net/browse/WT-8757", "[Multi OMS][MT5] - WT-8757")
 @pytest.mark.critical
 @pytest.mark.parametrize(
     "sl_type, tp_type",
-    [
-        (None, None),
+    random.choices([
         (SLTPType.random_values(), None),
         (None, SLTPType.random_values()),
         SLTPType.random_values(amount=2)
-    ]
+    ])
 )
-def test(web, market_obj, sl_type, tp_type, get_asset_tab_amount):
-    trade_object = market_obj()
+def test(web, stop_limit_obj, sl_type, tp_type, get_asset_tab_amount):
+    trade_object = stop_limit_obj()
 
     logger.info("Step 1: Get tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
@@ -33,10 +32,7 @@ def test(web, market_obj, sl_type, tp_type, get_asset_tab_amount):
     web.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
     logger.info(f"Verify Asset Tab amount increased to {tab_amount + 1}")
-    web.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
+    web.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
     logger.info(f"Verify order details in Asset Tab")
     web.trade_page.asset_tab.verify_item_data(trade_object)
-
-    logger.info(f"Verify Open Position noti in Notification Box")
-    web.home_page.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(trade_object.order_id))
