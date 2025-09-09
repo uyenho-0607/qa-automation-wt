@@ -63,6 +63,9 @@ class BasePage:
         logger.debug("- Refresh page...")
         self.actions.refresh()
         self.wait_for_spin_loader()
+    
+    def go_back(self):
+        self.actions.click(self.__btn_nav_back)
 
     def wait_for_spin_loader(self, timeout: int | float = 20):
         """Wait for the loader to be invisible."""

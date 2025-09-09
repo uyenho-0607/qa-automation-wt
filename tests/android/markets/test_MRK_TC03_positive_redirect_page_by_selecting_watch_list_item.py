@@ -35,15 +35,14 @@ def test(android):
         if subtab != tabs[-1]:
             logger.info(f"Step {i + 4}: Navigate to Markets Screen")
             android.home_screen.navigate_to(Features.MARKETS)
-
-
+    
 @pytest.fixture(autouse=True)
 def mark_symbol():
     star_symbol = random.choice(ObjSymbol().get_symbols(get_all=True))
     logger.info(f"- Mark star symbol: {star_symbol!r}")
     APIClient().market.post_starred_symbol(star_symbol)
-
+    
     yield
-
+    
     logger.info(f"- Delete all star symbols")
     APIClient().market.delete_starred_symbols()

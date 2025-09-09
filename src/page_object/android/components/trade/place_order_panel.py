@@ -6,6 +6,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element, resource_id
@@ -74,14 +75,19 @@ class PlaceOrderPanel(BaseTrade):
         return self.actions.get_text(cook_element(self.__txt_take_profit, SLTPType.PRICE.lower()))
 
     # ------------------------ ACTIONS ------------------------ #
-    def toggle_oct(self, enable: bool = True) -> None:
+    def toggle_oct(self, enable: bool = True, submit: bool = False) -> None:
         """Enable/disable One-Click Trading."""
+
+        # Check current OCT state
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=1)
         if is_enabled != enable:
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
         if enable:
-            self.agree_and_continue()
+            if submit:
+                self.agree_and_continue()
+            else:
+                self.click_cancel_btn()
 
     def open_pre_trade_details(self):
         self.actions.click(self.__btn_pre_trade_details)
@@ -101,6 +107,12 @@ class PlaceOrderPanel(BaseTrade):
         )."""
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         self.actions.click(cook_element(self.__btn_trade, trade_type.lower()))
+
+    def _select_oct_trade_type(self, trade_type: TradeType) -> None:
+        """Select trade type (BUY/SELL
+        )."""
+        logger.debug(f"- Select trade type: {trade_type.upper()!r}")
+        self.actions.click(cook_element(self.__btn_oct_trade, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
@@ -182,6 +194,37 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Input stop limit price: {value!r}")
         self.actions.send_keys(self.__txt_stop_limit_price, value, hide_keyboard=True)
 
+    def place_oct_order(self, trade_object: ObjTrade) -> None:
+        """
+        Place a valid order and load input data into trade_object.
+        Args:
+            trade_object: contain ObjTrade
+        """
+
+        symbol_details = ObjSymbol().get_symbol_details(trade_object.symbol)
+        contract_size = symbol_details["contract_size"]
+
+        trade_type = trade_object.trade_type
+
+        # Input volume and get units
+        volume = self._input_volume()
+        units = volume * contract_size
+
+        # Prepare trade details
+        trade_details = {
+            'volume': format_str_price(volume),
+            'units': format_str_price(units),
+            'entry_price': self.get_live_price(trade_type, oct=True),
+            'stop_loss': '--',
+            'take_profit': '--'
+        }
+
+        logger.debug(f"- Order Summary: {format_dict_to_string(trade_details)}")
+        trade_object |= {k: v for k, v in trade_details.items()}
+
+        # Place Order
+        self._select_oct_trade_type(trade_type)
+
     def place_order(
             self,
             trade_object: ObjTrade,
@@ -244,13 +287,6 @@ class PlaceOrderPanel(BaseTrade):
         # select expiry
         not trade_object.get("expiry") or self._select_expiry(trade_object.expiry)
 
-        # # Get final values for SL/TP if using points
-        # if sl_type == SLTPType.POINTS:
-        #     stop_loss = self._get_input_sl()
-        #
-        # if tp_type == SLTPType.POINTS:
-        #     take_profit = self._get_input_tp()
-
         # Prepare trade details
         volume, units = (volume, units) if not swap_to_units else (units, volume)
         trade_details = {
@@ -272,3 +308,7 @@ class PlaceOrderPanel(BaseTrade):
         not submit or self.confirm_trade()
 
     # ------------------------ VERIFY ------------------------ #
+
+    def verify_oct_mode(self, enable=True):
+        logger.info(f"Verifying OCT mode is {'enabled' if enable else 'disabled'}")
+        self.actions.verify_element_displayed(self.__btn_pre_trade_details, is_display=enable)

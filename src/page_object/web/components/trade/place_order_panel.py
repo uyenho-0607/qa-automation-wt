@@ -111,14 +111,17 @@ class PlaceOrderPanel(BaseTrade):
             return value.split(": ")[-1]
         return None
 
-    def toggle_oct(self, enable: bool = True) -> None:
+    def toggle_oct(self, enable: bool = True, submit=True) -> None:
         """Enable/disable One-Click Trading."""
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=1)
         if is_enabled == enable:
             return
         self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
         if enable:
-            self.agree_and_continue()
+            if submit:
+                self.agree_and_continue()
+
+            # missing element for cancel OCT mode
 
     def select_tab(self, tab: TradeTab):
         locator = cook_element(self.__trade_tab, tab)
