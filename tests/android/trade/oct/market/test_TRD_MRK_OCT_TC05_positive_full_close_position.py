@@ -38,5 +38,8 @@ def test(android, symbol, get_asset_tab_amount, trade_type, create_order_data):
     logger.info(f"Verify asset tab amount = {tab_amount}")
     android.trade_screen.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount)
 
+    logger.info(f"Step 7: Select tab {AssetTabs.POSITIONS_HISTORY.value.capitalize()}")
+    android.trade_screen.asset_tab.select_tab(AssetTabs.POSITIONS_HISTORY)
+    
     logger.info("Verify history order item details")
     android.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.POSITIONS_HISTORY)

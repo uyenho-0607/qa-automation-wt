@@ -1,11 +1,8 @@
 import random
 
-import pytest
-
+from src.data.enums import AccountType
 from src.data.objects.account_obj import ObjDemoAccount
 from src.utils.logging_utils import logger
-
-pytestmark = [pytest.mark.not_live, pytest.mark.not_crm]
 
 
 def test(android):
@@ -29,6 +26,9 @@ def test(android):
     logger.info("Step 3: Click Sign in button")
     android.login_screen.demo_account_modal.sign_in_from_completion()
 
+    logger.info("Verify demo tab is selected")
+    android.login_screen.verify_account_tab_is_selected(AccountType.DEMO)
+
     logger.info("Verify autofill values of account ID and password is correct")
     android.login_screen.verify_account_autofill_value(user_id, password)
 
@@ -36,5 +36,5 @@ def test(android):
     android.login_screen.click_sign_in()
 
     logger.info("Verify login successfully")
-    android.home_screen.feature_announcement_modal.got_it()
+    android.home_screen.feature_anm_modal.got_it()
     android.home_screen.verify_account_info_displayed()

@@ -11,3 +11,8 @@ def limit_obj(symbol):
         return trade_object
 
     return _handler
+
+
+@pytest.fixture(scope="package", autouse=True)
+def disable_OCT(disable_OCT):
+    pass

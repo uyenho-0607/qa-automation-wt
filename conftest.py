@@ -10,10 +10,11 @@ from allure_commons.utils import uuid4, now
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
-from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE
+from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE, PLATFORMS
 from src.data.enums import Server, AccountType, Client
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
-from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video
+from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, \
+    delete_container_files
 from src.utils.logging_utils import logger
 
 
@@ -33,6 +34,7 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
     parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
 
+builtins.own_fixture = []
 
 def pytest_configure(config):
     allure_dir = config.option.allure_report_dir
@@ -162,6 +164,15 @@ def pytest_runtest_setup(item: pytest.Item):
     logger.info(f"- Running test case: {item.parent.name} - [{server}] - [{account}] ")
     logger.debug(f"- User: {Config.credentials().username!r}")
 
+    # Store own fixture in pre-/post-condition and remove built-in
+    fixture_names = item.fixturenames
+    for name in fixture_names:
+        fixture_def = item._fixtureinfo.name2fixturedefs.get(name, [None])[0]
+        if fixture_def:
+            source_file = os.path.abspath(fixture_def.func.__code__.co_filename)
+            if ("site-packages" not in source_file or "pytest" not in source_file) and name not in PLATFORMS:
+                builtins.own_fixture.append(name)
+
 
 def pytest_sessionfinish(session: pytest.Session):
     logger.debug("===== pytest_sessionfinish ==== ")
@@ -171,6 +182,7 @@ def pytest_sessionfinish(session: pytest.Session):
 
     if allure_dir and os.path.exists(ROOTDIR / allure_dir):
         custom_allure_report(allure_dir)  # custom allure report
+        delete_container_files(allure_dir) # delete all container files
 
         # Set allure report properties
         browser = RuntimeConfig.browser
