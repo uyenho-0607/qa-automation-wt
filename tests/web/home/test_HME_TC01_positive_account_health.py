@@ -44,13 +44,13 @@ def setup_teardown(web, symbol):
 
     logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
 
-    logger.info("- Place order to make sure account has Margin Level")
+    logger.info("- Place order to make sure account has Margin Level", setup=True)
     APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
 
-    logger.info("- Refresh Page to load data")
+    logger.info("- Refresh Page to load data", setup=True)
     web.home_page.refresh_page()
 
-    logger.info("- Send API to get account statistic and details")
+    logger.info("- Send API to get account statistic and details", setup=True)
     account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     account_details = APIClient().user.get_user_account()
 
@@ -58,7 +58,7 @@ def setup_teardown(web, symbol):
 
     yield account_summary, account_details
 
-    logger.info("[Cleanup] Show all account summary items")
+    logger.info("[Cleanup] Show all account summary items", teardown=True)
     web.home_page.check_uncheck_balance_items(AccSummary.checkbox_list())
 
 

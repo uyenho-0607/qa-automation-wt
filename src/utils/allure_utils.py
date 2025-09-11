@@ -18,6 +18,8 @@ from src.data.project_info import StepLogs, RuntimeConfig
 from src.utils.common_utils import convert_timestamp
 from src.utils.logging_utils import logger
 
+builtins.container_uid = []
+
 
 def save_recorded_video(video_raw):
     """
@@ -138,9 +140,6 @@ def custom_allure_report(allure_dir: str) -> None:
 
 
 def delete_container_files(allure_dir):
-    def _strip_name(name: str | None) -> str | None:
-        return name.split("::", 1)[0] if name else None
-
     own_fixtures = set(builtins.own_fixture)
 
     for container_file in Path(allure_dir).glob("*-container.json"):
@@ -154,11 +153,64 @@ def delete_container_files(allure_dir):
         # delete if both are not in own fixtures
         if (before_name not in own_fixtures) and (after_name not in own_fixtures):
             os.remove(container_file)
-        else:
-            if after_name:
-                data["afters"][0]["name"] = after_name
+            continue
+
+        if after_name:
+            data["afters"][0]["name"] = after_name
+
+        # Remove sub-step in setup/teardown in case duration is 0
+        data['befores'] = [
+            item for item in data.get('befores', [])
+            if item['start'] != item['stop']
+        ]
+
+        data['afters'] = [
+            item for item in data.get('afters', [])
+            if item['start'] != item['stop']
+        ]
+
+        with open(container_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def custom_setup_teardown(allure_dir):
+    def _inject_steps(data, section, steps_dict):
+        """
+        section: "befores" or "afters"
+        steps_dict: StepLogs.setup_steps or StepLogs.teardown_steps
+        """
+        if data.get(section):
+            _name = _strip_name(data[section][0]["name"])
+            if _name in steps_dict:
+                data[section][0]["steps"] = [
+                    dict(name=v, status="passed", start=0, stop=0)
+                    for v in steps_dict[_name]
+                ]
+                del steps_dict[_name]
+
+    for container_file in Path(allure_dir).glob("*-container.json"):
+        with open(container_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        if container_file.name not in builtins.container_uid:
+            # Setup
+            if any(data['befores'][0]['name'] in d for d in StepLogs.setup_steps):
+                _inject_steps(data, "befores", StepLogs.setup_steps)
+
+            # Teardown
+            if data.get("afters", None):
+                name = _strip_name(data['afters'][0]['name'])
+                if any(name in d for d in StepLogs.teardown_steps):
+                    _inject_steps(data, "afters", StepLogs.teardown_steps)
+
             with open(container_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
+
+            builtins.container_uid.append(container_file.name)
+
+
+def _strip_name(name: str | None) -> str | None:
+    return name.split("::", 1)[0] if name else None
 
 
 def _process_test_time(data: Dict[str, Any]):

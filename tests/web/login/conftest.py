@@ -22,5 +22,5 @@ def web():
 
 @pytest.fixture(autouse=True)
 def setup_test(web):
-    logger.info("- Navigating to login page...")
+    logger.info("- Navigating to login page...", setup=True)
     web.login_page.goto()

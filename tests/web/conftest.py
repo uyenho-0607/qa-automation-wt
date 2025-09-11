@@ -26,16 +26,16 @@ def login_member_site(web):
     max_attempts = 5
 
     logger.info(f"{'=' * 10} Setup Login - Start {'=' * 10}")
-    logger.info("- Navigate to WT Member Site")
+    logger.info("- Navigate to WT Member Site", setup=True)
     web.login_page.goto()
 
-    logger.info("- Login to Member Site")
+    logger.info("- Login to Member Site", setup=True)
     web.login_page.login(wait=True)
 
-    logger.info("- Skipping feature ann modal (if any)")
+    logger.info("- Skipping feature ann modal (if any)", setup=True)
     web.home_page.feature_announcement_modal.got_it()
 
-    logger.info("- Check if logged in success")
+    logger.info("- Check if logged in success", setup=True)
     for attempt in range(max_attempts):
         if not web.home_page.is_logged_in():
 
@@ -61,7 +61,7 @@ def login_member_site(web):
 
 @pytest.fixture(scope="package")
 def disable_OCT():
-    logger.info("[Setup] Send API request to disable OCT")
+    logger.info("[Setup] Send API request to disable OCT", setup=True)
     APIClient().user.patch_oct(enable=False)
 
 
@@ -74,14 +74,14 @@ def enable_OCT():
 @pytest.fixture
 def close_confirm_modal(web):
     yield
-    logger.info("[Cleanup]: Close trade confirm modal if any")
+    logger.info("[Cleanup]: Close trade confirm modal if any", teardown=True)
     web.trade_page.modals.close_trade_confirm_modal()
 
 
 @pytest.fixture
 def close_edit_confirm_modal(web):
     yield
-    logger.info("[Cleanup]: Close edit confirm modal if any")
+    logger.info("[Cleanup]: Close edit confirm modal if any", teardown=True)
     web.trade_page.modals.close_edit_confirm_modal()
 
 
