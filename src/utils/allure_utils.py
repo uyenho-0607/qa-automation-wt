@@ -6,7 +6,6 @@ import os
 import re
 import subprocess
 import time
-import uuid
 from pathlib import Path
 from typing import Dict, Any
 
@@ -263,13 +262,18 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
 
     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
 
+    # init message details for verify steps to handle multiple checkpoints
+    for item in data.get("steps", []):
+        if "verify" in item["name"].lower():
+            item["statusDetails"] = dict(message="")
+
     for failed_step, msg_detail in failed_logs:
         v_step = steps_map.get(failed_step.lower())
 
         if v_step:
             if "verify" in v_step["name"].lower():
                 v_step["status"] = "failed"
-                v_step["statusDetails"] = dict(message=msg_detail)
+                v_step["statusDetails"]["message"] += msg_detail
 
                 # Attach screenshot if available
                 if failed_attachments:
@@ -281,6 +285,11 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                 data["steps"][-1]["attachments"].extend(list(
                     filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                 ))
+
+        # cleanup init message if step is not failed
+        for item in data.get("steps", []):
+            if "verify" in item["name"].lower() and item["status"] != "failed":
+                item.pop("statusDetails", None)
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
@@ -298,11 +307,13 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     """Clean up attachments and customize report details."""
 
     def _generate_history_id(test_identifier: str) -> str:
-        return hashlib.md5(test_identifier.encode("utf-8")).hexdigest()
+        params_str = ""
+        for item in data.get("parameters", []):
+            params_str += f"{item['name']}-{item['value']}"
+        return hashlib.md5(f"{test_identifier}{params_str}".encode("utf-8")).hexdigest()
 
     # Clean up attachments and status details
     if data.get("attachments"):
-
         attachments = data["attachments"]
         data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
 
@@ -330,8 +341,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Customize test's properties
     data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
-    # data["historyId"] = _generate_history_id(data['fullName'])
-    data["historyId"] = uuid.uuid4().hex
+    data["historyId"] = _generate_history_id(data['fullName'])
 
 def _add_check_icon(data):
     for item in data.get("steps", []):
