@@ -71,18 +71,20 @@ class TradingModals(BaseTrade):
 
     def click_edit_order_btn(self, retries=3, oct_mode=False):
         """Click the edit order button."""
-        logger.debug(f"Click edit order button")
         if oct_mode:
+            logger.debug(f"- Click edit order button")
             self.actions.click(self.__btn_edit_order)
             return True
 
         for attempt in range(1, retries + 1):
-            logger.debug(f"Attempt {attempt} - Clicking edit order button")
+            logger.debug(f"- Click edit order button (attempt:{attempt})")
             self.actions.click(self.__btn_edit_order, raise_exception=False, timeout=QUICK_WAIT)
 
-            logger.debug("- Check if confirm edit modal displayed")
-            if self.is_edit_confirm_modal_displayed(timeout=QUICK_WAIT):
+            if self.is_edit_confirm_modal_displayed(timeout=SHORT_WAIT):
+                logger.debug("> Confirm edit modal displayed")
                 return True
+            else:
+                logger.warning("> Confirm edit modal is not displayed, retry clicking edit order button")
 
         logger.warning("- Max retries exceeded for clicking edit order button")
         return False
@@ -107,14 +109,14 @@ class TradingModals(BaseTrade):
         locator = cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower())
         self.actions.click(locator)
         res = self.actions.get_value(locator, retry=True)
-        logger.debug(f"- Edit SL PRICE: {res!r}")
+        logger.debug(f"> Edit SL PRICE: {res!r}")
         return res
 
     def get_edit_tp(self):
         locator = cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower())
         self.actions.click(locator)
         res = self.actions.get_value(locator, retry=True)
-        logger.debug(f"- Edit TP PRICE: {res!r}")
+        logger.debug(f"> Edit TP PRICE: {res!r}")
         return res
 
     def input_edit_sl(self, value, sl_type: SLTPType = SLTPType.PRICE):

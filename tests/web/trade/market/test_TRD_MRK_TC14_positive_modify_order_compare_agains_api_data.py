@@ -6,7 +6,6 @@ from src.data.enums import SLTPType
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.order(2)
 @pytest.mark.critical
 def test(web, market_obj, close_edit_confirm_modal, create_order_data):
     trade_object = market_obj()

@@ -28,11 +28,11 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--password", help="Custom raw password")
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
-    parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
+    parser.addoption("--headless", action="store_true", help="Run browser in headless mode")
 
     # for testing chart render time
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
-    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", action="store_true", help="Whether to choose driver to run on argo cd")
 
 builtins.own_fixture = []
 
@@ -120,7 +120,6 @@ def pytest_collection_modifyitems(config, items):
 
 def pytest_runtest_setup(item: pytest.Item):
     """Setup test and configure Allure reporting"""
-
     # setup for recording real test time
     custom_testid = f"testid-{uuid4()}"
     allure.dynamic.id(custom_testid)
@@ -224,11 +223,14 @@ def pytest_runtest_makereport(item, call):
                     logger.error(f"Failed to start screen recording: {str(e)}")
 
         if report.failed:
+
             attach_screenshot(driver, name="setup")
             logger.error(f"Test setup failed: {report.longreprtext}")
 
+
     # Handle test completion
     if report.when == "call":
+        # record last step stop time
         if StepLogs.steps_with_time.get(StepLogs.TEST_ID):
             StepLogs.steps_with_time[StepLogs.TEST_ID].append(("stop", now()))
 

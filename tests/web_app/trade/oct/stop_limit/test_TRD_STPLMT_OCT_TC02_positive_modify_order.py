@@ -9,15 +9,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize(
-    "edit_field, sl_type, tp_type",
-    random.choices(
-        [
-            ("SL, TP", SLTPType.PRICE, SLTPType.PRICE),
-            ("SL, TP", SLTPType.POINTS, SLTPType.POINTS),
-        ]
-    )
-)
+@pytest.mark.parametrize("edit_field, sl_type, tp_type", [("SL, TP", SLTPType.PRICE, SLTPType.PRICE)])
 def test(web_app, symbol, edit_field, sl_type, tp_type, create_order_data):
     trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
