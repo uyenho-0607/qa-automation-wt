@@ -43,7 +43,7 @@ def setup_test(web_app):
     logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
 
     logger.info("- Send API request to get current placed Markets orders")
-    order_details = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
+    order_details = APIClient().order.get_orders_details(order_type=OrderType.MARKET, exclude_issue_symbols=False)
 
     if len(order_details) < 5:
         amount = 5 - len(order_details)
