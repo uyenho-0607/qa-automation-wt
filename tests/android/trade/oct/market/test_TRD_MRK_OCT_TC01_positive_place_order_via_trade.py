@@ -43,8 +43,8 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
     logger.info("Verify Open Position noti in Notification Box")
     android.home_screen.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(trade_object.order_id), go_back=False)
 
-    # logger.info("Verify noti item details")
-    # android.home_screen.notifications.verify_notification_details(trade_object)
+    logger.info("Verify noti item details")
+    android.home_screen.notifications.verify_notification_details(trade_object)
     #
     logger.info("Step 5: Navigate to Trade screen")
     android.home_screen.navigate_to(Features.TRADE)
