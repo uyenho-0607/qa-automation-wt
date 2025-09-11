@@ -14,7 +14,7 @@ from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE, PLATF
 from src.data.enums import Server, AccountType, Client
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, \
-    delete_container_files
+    delete_container_files, custom_setup_teardown
 from src.utils.logging_utils import logger
 
 
@@ -247,3 +247,13 @@ def pytest_runtest_makereport(item, call):
             if report.failed and driver:
                 attach_screenshot(driver, name="teardown")
                 logger.error(f"Test teardown failed: {report.longreprtext}")
+
+            custom_setup_teardown(allure_dir) # Handle log in setup/teardown
+
+
+def pytest_fixture_post_finalizer(fixturedef, request):
+    """Handle log in setup/teardown in case scope is package"""
+    if fixturedef.scope == "package":
+        allure_dir = RuntimeConfig.allure_dir
+        if allure_dir and os.path.exists(ROOTDIR / allure_dir):
+            custom_setup_teardown(allure_dir)
