@@ -1,3 +1,4 @@
+import inspect
 import logging
 
 from colorama import Fore, Style
@@ -7,8 +8,23 @@ from src.data.project_info import StepLogs
 def record_steps_log(func):
     def wrapper(*args, **kwargs):
         msg, *_ = args
+        if kwargs.pop("setup", None):
+            caller = inspect.stack()[1].function
+            if StepLogs.setup_steps.get(caller, None):
+                StepLogs.setup_steps[caller].append(msg)
+            else:
+                StepLogs.add_setup_step({caller: [msg]})
+
         if any(item in str(msg).lower() for item in ("step", "steps", "verify")):
             StepLogs.add_step(msg)
+
+        if kwargs.pop("teardown", None):
+            caller = inspect.stack()[1].function
+            if StepLogs.teardown_steps.get(caller, None):
+                StepLogs.teardown_steps[caller].append(msg)
+            else:
+                StepLogs.add_teardown_step({caller: [msg]})
+
         return func(*args, **kwargs)
 
     return wrapper
