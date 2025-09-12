@@ -159,6 +159,12 @@ def pytest_runtest_setup(item: pytest.Item):
     if item.get_closest_marker("not_crm") and RuntimeConfig.is_crm():
         pytest.skip("This test is not for crm account !")
 
+    if item.get_closest_marker("mt4") and RuntimeConfig.is_mt5():
+        pytest.skip("This test is only for MT4 users")
+
+    if item.get_closest_marker("mt5") and RuntimeConfig.is_mt4():
+        pytest.skip("This test is only for MT5 users")
+
     print("\x00")  # print a non-printable character to break a new line on console
     logger.info(f"- Running test case: {item.parent.name} - [{server}] - [{account}] ")
     logger.debug(f"- User: {Config.credentials().username!r}")

@@ -59,7 +59,7 @@ class Server(BaseEnum):
 
 
 class NotificationTab(BaseEnum):
-    """Enum representing different trading servers."""
+    """Enum representing different notification tabs"""
     ORDER = "Order"
     SYSTEM = "System"
     INFORMATION = "Information"
