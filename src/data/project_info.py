@@ -80,6 +80,10 @@ class RuntimeConfig:
         return cls.server == "mt4"
 
     @classmethod
+    def is_mt5(cls):
+        return cls.server == "mt5"
+
+    @classmethod
     def is_web(cls):
         return cls.platform == "web"
 

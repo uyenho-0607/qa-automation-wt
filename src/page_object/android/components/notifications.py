@@ -92,7 +92,7 @@ class Notifications(BaseScreen):
         self.actions.click(cook_element(self.__tab_noti))
 
     def wait_for_tab_amount(self, tab: NotificationTab, expected_amount: int) -> None:
-        """Wait for the asset tab amount to match the expected amount."""
+        """Wait for the notification tab amount to match the expected amount."""
         self.actions.wait_for_element_visible(
             cook_element(self.__tab_amount, locator_format(tab), expected_amount)
         )
