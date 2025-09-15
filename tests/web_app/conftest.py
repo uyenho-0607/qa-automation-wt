@@ -90,3 +90,4 @@ def cancel_all(web_app):
     yield
     logger.info("[Cleanup] Click cancel button (if any)", teardown=True)
     web_app.trade_page.click_cancel_btn()
+
