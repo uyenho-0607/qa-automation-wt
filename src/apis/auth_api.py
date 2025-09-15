@@ -1,12 +1,14 @@
+import os
 from src.apis.api_base import BaseAPI
 from src.core.config_manager import Config
 from src.data.enums import Client, AccountType
 from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
+df_validation_token = os.getenv("DF_VALIDATION_TOKEN")
 
 class AuthAPI(BaseAPI):
-    __headers = {"content-type": "application/json", "user-agent": "automation-team-client"}
+    __headers = {"content-type": "application/json", "user-agent": "automation-team-client", "x-df-token": df_validation_token}
 
     endpoints = {
         Client.LIRUNEX: {

@@ -111,9 +111,9 @@ def custom_allure_report(allure_dir: str) -> None:
                 data = json.load(f)
 
             # Skip processing and delete file if test status is skipped
-            if data.get("status") == "skipped":
-                _remove_skipped_tests(file_path)
-                continue
+            # if data.get("status") == "skipped":
+            #     _remove_skipped_tests(file_path)
+            #     continue
 
             _process_test_time(data)
             _add_attachments_prop(data)  # add empty attachments prop for each test report
@@ -286,10 +286,10 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                     filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                 ))
 
-        # cleanup init message if step is not failed
-        for item in data.get("steps", []):
-            if "verify" in item["name"].lower() and item["status"] != "failed":
-                item.pop("statusDetails", None)
+    # cleanup init message if step is not failed
+    for item in data.get("steps", []):
+        if "verify" in item["name"].lower() and item["status"] != "failed":
+            item.pop("statusDetails", None)
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:

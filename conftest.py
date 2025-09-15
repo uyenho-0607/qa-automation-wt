@@ -92,6 +92,8 @@ def pytest_sessionstart(session: pytest.Session):
 
     logger.info(f">> Load environment configuration - Client: {client.capitalize()!r}")
     logger.info(f">> Account: {account.capitalize()!r}")
+    logger.info(f">> Env: {env!r}")
+    logger.info(f">> Server: {server!r}")
     Config.load_config(env, client)
 
     # Save options to Runtime Config
