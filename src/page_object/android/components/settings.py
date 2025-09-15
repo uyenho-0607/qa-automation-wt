@@ -8,6 +8,7 @@ from src.data.enums import SettingOptions, NotiSettingsOpts, Language, ThemeOpti
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.modals.demo_acc_modals import DemoAccountModal
 from src.page_object.android.components.modals.password_modals import PasswordModal
+from src.page_object.android.components.modals.link_switch_modal import LinkSwitchModal
 from src.page_object.android.components.modals.notification_settings import NotificationSettingsModal
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element, translate_trade
@@ -21,6 +22,7 @@ class Settings(BaseScreen):
         self.demo_account_modal = DemoAccountModal(actions)
         self.__change_password_modal = PasswordModal(actions)
         self.notification_settings_modal = NotificationSettingsModal(actions)
+        self.link_switch_modal = LinkSwitchModal(actions)
 
     # ------------------------ LOCATORS ------------------------ #
     __btn_account_selector = (AppiumBy.XPATH, "//*[@resource-id='account-selector']")

@@ -49,6 +49,8 @@ def pytest_sessionstart(session: pytest.Session):
     RuntimeConfig.log_debug = session.config.getoption("debuglog")
     if RuntimeConfig.log_debug:
         setup_logging(logging.DEBUG)
+    else:
+        setup_logging()
 
     print("\x00")  # print a non-printable character to break a new line on console
     logger.debug("============ pytest_sessionstart ============ ")
