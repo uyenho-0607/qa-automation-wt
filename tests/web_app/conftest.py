@@ -103,7 +103,6 @@ def cancel_edit_order(web_app):
 def cancel_close_order(web_app):
     yield
     logger.info("[Cleanup] Cancel close order if any", teardown=True)
-    web_app.trade_page.modals.cancel_close_order()
 
 
 @pytest.fixture
