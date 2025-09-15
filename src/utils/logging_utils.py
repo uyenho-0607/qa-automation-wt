@@ -56,8 +56,7 @@ def setup_logging(
     Args:
         log_level: The logging level to use
     """
-
-    log_level = log_level if log_level is not None else logging.INFO if not RuntimeConfig.log_debug else logging.DEBUG
+    log_level = log_level or logging.INFO
     log_format = '%(asctime)s | %(levelname)s | %(message)s'
     date_format = "%Y-%m-%d %H:%M:%S"
 
