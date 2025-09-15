@@ -1,17 +1,16 @@
-import re
 import time
 from contextlib import suppress
 
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.enums import NotificationTab
 from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT, SHORT_WAIT
+from src.data.enums import NotificationTab
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.base_screen import BaseScreen
 from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
-from src.utils.format_utils import locator_format, extract_asset_tab_number
 from src.utils.common_utils import resource_id, cook_element
+from src.utils.format_utils import locator_format, extract_asset_tab_number
 from src.utils.logging_utils import logger
 
 
@@ -31,8 +30,10 @@ class Notifications(BaseScreen):
     __noti_list_items = (AppiumBy.XPATH, resource_id('notification-list-result-item'))
     __btn_close = (AppiumBy.XPATH, resource_id('notification-box-close'))
 
-    __noti_by_text = (AppiumBy.XPATH, "//*[@resource-id='notification-list-result-item']/android.widget.TextView[@text='{}']")
-    __noti_result = (AppiumBy.XPATH, "//*[@resource-id='notification-list-result-item' and contains(@content-desc, '{}')]")
+    __noti_by_text = (
+    AppiumBy.XPATH, "//*[@resource-id='notification-list-result-item']/android.widget.TextView[@text='{}']")
+    __noti_result = (
+    AppiumBy.XPATH, "//*[@resource-id='notification-list-result-item' and contains(@content-desc, '{}')]")
 
     # Noti order details
     __noti_details_order_type = (AppiumBy.XPATH, resource_id('notification-order-details-modal-order-type'))
@@ -82,7 +83,6 @@ class Notifications(BaseScreen):
 
         logger.warning(f"- Failed to navigate back to Home after max {max_attempts} attempts")
 
-
     def open_notification_box(self):
         if self.actions.is_element_displayed(self.__noti_selector):
             self.actions.click(self.__noti_selector)
@@ -122,7 +122,6 @@ class Notifications(BaseScreen):
         self.wait_for_tab_amount(tab, expected_amount)
         soft_assert(self.get_tab_amount(tab, wait=False), expected_amount)
         self.go_back()
-
 
     def verify_notification_banner(self, expected_title, expected_des, timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""

@@ -81,6 +81,3 @@ def setup_logging(
         _logger(*args, **kwargs)
 
     logger.info = log_with_record
-
-
-setup_logging()
