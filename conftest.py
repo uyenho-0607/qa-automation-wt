@@ -1,4 +1,5 @@
 import builtins
+import logging
 import os.path
 import shutil
 import time
@@ -15,7 +16,7 @@ from src.data.enums import Server, AccountType, Client
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, \
     delete_container_files, custom_setup_teardown
-from src.utils.logging_utils import logger
+from src.utils.logging_utils import logger, setup_logging
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -33,7 +34,7 @@ def pytest_addoption(parser: pytest.Parser):
     # for testing chart render time
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
     parser.addoption("--cd", action="store_true", help="Whether to choose driver to run on argo cd")
-    parser.addoption("--debuglog", action="store_true", help="Whether to log the debug log to console")
+    parser.addoption("--debuglog", action="store_true", default=False, help="Whether to log the debug log to console")
 
 builtins.own_fixture = []
 
@@ -46,6 +47,8 @@ def pytest_configure(config):
 
 def pytest_sessionstart(session: pytest.Session):
     RuntimeConfig.log_debug = session.config.getoption("debuglog")
+    if RuntimeConfig.log_debug:
+        setup_logging(logging.DEBUG)
 
     print("\x00")  # print a non-printable character to break a new line on console
     logger.debug("============ pytest_sessionstart ============ ")
