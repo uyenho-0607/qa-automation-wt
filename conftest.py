@@ -33,6 +33,7 @@ def pytest_addoption(parser: pytest.Parser):
     # for testing chart render time
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
     parser.addoption("--cd", action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--debuglog", action="store_true", help="Whether to log the debug log to console")
 
 builtins.own_fixture = []
 
@@ -44,6 +45,8 @@ def pytest_configure(config):
 
 
 def pytest_sessionstart(session: pytest.Session):
+    RuntimeConfig.log_debug = session.config.getoption("debuglog")
+
     print("\x00")  # print a non-printable character to break a new line on console
     logger.debug("============ pytest_sessionstart ============ ")
 
