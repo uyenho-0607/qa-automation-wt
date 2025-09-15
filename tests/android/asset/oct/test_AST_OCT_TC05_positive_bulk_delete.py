@@ -29,11 +29,11 @@ def test(android, symbol, order_type, setup_bulk_asset_test, cancel_bulk_close):
     android.trade_screen.asset_tab.select_tab(AssetTabs.HISTORY)
 
     logger.info("Verify items displayed in History Tab")
-    android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.HISTORY, order_ids)
+    android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.POSITIONS_HISTORY, order_ids)
 
 
 @pytest.fixture(autouse=True)
 def setup_test(android):
     yield
-    logger.info("[Cleanup] Navigate back to Asset Screen")
+    logger.info("Step 1: Navigate back to Asset Page")
     android.home_screen.go_back()

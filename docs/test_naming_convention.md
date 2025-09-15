@@ -2,17 +2,20 @@
 
 ## Feature Prefixes
 
-| Feature    | Prefix  | Description                    |
-|------------|---------|--------------------------------|
-| Login      | LGN     | Authentication and user access |
-| Trade      | TRD     | Trading operations             |
-| Asset      | AST     | Asset management               |
-| Signals    | SGN     | Trading signals                |
-| Market     | MKT     | Market data and analysis       |
-| News       | NWS     | News and announcements         |
-| Calendar   | CLD     | Economic calendar              |
-| Copy Trade | CPT     | Copy trading functionality     |
-| Education  | EDU     | Educational content            |
+| Feature    | Prefix  | Description                      |
+|--------------|---------|--------------------------------|
+| Login        | LGN     | Authentication and user access |
+| Market       | MKT     | Market data and analysis       |
+| Trade        | TRD     | Trading operations             |
+| Asset        | AST     | Asset management               |
+| Signals      | SGN     | Trading signals                |
+| News         | NWS     | News and announcements         |
+| Calendar     | CLD     | Economic calendar              |
+| Copy Trade   | CPT     | Copy trading functionality     |
+| Education    | EDU     | Educational content            |
+| Setting      | SET     | Setting content                |
+| Notification | NTF     | Notification content           |
+
 
 ## Test Case Naming Format
 

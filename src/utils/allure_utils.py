@@ -6,7 +6,6 @@ import os
 import re
 import subprocess
 import time
-import uuid
 from pathlib import Path
 from typing import Dict, Any
 
@@ -17,6 +16,8 @@ from src.data.consts import ROOTDIR, CHECK_ICON, FAILED_ICON, VIDEO_DIR
 from src.data.project_info import StepLogs, RuntimeConfig
 from src.utils.common_utils import convert_timestamp
 from src.utils.logging_utils import logger
+
+builtins.container_uid = []
 
 
 def save_recorded_video(video_raw):
@@ -138,9 +139,6 @@ def custom_allure_report(allure_dir: str) -> None:
 
 
 def delete_container_files(allure_dir):
-    def _strip_name(name: str | None) -> str | None:
-        return name.split("::", 1)[0] if name else None
-
     own_fixtures = set(builtins.own_fixture)
 
     for container_file in Path(allure_dir).glob("*-container.json"):
@@ -154,11 +152,64 @@ def delete_container_files(allure_dir):
         # delete if both are not in own fixtures
         if (before_name not in own_fixtures) and (after_name not in own_fixtures):
             os.remove(container_file)
-        else:
-            if after_name:
-                data["afters"][0]["name"] = after_name
+            continue
+
+        if after_name:
+            data["afters"][0]["name"] = after_name
+
+        # Remove sub-step in setup/teardown in case duration is 0
+        data['befores'] = [
+            item for item in data.get('befores', [])
+            if item['start'] != item['stop']
+        ]
+
+        data['afters'] = [
+            item for item in data.get('afters', [])
+            if item['start'] != item['stop']
+        ]
+
+        with open(container_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+def custom_setup_teardown(allure_dir):
+    def _inject_steps(data, section, steps_dict):
+        """
+        section: "befores" or "afters"
+        steps_dict: StepLogs.setup_steps or StepLogs.teardown_steps
+        """
+        if data.get(section):
+            _name = _strip_name(data[section][0]["name"])
+            if _name in steps_dict:
+                data[section][0]["steps"] = [
+                    dict(name=v, status="passed", start=0, stop=0)
+                    for v in steps_dict[_name]
+                ]
+                del steps_dict[_name]
+
+    for container_file in Path(allure_dir).glob("*-container.json"):
+        with open(container_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        if container_file.name not in builtins.container_uid:
+            # Setup
+            if any(data['befores'][0]['name'] in d for d in StepLogs.setup_steps):
+                _inject_steps(data, "befores", StepLogs.setup_steps)
+
+            # Teardown
+            if data.get("afters", None):
+                name = _strip_name(data['afters'][0]['name'])
+                if any(name in d for d in StepLogs.teardown_steps):
+                    _inject_steps(data, "afters", StepLogs.teardown_steps)
+
             with open(container_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
+
+            builtins.container_uid.append(container_file.name)
+
+
+def _strip_name(name: str | None) -> str | None:
+    return name.split("::", 1)[0] if name else None
 
 
 def _process_test_time(data: Dict[str, Any]):
@@ -211,13 +262,18 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
 
     failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
 
+    # init message details for verify steps to handle multiple checkpoints
+    for item in data.get("steps", []):
+        if "verify" in item["name"].lower():
+            item["statusDetails"] = dict(message="")
+
     for failed_step, msg_detail in failed_logs:
         v_step = steps_map.get(failed_step.lower())
 
         if v_step:
             if "verify" in v_step["name"].lower():
                 v_step["status"] = "failed"
-                v_step["statusDetails"] = dict(message=msg_detail)
+                v_step["statusDetails"]["message"] += msg_detail
 
                 # Attach screenshot if available
                 if failed_attachments:
@@ -229,6 +285,11 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                 data["steps"][-1]["attachments"].extend(list(
                     filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                 ))
+
+        # cleanup init message if step is not failed
+        for item in data.get("steps", []):
+            if "verify" in item["name"].lower() and item["status"] != "failed":
+                item.pop("statusDetails", None)
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
@@ -246,11 +307,13 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     """Clean up attachments and customize report details."""
 
     def _generate_history_id(test_identifier: str) -> str:
-        return hashlib.md5(test_identifier.encode("utf-8")).hexdigest()
+        params_str = ""
+        for item in data.get("parameters", []):
+            params_str += f"{item['name']}-{item['value']}"
+        return hashlib.md5(f"{test_identifier}{params_str}".encode("utf-8")).hexdigest()
 
     # Clean up attachments and status details
     if data.get("attachments"):
-
         attachments = data["attachments"]
         data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
 
@@ -278,8 +341,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Customize test's properties
     data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
-    # data["historyId"] = _generate_history_id(data['fullName'])
-    data["historyId"] = uuid.uuid4().hex
+    data["historyId"] = _generate_history_id(data['fullName'])
 
 def _add_check_icon(data):
     for item in data.get("steps", []):
