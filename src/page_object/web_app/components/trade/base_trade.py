@@ -45,7 +45,7 @@ class BaseTrade(BasePage):
     # One Click Trading Modal Actions
     def agree_and_continue(self):
         """Confirm the one-click trading action."""
-        self.actions.click(self.__btn_oct_confirm)
+        self.actions.click(self.__btn_oct_confirm, raise_exception=False)
 
     # Trade Confirmation Modal Actions
     def confirm_trade(self):

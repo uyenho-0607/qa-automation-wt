@@ -1,4 +1,5 @@
 import random
+import time
 from datetime import datetime, timedelta
 
 import requests
@@ -137,6 +138,8 @@ class TradeAPI(BaseAPI):
                     retry_count += 1
                     if retry_count < max_retries:
                         logger.warning(f"[API] {WARNING_ICON} Order details returned empty, retrying...")
+                        time.sleep(3)
+
                     else:
                         error_msg = f"[API] {FAILED_ICON_COLOR} Failed to get order details - order_id: {payload['order_id']}"
                         logger.error(error_msg)
@@ -178,6 +181,7 @@ class TradeAPI(BaseAPI):
                         raise requests.RequestException(error_msg)
 
                     logger.warning(f"[API] {WARNING_ICON} Attempt {attempt + 1}/{max_retries}: Failed to place order - status_code: {response.status_code} - error: {response_json.get('message')}")
+                    time.sleep(3)
                     continue
 
             logger.info(f"[API] Order placed successfully, orderID: {response_json['result']['clOrdId']} {CHECK_ICON_COLOR}")

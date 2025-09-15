@@ -215,7 +215,7 @@ class BaseActions:
         )
         return bool(res)
 
-    def is_element_displayed(self, locator: tuple[str, str], timeout=QUICK_WAIT, is_display=True, show_log=False) -> bool:
+    def is_element_displayed(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, is_display=True, show_log=False) -> bool:
         """Check if element is displayed, NO exception will be raised if element is not found"""
         if not is_display:
             self.wait_for_element_invisible(locator, timeout=timeout)

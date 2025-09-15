@@ -26,7 +26,8 @@ class BaseAPI:
     
     @staticmethod
     def api_url():
-        return f"{Config.config.base_url}/api" if not RuntimeConfig.url else f"{RuntimeConfig.url}/api"
+        api_url = f"{Config.config.base_url}/api" if not RuntimeConfig.url else f"{RuntimeConfig.url}/api"
+        return api_url
 
     @after_request(base_delay=1.0, max_delay=10.0)
     def get(self, endpoint: str, params: dict = None, fields_to_show=None, apply_retries=True, parse_result=True, truncate_len=5):
