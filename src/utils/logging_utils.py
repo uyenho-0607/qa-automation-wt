@@ -3,7 +3,8 @@ import logging
 
 from colorama import Fore, Style
 
-from src.data.project_info import StepLogs
+from src.data.project_info import StepLogs, RuntimeConfig
+
 
 def record_steps_log(func):
     def wrapper(*args, **kwargs):
@@ -48,15 +49,15 @@ class ColoredFormatter(logging.Formatter):
 
 
 def setup_logging(
-        log_level: int = logging.DEBUG,
+        log_level: int = None,
 ) -> None:
     """
     Set up logging configuration with both console and file handlers.
-    
     Args:
         log_level: The logging level to use
     """
 
+    log_level = log_level if log_level is not None else logging.INFO if not RuntimeConfig.log_debug else logging.DEBUG
     log_format = '%(asctime)s | %(levelname)s | %(message)s'
     date_format = "%Y-%m-%d %H:%M:%S"
 

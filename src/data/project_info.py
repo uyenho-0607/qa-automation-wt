@@ -66,6 +66,7 @@ class RuntimeConfig:
     headers: dict = {}
 
     charttime: int = 2
+    log_debug = True
 
     @classmethod
     def is_non_oms(cls):
