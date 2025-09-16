@@ -86,8 +86,9 @@ class PlaceOrderPanel(BaseTrade):
 
     def toggle_oct(self, enable: bool = True, submit=True) -> None:
         """Enable/disable One-Click Trading."""
-        is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=SHORT_WAIT)
+        is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=5)
         if is_enabled != enable:
+            logger.debug("- Click on oct switch")
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
         if enable:
