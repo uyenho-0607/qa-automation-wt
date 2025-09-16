@@ -29,6 +29,7 @@ class PlaceOrderPanel(BaseTrade):
     # One-Click Trading elements
     __toggle_oct = (By.CSS_SELECTOR, data_testid('toggle-oct'))
     __toggle_oct_checked = (By.CSS_SELECTOR, data_testid('toggle-oct-checked'))
+    __label_oct = (By.CSS_SELECTOR, "div[data-testid*='toggle-oct']")
     __btn_oct_trade = (By.CSS_SELECTOR, data_testid('trade-button-oct-order-{}'))
     __btn_pre_trade_details = (By.CSS_SELECTOR, data_testid('trade-button-pre-trade-details'))
 
@@ -78,6 +79,11 @@ class PlaceOrderPanel(BaseTrade):
         return self.actions.get_value(locator)
 
     # ------------------------ ACTIONS ------------------------ #
+    def is_oct_enable(self):
+        is_enable = self.actions.is_element_displayed(self.__label_oct)
+        logger.debug(f"- OCT enabled in Admin config: {is_enable!r}")
+        return is_enable
+
     def toggle_oct(self, enable: bool = True, submit=True) -> None:
         """Enable/disable One-Click Trading."""
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=SHORT_WAIT)
