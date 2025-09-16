@@ -30,10 +30,14 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type, ):
 
     logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
+    
+    logger.info(f"Step 2: Get the orderID")
     android.trade_screen.asset_tab.get_last_order_id(trade_object)
 
-    logger.info("Verify Open Position noti in Notification Box")
+    logger.info("Step 3: Navigate to Home screen")
     android.home_screen.navigate_to(Features.HOME)
+    
+    logger.info("Verify Open Position noti in Notification Box")
     android.home_screen.notifications.verify_notification_result(
         ObjNoti(trade_object).open_position_details(trade_object.order_id), go_back=False
     )

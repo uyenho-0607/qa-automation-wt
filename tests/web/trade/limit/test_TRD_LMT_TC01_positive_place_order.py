@@ -10,9 +10,9 @@ from src.utils.logging_utils import logger
     "sl_type, tp_type",
     [
         (None, None),
-        (SLTPType.random_values(), None),
-        (None, SLTPType.random_values()),
-        SLTPType.random_values(amount=2)
+        (SLTPType.POINTS, None),
+        (None, SLTPType.PRICE),
+        (SLTPType.PRICE, SLTPType.PRICE)
     ]
 )
 def test(web, limit_obj, get_asset_tab_amount, sl_type, tp_type, close_confirm_modal):

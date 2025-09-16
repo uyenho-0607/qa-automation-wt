@@ -4,6 +4,8 @@ from allure_commons.utils import now
 class StepLogs:
     steps_with_time = {}
     test_steps = []
+    setup_steps = dict()
+    teardown_steps = dict()
     broken_steps = []
     all_failed_logs = []
     failed_logs_dict = {}
@@ -19,6 +21,15 @@ class StepLogs:
     def add_step(cls, msg_log):
         cls.test_steps.append(msg_log)
         cls.steps_with_time[cls.TEST_ID].append((msg_log, now()))
+
+    @classmethod
+    def add_setup_step(cls, msg_log):
+        cls.setup_steps |= msg_log
+
+    @classmethod
+    def add_teardown_step(cls, msg_log):
+        cls.teardown_steps |= msg_log
+
 
     @classmethod
     def clean_step(cls):
@@ -55,6 +66,7 @@ class RuntimeConfig:
     headers: dict = {}
 
     charttime: int = 2
+    log_debug = True
 
     @classmethod
     def is_non_oms(cls):
@@ -67,6 +79,10 @@ class RuntimeConfig:
     @classmethod
     def is_mt4(cls):
         return cls.server == "mt4"
+
+    @classmethod
+    def is_mt5(cls):
+        return cls.server == "mt5"
 
     @classmethod
     def is_web(cls):

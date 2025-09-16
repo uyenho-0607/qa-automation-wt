@@ -1,6 +1,4 @@
 import time
-
-import allure
 import pytest
 
 from src.apis.api_client import APIClient

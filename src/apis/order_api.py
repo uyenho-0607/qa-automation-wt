@@ -30,12 +30,14 @@ class OrderAPI(BaseAPI):
             symbol: str = None,
             order_type: OrderType = OrderType.MARKET,
             order_id: int | str = None,
+            exclude_issue_symbols=True
     ):
         """
         Get order details of open positions or pending orders
         :param symbol: specific symbol
         :param order_type: order type (Market, Limit, Stop, StopLimit)
         :param order_id: specific order id, if provided, return order details by this order_id
+        :param exclude_issue_symbols: True if not count the ISSUE_SYMBOLS list
         :return: Return all orders details for a specific symbol, or order details by order_id
         """
         tab = AssetTabs.get_tab(order_type)
@@ -44,7 +46,9 @@ class OrderAPI(BaseAPI):
 
         logger.info(f"[API] Get placed order details ({'All' if not symbol else f'symbol:{symbol}'})")
         resp = self.get(endpoint, {"symbol": symbol}, fields_to_show=["orderId", "symbol", "takeProfit", "stopLoss"])
-        resp = [item for item in resp if item['symbol'] not in ISSUE_SYMBOLS]
+        resp = [item for item in resp if item['symbol']]
+        if exclude_issue_symbols:
+            resp = [item for item in resp if item['symbol'] not in ISSUE_SYMBOLS]
 
         if order_id:
             # return order details by order_id

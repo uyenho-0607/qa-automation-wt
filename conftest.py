@@ -1,4 +1,5 @@
 import builtins
+import logging
 import os.path
 import shutil
 import time
@@ -14,8 +15,8 @@ from src.data.consts import ROOTDIR, VIDEO_DIR, MULTI_OMS, WEB_APP_DEVICE, PLATF
 from src.data.enums import Server, AccountType, Client
 from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, \
-    delete_container_files
-from src.utils.logging_utils import logger
+    delete_container_files, custom_setup_teardown
+from src.utils.logging_utils import logger, setup_logging
 
 
 def pytest_addoption(parser: pytest.Parser):
@@ -28,11 +29,12 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--password", help="Custom raw password")
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
-    parser.addoption("--headless", default=False, action="store_true", help="Run browser in headless mode")
+    parser.addoption("--headless", action="store_true", help="Run browser in headless mode")
 
     # for testing chart render time
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
-    parser.addoption("--cd", default=True, action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--cd", action="store_true", help="Whether to choose driver to run on argo cd")
+    parser.addoption("--debuglog", action="store_true", default=False, help="Whether to log the debug log to console")
 
 builtins.own_fixture = []
 
@@ -44,6 +46,12 @@ def pytest_configure(config):
 
 
 def pytest_sessionstart(session: pytest.Session):
+    RuntimeConfig.log_debug = session.config.getoption("debuglog")
+    if RuntimeConfig.log_debug:
+        setup_logging(logging.DEBUG)
+    else:
+        setup_logging()
+
     print("\x00")  # print a non-printable character to break a new line on console
     logger.debug("============ pytest_sessionstart ============ ")
 
@@ -120,7 +128,6 @@ def pytest_collection_modifyitems(config, items):
 
 def pytest_runtest_setup(item: pytest.Item):
     """Setup test and configure Allure reporting"""
-
     # setup for recording real test time
     custom_testid = f"testid-{uuid4()}"
     allure.dynamic.id(custom_testid)
@@ -159,6 +166,12 @@ def pytest_runtest_setup(item: pytest.Item):
 
     if item.get_closest_marker("not_crm") and RuntimeConfig.is_crm():
         pytest.skip("This test is not for crm account !")
+
+    if item.get_closest_marker("mt4") and RuntimeConfig.is_mt5():
+        pytest.skip("This test is only for MT4 users")
+
+    if item.get_closest_marker("mt5") and RuntimeConfig.is_mt4():
+        pytest.skip("This test is only for MT5 users")
 
     print("\x00")  # print a non-printable character to break a new line on console
     logger.info(f"- Running test case: {item.parent.name} - [{server}] - [{account}] ")
@@ -224,11 +237,14 @@ def pytest_runtest_makereport(item, call):
                     logger.error(f"Failed to start screen recording: {str(e)}")
 
         if report.failed:
+
             attach_screenshot(driver, name="setup")
             logger.error(f"Test setup failed: {report.longreprtext}")
 
+
     # Handle test completion
     if report.when == "call":
+        # record last step stop time
         if StepLogs.steps_with_time.get(StepLogs.TEST_ID):
             StepLogs.steps_with_time[StepLogs.TEST_ID].append(("stop", now()))
 
@@ -247,3 +263,13 @@ def pytest_runtest_makereport(item, call):
             if report.failed and driver:
                 attach_screenshot(driver, name="teardown")
                 logger.error(f"Test teardown failed: {report.longreprtext}")
+
+            custom_setup_teardown(allure_dir) # Handle log in setup/teardown
+
+
+def pytest_fixture_post_finalizer(fixturedef, request):
+    """Handle log in setup/teardown in case scope is package"""
+    if fixturedef.scope == "package":
+        allure_dir = RuntimeConfig.allure_dir
+        if allure_dir and os.path.exists(ROOTDIR / allure_dir):
+            custom_setup_teardown(allure_dir)

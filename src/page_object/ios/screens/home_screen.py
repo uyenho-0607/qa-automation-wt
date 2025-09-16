@@ -53,14 +53,10 @@ class HomeScreen(BaseScreen):
 
     # ------------------------ ACTIONS ------------------------ #
 
-    def wait_for_loaded(self):
-        res = self.actions.wait_for_element_visible(self.__account_selector, timeout=30)
-        if res:
-            logger.info("- Home screen is loaded")
-
-        else:
-            logger.warning(f"- Home screen is not loaded after {LONG_WAIT} sec")
-
+    def is_logged_in(self):
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Home Page is displayed" if res else f"- Home Page is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
         return res
 
     def open_my_account(self, open=True):

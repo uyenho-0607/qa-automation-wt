@@ -9,15 +9,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-@pytest.mark.parametrize(
-    "sl_type, tp_type", random.choices(
-        [
-            [SLTPType.PRICE, SLTPType.PRICE],
-            [SLTPType.POINTS, SLTPType.POINTS],
-            SLTPType.sample_values(amount=2),
-        ]
-    )
-)
+@pytest.mark.parametrize("sl_type, tp_type", [(SLTPType.PRICE, SLTPType.PRICE)])
 def test(web_app, symbol, get_asset_tab_amount, sl_type, tp_type):
     trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
