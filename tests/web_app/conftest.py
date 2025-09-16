@@ -2,7 +2,6 @@ from contextlib import suppress
 
 import pytest
 
-from src.apis.api_client import APIClient
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_app_container import WebAppContainer
 from src.data.consts import FAILED_ICON_COLOR
@@ -58,15 +57,31 @@ def login_member_site(web_app):
 
 
 @pytest.fixture(scope="package")
-def disable_OCT():
-    logger.info("[Setup] Send API request to disable OCT")
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(web_app):
+    """disable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = web_app.trade_page.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
+        web_app.trade_page.place_order_panel.toggle_oct(enable=False, submit=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 
 @pytest.fixture(scope="package")
-def enable_OCT():
-    logger.info("[Setup] Send API request enable OCT")
-    APIClient().user.patch_oct(enable=True)
+def enable_OCT(web_app):
+    """enable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = web_app.trade_page.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Enable OCT", setup=True)
+        web_app.trade_page.place_order_panel.toggle_oct(enable=True, submit=True)
+
+    else:
+        pytest.skip("OCT mode is disabled in Admin Config - SKIP this test ")
 
 
 # cleanup trade test

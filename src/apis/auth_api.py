@@ -1,4 +1,3 @@
-import requests
 import os
 from src.apis.api_base import BaseAPI
 from src.core.config_manager import Config

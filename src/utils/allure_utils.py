@@ -286,10 +286,10 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                     filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                 ))
 
-        # cleanup init message if step is not failed
-        for item in data.get("steps", []):
-            if "verify" in item["name"].lower() and item["status"] != "failed":
-                item.pop("statusDetails", None)
+    # cleanup init message if step is not failed
+    for item in data.get("steps", []):
+        if "verify" in item["name"].lower() and item["status"] != "failed":
+            item.pop("statusDetails", None)
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:

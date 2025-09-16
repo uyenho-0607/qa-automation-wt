@@ -85,7 +85,7 @@ def enable_OCT(web):
     is_enable = web.trade_page.place_order_panel.is_oct_enable()
 
     if is_enable:
-        logger.info("[Setup] Enable OCT", setup=True)
+        logger.info("[Setup] OCT mode is enabled in Admin Config - Enable OCT", setup=True)
         web.trade_page.place_order_panel.toggle_oct(enable=True, submit=True)
 
     else:
