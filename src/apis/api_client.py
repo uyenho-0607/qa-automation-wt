@@ -5,6 +5,8 @@ from src.apis.order_api import OrderAPI
 from src.apis.statistics_api import StatisticsAPI
 from src.apis.trade_api import TradeAPI
 from src.apis.user_api import UserAPI
+from src.apis.config_api import ConfigAPI
+from src.apis.notification import NotificationAPI
 
 
 class APIClient:
@@ -25,3 +27,5 @@ class APIClient:
         self.market = MarketAPI()
         self.chart = ChartAPI()
         self.statistics = StatisticsAPI()
+        self.config = ConfigAPI()
+        self.notification = NotificationAPI()

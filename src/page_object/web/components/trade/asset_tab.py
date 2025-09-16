@@ -329,7 +329,7 @@ class AssetTab(BaseTrade):
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
         tab = AssetTabs.get_tab(order_type)
 
-        logger.debug("- Click Edit Button")
+        logger.debug(f"- Click Edit Button (order_id:{trade_object.order_id})")
         self._click_action_btn(tab, trade_object.get('order_id'), "edit")
 
         # Get edit price to calculate prices
@@ -367,7 +367,7 @@ class AssetTab(BaseTrade):
 
         # Retry in case sometimes the edit model is closed
         if not res_click:
-            logger.warning("- Edit modal is disappear, retry modifying order...")
+            # recursive call in case edit confirm modal is disappeared
             self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries, oct_mode)
 
         # Success case

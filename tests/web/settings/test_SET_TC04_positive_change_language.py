@@ -16,5 +16,5 @@ def test(web):
 @pytest.fixture(autouse=True)
 def cleanup(web):
     yield
-    logger.info("- Change Language back to English")
+    logger.info("[Cleanup] Change Language back to English")
     web.home_page.settings.change_language(Language.ENGLISH)

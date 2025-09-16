@@ -1,7 +1,10 @@
 from src.data.enums.system import (
     BaseEnum,
     URLSites,
-    URLPaths, Client, Server,
+    URLPaths,
+    Client,
+    Server,
+    NotificationTab
 )
 
 from src.data.enums.account import (
@@ -47,6 +50,7 @@ __all__ = [
     'URLPaths',
     'Client',
     'Server',
+    'NotificationTab',
 
     # Account
     'AccountType',

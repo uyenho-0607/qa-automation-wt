@@ -1,14 +1,31 @@
+import inspect
 import logging
 
 from colorama import Fore, Style
 
-from src.data.project_info import StepLogs
+from src.data.project_info import StepLogs, RuntimeConfig
+
 
 def record_steps_log(func):
     def wrapper(*args, **kwargs):
         msg, *_ = args
+        if kwargs.pop("setup", None):
+            caller = inspect.stack()[1].function
+            if StepLogs.setup_steps.get(caller, None):
+                StepLogs.setup_steps[caller].append(msg)
+            else:
+                StepLogs.add_setup_step({caller: [msg]})
+
         if any(item in str(msg).lower() for item in ("step", "steps", "verify")):
             StepLogs.add_step(msg)
+
+        if kwargs.pop("teardown", None):
+            caller = inspect.stack()[1].function
+            if StepLogs.teardown_steps.get(caller, None):
+                StepLogs.teardown_steps[caller].append(msg)
+            else:
+                StepLogs.add_teardown_step({caller: [msg]})
+
         return func(*args, **kwargs)
 
     return wrapper
@@ -32,15 +49,14 @@ class ColoredFormatter(logging.Formatter):
 
 
 def setup_logging(
-        log_level: int = logging.DEBUG,
+        log_level: int = None,
 ) -> None:
     """
     Set up logging configuration with both console and file handlers.
-    
     Args:
         log_level: The logging level to use
     """
-
+    log_level = log_level or logging.INFO
     log_format = '%(asctime)s | %(levelname)s | %(message)s'
     date_format = "%Y-%m-%d %H:%M:%S"
 
@@ -65,6 +81,3 @@ def setup_logging(
         _logger(*args, **kwargs)
 
     logger.info = log_with_record
-
-
-setup_logging()

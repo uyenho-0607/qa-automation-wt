@@ -7,6 +7,7 @@ from src.apis.api_client import APIClient
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_container import WebContainer
 from src.data.consts import FAILED_ICON_COLOR
+from src.data.enums import Features
 from src.utils.logging_utils import logger
 
 
@@ -26,16 +27,16 @@ def login_member_site(web):
     max_attempts = 5
 
     logger.info(f"{'=' * 10} Setup Login - Start {'=' * 10}")
-    logger.info("- Navigate to WT Member Site")
+    logger.info("- Navigate to WT Member Site", setup=True)
     web.login_page.goto()
 
-    logger.info("- Login to Member Site")
+    logger.info("- Login to Member Site", setup=True)
     web.login_page.login(wait=True)
 
-    logger.info("- Skipping feature ann modal (if any)")
+    logger.info("- Skipping feature ann modal (if any)", setup=True)
     web.home_page.feature_announcement_modal.got_it()
 
-    logger.info("- Check if logged in success")
+    logger.info("- Check if logged in success", setup=True)
     for attempt in range(max_attempts):
         if not web.home_page.is_logged_in():
 
@@ -60,54 +61,74 @@ def login_member_site(web):
 
 
 @pytest.fixture(scope="package")
-def disable_OCT():
-    logger.info("[Setup] Send API request to disable OCT")
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(web):
+    logger.info("[Setup] Navigate to Trade Page", setup=True)
+    web.home_page.navigate_to(Features.TRADE)
+
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = web.trade_page.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] Enable OCT", setup=True)
+        web.trade_page.place_order_panel.toggle_oct(enable=False, submit=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 
 @pytest.fixture(scope="package")
-def enable_OCT():
-    logger.info("[Setup] Send API request to enable OCT")
-    APIClient().user.patch_oct(enable=True)
+def enable_OCT(web):
+    logger.info("[Setup] Navigate to Trade Page", setup=True)
+    web.home_page.navigate_to(Features.TRADE)
+
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = web.trade_page.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] Enable OCT", setup=True)
+        web.trade_page.place_order_panel.toggle_oct(enable=True, submit=True)
+
+    else:
+        pytest.skip("OCT mode is disabled in Admin Config - SKIP this test ")
 
 
 @pytest.fixture
 def close_confirm_modal(web):
     yield
-    logger.info("[Cleanup]: Close trade confirm modal if any")
+    logger.info("[Cleanup] Close trade confirm modal if any", teardown=True)
     web.trade_page.modals.close_trade_confirm_modal()
 
 
 @pytest.fixture
 def close_edit_confirm_modal(web):
     yield
-    logger.info("[Cleanup]: Close edit confirm modal if any")
+    logger.info("[Cleanup] Close edit confirm modal if any", teardown=True)
     web.trade_page.modals.close_edit_confirm_modal()
 
 
 @pytest.fixture
 def cancel_close_order(web):
     yield
-    logger.info("[Cleanup]: Cancel close order modal if any")
+    logger.info("[Cleanup] Cancel close order modal if any")
     web.trade_page.modals.cancel_close_order()
 
 
 @pytest.fixture
 def cancel_delete_order(web):
     yield
-    logger.info("[Cleanup]: Cancel delete order modal if any")
+    logger.info("[Cleanup] Cancel delete order modal if any")
     web.trade_page.modals.cancel_delete_order()
 
 
 @pytest.fixture
 def cancel_bulk_delete(web):
     yield
-    logger.info("[Cleanup]: Cancel bulk delete modal if any")
+    logger.info("[Cleanup] Cancel bulk delete modal if any")
     web.trade_page.modals.cancel_bulk_delete()
 
 
 @pytest.fixture
 def cancel_bulk_close(web):
     yield
-    logger.info("[Cleanup]: Cancel bulk close modal if any")
+    logger.info("[Cleanup] Cancel bulk close modal if any")
     web.trade_page.modals.cancel_bulk_close()

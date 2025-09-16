@@ -16,17 +16,17 @@ class BaseTrade(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
     __live_price = (AppiumBy.XPATH, resource_id('trade-live-{}-price'))  # buy or sell market price
-    __oct_live_price = (
-        AppiumBy.XPATH, "//div[@data-testid='trade-button-oct-order-{}']/div[2]"
-    )
+    __oct_live_price = (AppiumBy.XPATH, "//*[@resource-id='trade-button-oct-order-{}']/android.widget.TextView[2]")
+    
     ##### One Click Trading Modal #####
     __btn_oct_confirm = (AppiumBy.XPATH, resource_id('oct-modal-button-confirm'))
+    __btn_oct_cancel = (AppiumBy.XPATH, resource_id('oct-modal-button-cancel'))
 
     ##### Trade Confirmation Modal #####
     __btn_trade_confirm = (AppiumBy.XPATH, resource_id('trade-confirmation-button-confirm'))
     __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))
     __btn_confirm_close_delete_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
-    __btn_cancel_trade = (AppiumBy.XPATH, "//android.widget.TextView[@text='Cancel']")
+    __btn_cancel_trade = (AppiumBy.XPATH, "//*[translate(@text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
     def get_live_price(
@@ -51,6 +51,10 @@ class BaseTrade(BaseScreen):
     def agree_and_continue(self):
         """Confirm the one-click trading action."""
         self.actions.click(self.__btn_oct_confirm)
+
+    def click_cancel_oct_btn(self):
+        """Cancel the one-click trading action."""
+        self.actions.click(self.__btn_oct_cancel)
 
     # Trade Confirmation Modal Actions
     def confirm_trade(self):

@@ -8,7 +8,7 @@ class UserAPI(BaseAPI):
     def __init__(self):
         super().__init__()
 
-    _oct_endpoint = "/user/v1/preference"
+    _endpoint = "/user/v1/preference"
     _hide_order_endpoint = "/user/v1/order/hide/preference"
     _user_account = "/user/v1/account"
 
@@ -19,7 +19,7 @@ class UserAPI(BaseAPI):
             "value": "true" if enable else "false"
         }
         logger.debug(f"[API] Set ONE_CLICK_TRADING (enable:{enable!r})")
-        resp = self.patch(self._oct_endpoint, payload)
+        resp = self.patch(self._endpoint, payload)
         return resp
 
     def patch_show_all(self, asset_tab=AssetTabs.OPEN_POSITION):
@@ -47,5 +47,15 @@ class UserAPI(BaseAPI):
             }
 
             return extract_acc
+        return resp
 
+    def patch_swap_volume_units(self, use_volume=True):
+        # Retrieve the Swap to Volume / Units API
+        payload = {
+            "category": "SWAP_UNITS",
+            "type": "SWAP_UNITS",
+            "value": "SIZE" if use_volume else "UNITS"
+        }
+        logger.debug(f"[API] SWAP_UNITS (use volume:{use_volume})")
+        resp = self.patch(self._endpoint, payload)
         return resp

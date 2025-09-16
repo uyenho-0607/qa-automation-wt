@@ -5,8 +5,7 @@ from typing import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import SHORT_WAIT
-from src.data.enums import AssetTabs, SLTPType, Expiry
+from src.data.enums import BulkCloseOpts, AssetTabs, SLTPType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import RuntimeConfig
 from src.page_object.web_app.components.modals.trading_modals import TradingModals
@@ -34,12 +33,8 @@ class AssetTab(BaseTrade):
 
     __item_by_id = (By.XPATH, "//div[@data-testid='asset-{}-list-item-order-no' and contains(normalize-space(), '{}')]")
     __order_id_items = (By.CSS_SELECTOR, "*[data-testid$='-list-item-order-no']")
-
     __expand_items = (By.CSS_SELECTOR, data_testid('asset-{}-list-item-expand'))
-    __expand_item_by_id = (
-        By.XPATH,
-        "//div[contains(normalize-space(), '{}')]/ancestor::div[2]/following-sibling::div//div[@data-testid='asset-{}-list-item-expand']"
-    )
+    __expand_item_by_id = (By.XPATH, "//div[text()='{}']/ancestor::div[4]//div[@data-testid='asset-{}-list-item-expand']")
     __expand_item_profit_loss = (
         By.XPATH, "//div[@data-testid='asset-open-list-item-expand']/div[contains(normalize-space(), 'Profit/Loss')]"
     )
@@ -54,8 +49,12 @@ class AssetTab(BaseTrade):
     __btn_action_by_id = (
         By.XPATH, "//div[contains(normalize-space(), '{}')]/..//div[@data-testid='asset-{}-button-{}']"  # - orderID - tab col - btn action
     )
-
     __txt_close_volume = (By.CSS_SELECTOR, data_testid('close-order-input-volume'))
+
+    # Bulk operations locators
+    __btn_bulk_close = (By.CSS_SELECTOR, data_testid('bulk-close'))
+    __opt_bulk_close = (By.XPATH, "//div[text()='{}']")
+    __btn_bulk_delete = (By.CSS_SELECTOR, data_testid('bulk-delete'))
 
     # ------------------------ HELPER METHODS ------------------------ #
     def get_profit_loss(self, wait=True):
@@ -100,8 +99,6 @@ class AssetTab(BaseTrade):
         expand_values = self.actions.get_text_elements(
             cook_element(self.__expanded_values, tab.col_locator())
         )
-        logger.debug("Done get elements")
-
         res = {k.lower().replace(" ", "_").replace(".", ""): v for k, v in zip(expand_labels, expand_values)}
 
         # special locators
@@ -114,7 +111,7 @@ class AssetTab(BaseTrade):
         if "size" in res:
             res["volume"] = res.pop("size")
 
-        if tab.is_history() and res.get("volume"): # todo: improve to check close_volume / x
+        if tab.is_history() and res.get("volume"):  # todo: improve to check close_volume / x
             res["volume"] = res["volume"].split(" / ")[0]
 
         # update order_id for trade_object if not present
@@ -149,13 +146,21 @@ class AssetTab(BaseTrade):
             locator = cook_element(self.__btn_action_by_id, order_id, tab.col_locator(), action)
         self.actions.click(locator)
 
-    def delete_order(self, trade_object: ObjTrade = None, confirm=True) -> None:
+    def delete_order(self, trade_object: ObjTrade = None, confirm=True, wait=False) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         if not trade_object.get("order_id"):
             self.get_last_order_id(trade_object)
 
+        logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
         self.click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
         not confirm or self.confirm_delete_order()
+        not wait or self.wait_for_spin_loader()
+
+    def bulk_delete_orders(self) -> None:
+        """Delete multiple pending orders at once."""
+        time.sleep(1)
+        self.actions.click(self.__btn_bulk_delete)
+        self.click_confirm_btn()
 
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=True) -> None:
         order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
@@ -194,11 +199,28 @@ class AssetTab(BaseTrade):
         self.actions.send_keys(self.__txt_close_volume, close_volume)
 
         if confirm:
-            self.get_current_price(close_obj) # update close price
+            self.get_current_price(close_obj)  # update close price
             self.confirm_close_order()
 
         not wait or self.wait_for_spin_loader()
         return new_created_obj
+
+    def bulk_close_positions(self, option: BulkCloseOpts = BulkCloseOpts.ALL, submit=False) -> None:
+        """Close multiple positions at once using the specified option."""
+        self.actions.click(self.__btn_bulk_close)
+
+        options = {
+            BulkCloseOpts.ALL: "All Positions",
+            BulkCloseOpts.PROFIT: "Profitable Positions",
+            BulkCloseOpts.LOSS: "Losing Positions",
+        }
+
+        self.actions.click(cook_element(self.__opt_bulk_close, options[option]))
+
+        if submit:
+            self.click_confirm_btn()
+        else:
+            self.click_cancel_btn()
 
     def modify_order(
             self,
@@ -208,7 +230,8 @@ class AssetTab(BaseTrade):
             expiry: Expiry = None,
             confirm=False,
             retry_count=0,
-            max_retries=3
+            max_retries=3,
+            oct_mode=False,
     ):
         """
         Modify stop loss/ take profit/ fill policy/ Expiry
@@ -259,10 +282,9 @@ class AssetTab(BaseTrade):
         time.sleep(1)
         self.__trade_modals.click_update_order_btn()
 
-        logger.debug(f"- Trade object after modified: {format_dict_to_string(trade_object)}")
-
+        # logger.debug(f"- Trade object after modified: {format_dict_to_string(trade_object)}")
         # check if edit confirm modal is displayed
-        if not self.__trade_modals.is_edit_confirm_modal_displayed():
+        if not self.__trade_modals.is_edit_confirm_modal_displayed() and not oct_mode:
             # Recursive call with incremented retry count
             self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
 
@@ -275,8 +297,9 @@ class AssetTab(BaseTrade):
         self.wait_for_tab_amount(tab, expected_amount)
         soft_assert(self.get_tab_amount(tab, wait=False), expected_amount)
 
-    def verify_item_data(self, trade_object: ObjTrade, tab: AssetTabs = None) -> None:
+    def verify_item_data(self, trade_object: ObjTrade, tab: AssetTabs = None, wait=False) -> None:
         """Verify that the item data matches the expected data."""
+        not wait or self.wait_for_spin_loader()
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
         # handle expected
         self.get_current_price(trade_object)  # update current price for trade_object

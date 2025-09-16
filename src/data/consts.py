@@ -28,3 +28,5 @@ WEB_APP_DEVICE = "iPhone 14 Pro Max"
 MULTI_OMS = ["lirunex"]
 
 ISSUE_SYMBOLS = ["EOSUSD.d", "DOTUSD.ecn", "MATICUSD.d"]
+
+PLATFORMS = ["web", "android", "ios", "web_app"]

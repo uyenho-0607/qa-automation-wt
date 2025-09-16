@@ -6,7 +6,7 @@ from typing import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, WARNING_ICON
+from src.data.consts import QUICK_WAIT, WARNING_ICON, SHORT_WAIT
 from src.data.enums import OrderType, FillPolicy, SLTPType, Expiry, TradeTab, TradeType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.trade.base_trade import BaseTrade
@@ -36,6 +36,7 @@ class PlaceOrderPanel(BaseTrade):
     __tab_oct = (By.CSS_SELECTOR, data_testid('tab-one-click-trading'))
     __tab_trade = (By.CSS_SELECTOR, data_testid('tab-trade'))
     __tab_specification = (By.CSS_SELECTOR, data_testid('tab-specification'))
+    __label_oct = (By.XPATH, "//span[translate(text(), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz') = 'one-click trading']")
 
     # UI control buttons for adjusting values
     __inc_dec_volume = (By.CSS_SELECTOR, data_testid('trade-input-volume-{}'))  # increase / decrease
@@ -111,14 +112,23 @@ class PlaceOrderPanel(BaseTrade):
             return value.split(": ")[-1]
         return None
 
-    def toggle_oct(self, enable: bool = True) -> None:
+    def is_oct_enable(self):
+        # check if oct tab is displayed
+        is_enable = self.actions.is_element_displayed(self.__label_oct)
+        logger.debug(f"- OCT enabled in Admin config: {is_enable!r}")
+        return is_enable
+
+    def toggle_oct(self, enable: bool = True, submit=True) -> None:
         """Enable/disable One-Click Trading."""
-        is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=1)
+        is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=SHORT_WAIT)
         if is_enabled == enable:
             return
         self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
         if enable:
-            self.agree_and_continue()
+            if submit:
+                self.agree_and_continue()
+
+            # missing element for cancel OCT mode
 
     def select_tab(self, tab: TradeTab):
         locator = cook_element(self.__trade_tab, tab)
