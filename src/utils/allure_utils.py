@@ -111,9 +111,9 @@ def custom_allure_report(allure_dir: str) -> None:
                 data = json.load(f)
 
             # Skip processing and delete file if test status is skipped
-            if data.get("status") == "skipped":
-                _remove_skipped_tests(file_path)
-                continue
+            # if data.get("status") == "skipped":
+            #     _remove_skipped_tests(file_path)
+            #     continue
 
             _process_test_time(data)
             _add_attachments_prop(data)  # add empty attachments prop for each test report

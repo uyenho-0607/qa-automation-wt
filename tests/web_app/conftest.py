@@ -88,35 +88,35 @@ def enable_OCT(web_app):
 @pytest.fixture
 def cancel_all(web_app):
     yield
-    logger.info("[Cleanup] Click cancel button (if any)")
+    logger.info("[Cleanup] Click cancel button (if any)", teardown=True)
     web_app.trade_page.click_cancel_btn()
 
 
 @pytest.fixture
 def cancel_edit_order(web_app):
     yield
-    logger.debug("[Cleanup] Cancel edit order if any")
+    logger.debug("[Cleanup] Cancel edit order if any", teardown=True)
     web_app.trade_page.modals.cancel_edit_order()
 
 
 @pytest.fixture
 def cancel_close_order(web_app):
     yield
-    logger.debug("[Cleanup] Cancel close order if any")
+    logger.debug("[Cleanup] Cancel close order if any", teardown=True)
     web_app.trade_page.modals.cancel_close_order()
 
 
 @pytest.fixture
 def cancel_delete_order(web_app):
     yield
-    logger.debug("[Cleanup] Cancel delete order if any")
+    logger.debug("[Cleanup] Cancel delete order if any", teardown=True)
     web_app.trade_page.modals.cancel_delete_order()
 
 
 @pytest.fixture
 def cancel_bulk_delete(web_app):
     yield
-    logger.debug("[Cleanup] Cancel bulk delete orders if any")
+    logger.debug("[Cleanup] Cancel bulk delete orders if any", teardown=True)
     web_app.trade_page.modals.cancel_bulk_delete()
 
 
