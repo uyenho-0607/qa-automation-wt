@@ -65,3 +65,9 @@ class UIMessages:
     DEMO_ACCOUNT_OPEN_SUCCESS = "Your demo account has been opened successfully."
     NO_ITEM_AVAILABLE = "No items available"
     TYPE_SOMETHING_TO_SEARCH = "Type something to search"
+
+    # ===== Link and Switch Messages =====
+    ACCOUNT_SWITCHED_BANNER_TITLE = "Account Switched"
+    ACCOUNT_ID_DES = "Account ID: {}"
+    ACCOUNT_SUCCESSFULLY_REMOVED = "Account successfully removed"
+    SUCCESSFULLY_LINKED = "Successfully Linked"

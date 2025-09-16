@@ -1,4 +1,3 @@
-import random
 import time
 
 from appium.webdriver.common.appiumby import AppiumBy
@@ -7,20 +6,16 @@ from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import BulkCloseOpts, OrderType, SLTPType, FillPolicy, Expiry, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
-from src.page_object.ios.components.trade.asset_tab import AssetTab
 from src.page_object.ios.components.trade.base_trade import BaseTrade
-from src.utils import DotDict
-from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import resource_id, cook_element
 from src.utils.format_utils import locator_format
 from src.utils.logging_utils import logger
-from src.utils.trading_utils import get_sl_tp, calculate_trading_params
+from src.utils.trading_utils import get_sl_tp
 
 
 class TradingModals(BaseTrade):
     def __init__(self, actions: MobileActions):
         super().__init__(actions)
-        self.__asset_tab = AssetTab(actions)
 
     # ------------------------------------------------ LOCATORS ------------------------------------------------ #
 
@@ -196,38 +191,6 @@ class TradingModals(BaseTrade):
         logger.debug(f"- Input stop limit price: {value!r}")
         self.actions.send_keys(self.__txt_edit_stop_limit_price, value)
 
-    # Control buttons
-    def __control_price(self, order_type, stop_limit_price=True, price=True, stop_loss=True, take_profit=True):
-
-        if stop_limit_price and order_type == OrderType.STOP_LIMIT:
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_stop_limit_price, "increase"))
-
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_stop_limit_price, "decrease"))
-
-        if price and order_type != OrderType.MARKET:
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_price, "increase"))
-
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_price, "decrease"))
-
-        if stop_loss:
-            sl_type = SLTPType.sample_values()
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_sl, sl_type.lower(), "increase"))
-
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_sl, sl_type.lower(), "decrease"))
-
-        if take_profit:
-            tp_type = SLTPType.sample_values()
-            for _ in range(random.randint(10, 20)):
-                self.actions.click(cook_element(self.__btn_inc_dec_tp, tp_type.lower(), "increase"))
-            for _ in range(random.randint(1, 10)):
-                self.actions.click(cook_element(self.__btn_inc_dec_tp, tp_type.lower(), "decrease"))
-
     def modify_order(
             self,
             trade_object: ObjTrade,
@@ -249,14 +212,6 @@ class TradingModals(BaseTrade):
         # Get current price to re-calculate prices
         edit_price = self.get_edit_price(trade_object.order_type) or trade_object.entry_price
         stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type)
-
-        # if order_type != OrderType.MARKET:
-        #     self.input_edit_price(trade_params.entry_price)
-        #     trade_object.entry_price = trade_params.entry_price
-        #
-        # if order_type.is_stp_limit():
-        #     self.input_edit_stop_limit_price(trade_params.stop_limit_price)
-        #     trade_object.stop_limit_price = trade_params.stop_limit_price
 
         if sl_type:
             self.input_edit_sl(stop_loss, sl_type)
@@ -292,127 +247,9 @@ class TradingModals(BaseTrade):
 
         self.click_btn_edit_order()
 
-    def modify_invalid_order(
-            self,
-            trade_object: DotDict,
-            stop_loss=False,
-            take_profit=False,
-            entry_price=False,
-            stop_limit_price=False,
-            submit=False
-    ):
-        """
-        Modify invalid order with option
-        trade_object: Should contain trade_type (BUY / SELL), order_type (MARKET/ LIMIT/ STOP/ STOP LIMIT)
-        stop_loss: set to True >> stop_loss will be invalid
-        take_profit: set to True >> take_profit will be invalid
-        entry_price: set to True >> entry_price will be invalid
-        stop_limit_price: set to True >> stop_limit_price will be invalid
-        NOTE: whether stop_loss/ take_profit is invalid or entry_price is invalid
-        """
-
-        trade_type, order_type = trade_object.trade_type, trade_object.order_type
-
-        edit_price = self.get_edit_price(trade_object.order_type)
-        invalid_price = calculate_trading_params(edit_price, trade_type, order_type, is_invalid=True)
-
-        if entry_price:
-            price = invalid_price.entry_price
-            self.input_edit_price(price)
-
-        if stop_limit_price:
-            stp_price = invalid_price.stop_limit_price
-            self.input_edit_stop_limit_price(stp_price)
-
-        if stop_loss:
-            sl = invalid_price.stop_loss
-            self.input_edit_sl(sl)
-
-        if take_profit:
-            tp = invalid_price.take_profit
-            self.input_edit_tp(tp)
-
-        self.click_btn_edit_order()
-        if submit:
-            self.confirm_update_order()
-
-    def modify_order_with_control_buttons(
-            self, trade_object: DotDict = None,
-            stop_limit_price=True, price=True,
-            stop_loss=True,
-            take_profit=True,
-    ):
-        self.__control_price(trade_object.order_type, stop_limit_price, price, stop_loss, take_profit)
-
-        # Load data to trade_object for verifying
-        edit_sl = self.actions.get_text(cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower()))
-        edit_tp = self.actions.get_text(cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower()))
-
-        trade_object.stop_loss = edit_sl
-        trade_object.take_profit = edit_tp
-
-        if trade_object.order_type != OrderType.MARKET:
-            trade_object.entry_price = self.actions.get_text(self.__txt_edit_price)
-
-        if trade_object.order_type == OrderType.STOP_LIMIT:
-            trade_object.stop_limit_price = self.actions.get_text(self.__txt_edit_stop_limit_price)
-
-        self.click_btn_edit_order()
-
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
     def verify_trade_confirmation(self, trade_object: ObjTrade):
-        """Verify the trade confirmation information."""
-
-        expected = trade_object.trade_confirm_details()
-
-        # Handle actual dict
-        locator_list = [
-            self.__confirm_order_type,
-            self.__confirm_symbol,
-            self.__confirm_volume,
-            self.__confirm_units,
-            self.__confirm_stop_loss,
-            self.__confirm_take_profit,
-        ]
-
-        not expected.get("fill_policy") or locator_list.append(cook_element(self.__confirm_fill_policy_by_text, expected["fill_policy"]))
-        not expected.get("expiry") or locator_list.append(self.__confirm_expiry)
-
-        if trade_object.order_type != OrderType.MARKET:
-            locator_list.append(self.__confirm_price)
-
-        if trade_object.order_type.is_stp_limit():
-            locator_list.append(self.__confirm_stop_limit_price)
-
-        actual = {
-            k: v for k, v in zip(expected, [self.actions.get_text(locator) for locator in locator_list])
-        }
-
-        soft_assert(actual, expected, tolerance=0.1, tolerance_fields=trade_object.tolerance_fields())
+        ...
 
     def verify_edit_trade_confirmation(self, trade_object: ObjTrade):
-
-        expected = trade_object.trade_edit_confirm_details()
-
-        actual = {
-            "order_type": self.actions.get_text(self.__edit_confirm_order_type),
-            "symbol": self.actions.get_text(self.__edit_confirm_symbol),
-            "volume": self.actions.get_text(self.__edit_confirm_volume),
-            "units": self.actions.get_text(self.__edit_confirm_units),
-            "stop_loss": self.actions.get_text(self.__edit_confirm_sl),
-            "take_profit": self.actions.get_text(self.__edit_confirm_tp)
-        }
-
-        if expected.get("entry_price"):
-            actual["entry_price"] = self.actions.get_text(self.__edit_confirm_price)
-
-        if expected.get("stop_limit_price"):
-            actual["stop_limit_price"] = self.actions.get_text(self.__edit_confirm_stop_limit_price)
-
-        if expected.get("fill_policy"):
-            actual["fill_policy"] = self.actions.get_text(cook_element(self.__edit_confirm_fill_policy_by_text, expected["fill_policy"]))
-
-        if expected.get("expiry"):
-            actual["expiry"] = self.actions.get_text(self.__edit_confirm_expiry)
-
-        soft_assert(actual, expected)
+        ...

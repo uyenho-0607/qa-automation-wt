@@ -5,7 +5,6 @@ from typing import Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import SHORT_WAIT
 from src.data.enums import BulkCloseOpts, AssetTabs, SLTPType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import RuntimeConfig
@@ -36,7 +35,6 @@ class AssetTab(BaseTrade):
     __order_id_items = (By.CSS_SELECTOR, "*[data-testid$='-list-item-order-no']")
     __expand_items = (By.CSS_SELECTOR, data_testid('asset-{}-list-item-expand'))
     __expand_item_by_id = (By.XPATH, "//div[text()='{}']/ancestor::div[4]//div[@data-testid='asset-{}-list-item-expand']")
-
     __expand_item_profit_loss = (
         By.XPATH, "//div[@data-testid='asset-open-list-item-expand']/div[contains(normalize-space(), 'Profit/Loss')]"
     )
@@ -101,8 +99,6 @@ class AssetTab(BaseTrade):
         expand_values = self.actions.get_text_elements(
             cook_element(self.__expanded_values, tab.col_locator())
         )
-        logger.debug("Done get elements")
-
         res = {k.lower().replace(" ", "_").replace(".", ""): v for k, v in zip(expand_labels, expand_values)}
 
         # special locators
