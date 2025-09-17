@@ -40,7 +40,7 @@ class AssetsPage(BasePage):
 
         return res
 
-    def get_mytrade_item(self):
+    def get_my_trade_list(self):
         self.actions.scroll_to_element(self.__item_watchlist)
         return self.actions.get_text_elements(self.__item_watchlist)
 
@@ -71,6 +71,6 @@ class AssetsPage(BasePage):
 
         soft_assert(actual, exp_data, tolerance=tolerance_percent, tolerance_fields=tolerance_fields, field_tolerances={AccInfo.REALISED_PROFIT_LOSS: 10})
 
-    def verify_mytrade_items(self, expected: list):
-        actual = self.get_mytrade_item()
+    def verify_my_trade_list(self, expected: list):
+        actual = self.get_my_trade_list()
         soft_assert(actual, expected)
