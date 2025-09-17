@@ -9,7 +9,6 @@ from src.utils.logging_utils import logger
 @pytest.fixture(scope="package", autouse=True)
 def symbol():
     logger.info(f"{'=' * 10} Setup Symbol Data - Start {'=' * 10}")
-
     logger.info("- Get and select symbol to use through test package", setup=True)
     select_symbol = ObjSymbol().get_symbol()
     logger.info(f"{'=' * 10} Setup Symbol Data - Done {'=' * 10}")
