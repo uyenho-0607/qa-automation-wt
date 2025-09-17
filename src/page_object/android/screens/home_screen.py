@@ -1,7 +1,7 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import SHORT_WAIT, LONG_WAIT
+from src.data.consts import SHORT_WAIT, EXPLICIT_WAIT
 from src.data.enums import AccSummary
 from src.data.ui_messages import UIMessages
 from src.page_object.android.base_screen import BaseScreen
@@ -11,7 +11,7 @@ from src.page_object.android.components.notifications import Notifications
 from src.page_object.android.components.settings import Settings
 from src.page_object.android.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
 from src.utils.logging_utils import logger
 
@@ -26,28 +26,31 @@ class HomeScreen(BaseScreen):
         self.watch_list = WatchList(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __account_selector = (AppiumBy.XPATH, resource_id("account-selector"))
-    __account_type_tag = (AppiumBy.XPATH, resource_id("account-type-tag"))
+    __account_selector = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("account-selector")')
+    __account_type_tag = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("account-type-tag")')
 
-    __available_balance_dropdown = (AppiumBy.XPATH, resource_id("available-balance-dropdown"))
-    __available_account_amount = (AppiumBy.XPATH, resource_id('available-balance-amount'))
-    __available_balance_title = (AppiumBy.XPATH, resource_id("available-balance-title"))
+    __available_balance_dropdown = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("available-balance-dropdown")')
+    __available_account_amount = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("available-balance-amount")')
+    __available_balance_title = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("available-balance-title")')
 
-    __symbol_search_selector = (AppiumBy.XPATH, resource_id("symbol-search-selector"))
-    __txt_symbol_search = (AppiumBy.XPATH, resource_id("symbol-input-search"))
-    __item_search_result = (AppiumBy.XPATH, "//*[@resource-id='watchlist-symbol' and contains(@text, '{}')]")
-    __items_search_result = (AppiumBy.XPATH, resource_id('symbol-input-search-items'))
-    __search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']")
+    __symbol_search_selector = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("symbol-search-selector")')
+    __txt_symbol_search = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("symbol-input-search")')
+    __item_search_result = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").textContains("{}")')
+    __items_search_result = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("symbol-input-search-items")')
+    __search_history = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.TextView").text("Search History")')
     __btn_delete_search_history = (AppiumBy.XPATH, "//android.widget.TextView[@text='Search History']/following-sibling::android.widget.TextView")
-    __btn_search_cancel = (AppiumBy.XPATH, resource_id("symbol-input-search-cancel"))
+    __btn_search_cancel = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("symbol-input-search-cancel")')
     __item_search_history = (AppiumBy.XPATH, "//android.view.ViewGroup[2]/android.view.ViewGroup[@content-desc]")
-    __item_search_history_by_text = (AppiumBy.XPATH, "//android.view.ViewGroup[2]/android.view.ViewGroup[@content-desc='{}']")
-    __notification_selector = (AppiumBy.XPATH, resource_id("notification-selector"))
-    __empty_search_result = (AppiumBy.XPATH, "//android.widget.TextView[@text='No items available']")
+    __item_search_history_by_text = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("{}")')
+    __notification_selector = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("notification-selector")')
+    __empty_search_result = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.TextView").text("No items available")')
 
     # ------------------------ ACTIONS ------------------------ #
-    def is_logged_in(self):
-        return self.actions.is_element_displayed(self.__account_selector, timeout=LONG_WAIT)
+    def on_home_screen(self):
+        res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
+        log_msg = "- Home Screen is displayed" if res else f"- Home Screen is not displayed, wait time: {wait_time} sec"
+        logger.debug(log_msg)
+        return res
 
     def open_my_account(self, open=True):
         is_open = self.my_account_modal.is_open()
