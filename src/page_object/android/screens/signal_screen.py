@@ -25,9 +25,9 @@ class SignalScreen(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
     __txt_signal_search = (AppiumBy.XPATH, "//android.widget.TextView/following-sibling::android.widget.EditText")
-    __tab = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='{}']")
-    __items = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol']")
-    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
+    __tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("{}")')
+    __items = (AppiumBy.ID, 'watchlist-symbol')
+    __item_by_name = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").text("{}")')
 
     ##### COPY TO ORDER #####
     __analysis_action = (
