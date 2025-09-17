@@ -4,7 +4,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums import WatchListTab
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.trade.watch_list import WatchList
@@ -19,14 +19,14 @@ class MarketsScreen(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
 
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
+    __tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.TextView").textContains("{}")')
+    __horizontal_scroll_tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.HorizontalScrollView")')
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
     __chb_symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.widget.TextView[@text='{}']/preceding-sibling::android.view.ViewGroup[.//android.widget.TextView]")
-    __unchb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Show all']/android.view.ViewGroup")
-    __chb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, 'Show all')]/android.view.ViewGroup[android.widget.TextView]")
-    __btn_save_changes = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Save Changes']")
+    __unchb_show_all = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("Show all")')
+    __chb_show_all = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Show all")')
+    __btn_save_changes = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("Save Changes")')
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -36,7 +36,7 @@ class MarketsScreen(BaseScreen):
 
         logger.info(f"- Select tab: {tab.value.capitalize()!r}")
         # if tab is represent, select tab immediately
-        if self.actions.is_element_displayed(locator):
+        if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
             self.actions.click(locator)
             return
 
@@ -46,7 +46,7 @@ class MarketsScreen(BaseScreen):
             for direction in ["left", "right"]:
                 logger.debug(f"- Swipe {direction} to show tab")
                 self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
-                if self.actions.is_element_displayed(locator):
+                if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
                     self.actions.click(locator)
                     return
 
