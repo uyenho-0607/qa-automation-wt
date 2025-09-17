@@ -42,7 +42,6 @@ def login_wt_app(ios):
 
     logger.info("- Wait for home screen loaded", setup=True)
 
-
     for attempt in range(max_retries + 1):
         if not ios.home_screen.on_home_screen():
             with suppress(Exception):
