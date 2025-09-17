@@ -19,7 +19,7 @@ def test(web_app, setup_test):
     web_app.home_page.navigate_to(Features.ASSETS, wait=True)
 
     logger.info(f"Verify My Trade list: {', '.join(symbols)} (result from test setup)")
-    web_app.assets_page.verify_mytrade_items(symbols)
+    web_app.assets_page.verify_my_trade_list(symbols)
 
     logger.info(f"Step 2: Select latest symbol from My Trade ({symbols[0]!r})")
     web_app.assets_page.watch_list.select_last_symbol()
@@ -35,7 +35,7 @@ def test(web_app, setup_test):
     web_app.home_page.navigate_to(Features.ASSETS, wait=True)
 
     logger.info(f"Verify My Trade list is not changed ({', '.join(symbols)})")
-    web_app.assets_page.verify_mytrade_items(symbols)
+    web_app.assets_page.verify_my_trade_list(symbols)
 
 
 @pytest.fixture
@@ -48,7 +48,7 @@ def setup_test(web_app):
     if len(order_details) < 5:
         amount = 5 - len(order_details)
 
-        logger.debug(f"- No market order available, Place {amount} new orders", setup=True)
+        logger.info(f"- No market order available, Place {amount} new orders", setup=True)
         symbols = random.choices(ObjSymbol().get_symbols(get_all=True), k=amount)
         for _symbol in symbols:
             APIClient().trade.post_order(ObjTrade(symbol=_symbol, order_type=OrderType.MARKET), update_price=False)
