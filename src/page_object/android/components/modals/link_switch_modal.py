@@ -11,14 +11,14 @@ class LinkSwitchModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __btn_add_account = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='{} Account']")
+    __btn_add_account = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("{} Account")')
     __txt_user_id = (AppiumBy.XPATH,
                      "(//android.widget.TextView[@text='Account ID']/following-sibling::android.view.ViewGroup/android.widget.EditText)[1]")
     __txt_password = (AppiumBy.XPATH,
                       "(//android.widget.TextView[@text='Account ID']/following-sibling::android.view.ViewGroup/android.widget.EditText)[2]")
     __btn_confirm = (AppiumBy.XPATH,
                      "//*[translate(@content-desc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='confirm']")
-    __btn_close = (AppiumBy.XPATH, "//*[@resource-id='modal-close-button']")
+    __btn_close = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("modal-close-button")')
 
     # ------------------------ ACTIONS ------------------------ #
 
