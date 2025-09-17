@@ -209,6 +209,10 @@ class ObjTrade(BaseObj):
         if tab.is_history():
             details["close_price"] = details.pop("current_price", None)
 
+        # mobile specific
+        if RuntimeConfig.platform in ["ios", "android"]:
+            details["symbol"] = self.get("symbol")
+
         return {k: v for k, v in details.items() if v}
 
     def api_data_format(self) -> Dict[str, Any]:

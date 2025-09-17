@@ -26,22 +26,21 @@ class DemoAccountModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __opt_setting = (AppiumBy.XPATH, "//*[@resource-id='setting-option-{}']")
+    __opt_setting = (AppiumBy.ID, 'setting-option-{}')
 
     # ======================== DEMO ACCOUNT CREATION LOCATORS ======================== #
-    __txt_name = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-name']")
-    __txt_email = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-email']")
+    __txt_name = (AppiumBy.ID, 'demo-account-creation-modal-name')
+    __txt_email = (AppiumBy.ID, 'demo-account-creation-modal-email')
 
-    __drp_country_dial_code = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-dial-code']")
-    __txt_country_search = (AppiumBy.XPATH, "//*[@resource-id='country-dial-code-search']")
+    __drp_country_dial_code = (AppiumBy.ID, 'demo-account-creation-modal-dial-code')
+    __txt_country_search = (AppiumBy.ID, 'country-dial-code-search')
     __item_country_dial_code = (
-        AppiumBy.XPATH, "//*[@resource-id='country-dial-code-item']/android.widget.TextView[contains(@text, '(+{})')]"
-    )
-    __txt_phone_number = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-phone']")
-    __deposit = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-deposit']")
-    __item_deposit = (AppiumBy.XPATH, "//*[@resource-id='deposit-dropdown-item' and @content-desc='{}']")
-    __btn_agree_and_continue = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-confirm']")
-    __field_validation = (AppiumBy.XPATH, "//*[@resource-id='input-field-validation']")
+        AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("country-dial-code-item").descriptionContains("(+{})")')
+    __txt_phone_number = (AppiumBy.ID, 'demo-account-creation-modal-phone')
+    __deposit = (AppiumBy.ID, 'demo-account-creation-modal-deposit')
+    __item_deposit = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("deposit-dropdown-item").description("{}")')
+    __btn_agree_and_continue = (AppiumBy.ID, 'demo-account-creation-modal-confirm')
+    __field_validation = (AppiumBy.ID, 'input-field-validation')
 
     # Actions
     def input_name(self, name: str):
@@ -145,16 +144,16 @@ class DemoAccountModal(BaseScreen):
 
     # ======================== DEMO ACCOUNT COMPLETION ======================== #
     # Locators
-    __demo_acc_completion_title = (AppiumBy.XPATH, "//*[@resource-id='demo-account-completion-modal-title']")
+    __demo_acc_completion_title = (AppiumBy.ID, 'demo-account-completion-modal-title')
     __demo_acc_userid = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-value'][1]")
     __demo_acc_password = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-value'][2]")
     __demo_acc_name = (
         AppiumBy.XPATH,
         "//android.widget.TextView[@text='Name']/following-sibling::*[@resource-id='demo-completion-value'][1]"
     )
-    __btn_sign_in_demo_acc_completion = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-sign-in']")
-    __btn_switch_to_demo_acc = (AppiumBy.XPATH, "//android.widget.TextView[@text='SWITCH TO DEMO ACCOUNT']")
-    __btn_demo_acc_completion_done = (AppiumBy.XPATH, "//*[@resource-id='demo-completion-done']")
+    __btn_sign_in_demo_acc_completion = (AppiumBy.ID, 'demo-completion-sign-in')
+    __btn_switch_to_demo_acc = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().text("SWITCH TO DEMO ACCOUNT")')
+    __btn_demo_acc_completion_done = (AppiumBy.ID, 'demo-completion-done')
 
     # Actions
     def get_account_details(self) -> DotDict:

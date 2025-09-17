@@ -7,8 +7,8 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, stop_obj, order_data, cancel_all):
-    trade_object = stop_obj()
+def test(android, stop_limit_obj, order_data, cancel_all):
+    trade_object = stop_limit_obj()
     tab = AssetTabs.PENDING_ORDER
     tab_amount = android.trade_screen.asset_tab.get_tab_amount(AssetTabs.PENDING_ORDER)
 
