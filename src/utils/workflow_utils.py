@@ -1,3 +1,4 @@
+import builtins
 import logging
 import os
 import socket
@@ -225,13 +226,13 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
     return assigned
 
 
-# if __name__ == '__main__':
-#     ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
-#     accounts = ggapi.get_accounts(
-#         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
-#         ["decode"], "demo"
-#     )
-#
-#     dirs = collect_critical_folders(platform="web-app")
-#     res = assign_dirs_to_accounts(accounts[::-1], dirs)
-#     print(accounts)
+def get_session_id():
+    driver = getattr(builtins, "web_driver", None)
+    if driver:
+        session_id = driver.session_id
+        with open("/tmp/session_id.txt", "w") as f:
+            f.write(session_id)
+
+        logger.debug(f"- session_id: {session_id!r}")
+        return session_id
+    return None

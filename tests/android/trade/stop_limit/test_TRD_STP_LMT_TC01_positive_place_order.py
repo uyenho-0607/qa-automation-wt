@@ -16,8 +16,8 @@ from src.utils.logging_utils import logger
         (SLTPType.PRICE, SLTPType.PRICE)
     ]
 )
-def test(android, cancel_all, sl_type, tp_type, stop_obj, get_asset_tab_amount):
-    trade_object = stop_obj()
+def test(android, cancel_all, sl_type, tp_type, stop_limit_obj, get_asset_tab_amount):
+    trade_object = stop_limit_obj()
     tab = AssetTabs.PENDING_ORDER
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
@@ -41,4 +41,3 @@ def test(android, cancel_all, sl_type, tp_type, stop_obj, get_asset_tab_amount):
 
     logger.info(f"Verify order details in Pending Order tab")
     android.trade_screen.asset_tab.verify_item_data(trade_object)
-
