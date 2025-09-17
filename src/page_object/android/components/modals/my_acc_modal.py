@@ -5,7 +5,7 @@ from src.data.consts import SHORT_WAIT
 from src.data.enums import AccSummary
 from src.page_object.android.base_screen import BaseScreen
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, resource_id
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import format_acc_balance
 
 
@@ -17,7 +17,7 @@ class MyAccountModal(BaseScreen):
     __items = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']/following-sibling::android.widget.TextView[1]")
     __drp_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Balance']/following-sibling::android.widget.TextView[1]")
     __drp_note = (AppiumBy.XPATH, "//android.widget.TextView[@text='Note']/following-sibling::android.widget.TextView[1]")
-    __btn_close = (AppiumBy.XPATH, resource_id('modal-close-button'))
+    __btn_close = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("modal-close-button")')
 
     # ------------------------ ACTIONS ------------------------ #
 

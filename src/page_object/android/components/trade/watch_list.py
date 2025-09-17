@@ -8,7 +8,7 @@ from src.data.enums import WatchListTab
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils import DotDict
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
 
@@ -17,12 +17,12 @@ class WatchList(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __items = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
-    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
-    __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
-    __btn_symbol_remove = (AppiumBy.XPATH, "//*[@text='Remove']")
-    __selected_item = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='symbol-overview-id' and @text='{}']")
+    __tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().textContains("{}")')
+    __items = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol")')
+    __item_by_name = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").text("{}")')
+    __star_icon_by_symbol = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("chart-star-symbol")')
+    __btn_symbol_remove = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().text("Remove")')
+    __selected_item = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("symbol-overview-id").text("{}")')
 
     # ------------------------ ACTIONS ------------------------ 
 

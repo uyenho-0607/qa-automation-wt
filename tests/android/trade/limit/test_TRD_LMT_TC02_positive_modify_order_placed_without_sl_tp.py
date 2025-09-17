@@ -1,9 +1,8 @@
 import pytest
 
 from src.data.enums import AssetTabs
-from src.data.enums import SLTPType, OrderType
+from src.data.enums import SLTPType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -17,8 +16,8 @@ from src.utils.logging_utils import logger
         ("SL, TP", *SLTPType.random_values(amount=2)),
     ]
 )
-def test(android, symbol, edit_field, sl_type, tp_type, create_order_data, close_edit_confirmation):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, stop_loss=0, take_profit=0)
+def test(android, limit_obj, edit_field, sl_type, tp_type, create_order_data, cancel_all):
+    trade_object = limit_obj(stop_loss=0, take_profit=0)
     # -------------------
 
     logger.info("Step 1: Place order without SL and TP")
@@ -31,7 +30,7 @@ def test(android, symbol, edit_field, sl_type, tp_type, create_order_data, close
     android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
 
     logger.info(f"Step 3: Update placed order with {edit_field!r}")
-    android.trade_screen.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    android.trade_screen.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade edit confirmation")
     android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)
@@ -40,7 +39,7 @@ def test(android, symbol, edit_field, sl_type, tp_type, create_order_data, close
     android.trade_screen.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info("Step 5: Select Pending Orders tab")
     android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
