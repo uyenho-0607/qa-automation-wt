@@ -5,7 +5,7 @@ from src.data.consts import EXPLICIT_WAIT
 from src.data.enums import Features
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
 
@@ -44,18 +44,18 @@ class BaseScreen:
             self.initialized = True
 
     # ------------------------ LOCATORS ------------------------ #
-    __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
-    __alert_success = (AppiumBy.XPATH, "//*[@resource-id='alert-success']")
-
-    __alert_box = (AppiumBy.XPATH, "//*[@resource-id='notification-box']")
-    __alert_title = (AppiumBy.XPATH, "//*[@resource-id='notification-box-title']")
-    __alert_desc = (AppiumBy.XPATH, "//*[@resource-id='notification-box-description']")
-    __alert_box_close = (AppiumBy.XPATH, "//*[@resource-id='notification-box-close']")
-    __btn_nav_back = (AppiumBy.XPATH, "//*[@resource-id='navigation-back-button']")
-    __spin_loader = (AppiumBy.XPATH, resource_id('spin-loader'))
-    __home_nav_option = (AppiumBy.XPATH, '//android.view.ViewGroup[contains(@content-desc, "{}")]')
-    __btn_confirm = (AppiumBy.XPATH, "//*[translate(@content-desc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[translate(@content-desc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
+    __alert_error = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("alert-error")')
+    __alert_success = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("alert-success")')
+    __alert_box = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("notification-box")')
+    __alert_title = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("notification-box-title")')
+    __alert_desc = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("notification-box-description")')
+    __alert_box_close = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("notification-box-close")')
+    __btn_nav_back = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("navigation-back-button")')
+    __spin_loader = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("spin-loader")')
+    __opt_home_nav = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("home-nav-option-{}")')
+    __opt_side_bar = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("side-bar-option-{}")')
+    __btn_confirm = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("confirm")')
+    __btn_cancel = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("cancel")')
 
     # ------------------------ ACTIONS ------------------------ #
     def go_back(self):
@@ -68,9 +68,9 @@ class BaseScreen:
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def navigate_to(self, feature: Features, wait=False):
-        self.actions.click(cook_element(self.__home_nav_option, feature))
-        if wait:
-            self.wait_for_spin_loader()
+        locator = self.__opt_home_nav if feature in feature.home_nav_list() else self.__opt_side_bar
+        self.actions.click(cook_element(locator, feature.lower()))
+        not wait or self.wait_for_spin_loader()
 
     def click_confirm_btn(self):
         self.actions.click(self.__btn_confirm)
