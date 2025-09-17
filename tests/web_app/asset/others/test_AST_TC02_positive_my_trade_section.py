@@ -42,13 +42,13 @@ def test(web_app, setup_test):
 def setup_test(web_app):
     logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
 
-    logger.info("- Send API request to get current placed Markets orders")
+    logger.info("- Send API request to get current placed Markets orders", setup=True)
     order_details = APIClient().order.get_orders_details(order_type=OrderType.MARKET, exclude_issue_symbols=False)
 
     if len(order_details) < 5:
         amount = 5 - len(order_details)
 
-        logger.debug(f"- No market order available, Place {amount} new orders")
+        logger.debug(f"- No market order available, Place {amount} new orders", setup=True)
         symbols = random.choices(ObjSymbol().get_symbols(get_all=True), k=amount)
         for _symbol in symbols:
             APIClient().trade.post_order(ObjTrade(symbol=_symbol, order_type=OrderType.MARKET), update_price=False)
@@ -58,7 +58,7 @@ def setup_test(web_app):
     symbols = [item["symbol"] for item in order_details][:5]
 
 
-    logger.info(f">> Setup Summary: 5 latest placed Market orders: {', ' .join(symbols)}")
+    logger.info(f">> Setup Summary: 5 latest placed Market orders: {', ' .join(symbols)}", setup=True)
     logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield symbols

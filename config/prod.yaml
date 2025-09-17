@@ -8,7 +8,6 @@ ios_udid: ""
 
 lirunex:
   base_url: https://webtrader.lirunex.com
-  api_url: https://webtrader.lirunex.com/api
 
   credentials:
     mt4:
@@ -23,7 +22,6 @@ lirunex:
 
 dcodemarkets:
   base_url: https://webtrader.dcodemarkets.com
-  api_url: https://webtrader.dcodemarkets.com/api
 
   credentials:
     mt5:

@@ -24,11 +24,7 @@ class MarketsPage(BasePage):
     __symbol_row_text = (By.XPATH, "//div[@data-testid='{}-symbol' and text()='{}']")
     __news_content = (By.CSS_SELECTOR, data_testid('market-news-content-text'))
 
-    __redirect_arrow = (
-        By.XPATH,
-        "//span[@data-testid='market-section-title' and text()='{}']"
-        "/ancestor::div/*[@data-testid='market-section-show-more']"
-    )
+    __redirect_arrow = (By.CSS_SELECTOR, data_testid('market-section-show-more'))
     __btn_symbol_preference = (By.CSS_SELECTOR, data_testid('symbol-preference'))
     __chb_show_all = (
         By.XPATH, "//div[@data-testid='symbol-preference-select-all-{}']//div"
