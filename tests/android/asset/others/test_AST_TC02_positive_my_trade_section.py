@@ -1,4 +1,3 @@
-import random
 import time
 
 import pytest
@@ -11,9 +10,9 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, setup_order_data):
+def test(android, setup_test):
 
-    symbols = setup_order_data
+    symbols = setup_test
 
     logger.info("Step 1: Navigate to Asset Screen")
     android.home_screen.navigate_to(Features.ASSETS)
@@ -36,15 +35,24 @@ def test(android, setup_order_data):
 
 
 @pytest.fixture
-def setup_order_data(android):
+def setup_test(android):
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+    logger.info("- Send API request to get current placed Markets orders", setup=True)
+    order_details = APIClient().order.get_orders_details(order_type=OrderType.MARKET, exclude_issue_symbols=False)
 
-    symbols = ObjSymbol(amount=5).get_symbol()
-    logger.info(f"- Place 5 order for list symbol: {symbols}")
-    for _symbol in symbols:
-        trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)
-        APIClient().trade.post_order(trade_object, update_price=False)
+    if len(order_details) < 5:
+        amount = 5 - len(order_details)
 
-    logger.info("- Navigate to Home Page")
-    android.assets_screen.navigate_to(Features.HOME)
+        logger.info(f"- No market order available, Place {amount} new orders", setup=True)
+        symbols = ObjSymbol(amount=5).get_symbol()
+        for _symbol in symbols:
+            APIClient().trade.post_order(ObjTrade(symbol=_symbol, order_type=OrderType.MARKET), update_price=False)
+
+        order_details = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
+
+    symbols = [item["symbol"] for item in order_details][:5]
+
+    logger.info(f">> Setup Summary: 5 latest placed Market orders: {', ' .join(symbols)}", setup=True)
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
     yield symbols
