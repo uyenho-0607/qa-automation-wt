@@ -7,13 +7,13 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, setup):
-    exp_account_summary, acc_details = setup
+def test(android, setup_test):
 
     logger.info("Step 1: Open My Account modal")
     android.home_screen.open_my_account()
 
     logger.info("Verify account summary against api data")
+    exp_account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     android.home_screen.my_account_modal.verify_account_info(exp_account_summary)
 
     logger.info("Step 2: Close My Account modal")
@@ -24,14 +24,15 @@ def test(android, setup):
 
 
 @pytest.fixture
-def setup(android, symbol):
+def setup_test(android, symbol):
+    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
+
     logger.info("- Place order to make sure account has Margin Level")
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
-    APIClient().trade.post_order(trade_object)
+    APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
 
-    account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
-    account_details = APIClient().user.get_user_account()
+    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
 
-    yield account_summary, account_details
-    logger.info("- Close My Account modal")
+    yield
+
+    logger.info("[Cleanup] Close My Account modal (if open)")
     android.home_screen.my_account_modal.close()
