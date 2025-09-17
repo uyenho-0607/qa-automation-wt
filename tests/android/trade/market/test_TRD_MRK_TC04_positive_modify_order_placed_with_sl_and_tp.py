@@ -1,8 +1,7 @@
 import pytest
 
-from src.data.enums import SLTPType, OrderType, AssetTabs
+from src.data.enums import SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
@@ -15,8 +14,8 @@ from src.utils.logging_utils import logger
         SLTPType.sample_values(amount=2),
     ]
 )
-def test(android, symbol, create_order_data, sl_type, tp_type, close_edit_confirmation):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(android, market_obj, create_order_data, sl_type, tp_type, cancel_all):
+    trade_object = market_obj()
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL and TP")
@@ -26,7 +25,7 @@ def test(android, symbol, create_order_data, sl_type, tp_type, close_edit_confir
     android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
 
     logger.info(f"Step 2: Update order with sl_type: {sl_type.capitalize()!r} - tp_type: {tp_type.capitalize()!r}")
-    android.trade_screen.modals.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    android.trade_screen.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade edit confirmation")
     android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)
@@ -35,7 +34,7 @@ def test(android, symbol, create_order_data, sl_type, tp_type, close_edit_confir
     android.trade_screen.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify order details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

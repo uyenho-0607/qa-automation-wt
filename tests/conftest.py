@@ -14,7 +14,9 @@ def symbol():
 
     logger.info("- Get and select symbol to use through test package", setup=True)
     logger.debug(f"- Filtered symbol list: {(symbols := ObjSymbol().get_symbols())}")
-    logger.debug(f"- Random selected symbol: {(select_symbol := random.choice(symbols))!r}")
+    select_symbol = "AVAX.USD"
+
+    # logger.debug(f"- Random selected symbol: {(select_symbol := random.choice(symbols))!r}")
 
     logger.info(f"{'=' * 10} Setup Symbol Data - Done {'=' * 10}")
     return select_symbol
