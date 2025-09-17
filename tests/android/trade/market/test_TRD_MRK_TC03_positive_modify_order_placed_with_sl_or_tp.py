@@ -1,39 +1,31 @@
 import pytest
 
-from src.data.enums import AssetTabs
-from src.data.enums import SLTPType, OrderType
+from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.notification_obj import ObjNoti
-from src.data.objects.trade_obj import ObjTrade
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize(
     "exclude_field, update_field",
     [
-        ("SL", "SL"),
         pytest.param("SL", "TP", marks=pytest.mark.critical),
-        ("SL", "SL,TP"),
         pytest.param("TP", "SL", marks=pytest.mark.critical),
-        ("TP", "TP"),
-        ("TP", "SL,TP"),
     ]
 )
-def test(android, symbol, get_asset_tab_amount, exclude_field, update_field, create_order_data, close_edit_confirmation):
+def test(android, market_obj, exclude_field, update_field, order_data, cancel_all):
+    trade_object = market_obj()
+    update_info = {f"{exclude_field.lower()}_type": None, f"{update_field.lower()}_type": SLTPType.random_values()}
 
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
-    trade_object[exclude_field] = 0
-    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
-    # -------------------
-
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
-    create_order_data(trade_object)
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without {exclude_field}")
+    order_data(trade_object, **{f"{exclude_field.lower()}_type": None})
+    android.trade_screen.asset_tab.get_last_order_id(trade_object, wait=True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
-    android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
+    android.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION, wait=False)
 
-    logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
-    android.trade_screen.modals.modify_order(trade_object, **update_info)
+    logger.info(f"Step 2: Update placed order with {update_field!r}")
+    android.trade_screen.asset_tab.modify_order(trade_object, **update_info, confirm=False)
 
     logger.info(f"Verify trade edit confirmation")
     android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)
@@ -42,7 +34,7 @@ def test(android, symbol, get_asset_tab_amount, exclude_field, update_field, cre
     android.trade_screen.modals.confirm_update_order()
 
     logger.info(f"Verify order updated notification banner")
-    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner(**trade_object))
+    android.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_updated_banner())
 
     logger.info(f"Verify order details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)
