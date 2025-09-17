@@ -7,27 +7,28 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.parametrize(
-    "sl_type, tp_type",
+    "exclude_field, update_field",
     [
-        pytest.param(SLTPType.POINTS, SLTPType.POINTS, marks=pytest.mark.critical),
-        pytest.param(SLTPType.PRICE, SLTPType.PRICE, marks=pytest.mark.critical),
+        pytest.param("SL", "TP", marks=pytest.mark.critical),
+        pytest.param("TP", "SL", marks=pytest.mark.critical),
     ]
 )
-def test(android, stop_obj, sl_type, tp_type, order_data, cancel_all):
-    trade_object = stop_obj()
+def test(android, stop_limit_obj, exclude_field, update_field, order_data, cancel_all):
+    trade_object = stop_limit_obj()
+    update_info = {f"{exclude_field.lower()}_type": None, f"{update_field.lower()}_type": SLTPType.random_values()}
 
-    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")
-    order_data(trade_object, SLTPType.PRICE, SLTPType.PRICE)
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without {exclude_field}")
+    order_data(trade_object, **{f"{exclude_field.lower()}_type": None})
 
     logger.info("Step 2: Select Pending Orders tab")
     android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
     trade_object.order_id = android.trade_screen.asset_tab.get_last_order_id(AssetTabs.PENDING_ORDER, wait=True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
-    android.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.PENDING_ORDER, False)
+    android.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.PENDING_ORDER, wait=False)
 
-    logger.info(f"Step 3: Update order with sl_type: {sl_type.capitalize()!r} - tp_type: {tp_type.capitalize()!r}")
-    android.trade_screen.asset_tab.modify_order(trade_object, sl_type, tp_type, confirm=False)
+    logger.info(f"Step 3: Update placed order with {update_field!r}")
+    android.trade_screen.asset_tab.modify_order(trade_object, **update_info, confirm=False)
 
     logger.info(f"Verify trade edit confirmation")
     android.trade_screen.modals.verify_edit_trade_confirmation(trade_object)

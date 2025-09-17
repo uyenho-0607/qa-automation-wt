@@ -223,7 +223,7 @@ class AssetTab(BaseTrade):
         if submit:
             self.click_confirm_btn()
         else:
-            self.click_cancel_btn()
+            self.click_cancel_btn(cancel_all=False)
 
     def modify_order(
             self,
