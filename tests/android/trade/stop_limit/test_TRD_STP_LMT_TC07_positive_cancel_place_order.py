@@ -1,16 +1,16 @@
 import pytest
 
-from src.data.enums import AssetTabs, OrderType, SLTPType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs, SLTPType
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, symbol, get_asset_tab_amount):
-    trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
+def test(android, stop_limit_obj, get_asset_tab_amount):
+    trade_object = stop_limit_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} order")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")
     android.trade_screen.place_order_panel.place_order(trade_object, sl_type=SLTPType.sample_values(), tp_type=SLTPType.sample_values())
 
     logger.info("Step 2: Cancel Place Order")
