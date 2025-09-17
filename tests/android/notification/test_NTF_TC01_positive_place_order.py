@@ -12,10 +12,10 @@ def test(android, symbol, get_asset_tab_amount, get_notification_tab_amount):
     # -------------------
 
     logger.info(f"Step 1: Place {trade_object.trade_type} order for {symbol!r}")
-    android.trade_screen.place_order_panel.place_order(trade_object, submit=True)
+    android.trade_screen.place_order_panel.place_order(trade_object, confirm=True)
 
     logger.info(f"Step 2: Get placed order_id = {trade_object.order_id!r}")
-    android.trade_screen.asset_tab.get_last_order_id(trade_object)
+    trade_object.order_id = android.trade_screen.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION)
 
     logger.info("Step 3: Navigate to Home Screen")
     android.home_screen.navigate_to(Features.HOME)

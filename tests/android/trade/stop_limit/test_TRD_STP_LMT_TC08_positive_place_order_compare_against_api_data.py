@@ -7,8 +7,8 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, limit_obj, get_asset_tab_amount, order_data, cancel_all):
-    trade_object = limit_obj()
+def test(android, stop_limit_obj, get_asset_tab_amount, order_data, cancel_all):
+    trade_object = stop_limit_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} (tab amount: {tab_amount!r})")
