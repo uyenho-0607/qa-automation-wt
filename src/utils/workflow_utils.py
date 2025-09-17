@@ -164,7 +164,7 @@ Handle test directories
 """
 
 
-def collect_runtest_folders(platform="web", module="", test_marker="critical", custom_option=""):
+def collect_critical_folders(platform="web", module="", test_marker="critical", custom_option=""):
     platform = platform.replace("-", "_")
     test_root = ROOTDIR / "tests" / platform / module
     test_folders = set()
@@ -277,14 +277,3 @@ def output_session_id():
         return session_id
 
     return None
-
-# if __name__ == '__main__':
-#     tmp = GoogleSheetsAPI()
-#     account = tmp.get_accounts(
-#         sheet_url="https://docs.google.com/spreadsheets/d/1AlxtJKUWiE6Amya2o0FMvaYlx_htq0XsBAZZ2luOgtM",
-#         clients="lirunex", account_type="live"
-#     )
-#
-#     dirs = collect_runtest_folders(module="login", custom_option="-k positive")
-#     res = assign_dirs_to_accounts(account, dirs, num_of_pod=3)
-#     breakpoint()
