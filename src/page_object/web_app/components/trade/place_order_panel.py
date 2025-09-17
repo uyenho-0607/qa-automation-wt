@@ -92,10 +92,7 @@ class PlaceOrderPanel(BaseTrade):
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
         if enable:
-            if submit:
-                self.agree_and_continue()
-            else:
-                self.click_cancel_btn()
+            self.confirm_oct(confirm=submit)
 
     def open_pre_trade_details(self):
         self.actions.click(self.__btn_pre_trade_details)
