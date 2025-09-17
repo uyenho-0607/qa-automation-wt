@@ -19,6 +19,7 @@ from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom
     delete_container_files, custom_setup_teardown
 from src.utils.logging_utils import logger, setup_logging
 
+RECORD_VIDEO = False
 
 def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--env", default="sit", help="Environment to run tests (sit, release_sit, uat)")
@@ -31,11 +32,13 @@ def pytest_addoption(parser: pytest.Parser):
     parser.addoption("--url", help="Custom tenant url")
     parser.addoption("--browser", default="chrome", help="Browser for web tests (chrome, firefox, safari)")
     parser.addoption("--headless", action="store_true", help="Run browser in headless mode")
+    parser.addoption("--enable_cdp", help="Enable dev tool to log API requests")
 
     # for testing chart render time
     parser.addoption("--charttime", default="", help="Allow maximum chart render time")
     parser.addoption("--cd", action="store_true", help="Whether to choose driver to run on argo cd")
     parser.addoption("--debuglog", action="store_true", default=False, help="Whether to log the debug log to console")
+    parser.addoption("--video", action="store_true", default=False, help="Whether to record video locally")
 
 builtins.own_fixture = []
 
@@ -117,8 +120,11 @@ def pytest_sessionstart(session: pytest.Session):
     if session.config.getoption("charttime"):
         RuntimeConfig.charttime = int(session.config.getoption("charttime"))
 
+    # record video option
+    global RECORD_VIDEO
+    RECORD_VIDEO = session.config.getoption("video")
     # setup video folder
-    if RuntimeConfig.platform in ["android", "ios"] and RuntimeConfig.allure_dir:
+    if RuntimeConfig.allure_dir and RECORD_VIDEO:
         if os.path.exists(VIDEO_DIR):
             shutil.rmtree(VIDEO_DIR)
 
@@ -152,6 +158,10 @@ def pytest_runtest_setup(item: pytest.Item):
     parent_suite = RuntimeConfig.client.upper()
     allure.dynamic.parent_suite(parent_suite)
     allure.dynamic.suite(server.upper())
+
+    if sub_suite.lower() in ["chart"]:
+        RuntimeConfig.enable_cdp = True
+
     not sub_suite or allure.dynamic.sub_suite(sub_suite)
 
     if item.get_closest_marker("critical"):
@@ -231,7 +241,7 @@ def pytest_runtest_makereport(item, call):
 
     # Start recording at the beginning of the test`
     if driver and report.when == "setup":
-        if platform in ['android', 'ios'] and not RuntimeConfig.argo_cd:
+        if RECORD_VIDEO:
             if allure_dir and os.path.exists(ROOTDIR / allure_dir):
                 try:
                     driver.start_recording_screen(videoFps="60")
@@ -262,7 +272,7 @@ def pytest_runtest_makereport(item, call):
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             log_step_to_allure()  # show test steps on allure
 
-            if driver and RuntimeConfig.platform in ["android", "ios"] and not RuntimeConfig.argo_cd:
+            if driver and RECORD_VIDEO:
                 try:
                     # Attach video for mobile
                     attach_video(driver)
