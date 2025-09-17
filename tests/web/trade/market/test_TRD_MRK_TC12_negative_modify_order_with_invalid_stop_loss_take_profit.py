@@ -35,7 +35,7 @@ def test(web, invalid_field, close_edit_confirm_modal, setup_test):
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup_test(create_order_data, market_obj, symbol):
+def setup_test(create_order_data, symbol):
     trade_obj = ObjTrade(stop_loss=0, take_profit=0, symbol=symbol, order_type=OrderType.MARKET)
 
     logger.info(f"- Place {trade_obj.trade_type} Order")

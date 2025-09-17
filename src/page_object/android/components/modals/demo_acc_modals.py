@@ -27,7 +27,6 @@ class DemoAccountModal(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
     __opt_setting = (AppiumBy.ID, 'setting-option-{}')
-
     # DEMO ACCOUNT CREATION
     __txt_name = (AppiumBy.ID, 'demo-account-creation-modal-name')
     __txt_email = (AppiumBy.ID, 'demo-account-creation-modal-email')

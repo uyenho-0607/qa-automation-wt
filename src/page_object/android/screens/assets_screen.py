@@ -3,6 +3,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import AccInfo
 from src.page_object.android.base_screen import BaseScreen
+from src.page_object.android.components.trade.asset_tab import AssetTab
 from src.page_object.android.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
 from src.utils.format_utils import format_acc_balance
@@ -12,6 +13,7 @@ class AssetsScreen(BaseScreen):
     def __init__(self, actions: MobileActions):
         super().__init__(actions)
         self.watch_list = WatchList(actions)
+        self.tab = AssetTab(actions)
 
     # ------------------------ LOCATORS ------------------------ #
     __acc_name = (AppiumBy.ID, 'account-name')
