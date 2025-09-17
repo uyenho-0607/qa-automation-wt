@@ -1,24 +1,24 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs
-from src.data.enums import SLTPType, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs, SLTPType
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, symbol, create_order_data):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(android, market_obj, order_data):
+    trade_object = market_obj()
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
-    create_order_data(trade_object)
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without SL and TP")
+    order_data(trade_object, None, None)
+    trade_object.order_id = android.trade_screen.asset_tab.get_last_order_id(AssetTabs.PENDING_ORDER, wait=True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
-    android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
+    android.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION, wait=False)
 
     logger.info(f"Step 2: Modify order with SL and TP")
-    android.trade_screen.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
+    android.trade_screen.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
 
     logger.info(f"Verify item details after update")
     android.trade_screen.asset_tab.verify_item_data(trade_object)

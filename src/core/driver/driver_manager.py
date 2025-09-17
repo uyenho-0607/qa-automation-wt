@@ -19,7 +19,7 @@ class DriverManager:
                 _driver = WebDriver.init_driver(
                     browser=kwargs.get("browser", RuntimeConfig.browser),
                     headless=kwargs.get("headless", RuntimeConfig.headless),
-                    enable_cdp=False
+                    enable_cdp=RuntimeConfig.enable_cdp
                 )
                 return _driver
 
