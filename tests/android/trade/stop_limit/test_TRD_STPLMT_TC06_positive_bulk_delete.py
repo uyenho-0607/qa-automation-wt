@@ -3,7 +3,7 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-def test(android, symbol, setup_bulk_test, cancel_bulk_delete):
+def test(android, symbol, setup_bulk_test, cancel_all):
     order_ids = setup_bulk_test(order_type=OrderType.STOP_LIMIT)
     expected_amount = 0 if len(order_ids) <= 30 else 30 - len(order_ids)
     # -------------------
