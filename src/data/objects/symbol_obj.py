@@ -175,3 +175,4 @@ class ObjSymbol:
         market_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
         pending_orders = APIClient().order.get_orders_details(order_type=OrderType.LIMIT)
         return market_orders + pending_orders
+
