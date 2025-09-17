@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
         (SLTPType.PRICE, SLTPType.PRICE)
     ]
 )
-def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
+def test(ios, cancel_all, market_obj, sl_type, tp_type, get_asset_tab_amount):
     trade_object = market_obj()
 
     tab = AssetTabs.OPEN_POSITION
@@ -24,7 +24,7 @@ def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place order {format_display_dict(trade_object)} - (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")
+    logger.info(f"Step 2: Place order: {format_display_dict(trade_object)} - (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")
     ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type, confirm=False)
 
     logger.info(f"Verify trade confirmation")
@@ -53,5 +53,5 @@ def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
 @pytest.fixture(autouse=True)
 def teardown(ios):
     yield
-    logger.info("[Setup] Navigate back to Trade Screen", teardown=True)
+    logger.info("[Cleanup] Navigate back to Trade Screen", teardown=True)
     ios.home_screen.navigate_to(Features.TRADE)

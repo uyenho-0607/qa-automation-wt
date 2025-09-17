@@ -15,7 +15,7 @@ def test(ios, symbol, get_asset_tab_amount):
     logger.info("Step 1: Get tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place order {format_display_dict(trade_object)} via OCT form (tab:{tab_amount})")
+    logger.info(f"Step 2: Place order: {format_display_dict(trade_object)} via OCT form (tab:{tab_amount})")
     ios.trade_screen.place_order_panel.place_oct_order(trade_object)
 
     logger.info("Verify Order Submitted Notification banner")
