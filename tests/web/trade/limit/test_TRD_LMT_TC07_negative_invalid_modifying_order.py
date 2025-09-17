@@ -1,5 +1,7 @@
 import pytest
 
+from src.data.enums import OrderType
+from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
 from src.utils.logging_utils import logger
 
@@ -26,15 +28,15 @@ def test(web, invalid_field, expected_message, close_edit_confirm_modal, setup_t
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
     logger.info(f"Step 1: Modify order with {invalid_field!r}")
-    web.trade_page.modals.modify_invalid_order(trade_object, **invalid_dict, submit=True)
+    web.trade_page.asset_tab.modify_invalid_order(trade_object, **invalid_dict, submit=True)
 
     logger.info("Verify invalid notification banner")
     web.home_page.notifications.verify_notification_banner(UIMessages.INVALID_ORDER_BANNER_TITLE, expected_message)
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup_test(create_order_data, limit_obj):
-    trade_object = limit_obj(stop_loss=0, take_profit=0)
+def setup_test(create_order_data, symbol,):
+    trade_object = ObjTrade(symbol=symbol, order_type=OrderType.LIMIT, stop_loss=0, take_profit=0)
 
     logger.info(f"- Place {trade_object.trade_type} Order")
     create_order_data(trade_object)

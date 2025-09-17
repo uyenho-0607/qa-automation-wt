@@ -65,7 +65,7 @@ class ObjSymbol:
     def _get_disabled_symbols(cls) -> None:
         """Check all current placed orders with isEnable = False"""
         orders = cls._get_all_orders()
-        cls.ISSUED = {item["symbol"] for item in orders if not item["isEnable"]}
+        cls.ISSUED = {item["symbol"] for item in orders if not item["isEnable"] or not item["editable"] or not item["closable"]}
         cls._issue_loaded = True
 
         if cls.ISSUED:
@@ -170,5 +170,5 @@ class ObjSymbol:
         from src.apis.api_client import APIClient
         market_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
         pending_orders = APIClient().order.get_orders_details(order_type=OrderType.LIMIT)
-
         return market_orders + pending_orders
+
