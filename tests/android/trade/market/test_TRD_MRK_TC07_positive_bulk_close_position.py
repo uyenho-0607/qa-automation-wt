@@ -5,7 +5,6 @@ from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 @pytest.mark.parametrize("bulk_close_option", list(BulkCloseOpts))
 def test(android, symbol, setup_bulk_test, cancel_bulk_close, bulk_close_option):
     order_ids = setup_bulk_test(order_type=OrderType.MARKET)

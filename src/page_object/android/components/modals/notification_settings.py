@@ -1,4 +1,4 @@
-from selenium.webdriver.common.by import By
+from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums.home import NotiSettingsOpts
@@ -11,7 +11,7 @@ class NotificationSettingsModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __opt_setting = (By.XPATH, "//android.widget.TextView[@text='{}']/following-sibling::android.widget.Switch[1]")
+    __opt_setting = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']/following-sibling::android.widget.Switch[1]")
 
     # ------------------------ ACTIONS ------------------------ #
 
