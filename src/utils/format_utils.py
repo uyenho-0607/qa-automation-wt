@@ -43,7 +43,6 @@ def format_display_dict(data, flatten: bool = True) -> str:
         return json.dumps(converted_data, indent=2)
 
 
-
 def locator_format(value: str):
     """return the string as locator format: EX: Good Till Cancelled -> good-till-cancel"""
     return value.lower().replace(" ", "-").lower()

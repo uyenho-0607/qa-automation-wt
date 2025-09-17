@@ -35,7 +35,7 @@ class WebDriver:
                 if headless:
                     options.add_argument("--headless")
 
-                # 🔥 Enable Chrome DevTools Protocol if requested
+                # Enable Chrome DevTools Protocol if requested
                 if enable_cdp:
                     options.set_capability('goog:loggingPrefs', {'performance': 'ALL'})
 
@@ -97,8 +97,8 @@ class WebDriver:
                                     req_data = cls._request_times[request_id]
                                     req_data['response_time'] = duration
 
-                                    logger.info(f"=========> API /candlestick - {req_data['url']}")
-                                    logger.info(f"=========> Status: {req_data['status']} -- Response time: {req_data['response_time']:.2f} s")
+                                    logger.debug(f"=========> API /candlestick - {req_data['url']}")
+                                    logger.debug(f"=========> Status: {req_data['status']} -- Response time: {req_data['response_time']:.2f} s")
 
                                     del cls._request_times[request_id]
 
