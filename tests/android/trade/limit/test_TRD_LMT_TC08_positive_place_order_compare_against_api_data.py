@@ -1,14 +1,13 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, symbol, get_asset_tab_amount, ):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
+def test(android, limit_obj, get_asset_tab_amount, cancel_all):
+    trade_object = limit_obj()
 
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)

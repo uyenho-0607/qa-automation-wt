@@ -11,7 +11,7 @@ from src.utils.logging_utils import logger
             random.choice([OrderType.STOP, OrderType.LIMIT]),
         ]
 ))
-def test(android, symbol, order_type, setup_bulk_asset_test, cancel_bulk_close):
+def test(android, symbol, order_type, setup_bulk_asset_test, cancel_all):
     tab_amount, order_ids = setup_bulk_asset_test(order_type=order_type)
     # -------------------
 

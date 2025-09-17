@@ -5,7 +5,7 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-def test(android, symbol, get_asset_tab_amount, cancel_delete_order, create_order_data):
+def test(android, symbol, get_asset_tab_amount, cancel_all, create_order_data):
     trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
     # ------------------- #
