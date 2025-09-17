@@ -164,7 +164,6 @@ class TradingModals(BaseTrade):
         if prices.stop_loss:
             self._input_edit_sl(prices.stop_loss, sl_type)
             trade_object.stop_loss = self._get_edit_sl() if sl_type == SLTPType.POINTS else prices.stop_loss
-
         # Scroll to bottom
         self.actions.scroll_down(0.4)
 

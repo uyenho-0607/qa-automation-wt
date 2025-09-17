@@ -1,5 +1,4 @@
 from src.apis.api_base import BaseAPI
-from src.data.consts import ISSUE_SYMBOLS
 from src.data.enums import AssetTabs, OrderType
 from src.utils.logging_utils import logger
 
@@ -35,9 +34,9 @@ class OrderAPI(BaseAPI):
         """
         Get order details of open positions or pending orders
         :param symbol: specific symbol
-        :param order_type: order type (Market, Limit, Stop, StopLimit)
+        :param order_type: order type (Market, Limit / Stop / StopLimit)
         :param order_id: specific order id, if provided, return order details by this order_id
-        :param exclude_issue_symbols: True if not count the ISSUE_SYMBOLS list
+        :param exclude_issue_symbols: True if not count the symbols with isEnable = False
         :return: Return all orders details for a specific symbol, or order details by order_id
         """
         tab = AssetTabs.get_tab(order_type)
@@ -45,11 +44,11 @@ class OrderAPI(BaseAPI):
         endpoint = self._pending_endpoint if tab == AssetTabs.PENDING_ORDER else self._open_endpoint
 
         logger.info(f"[API] Get placed order details: {tab.title()} - ({'All' if not symbol else f'symbol:{symbol}'})")
-        resp = self.get(endpoint, {"symbol": symbol}, fields_to_show=["orderId", "symbol", "takeProfit", "stopLoss"])
+        resp = self.get(endpoint, {"symbol": symbol}, fields_to_show=["orderId", "symbol", "takeProfit", "stopLoss", "isEnable"])
         resp = [item for item in resp if item['symbol']]
 
         if exclude_issue_symbols:
-            resp = [item for item in resp if item['symbol'] not in ISSUE_SYMBOLS]
+            resp = [item for item in resp if item['isEnable'] and item["closable"] and item["editable"]]
 
         if order_id:
             # return order details by order_id

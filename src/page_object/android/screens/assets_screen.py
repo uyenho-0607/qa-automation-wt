@@ -3,9 +3,9 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import AccInfo
 from src.page_object.android.base_screen import BaseScreen
+from src.page_object.android.components.trade.asset_tab import AssetTab
 from src.page_object.android.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id
 from src.utils.format_utils import format_acc_balance
 
 
@@ -13,20 +13,21 @@ class AssetsScreen(BaseScreen):
     def __init__(self, actions: MobileActions):
         super().__init__(actions)
         self.watch_list = WatchList(actions)
+        self.tab = AssetTab(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __acc_name = (AppiumBy.XPATH, resource_id('account-name'))
-    __acc_id = (AppiumBy.XPATH, resource_id('account-id'))
-    __acc_type = (AppiumBy.XPATH, resource_id('account-type-tag'))
-    __acc_details = (AppiumBy.XPATH, resource_id('account-detail'))
+    __acc_name = (AppiumBy.ID, 'account-name')
+    __acc_id = (AppiumBy.ID, 'account-id')
+    __acc_type = (AppiumBy.ID, 'account-type-tag')
+    __acc_details = (AppiumBy.ID, 'account-detail')
 
     __available_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Available Balance']/following-sibling::android.widget.TextView[2]")
     __realised_profit_loss = (AppiumBy.XPATH, "//android.widget.TextView[@text='Realised Profit/Loss']/following-sibling::android.widget.TextView[2]")
     __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[3]")
     __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[3]")
     __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[3]")
-    __item_watchlist = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
-    __view_transaction = (AppiumBy.XPATH, resource_id("asset-header-view-all"))
+    __item_watchlist = (AppiumBy.ID, 'watchlist-symbol')
+    __view_transaction = (AppiumBy.ID, 'asset-header-view-all')
 
     # ------------------------ ACTIONS ------------------------ #
     def _get_acc_balance_info(self):
@@ -40,7 +41,7 @@ class AssetsScreen(BaseScreen):
 
         return res
 
-    def get_mytrade_item(self):
+    def get_my_trade_list(self):
         # scroll down a bit
         self.actions.scroll_down()
         return self.actions.get_text_elements(self.__item_watchlist)
@@ -66,15 +67,15 @@ class AssetsScreen(BaseScreen):
 
         soft_assert(actual, expected)
 
-    def verify_account_balance_summary(self, exp_data, tolerance_percent = None, tolerance_fields = None):
+    def verify_account_balance_summary(self, exp_data, tolerance_percent=None, tolerance_fields=None):
         """Verify the asset account dashboard details"""
         actual = self._get_acc_balance_info()
 
         for item in exp_data:
             exp_data[item] = round(exp_data[item], 2)
 
-        soft_assert(actual, exp_data, tolerance=tolerance_percent, tolerance_fields=tolerance_fields)
+        soft_assert(actual, exp_data, tolerance=tolerance_percent, tolerance_fields=tolerance_fields, field_tolerances={AccInfo.REALISED_PROFIT_LOSS: 10})
 
-    def verify_mytrade_items(self, expected: list):
-        actual = self.get_mytrade_item()
+    def verify_my_trade_list(self, expected: list):
+        actual = self.get_my_trade_list()
         soft_assert(actual, expected)

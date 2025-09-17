@@ -25,20 +25,20 @@ class Settings(BaseScreen):
         self.link_switch_modal = LinkSwitchModal(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __btn_account_selector = (AppiumBy.XPATH, "//*[@resource-id='account-selector']")
-    __txt_account_name = (AppiumBy.XPATH, "//*[@resource-id='account-name']")
-    __txt_account_id = (AppiumBy.XPATH, "//*[@resource-id='account-id']")
-    __txt_account_detail = (AppiumBy.XPATH, "//*[@resource-id='account-detail']")
+    __btn_account_selector = (AppiumBy.ID, 'account-selector')
+    __txt_account_name = (AppiumBy.ID, 'account-name')
+    __txt_account_id = (AppiumBy.ID, 'account-id')
+    __txt_account_detail = (AppiumBy.ID, 'account-detail')
 
     # Settings
-    __opt_setting = (AppiumBy.XPATH, "//*[@resource-id='setting-option-{}']")
+    __opt_setting = (AppiumBy.ID, 'setting-option-{}')
     __switch_one_click_trading = (AppiumBy.XPATH, "//*[@resource-id='setting-option-oct']//android.widget.Switch")
-    __opt_language = (AppiumBy.XPATH, "//*[@content-desc='{}']")
-    __opt_theme = (AppiumBy.XPATH, "//*[contains(@content-desc, '{}')]")
-    __demo_acc = (AppiumBy.XPATH, "//android.widget.TextView[@text='Demo Account']")
-    __btn_help_support = (AppiumBy.XPATH, "//*[@resource-id='setting-option-help-support']")
-    __btn_about = (AppiumBy.XPATH, "//*[@resource-id='setting-option-about']")
-    __btn_logout = (AppiumBy.XPATH, "//*[@resource-id='account-logout']")
+    __opt_language = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("{}")')
+    __opt_theme = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("{}")')
+    __demo_acc = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().text("Demo Account")')
+    __btn_help_support = (AppiumBy.ID, 'setting-option-help-support')
+    __btn_about = (AppiumBy.ID, 'setting-option-about')
+    __btn_logout = (AppiumBy.ID, 'account-logout')
 
     # ------------------------ ACTIONS ------------------------ #
     def __open_setting(self):
