@@ -4,7 +4,7 @@ import pytest
 
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_app_container import WebAppContainer
-from src.data.consts import FAILED_ICON_COLOR
+from src.data.consts import FAILED_ICON_COLOR, QUICK_WAIT
 from src.utils.logging_utils import logger
 
 
@@ -96,7 +96,7 @@ def cancel_all(web_app):
 def cancel_edit_order(web_app):
     yield
     logger.info("[Cleanup] Cancel edit order if any", teardown=True)
-    web_app.trade_page.modals.cancel_edit_order()
+    web_app.trade_page.modals.confirm_update_order(confirm=False, timeout=QUICK_WAIT)
 
 
 @pytest.fixture

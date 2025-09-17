@@ -30,8 +30,8 @@ lirunex:
       user_demo: 569203282
 
   mobile:
-    app_package: com.aquariux.uat.lirunex
-    app_bundle: ...
+    app_package: com.aquariux.lirunex.uat
+    app_bundle: com.aquariux.lirunex.uat
 
 transactCloud:
   base_url: https://transactcloudmt5-mb.webtrader-uat.s20ip12.com
@@ -44,4 +44,4 @@ transactCloud:
 
   mobile:
     app_package: com.aquariux.wt.uat.transactcloudmt5
-    app_bundle: ...
+    app_bundle: com.aquariux.wt.uat.transactcloudmt5

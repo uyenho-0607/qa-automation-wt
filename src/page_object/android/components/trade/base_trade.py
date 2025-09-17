@@ -8,6 +8,7 @@ from src.data.enums import TradeType
 from src.page_object.android.base_screen import BaseScreen
 from src.utils import DotDict
 from src.utils.common_utils import resource_id, cook_element
+from src.utils.logging_utils import logger
 
 
 class BaseTrade(BaseScreen):
@@ -48,23 +49,19 @@ class BaseTrade(BaseScreen):
         return live_price if live_price else 0
 
     # One Click Trading Modal Actions
-    def agree_and_continue(self):
-        """Confirm the one-click trading action."""
-        self.actions.click(self.__btn_oct_confirm)
-
-    def click_cancel_oct_btn(self):
-        """Cancel the one-click trading action."""
-        self.actions.click(self.__btn_oct_cancel)
+    def confirm_oct(self, confirm=True):
+        """Confirm enable OCT or not"""
+        logger.debug(f"- Confirm enable OCT: {confirm!r}")
+        self.actions.click(self.__btn_oct_confirm if confirm else self.__btn_oct_cancel)
 
     # Trade Confirmation Modal Actions
-    def confirm_trade(self):
-        """Confirm the trade in the trade confirmation modal, give trade_object to update the current price for more precise"""
-        self.actions.click(self.__btn_trade_confirm)
-
-    def close_trade_confirm_modal(self, timeout=EXPLICIT_WAIT):
-        time.sleep(1)
-        self.actions.click(self.__btn_cancel_trade, timeout=timeout, raise_exception=False, show_log=False)
-
+    def confirm_trade(self, confirm=True, timeout=EXPLICIT_WAIT):
+        """
+        Confirm the trade in the trade confirmation modal.
+        In case of canceling placing order -> set cancel = True
+        """
+        logger.debug(f"- Confirm place order: {confirm!r}")
+        self.actions.click(self.__btn_trade_confirm if confirm else self.__btn_trade_close, timeout=timeout, raise_exception=not confirm, show_log=not confirm)
 
     def confirm_close_order(self):
         """Confirm close order action."""
