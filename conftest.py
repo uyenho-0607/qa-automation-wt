@@ -160,7 +160,7 @@ def pytest_runtest_setup(item: pytest.Item):
         item.add_marker(f"user: {RuntimeConfig.user}")
 
     if item.get_closest_marker("non_oms") and not RuntimeConfig.is_non_oms():
-        pytest.skip("This test is for Non-OMS server only !")
+        pytest.skip("This test is for Non-OMS Tenant only !")
 
     if item.get_closest_marker("not_demo") and RuntimeConfig.is_demo():
         pytest.skip("This test is not for demo account !")
@@ -245,9 +245,15 @@ def pytest_runtest_makereport(item, call):
             attach_screenshot(driver, name="setup")
             logger.error(f"Test setup failed: {report.longreprtext}")
 
+        if report.skipped:
+            attach_screenshot(driver, name="setup")
+
 
     # Handle test completion
     if report.when == "call":
+        if report.skipped:
+            attach_screenshot(driver, name="skip")
+
         # record last step stop time
         if StepLogs.steps_with_time.get(StepLogs.TEST_ID):
             StepLogs.steps_with_time[StepLogs.TEST_ID].append(("stop", now()))

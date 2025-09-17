@@ -95,33 +95,33 @@ def cancel_all(web_app):
 @pytest.fixture
 def cancel_edit_order(web_app):
     yield
-    logger.debug("[Cleanup] Cancel edit order if any", teardown=True)
+    logger.info("[Cleanup] Cancel edit order if any", teardown=True)
     web_app.trade_page.modals.cancel_edit_order()
 
 
 @pytest.fixture
 def cancel_close_order(web_app):
     yield
-    logger.debug("[Cleanup] Cancel close order if any", teardown=True)
+    logger.info("[Cleanup] Cancel close order if any", teardown=True)
     web_app.trade_page.modals.cancel_close_order()
 
 
 @pytest.fixture
 def cancel_delete_order(web_app):
     yield
-    logger.debug("[Cleanup] Cancel delete order if any", teardown=True)
+    logger.info("[Cleanup] Cancel delete order if any", teardown=True)
     web_app.trade_page.modals.cancel_delete_order()
 
 
 @pytest.fixture
 def cancel_bulk_delete(web_app):
     yield
-    logger.debug("[Cleanup] Cancel bulk delete orders if any", teardown=True)
+    logger.info("[Cleanup] Cancel bulk delete orders if any", teardown=True)
     web_app.trade_page.modals.cancel_bulk_delete()
 
 
 @pytest.fixture
 def cancel_bulk_close(web_app):
     yield
-    logger.debug("[Cleanup] Cancel bulk close orders if any")
+    logger.info("[Cleanup] Cancel bulk close orders if any")
     web_app.trade_page.modals.cancel_bulk_close()

@@ -4,10 +4,11 @@ from src.data.enums import AssetTabs, SLTPType
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.skip
 @pytest.mark.critical
 def test(web, stop_obj, get_asset_tab_amount, close_confirm_modal):
     """This test is covered in Limit package"""
+    pytest.skip("This test already covered in Limit suite")
+
     trade_object = stop_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
