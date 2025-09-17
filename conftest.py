@@ -18,6 +18,7 @@ from src.data.project_info import DriverList, RuntimeConfig, StepLogs
 from src.utils.allure_utils import attach_screenshot, log_step_to_allure, custom_allure_report, attach_video, \
     delete_container_files, custom_setup_teardown
 from src.utils.logging_utils import logger, setup_logging
+from src.utils.workflow_utils import get_session_id
 
 RECORD_VIDEO = False
 
@@ -205,6 +206,7 @@ def pytest_runtest_setup(item: pytest.Item):
 def pytest_sessionfinish(session: pytest.Session):
     logger.debug("===== pytest_sessionfinish ==== ")
 
+    get_session_id()
     DriverManager.quit_driver(RuntimeConfig.platform)
     allure_dir = RuntimeConfig.allure_dir
 
