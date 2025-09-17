@@ -51,7 +51,7 @@ def test(android, symbol, get_notification_tab_amount):
     logger.info(f"Expected remaining after partial close: vol={trade_object.volume}, units={trade_object.units}")
 
     logger.info(f"Step 6: Get latest order_id")
-    android.trade_screen.asset_tab.get_last_order_id(trade_object)
+    trade_object.order_id = android.trade_screen.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION)
     logger.info(f"Got updated order_id = {trade_object.order_id!r}")
 
     logger.info("Step 7: Navigate to Home screen")
