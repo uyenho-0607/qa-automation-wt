@@ -1,20 +1,19 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, symbol, get_asset_tab_amount, ):
-    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
+def test(android, limit_obj, get_asset_tab_amount, cancel_all):
+    trade_object = limit_obj()
 
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 2: Place {trade_object.trade_type} order (tab amount: {tab_amount!r})")
-    android.trade_screen.place_order_panel.place_order(trade_object, submit=True)
+    android.trade_screen.place_order_panel.place_order(trade_object, confirm=True)
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)

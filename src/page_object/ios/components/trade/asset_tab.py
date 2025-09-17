@@ -9,7 +9,7 @@ from src.data.project_info import RuntimeConfig
 from src.page_object.ios.components.modals.trading_modals import TradingModals
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, log_page_source
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number
 from src.utils.logging_utils import logger
 
@@ -42,7 +42,7 @@ class AssetTab(BaseTrade):
     __btn_action = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-button-{}")  # tab: open, pending, history - action: close, edit
     __btn_action_by_id = (
         AppiumBy.IOS_CLASS_CHAIN,
-        '**/XCUIElementTypeOther[`name CONTAINS "{}"`]/**/XCUIElementTypeOther[`name == "%s"`]' % __btn_action[1] # orderID - tab - action
+        '**/XCUIElementTypeOther[`name CONTAINS "{}"`]/**/XCUIElementTypeOther[`name == "%s"`]' % __btn_action[1]  # orderID - tab - action
     )
     __txt_close_volume = (AppiumBy.ACCESSIBILITY_ID, "close-order-input-volume")
 
@@ -73,10 +73,9 @@ class AssetTab(BaseTrade):
         logger.debug(f"- Lastest orderID: {order_id!r}")
         return order_id
 
-    def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade, wait=True):
+    def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade):
         """Get latest data for placed order"""
-        not wait or self.wait_for_spin_loader()
-
+        # not wait or self.wait_for_spin_loader()
         if trade_object.get("order_id"):
             logger.debug(f"- Wait for order: {trade_object.order_id} display")
             self.actions.wait_for_element_visible(cook_element(self.__item_by_id, tab.col_locator(), trade_object.order_id))
@@ -156,14 +155,14 @@ class AssetTab(BaseTrade):
         # Click edit button
         self._click_action_btn(trade_object.order_id, tab)
 
-        # Fill edit order information
-        self.__trade_modals.fill_updated_order(trade_object, sl_type, tp_type)
+        # Fill edit order modal
+        self.__trade_modals.fill_update_order(trade_object, sl_type, tp_type)
 
-        # Click update order
+        # Click update order button
         self.__trade_modals.click_update_order_btn()
 
-        if confirm:
-            self.click_confirm_btn()
+        # confirm update order
+        not confirm or self.click_confirm_btn()
 
     # ------------------------ VERIFY ------------------------ #
     def verify_tab_amount(self, tab: AssetTabs, exp_amount):
@@ -187,5 +186,5 @@ class AssetTab(BaseTrade):
             expected["price"] = expected.pop("entry_price", None)
 
         # handle actual
-        actual = self.get_expand_item_data(tab, trade_object, wait=False)
+        actual = self.get_expand_item_data(tab, trade_object)
         soft_assert(actual, expected, check_contains=True, tolerance=1, tolerance_fields=trade_object.tolerance_fields())
