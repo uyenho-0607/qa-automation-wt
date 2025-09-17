@@ -34,8 +34,8 @@ def test_cancel_enable(web_app):
 
 
 @pytest.fixture(autouse=True, scope="module")
-def cleanup_test():
+def cleanup_test(web_app):
     yield
-    logger.info("[Cleanup] Enable OCT mode for other tests")
-    APIClient().user.patch_oct(enable=True)
+    logger.info("[Cleanup] Enable OCT mode for other tests", teardown=True)
+    web_app.trade_page.place_order_panel.toggle_oct(enable=True)
 

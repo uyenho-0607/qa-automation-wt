@@ -111,9 +111,9 @@ def custom_allure_report(allure_dir: str) -> None:
                 data = json.load(f)
 
             # Skip processing and delete file if test status is skipped
-            if data.get("status") == "skipped":
-                _remove_skipped_tests(file_path)
-                continue
+            # if data.get("status") == "skipped":
+            #     _remove_skipped_tests(file_path)
+            #     continue
 
             _process_test_time(data)
             _add_attachments_prop(data)  # add empty attachments prop for each test report
@@ -193,7 +193,7 @@ def custom_setup_teardown(allure_dir):
 
         if container_file.name not in builtins.container_uid:
             # Setup
-            if any(data['befores'][0]['name'] in d for d in StepLogs.setup_steps):
+            if any(data.get('befores', [{}])[0].get('name', "") in d for d in StepLogs.setup_steps):
                 _inject_steps(data, "befores", StepLogs.setup_steps)
 
             # Teardown
@@ -286,10 +286,10 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
                     filter(lambda x: x["name"] == "broken", data.get("attachments", []))
                 ))
 
-        # cleanup init message if step is not failed
-        for item in data.get("steps", []):
-            if "verify" in item["name"].lower() and item["status"] != "failed":
-                item.pop("statusDetails", None)
+    # cleanup init message if step is not failed
+    for item in data.get("steps", []):
+        if "verify" in item["name"].lower() and item["status"] != "failed":
+            item.pop("statusDetails", None)
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
@@ -315,7 +315,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     # Clean up attachments and status details
     if data.get("attachments"):
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup"]]
+        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup", "skipped"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(

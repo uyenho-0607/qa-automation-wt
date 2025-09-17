@@ -9,8 +9,20 @@ from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup(login_member_site):
-    pass
+def setup(login_member_site, web_app):
+
+    logger.info("[Setup] Select any symbol from watch list", setup=True)
+    web_app.home_page.watch_list.select_last_symbol()
+
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = web_app.trade_page.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
+        web_app.trade_page.place_order_panel.toggle_oct(enable=False, submit=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 
 @pytest.fixture
