@@ -22,7 +22,7 @@ def test(android, symbol, create_order_data):
     android.trade_screen.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
     
     logger.info(f"Step 3: Modify order with SL and TP")
-    android.trade_screen.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), expiry=Expiry.sample_values(OrderType.STOP), confirm=True)
+    android.trade_screen.modals.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
 
     logger.info("Step 4: Select Pending Order tab")
     android.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)

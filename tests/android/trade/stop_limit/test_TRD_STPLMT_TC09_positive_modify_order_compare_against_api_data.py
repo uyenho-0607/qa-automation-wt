@@ -9,7 +9,7 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.order(2)
 @pytest.mark.critical
-def test(android, symbol, create_order_data, close_edit_confirmation, cancel_edit_order):
+def test(android, symbol, create_order_data, close_edit_confirmation, cancel_all):
     trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
 
     logger.info(f"Step 1: Place {trade_object.trade_type} Order")

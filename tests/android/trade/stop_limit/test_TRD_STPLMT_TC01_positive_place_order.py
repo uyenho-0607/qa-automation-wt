@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
         SLTPType.sample_values(amount=2)
     ]
 )
-def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
+def test(android, symbol, get_asset_tab_amount, sl_type, tp_type, cancel_all):
     trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol)
 
     logger.info("Step 1: Get asset tab amount")
@@ -42,10 +42,3 @@ def test(android, symbol, get_asset_tab_amount, sl_type, tp_type):
 
     logger.info(f"Verify order details in Pending Order tab")
     android.trade_screen.asset_tab.verify_item_data(trade_object)
-
-
-@pytest.fixture(autouse=True)
-def teardown_test(android):
-    yield
-    logger.info("- Teardown test")
-    android.trade_screen.place_order_panel.click_cancel_btn()

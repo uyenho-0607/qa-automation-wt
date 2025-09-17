@@ -14,7 +14,7 @@ def test(android, symbol, get_asset_tab_amount, ):
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 2: Place {trade_object.trade_type} order (tab amount: {tab_amount!r})")
-    android.trade_screen.place_order_panel.place_order(trade_object, submit=True)
+    android.trade_screen.place_order_panel.place_order(trade_object, confirm=True)
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     android.trade_screen.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
