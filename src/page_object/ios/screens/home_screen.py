@@ -52,10 +52,16 @@ class HomeScreen(BaseScreen):
     __empty_search_result = (AppiumBy.XPATH, "//XCUIElementTypeStaticText[@name='No items available']")
 
     # ------------------------ ACTIONS ------------------------ #
+    def show_screen_by_nav_back(self):
+        """Back to home screen using navigation back button"""
+        max_attempts = 5
+        while not self.on_home_screen() and max_attempts:
+            max_attempts -= 1
+            self.go_back()
 
-    def is_logged_in(self):
+    def on_home_screen(self):
         res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
-        log_msg = "- Home Page is displayed" if res else f"- Home Page is not displayed, wait time: {wait_time} sec"
+        log_msg = "- Home Screen is displayed" if res else f"- Home Screen is not displayed, wait time: {wait_time} sec"
         logger.debug(log_msg)
         return res
 

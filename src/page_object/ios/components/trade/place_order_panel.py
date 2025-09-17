@@ -36,7 +36,7 @@ class PlaceOrderPanel(BaseTrade):
     __expiry_date = (AppiumBy.ACCESSIBILITY_ID, "trade-input-expiry-date")
 
     __txt_volume = (AppiumBy.ACCESSIBILITY_ID, "trade-input-volume")
-    __units = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name BEGINSWITH 'Units'`]")
+    __lbl_units_volume = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name BEGINSWITH 'Units'`]") # value of units/ volume (NOT the input value)
     __txt_price = (AppiumBy.ACCESSIBILITY_ID, "trade-input-price")
     __txt_stop_limit_price = (AppiumBy.ACCESSIBILITY_ID, "trade-input-stop-limit-price")
     __txt_sl = (AppiumBy.ACCESSIBILITY_ID, "trade-input-stoploss-{}")  # points or price
@@ -61,8 +61,8 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Input TP as Price: {value!r}")
         return value
 
-    def _get_units(self):
-        value = self.actions.get_attribute(self.__units, "label").split(" ")[-1]
+    def _get_vol_info_value(self):
+        value = self.actions.get_attribute(self.__lbl_units_volume, "label").split(" ")[-1]
         logger.debug(f"- Units is: {value!r}")
         return value
 
@@ -73,8 +73,8 @@ class PlaceOrderPanel(BaseTrade):
         if is_enabled != enable:
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
-        if enable:
-            self.confirm_oct(submit)
+            if enable:
+                self.confirm_oct(submit)
 
     def open_pre_trade_details(self):
         logger.debug("- Open pre-trade details")
@@ -86,16 +86,16 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_order_type(self, order_type: OrderType, retries=3):
         # check current selected order_type
+        if retries <= 0:
+            logger.warning(f"- Failed to select order type: {order_type.value.title()} after retries")
+            return
+
         cur_order_type = self.actions.get_attribute(self.__drp_order_type, "label")
         cur_order_type = " ".join(cur_order_type.split(" ")[:-1])  # handle unexpected icon
         is_select = order_type.lower() == cur_order_type.lower()
 
         if is_select:
             logger.debug(f"- Order Type: {order_type.value.title()!r} selected")
-            return
-
-        if retries <= 0:
-            logger.warning(f"- Failed to select order type: {order_type.value.title()} after retries")
             return
 
         logger.info(f"- Selecting order type: {order_type.value.title()!r}")
@@ -106,16 +106,16 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_fill_policy(self, fill_policy: FillPolicy, retries=3):
         # check current fill policy
+        if retries <= 0:
+            logger.warning(f"- Failed to select fill policy: {fill_policy.value.title()!r} after retries")
+            return
+
         cur_fp = self.actions.get_attribute(self.__drp_fill_policy, "label")
         cur_fp = " ".join(cur_fp.split(" ")[:-1])
         is_select = fill_policy.lower() == cur_fp
 
         if is_select:
             logger.debug(f"- Fill Policy: {fill_policy.value.title()!r} selected")
-            return
-
-        if retries <= 0:
-            logger.warning(f"- Failed to select fill policy: {fill_policy.value.title()!r} after retries")
             return
 
         logger.info(f"- Selecting fill policy: {fill_policy.value.title()!r}")
@@ -125,16 +125,16 @@ class PlaceOrderPanel(BaseTrade):
 
     def _select_expiry(self, expiry: Expiry, retries=3):
         # check current selected expiry
+        if retries <= 0:
+            logger.warning(f"- Failed to select expiry: {expiry.value.title()!r} after retries")
+            return
+
         cur_expiry = self.actions.get_attribute(self.__drp_expiry, "label")
         cur_expiry = " ".join(cur_expiry.split(" ")[:-1])
         is_select = cur_expiry.lower() == expiry.lower()
 
         if is_select:
             logger.debug(f"- Expiry: {expiry.value.title()!r} selected")
-            return
-
-        if retries <= 0:
-            logger.warning(f"- Failed to select expiry: {expiry.value.title()!r} after retries")
             return
 
         logger.info(f"- Selecting expiry: {expiry.value.title()!r}")

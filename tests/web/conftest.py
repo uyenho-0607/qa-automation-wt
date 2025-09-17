@@ -38,7 +38,7 @@ def login_member_site(web):
 
     logger.info("- Check if logged in success", setup=True)
     for attempt in range(max_attempts):
-        if not web.home_page.is_logged_in():
+        if not web.home_page.on_home_page():
 
             logger.warning(f"- Login failed, refresh page and login again (attempt: {attempt + 1})")
             web.login_page.refresh_page()
@@ -52,7 +52,7 @@ def login_member_site(web):
         else:
             break
 
-        if attempt == max_attempts - 1 and not web.home_page.is_logged_in():
+        if attempt == max_attempts - 1 and not web.home_page.on_home_page():
             # login one more time to catch the screenshot
             web.login_page.login()
             raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")

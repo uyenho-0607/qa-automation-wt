@@ -124,6 +124,7 @@ class PlaceOrderPanel(BaseTrade):
         if is_enabled == enable:
             return
         self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
+        # todo: recheck
         if enable:
             if submit:
                 self.agree_and_continue()

@@ -155,7 +155,7 @@ class AssetTab(BaseTrade):
 
     def delete_order(self, trade_object: ObjTrade, confirm=True, wait=False) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
-        if not trade_object.get("order_id"):
+        if trade_object and not trade_object.get("order_id"):
             self.get_last_order_id(trade_object)
 
         logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
