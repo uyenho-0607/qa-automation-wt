@@ -7,7 +7,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, symbol, get_asset_tab_amount, cancel_delete_order, create_order_data):
+def test(android, symbol, get_asset_tab_amount, cancel_all, create_order_data):
     trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
 
     logger.info("Step 1: Get asset tab amount")
