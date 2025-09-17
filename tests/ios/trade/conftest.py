@@ -1,5 +1,8 @@
+from contextlib import suppress
+
 import pytest
 
+from src.data.consts import SHORT_WAIT
 from src.data.enums import OrderType, SLTPType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
@@ -55,3 +58,11 @@ def prepare_place_order(ios, market_obj):
         ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type)
 
     return handler
+
+
+@pytest.fixture
+def cancel_all(ios):
+    yield
+    logger.info("[Cleanup] Click cancel button (if any)", teardown=True)
+    with suppress(Exception):
+        ios.trade_screen.click_cancel_btn(timeout=SHORT_WAIT)

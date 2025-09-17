@@ -10,22 +10,24 @@ from src.utils.logging_utils import logger
 
 @pytest.fixture(scope="package", autouse=True)
 def setup_trade_test(login_wt_app, android, symbol):
-    logger.info(f"[Setup] Select symbol: {symbol!r}")
+
+    logger.info(f"[Setup] Search and select symbol: {symbol!r}", setup=True)
     android.home_screen.search_and_select_symbol(symbol)
 
 
 @pytest.fixture
 def create_order_data(android):
     def _handler(trade_object):
-        tab_amount = android.trade_screen.asset_tab.get_tab_amount(AssetTabs.get_tab(trade_object.order_type))
+        tab = AssetTabs.get_tab(trade_object.order_type)
+        current_amount = android.trade_screen.asset_tab.get_tab_amount(tab)
 
         logger.info(f"- POST {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order")
         res = APIClient().trade.post_order(trade_object)
 
-        logger.info("- Wait for tab amount to increase")
-        android.trade_screen.asset_tab.wait_for_tab_amount(AssetTabs.get_tab(trade_object.order_type), tab_amount + 1)
+        # Loading new created data
+        android.trade_screen.asset_tab.wait_for_tab_amount(tab, expected_amount=current_amount + 1)
 
-        return res
+        return res, current_amount + 1
 
     return _handler
 

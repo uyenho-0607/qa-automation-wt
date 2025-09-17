@@ -63,7 +63,8 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Input TP as Price: {value!r}")
         return value
 
-    def _get_vol_info_value(self):
+    def _get_volume_info_value(self):
+        """Get corresponding value of units/ volume"""
         value = self.actions.get_attribute(self.__lbl_units_volume, "label").split(" ")[-1]
         logger.debug(f"- Units is: {value!r}")
         return value
@@ -74,14 +75,14 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- OCT enabled in Admin config: {is_enable!r}")
         return is_enable
 
-    def toggle_oct(self, enable=True, submit=True):
+    def toggle_oct(self, enable=True, confirm=True):
         # Check current OCT state
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=QUICK_WAIT)
         if is_enabled != enable:
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
             if enable:
-                self.confirm_oct(submit)
+                self.confirm_oct(confirm)
 
     def open_pre_trade_details(self):
         logger.debug("- Open pre-trade details")
@@ -226,7 +227,7 @@ class PlaceOrderPanel(BaseTrade):
         # Set volume property for object
         trade_object.volume = trade_object.get("volume") or random.randint(1, 5)
         self._input_volume(trade_object.volume)
-        trade_object.units = self._get_vol_info_value()
+        trade_object.units = self._get_volume_info_value()
 
         # Calculate price
         prices = calculate_trading_params(
@@ -278,7 +279,7 @@ class PlaceOrderPanel(BaseTrade):
         trade_object |= {k: v for k, v in trade_details.items()}
 
         # click place order button
-        self.actions.click(self.__btn_place_order)
+        self._click_place_order_btn()
 
         if confirm:
             self.confirm_trade()
