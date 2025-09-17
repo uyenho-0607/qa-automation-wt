@@ -1,76 +1,85 @@
+from contextlib import suppress
+
 import pytest
 
-from src.apis.api_client import APIClient
-from src.core.actions.mobile_actions import MobileActions
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.android_container import AndroidContainer
+from src.data.consts import FAILED_ICON_COLOR, QUICK_WAIT
 from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package")
 def android():
-    logger.info("[Setup] Init Android driver")
+    logger.info("[Setup] Init Android driver", setup=True)
     DriverManager.get_driver()
 
     yield AndroidContainer()
 
-    logger.info("[Cleanup] Quit Android driver")
+    logger.info("[Cleanup] Quit Android driver", teardown=True)
     DriverManager.quit_driver()
 
-    logger.info("[Cleanup] Stop Appium service")
+    logger.info("[Cleanup] Stop Appium service", teardown=True)
     AppiumDriver.stop_appium_service()
 
 
 @pytest.fixture(scope="package")
 def login_wt_app(android):
-    logger.info(f"- Login to WT App")
-    android.login_screen.login(wait=True)
-    android.home_screen.feature_anm_modal.got_it()
+    max_retries = 3
+    logger.info("[Setup] Login to WT app", setup=True)
+
+    for attempt in range(1, max_retries + 1):
+        with suppress(Exception):
+            android.login_screen.login(wait=True)
+            android.home_screen.feature_anm_modal.got_it()
+
+        # check if login success
+        if android.home_screen.on_home_screen():
+            break  # Success → stop retrying
+        else:
+            logger.warning(f"[Setup] Login attempt {attempt} failed")
+            # Click ok btn if any before retrying
+            android.login_screen.click_ok_btn()
+
+        if attempt == max_retries:
+            # Final attempt failed → capture screenshot + raise error
+            android.login_screen.login()
+            raise RuntimeError(f"Setup test failed! Unable to login to WT {FAILED_ICON_COLOR}")
 
 
+# cleanup trade test
 @pytest.fixture
-def cancel_delete_order(android):
+def cancel_all(android):
     yield
-    logger.debug("[Cleanup] Cancel delete order")
-    android.trade_screen.modals.cancel_delete_order()
-
-
-@pytest.fixture
-def cancel_close_order(android):
-    yield
-    logger.debug("[Cleanup] Cancel close order")
-    android.trade_screen.modals.cancel_close_order()
-
-
-@pytest.fixture
-def cancel_bulk_delete(android):
-    yield
-    logger.debug("[Cleanup] Cancel bulk delete orders")
-    android.trade_screen.modals.cancel_bulk_delete()
-
-
-@pytest.fixture
-def cancel_bulk_close(android):
-    yield
-    logger.debug("[Cleanup] Cancel bulk close orders")
-    android.trade_screen.modals.cancel_bulk_close()
-
-
-@pytest.fixture
-def cancel_edit_order(android):
-    yield
-    logger.debug("[Cleanup] Cancel edit order")
-    android.trade_screen.modals.cancel_edit_order()
+    logger.info("[Cleanup] Click cancel button (if any)", teardown=True)
+    with suppress(Exception):
+        android.trade_screen.click_cancel_btn(timeout=QUICK_WAIT)
 
 
 @pytest.fixture(scope="package")
-def disable_OCT():
-    logger.info("[Setup] Send API to disable OCT")
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(android):
+    """disable OCT from place order panel"""
+
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = android.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] Disable OCT", setup=True)
+        android.trade_screen.place_order_panel.toggle_oct(enable=False, confirm=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 
 @pytest.fixture(scope="package")
-def enable_OCT():
-    logger.info("[Setup] Send API to enable OCT")
-    APIClient().user.patch_oct(enable=True)
+def enable_OCT(android):
+    """enable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = android.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Enable OCT", setup=True)
+        android.trade_screen.place_order_panel.toggle_oct(enable=True, confirm=True)
+
+    else:
+        pytest.skip("OCT mode is disabled in Admin Config - SKIP this test ")
