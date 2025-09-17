@@ -8,28 +8,26 @@ pytestmark = [pytest.mark.critical]
 
 # Expected render time (seconds)
 EXP_TIME = RuntimeConfig.charttime
-SYMBOLS = "XAGUSD"
-# SYMBOLS = "AAPL"  # Market closed
 
 
 def test_default(android):
-    logger.info(f"Step 1: Get default render time")
+    logger.info(f"Step: Get default render time")
     elapsed = android.trade_screen.chart.get_default_render_time()
 
     logger.info(f"Verify first render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
     android.trade_screen.chart.verify_render_time(elapsed, EXP_TIME)
 
 
-@pytest.mark.parametrize("timeframe", ChartTimeframe.list_values())
+@pytest.mark.parametrize("timeframe", ChartTimeframe.crit_list())
 def test_timeframe(android, timeframe):
-    logger.info(f"Step 1: Select and get chart render time for timeframe: {timeframe.value!r}")
+    logger.info(f"Step: Select and get chart render time for timeframe: {timeframe.value!r}")
     elapsed = android.trade_screen.chart.get_timeframe_render_time(timeframe)
 
     logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
     android.trade_screen.chart.verify_render_time(elapsed, EXP_TIME)
 
 
-@pytest.mark.parametrize("timeframe", ChartTimeframe.list_values())
+@pytest.mark.parametrize("timeframe", ChartTimeframe.crit_list())
 def test_select_timeframe_repeatedly(android, timeframe):
     logger.info(f"Step: Continue select timeframe: {timeframe.value!r}")
     elapsed = android.trade_screen.chart.get_timeframe_render_time(timeframe)
@@ -39,8 +37,7 @@ def test_select_timeframe_repeatedly(android, timeframe):
 
 
 @pytest.fixture(scope="module", autouse=True)
-def setup_test(android):
-    logger.info(f"- Search and select symbol: {SYMBOLS}")
-    android.home_screen.search_and_select_symbol(SYMBOLS)
-
-    yield
+def setup_test(android, symbol):
+    
+    logger.info(f"- Search and select symbol: {symbol}", setup=True)
+    android.home_screen.search_and_select_symbol(symbol)
