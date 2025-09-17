@@ -47,6 +47,8 @@ def pytest_configure(config):
 
 def pytest_sessionstart(session: pytest.Session):
     RuntimeConfig.log_debug = session.config.getoption("debuglog")
+    RuntimeConfig.argo_cd = session.config.getoption("cd")
+
     if RuntimeConfig.log_debug:
         setup_logging(logging.DEBUG)
     else:
