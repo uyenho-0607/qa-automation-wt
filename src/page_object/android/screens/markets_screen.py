@@ -19,14 +19,14 @@ class MarketsScreen(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
 
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
+    __tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.TextView").textContains("{}")')
+    __horizontal_scroll_tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.HorizontalScrollView")')
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
     __chb_symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.widget.TextView[@text='{}']/preceding-sibling::android.view.ViewGroup[.//android.widget.TextView]")
-    __unchb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Show all']/android.view.ViewGroup")
-    __chb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, 'Show all')]/android.view.ViewGroup[android.widget.TextView]")
-    __btn_save_changes = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Save Changes']")
+    __unchb_show_all = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("Show all")')
+    __chb_show_all = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Show all")')
+    __btn_save_changes = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("Save Changes")')
 
     # ------------------------ ACTIONS ------------------------ #
 

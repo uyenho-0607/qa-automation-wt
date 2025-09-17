@@ -16,8 +16,8 @@ class Chart(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __candle_stick = (AppiumBy.XPATH, "//*[contains(@content-desc, 'Candlestick')]")
-    __timeframe = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']")
+    __candle_stick = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Candlestick")')
+    __timeframe = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().text("{}")')
     __chart_loading = (AppiumBy.XPATH, "//android.view.View[@resource-id='chart-root']/android.widget.TextView[1]")
 
     # ------------------------ ACTIONS ------------------------ #

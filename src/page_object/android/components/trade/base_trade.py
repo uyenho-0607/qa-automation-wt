@@ -7,7 +7,8 @@ from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
 from src.data.enums import TradeType
 from src.page_object.android.base_screen import BaseScreen
 from src.utils import DotDict
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
+from src.utils.logging_utils import logger
 
 
 class BaseTrade(BaseScreen):
@@ -15,18 +16,18 @@ class BaseTrade(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __live_price = (AppiumBy.XPATH, resource_id('trade-live-{}-price'))  # buy or sell market price
+    __live_price = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("trade-live-{}-price")')  # buy or sell market price
     __oct_live_price = (AppiumBy.XPATH, "//*[@resource-id='trade-button-oct-order-{}']/android.widget.TextView[2]")
     
     ##### One Click Trading Modal #####
-    __btn_oct_confirm = (AppiumBy.XPATH, resource_id('oct-modal-button-confirm'))
-    __btn_oct_cancel = (AppiumBy.XPATH, resource_id('oct-modal-button-cancel'))
+    __btn_oct_confirm = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("oct-modal-button-confirm")')
+    __btn_oct_cancel = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("oct-modal-button-cancel")')
 
     ##### Trade Confirmation Modal #####
-    __btn_trade_confirm = (AppiumBy.XPATH, resource_id('trade-confirmation-button-confirm'))
-    __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))
-    __btn_confirm_close_delete_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
-    __btn_cancel_trade = (AppiumBy.XPATH, "//*[translate(@text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
+    __btn_trade_confirm = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("trade-confirmation-button-confirm")')
+    __btn_trade_close = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("trade-confirmation-button-close")')
+    __btn_confirm_close_delete_order = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("close-order-button-submit")')
+    __btn_cancel_trade = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().textContains("cancel")')
 
     # ------------------------ ACTIONS ------------------------ #
     def get_live_price(
@@ -47,6 +48,17 @@ class BaseTrade(BaseScreen):
 
         return live_price if live_price else 0
 
+    def get_current_price(self, trade_object: DotDict, timeout=QUICK_WAIT):
+        """Get the current price for a placed order (reverse for order_type = Market).
+        """
+        from src.data.enums import OrderType
+        trade_type, order_type = trade_object.trade_type, trade_object.order_type
+        if order_type == OrderType.MARKET:
+            trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
+
+        current_price = self.actions.get_text(cook_element(self.__live_price, trade_type.lower()), timeout=timeout, raise_exception=False, show_log=False)
+        trade_object.current_price = current_price
+
     # One Click Trading Modal Actions
     def agree_and_continue(self):
         """Confirm the one-click trading action."""
@@ -57,12 +69,12 @@ class BaseTrade(BaseScreen):
         self.actions.click(self.__btn_oct_cancel)
 
     # Trade Confirmation Modal Actions
-    def confirm_trade(self):
-        """Confirm the trade in the trade confirmation modal, give trade_object to update the current price for more precise"""
-        self.actions.click(self.__btn_trade_confirm)
+    def confirm_trade(self, confirm=True, timeout=EXPLICIT_WAIT):
+        """Confirm the trade in the trade confirmation modal"""
+        logger.debug(f"- Confirm place order: {confirm!r}")
+        self.actions.click(self.__btn_trade_confirm if confirm else self.__btn_trade_close, timeout=timeout, raise_exception=not confirm, show_log=not confirm)
 
     def close_trade_confirm_modal(self, timeout=EXPLICIT_WAIT):
-        time.sleep(1)
         self.actions.click(self.__btn_cancel_trade, timeout=timeout, raise_exception=False, show_log=False)
 
 

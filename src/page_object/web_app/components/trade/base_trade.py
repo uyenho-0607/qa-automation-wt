@@ -48,7 +48,7 @@ class BaseTrade(BasePage):
         self.actions.click(self.__btn_oct_confirm, raise_exception=False)
 
     # Trade Confirmation Modal Actions
-    def confirm_trade(self):
+    def confirm_trade(self, confirm=True):
         """Confirm the trade in the trade confirmation modal, give trade_object to update the current price for more precise"""
         self.actions.click(self.__btn_trade_confirm)
 
