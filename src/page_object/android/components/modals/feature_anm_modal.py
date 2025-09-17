@@ -11,7 +11,7 @@ class FeatureAnnouncementModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __btn_got_it = (AppiumBy.XPATH, "//*[@resource-id='feature-announcement-modal-got-it-button']")
+    __btn_got_it = (AppiumBy.ID, 'feature-announcement-modal-got-it-button')
 
     # ------------------------ ACTIONS ------------------------ #
     def got_it(self):

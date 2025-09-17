@@ -73,10 +73,9 @@ class AssetTab(BaseTrade):
         logger.debug(f"- Lastest orderID: {order_id!r}")
         return order_id
 
-    def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade, wait=True):
+    def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade):
         """Get latest data for placed order"""
-        not wait or self.wait_for_spin_loader()
-
+        # not wait or self.wait_for_spin_loader()
         if trade_object.get("order_id"):
             logger.debug(f"- Wait for order: {trade_object.order_id} display")
             self.actions.wait_for_element_visible(cook_element(self.__item_by_id, tab.col_locator(), trade_object.order_id))

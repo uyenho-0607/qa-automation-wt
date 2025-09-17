@@ -16,7 +16,7 @@ from src.utils.logging_utils import logger
         (SLTPType.PRICE, SLTPType.PRICE)
     ]
 )
-def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
+def test(ios, cancel_all, market_obj, sl_type, tp_type, get_asset_tab_amount):
     trade_object = market_obj()
 
     tab = AssetTabs.OPEN_POSITION
@@ -53,5 +53,5 @@ def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
 @pytest.fixture(autouse=True)
 def teardown(ios):
     yield
-    logger.info("[Setup] Navigate back to Trade Screen", teardown=True)
+    logger.info("[Cleanup] Navigate back to Trade Screen", teardown=True)
     ios.home_screen.navigate_to(Features.TRADE)

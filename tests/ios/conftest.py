@@ -1,8 +1,6 @@
 from contextlib import suppress
 
 import pytest
-
-from src.apis.api_client import APIClient
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.ios_container import iOSContainer
