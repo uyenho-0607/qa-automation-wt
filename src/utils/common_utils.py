@@ -22,14 +22,14 @@ def log_page_source(name="page_source"):
 def get_connected_device(platform=None):
     platform = platform or RuntimeConfig.platform
     if platform == "android":
-        logger.info("Trying to get Android device")
+        logger.debug("Trying to get Android device")
         result = subprocess.run(['adb', 'devices'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = result.stdout.strip().split('\n')[1:]  # Skip the first line
         for line in lines:
             if line.strip() and 'device' in line:
                 return line.split()[0]  # Return the device ID
     else: # IOS
-        logger.info("Trying to get iOS device")
+        logger.debug("Trying to get iOS device")
         result = subprocess.run(['idevice_id', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = result.stdout.strip().split('\n')
         for line in lines:

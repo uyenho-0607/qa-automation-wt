@@ -26,7 +26,7 @@ lirunex:
 
     mt5:
       # user_live: ...
-      user_crm: mt5_automation31@mailinator.com
+      user_crm: mt5_automation46@mailinator.com
       user_demo: 569203282
 
   mobile:
@@ -44,4 +44,4 @@ transactCloud:
 
   mobile:
     app_package: com.aquariux.wt.uat.transactcloudmt5
-    app_bundle: com.aquariux.wt.uat.transactcloudmt5
+    app_bundle: com.aquariux.lirunex.uat

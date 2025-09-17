@@ -22,16 +22,14 @@ def test(android, tab):
     android.markets_screen.watch_list.select_symbol(select_symbol)
 
     logger.info(f"Verify symbol {select_symbol} is selected in chart")
-    android.trade_screen.verify_symbol_overview_id(select_symbol)
-
-
+    android.trade_screen.chart.verify_symbol_selected(select_symbol)
+    
 @pytest.fixture(autouse=True)
 def mark_star_symbol(tab, android):
     if tab == WatchListTab.FAVOURITES:
 
         logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
         logger.info("- Prepare starred symbols")
-
         for star_symbol in ObjSymbol().all_symbols[:3]:
             logger.info(f"> Mark star symbol: {star_symbol!r}", setup=True)
             APIClient().market.post_starred_symbol(star_symbol)
