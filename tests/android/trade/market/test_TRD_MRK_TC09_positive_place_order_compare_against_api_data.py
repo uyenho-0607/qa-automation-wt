@@ -1,14 +1,13 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, OrderType
-from src.data.objects.trade_obj import ObjTrade
+from src.data.enums import AssetTabs
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, symbol, get_asset_tab_amount, ):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(android, market_obj, get_asset_tab_amount, cancel_all):
+    trade_object = market_obj()
 
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
@@ -30,9 +29,3 @@ def test(android, symbol, get_asset_tab_amount, ):
     logger.info("Verify placed order against API data")
     android.trade_screen.verify_placed_order_data(trade_object, api_data)
 
-
-@pytest.fixture(autouse=True)
-def teardown_test(android):
-    yield
-    logger.info("- Teardown test")
-    android.trade_screen.place_order_panel.click_cancel_btn()
