@@ -1,4 +1,3 @@
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -6,7 +5,7 @@ from src.data.consts import QUICK_WAIT
 from src.data.enums import TradeType, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
-from src.utils.common_utils import resource_id, cook_element, data_testid
+from src.utils.common_utils import cook_element, data_testid
 from src.utils.logging_utils import logger
 
 
@@ -22,7 +21,7 @@ class BaseTrade(BasePage):
 
     ##### Trade Confirmation Modal #####
     __btn_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-confirm'))
-    __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))  # cancel trade btn
+    __btn_trade_close = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-close'))  # cancel trade btn
     __btn_confirm_close_delete_order = (By.CSS_SELECTOR, data_testid('close-order-button-submit'))
 
     # ------------------------ ACTIONS ------------------------ #

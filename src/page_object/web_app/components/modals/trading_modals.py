@@ -24,7 +24,6 @@ class TradingModals(BaseTrade):
     __confirm_symbol = (By.CSS_SELECTOR, data_testid('trade-confirmation-symbol'))
     __confirm_labels = (By.CSS_SELECTOR, data_testid('trade-confirmation-label'))
     __confirm_values = (By.CSS_SELECTOR, data_testid('trade-confirmation-value'))
-    __btn_cancel_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-close'))
 
     ##### Edit Trade Modal #####
     __btn_update_order = (By.CSS_SELECTOR, data_testid('edit-button-order'))
