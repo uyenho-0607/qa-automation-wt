@@ -205,6 +205,7 @@ def pytest_runtest_setup(item: pytest.Item):
 def pytest_sessionfinish(session: pytest.Session):
     logger.debug("===== pytest_sessionfinish ==== ")
 
+    get_session_id()
     DriverManager.quit_driver(RuntimeConfig.platform)
     allure_dir = RuntimeConfig.allure_dir
 
