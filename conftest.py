@@ -283,3 +283,13 @@ def pytest_fixture_post_finalizer(fixturedef, request):
         allure_dir = RuntimeConfig.allure_dir
         if allure_dir and os.path.exists(ROOTDIR / allure_dir):
             custom_setup_teardown(allure_dir)
+
+
+def pytest_runtest_logreport(report):
+    if report.when == "call":
+        printlog = logger.info if report.outcome == "passed" else logger.warning
+        print("\x00") # print a non-printable character to break a new line on console
+        printlog("-------------")  # noqa
+        printlog(f"Test case     | { report.nodeid.replace("::test", "")}")  # noqa
+        printlog(f"Test duration | {round(report.duration, 3)}s")  # noqa
+        printlog("-------------")
