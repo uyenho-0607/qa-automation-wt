@@ -33,7 +33,7 @@ def record_steps_log(func):
 
 logger = logging.getLogger("pythonLog")
 LOG_COLOR = {
-    logging.DEBUG: Fore.WHITE,
+    logging.DEBUG: Fore.LIGHTBLACK_EX,
     logging.INFO: Fore.GREEN,
     logging.WARNING: Fore.YELLOW,
     logging.ERROR: Fore.RED,

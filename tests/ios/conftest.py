@@ -30,7 +30,7 @@ def login_wt_app(ios):
 
     if not RuntimeConfig.argo_cd:
         # currently, cannot reset login state of app -> temporarily check if app is logged in -> perform logout
-        if ios.home_screen.is_logged_in():
+        if ios.home_screen.on_home_screen():
             logger.info("- App is logged in, logout first", setup=True)
             ios.home_screen.settings.logout()
 
@@ -47,7 +47,7 @@ def login_wt_app(ios):
 
 
     for attempt in range(max_retries + 1):
-        if not ios.home_screen.is_logged_in():
+        if not ios.home_screen.on_home_screen():
             with suppress(Exception):
                 logger.info("- Perform login again", setup=True)
                 ios.login_screen.login(wait=True)
@@ -56,7 +56,7 @@ def login_wt_app(ios):
         else:
             break
 
-        if attempt == max_retries - 1 and not ios.home_screen.is_logged_in():
+        if attempt == max_retries - 1 and not ios.home_screen.on_home_screen():
             # login one more time to catch the screenshot
             ios.login_screen.login()
             raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")

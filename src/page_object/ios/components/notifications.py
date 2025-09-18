@@ -1,15 +1,13 @@
-import time
+import re
+from contextlib import suppress
 
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common import TimeoutException
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT, SHORT_WAIT
-from src.data.objects.trade_obj import ObjTrade
+from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
 from src.page_object.ios.base_screen import BaseScreen
-from src.utils import DotDict
 from src.utils.assert_utils import soft_assert, compare_noti_with_tolerance
-from src.utils.common_utils import resource_id, log_page_source
+from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
 
@@ -18,36 +16,13 @@ class Notifications(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-
-    __noti_selector = (AppiumBy.XPATH, "//*[@name='notification-selector']")
+    __noti_selector = (AppiumBy.ACCESSIBILITY_ID, "notification-selector")
     __tab_noti = (AppiumBy.ACCESSIBILITY_ID, "tab-notification-type-{}")
     __noti_des = (AppiumBy.ACCESSIBILITY_ID, "notification-box-description")
     __noti_title = (AppiumBy.ACCESSIBILITY_ID, "notification-box-title")
     __noti_list_items = (AppiumBy.ACCESSIBILITY_ID, "notification-list-result-item")
-    __btn_close = (AppiumBy.ACCESSIBILITY_ID, "notification-box-close")
-
-    # Noti order details
-    __noti_details_order_type = (AppiumBy.ACCESSIBILITY_ID, "notification-order-details-modal-order-type")
-
-    __noti_details_symbol = (
-        AppiumBy.XPATH, "//*[@name='notification-order-details-label' and @label='Symbol']/following-sibling::*[1]"
-    )
-    __noti_details_volume = (
-        AppiumBy.XPATH,
-        "//*[@name='notification-order-details-label' and @label='Size' or @label='Volume']/following-sibling::*[1]"
-    )
-    __noti_details_units = (
-        AppiumBy.XPATH,
-        "//*[@name='notification-order-details-label' and @label='Units']/following-sibling::*[1]"
-    )
-    __noti_details_stop_loss = (
-        AppiumBy.XPATH,
-        "//*[@name='notification-order-details-label' and @label='Stop Loss']/following-sibling::*[1]"
-    )
-    __noti_details_take_profit = (
-        AppiumBy.XPATH,
-        "//*[@name='notification-order-details-label' and @label='Take Profit']/following-sibling::*[1]"
-    )
+    __btn_close_banner = (AppiumBy.ACCESSIBILITY_ID, "notification-box-close")
+    __noti_result = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeOther[`name == "notification-list-result-item" AND label CONTAINS "{}"`]')
 
     # ------------------------ ACTIONS ------------------------ #
     def open_notification_box(self):
@@ -55,53 +30,58 @@ class Notifications(BaseScreen):
             self.actions.click(self.__noti_selector)
 
     def close_noti_banner(self):
-        if self.actions.is_element_displayed(self.__btn_close, timeout=QUICK_WAIT):
-            try:
-                self.actions.click(self.__btn_close, show_log=False, raise_exception=False)
+        if self.actions.is_element_displayed(self.__btn_close_banner, timeout=QUICK_WAIT):
+            with suppress(Exception):
+                self.actions.click(self.__btn_close_banner, show_log=False, raise_exception=False)
 
-            except TimeoutException:
-                logger.debug("- Close button is not displayed, skip clicking")
+    def _get_open_position(self):
+        noti = cook_element(self.__noti_result, "Open Position")
+        return self.actions.get_text(noti)
+
+    def _get_position_closed(self):
+        noti = cook_element(self.__noti_result, "Position Closed")
+        return self.actions.get_text(noti)
 
     # ------------------------ VERIFY ------------------------ #
 
-    def verify_notification_banner(self, expected_title, expected_des=None):
+    def verify_notification_banner(self, expected_title="", expected_des="", timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        title = self.actions.find_element(self.__noti_title, raise_exception=False, timeout=SHORT_WAIT)
-        des = self.actions.find_element(self.__noti_des, raise_exception=False, timeout=SHORT_WAIT)
-
-        actual_title = title.text.strip() if title else ""
-        actual_des = des.text.strip() if des else ""
-
-        logger.debug(f"- Check noti_title equal: {expected_title!r}")
-        soft_assert(actual_title, expected_title)
-
         if expected_des:
-            logger.debug(f"- Check noti_des equal: {expected_des!r}")
+            logger.debug("- Fetching notification description")
+            actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
+
+            logger.debug(f"> Check noti des = {expected_des!r}")
             compare_noti_with_tolerance(actual_des, expected_des)
 
-    def verify_notification_result(self, expected_result: str | list, go_back=True):
+        if expected_title:
+            timeout = EXPLICIT_WAIT if not expected_des else QUICK_WAIT
+            logger.debug("- Fetching notification title")
+            actual_title = self.actions.get_text(self.__noti_title, timeout=timeout)
+
+            if not expected_des or actual_title:
+                logger.debug(f"> Check noti title - {expected_title!r}")
+                soft_assert(actual_title, expected_title)
+
+    def verify_notification_result(self, expected_result: str | list, close=True):
         self.open_notification_box()
-        actual_res = self.actions.get_content_desc(self.__noti_list_items).split(", ")[0].replace("  ", " ")
+
+        if "Open Position" in expected_result:
+            noti_res = self._get_open_position()
+
+        elif "Position Closed" in expected_result:
+            noti_res = self._get_position_closed()
+
+        else:
+            # get latest notification
+            noti_res = self.actions.get_text(self.__noti_list_items)
+
+        actual_res = noti_res.split(", ")[0].replace("  ", " ")
+        actual_res = actual_res.split("\n")[0]
+
+        pattern = r"^(.*?\d+(?:\.\d+)?)(?=\s+(?:a\s+few\s+seconds|a\s+day|an?\s+\w+|\d+\s+\w+)\s+ago)"
+        match = re.search(pattern, actual_res)
+        actual_res = match.group(1) if match else actual_res
+
         compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
-        not go_back or self.go_back()
-
-    def verify_notification_details(self, trade_object: ObjTrade):
-        self.actions.click(self.__noti_list_items)
-
-        actual = {
-            "order_type": self.actions.get_text(self.__noti_details_order_type),
-            "symbol": self.actions.get_text(self.__noti_details_symbol),
-            "volume": self.actions.get_text(self.__noti_details_volume),
-            "units": self.actions.get_text(self.__noti_details_units),
-            "stop_loss": self.actions.get_text(self.__noti_details_stop_loss),
-            "take_profit": self.actions.get_text(self.__noti_details_take_profit),
-        }
-
-        expected = {k: v for k, v in trade_object.items() if k in actual}
-        expected["order_type"] = f"{trade_object.trade_type.upper()} ORDER"
-
-        logger.debug("- Verify notification item details")
-        soft_assert(actual, expected)
-        self.go_back()
-        time.sleep(0.5)
-        self.go_back()
+        if close:
+            self.go_back()

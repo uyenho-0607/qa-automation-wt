@@ -1,11 +1,11 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT
 from src.data.enums import Features
 from src.data.ui_messages import UIMessages
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
 
@@ -46,31 +46,32 @@ class BaseScreen:
     # ------------------------ LOCATORS ------------------------ #
     __alert_error = (AppiumBy.ACCESSIBILITY_ID, "alert-error")
     __alert_success = (AppiumBy.ACCESSIBILITY_ID, "alert-success")
-
     __alert_box = (AppiumBy.ACCESSIBILITY_ID, "notification-box")
     __alert_title = (AppiumBy.ACCESSIBILITY_ID, "notification-box-title")
     __alert_desc = (AppiumBy.ACCESSIBILITY_ID, "notification-box-description")
     __alert_box_close = (AppiumBy.ACCESSIBILITY_ID, "notification-box-close")
     __btn_nav_back = (AppiumBy.ACCESSIBILITY_ID, "navigation-back-button")
     __spin_loader = (AppiumBy.ACCESSIBILITY_ID, 'spin-loader')
-    __home_nav_option = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, '{}')])[18]")
-    __btn_confirm = (AppiumBy.XPATH, "//*[@name='Confirm']")
-    __btn_cancel = (AppiumBy.XPATH, "//*[@name='Cancel']")
+
+    __opt_home_nav = (AppiumBy.ACCESSIBILITY_ID, "home-nav-option-{}")
+    __opt_side_bar = (AppiumBy.ACCESSIBILITY_ID, "side-bar-option-{}")
+    __btn_confirm = (AppiumBy.XPATH, "//*[translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='confirm']")
+    __btn_cancel = (AppiumBy.XPATH, "//*[translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
 
     # ------------------------ ACTIONS ------------------------ #
     def go_back(self):
-        self.actions.click(self.__btn_nav_back)
+        self.actions.click(self.__btn_nav_back, timeout=SHORT_WAIT, raise_exception=False)
 
     def wait_for_spin_loader(self, timeout: int = 20):
         """Wait for the loader to be invisible."""
-        logger.debug("- Waiting for spin loader...")
         if self.actions.is_element_displayed(self.__spin_loader, timeout=5):
+            logger.debug("- Wait for loading icon to disappear...")
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
     def navigate_to(self, feature: Features, wait=False):
-        self.actions.click(cook_element(self.__home_nav_option, feature))
-        if wait:
-            self.wait_for_spin_loader()
+        locator = self.__opt_home_nav if feature in feature.home_nav_list() else self.__opt_side_bar
+        self.actions.click(cook_element(locator, feature.lower()))
+        not wait or self.wait_for_spin_loader()
 
     def click_confirm_btn(self):
         self.actions.click(self.__btn_confirm)

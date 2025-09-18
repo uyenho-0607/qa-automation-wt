@@ -3,6 +3,7 @@ from src.data.objects.base_obj import BaseObj
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
+from src.utils.common_utils import log_page_source
 from src.utils.format_utils import remove_comma, format_str_price
 
 """

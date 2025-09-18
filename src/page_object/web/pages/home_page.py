@@ -56,9 +56,9 @@ class HomePage(BasePage):
     __empty_message = (By.CSS_SELECTOR, "div[data-testid='symbol-dropdown-result'] > div[data-testid='empty-message']")
 
     # ------------------------ ACTIONS ------------------------ #
-    def is_logged_in(self):
+    def on_home_page(self):
         res = self.actions.is_element_displayed(self.__account_selector, timeout=(wait_time := EXPLICIT_WAIT))
-        log_msg = "- Login successfully, Home Page is displayed" if res else f"- Login failed, Home Page is not displayed, wait time: {wait_time} sec"
+        log_msg = "- Home Page is displayed" if res else f"- Home Page is not displayed, wait time: {wait_time} sec"
         logger.debug(log_msg)
         return res
 
