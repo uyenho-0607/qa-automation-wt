@@ -1,3 +1,4 @@
+import re
 from contextlib import suppress
 
 from appium.webdriver.common.appiumby import AppiumBy
@@ -76,6 +77,10 @@ class Notifications(BaseScreen):
 
         actual_res = noti_res.split(", ")[0].replace("  ", " ")
         actual_res = actual_res.split("\n")[0]
+
+        pattern = r"^(.*?\d+(?:\.\d+)?)(?=\s+(?:a\s+few\s+seconds|a\s+day|an?\s+\w+|\d+\s+\w+)\s+ago)"
+        match = re.search(pattern, actual_res)
+        actual_res = match.group(1) if match else actual_res
 
         compare_noti_with_tolerance(actual_res, expected_result, is_banner=False)
         if close:
