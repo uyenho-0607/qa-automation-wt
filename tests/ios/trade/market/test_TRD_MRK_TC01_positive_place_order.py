@@ -18,7 +18,7 @@ from src.utils.logging_utils import logger
     ]
 )
 def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
-    trade_object = market_obj(is_units=True)
+    trade_object = market_obj()
 
     tab = AssetTabs.OPEN_POSITION
 

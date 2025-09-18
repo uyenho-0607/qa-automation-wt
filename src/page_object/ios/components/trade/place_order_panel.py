@@ -220,7 +220,7 @@ class PlaceOrderPanel(BaseTrade):
         # Input stop loss
         if prices.stop_loss:
             self._input_stop_loss(prices.stop_loss, sl_type)
-            trade_object.stop_loss = self._get_input_sl()
+            trade_object.stop_loss = self._get_input_sl() if sl_type == SLTPType.POINTS else prices.stop_loss
 
         # Scroll to bottom
         self.actions.scroll_down(0.4)
@@ -228,7 +228,7 @@ class PlaceOrderPanel(BaseTrade):
         # Input take profit
         if prices.take_profit:
             self._input_take_profit(prices.take_profit, tp_type)
-            trade_object.take_profit = self._get_input_tp()
+            trade_object.take_profit = self._get_input_tp() if tp_type == SLTPType.POINTS else prices.take_profit
 
         # Select expiry
         if trade_object.expiry:
