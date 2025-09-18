@@ -3,8 +3,8 @@ import time
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, SHORT_WAIT
-from src.data.enums import BulkCloseOpts, OrderType, SLTPType, Expiry
+from src.data.consts import QUICK_WAIT, SHORT_WAIT, EXPLICIT_WAIT
+from src.data.enums import OrderType, SLTPType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
@@ -24,9 +24,8 @@ class TradingModals(BaseTrade):
     __confirm_symbol = (By.CSS_SELECTOR, data_testid('trade-confirmation-symbol'))
     __confirm_labels = (By.CSS_SELECTOR, data_testid('trade-confirmation-label'))
     __confirm_values = (By.CSS_SELECTOR, data_testid('trade-confirmation-value'))
-    __btn_cancel_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-close'))
 
-    ##### Edit Confirmation Modal #####
+    ##### Edit Trade Modal #####
     __btn_update_order = (By.CSS_SELECTOR, data_testid('edit-button-order'))
     __btn_cancel_edit_order = (By.CSS_SELECTOR, data_testid('edit-button-cancel'))
     __txt_edit_sl = (By.CSS_SELECTOR, data_testid('edit-input-stoploss-{}'))  # price or points
@@ -39,7 +38,7 @@ class TradingModals(BaseTrade):
     __edit_expiry_date = (By.CSS_SELECTOR, data_testid('edit-input-expiry-date'))
     __edit_wheel_expiry_date = (By.CSS_SELECTOR, "div[class='datepicker-wheel']")
 
-    # Confirmation
+    # Edit Confirmation Modal
     __edit_symbol_price = (By.CSS_SELECTOR, data_testid('edit-symbol-price'))
     __edit_confirm_order_id = (By.CSS_SELECTOR, data_testid('edit-confirmation-order-id'))
     __edit_confirm_order_type = (By.CSS_SELECTOR, data_testid('edit-confirmation-order-type'))
@@ -58,13 +57,6 @@ class TradingModals(BaseTrade):
     __btn_bulk_close_cancel = (By.CSS_SELECTOR, data_testid('bulk-close-modal-button-cancel-all'))
 
     # ------------------------------------------------ ACTIONS ------------------------------------------------ #
-    def close_trade_confirm_modal(self, timeout=QUICK_WAIT):
-        self.actions.click(self.__btn_cancel_trade_confirm, timeout=timeout, raise_exception=False, show_log=False)
-
-    def confirm_bulk_close(self, option: BulkCloseOpts = BulkCloseOpts.ALL):
-        """Click the bulk close confirm button."""
-        self.actions.click(cook_element(self.__btn_bulk_close_confirm, locator_format(option)))
-
     def cancel_bulk_close(self, timeout=QUICK_WAIT):
         self.actions.click(self.__btn_bulk_close_cancel, timeout=timeout, raise_exception=False, show_log=False)
 
@@ -138,11 +130,9 @@ class TradingModals(BaseTrade):
     def click_update_order_btn(self):
         self.actions.click(self.__btn_update_order, timeout=SHORT_WAIT, raise_exception=False)
 
-    def confirm_update_order(self):
-        self.actions.click(self.__btn_confirm_update_order)
-
-    def cancel_edit_order(self):
-        self.actions.click(self.__btn_cancel_edit_order, timeout=QUICK_WAIT, raise_exception=False, show_log=False)
+    def confirm_update_order(self, confirm=True, timeout=EXPLICIT_WAIT):
+        logger.debug(f"- Confirm update order: {confirm!r}")
+        self.actions.click(self.__btn_confirm_update_order if confirm else self.__btn_cancel_update_order, timeout=timeout, raise_exception=not confirm, show_log=not confirm)
 
     def _get_trade_confirmation(self):
         labels = self.actions.get_text_elements(self.__confirm_labels)

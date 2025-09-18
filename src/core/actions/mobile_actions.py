@@ -2,8 +2,6 @@ import builtins
 
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver.common.actions.pointer_input import PointerInput
-
-from src.core.config_manager import Config
 from src.core.actions.base_actions import BaseActions
 from src.core.decorators import handle_stale_element
 from src.data.consts import EXPLICIT_WAIT

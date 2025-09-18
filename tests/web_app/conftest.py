@@ -4,7 +4,7 @@ import pytest
 
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_app_container import WebAppContainer
-from src.data.consts import FAILED_ICON_COLOR
+from src.data.consts import FAILED_ICON_COLOR, QUICK_WAIT
 from src.utils.logging_utils import logger
 
 
@@ -36,7 +36,7 @@ def login_member_site(web_app):
 
     logger.info("- Check if logged in success")
     for attempt in range(max_attempts):
-        if not web_app.home_page.is_logged_in():
+        if not web_app.home_page.on_home_page():
             logger.warning(f"- Login failed, refresh page and login again (attempt: {attempt + 1})")
             web_app.login_page.refresh_page()
 
@@ -48,7 +48,7 @@ def login_member_site(web_app):
         else:
             break
 
-        if attempt == max_attempts - 1 and not web_app.home_page.is_logged_in():
+        if attempt == max_attempts - 1 and not web_app.home_page.on_home_page():
             # login one more time to catch the screenshot
             web_app.login_page.login()
             raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
@@ -96,7 +96,7 @@ def cancel_all(web_app):
 def cancel_edit_order(web_app):
     yield
     logger.info("[Cleanup] Cancel edit order if any", teardown=True)
-    web_app.trade_page.modals.cancel_edit_order()
+    web_app.trade_page.modals.confirm_update_order(confirm=False, timeout=QUICK_WAIT)
 
 
 @pytest.fixture

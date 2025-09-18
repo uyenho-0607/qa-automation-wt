@@ -123,13 +123,16 @@ class AssetTab(BaseTrade):
         self.actions.click(cook_element(self.__tab, locator_format(tab_locator)))
         not wait or self.wait_for_spin_loader()
 
-    def delete_order(self, ):
+    def delete_order(self, trade_obj: ObjTrade = None, order_id=None, confirm=True, wait=False):
         ...
 
     def full_close_order(self):
         ...
 
     def partial_close_order(self, trade_object: ObjTrade):
+        ...
+
+    def modify_order(self):
         ...
 
     # ------------------------ VERIFY ------------------------ #

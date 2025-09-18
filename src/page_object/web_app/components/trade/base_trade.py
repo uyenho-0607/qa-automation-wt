@@ -1,4 +1,3 @@
-from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -6,7 +5,8 @@ from src.data.consts import QUICK_WAIT
 from src.data.enums import TradeType, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.base_page import BasePage
-from src.utils.common_utils import resource_id, cook_element, data_testid
+from src.utils.common_utils import cook_element, data_testid
+from src.utils.logging_utils import logger
 
 
 class BaseTrade(BasePage):
@@ -17,10 +17,11 @@ class BaseTrade(BasePage):
     __live_price = (By.CSS_SELECTOR, data_testid('trade-live-{}-price'))  # buy or sell market price
     __oct_live_price = (By.XPATH, "//div[@data-testid='trade-button-oct-order-{}']/div[2]")
     __btn_oct_confirm = (By.CSS_SELECTOR, data_testid('oct-modal-button-confirm'))
+    __btn_oct_cancel = (By.CSS_SELECTOR, data_testid('oct-modal-button-cancel'))
 
     ##### Trade Confirmation Modal #####
     __btn_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-confirm'))
-    __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))  # cancel trade btn
+    __btn_trade_close = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-close'))  # cancel trade btn
     __btn_confirm_close_delete_order = (By.CSS_SELECTOR, data_testid('close-order-button-submit'))
 
     # ------------------------ ACTIONS ------------------------ #
@@ -43,17 +44,19 @@ class BaseTrade(BasePage):
         trade_object.current_price = current_price
 
     # One Click Trading Modal Actions
-    def agree_and_continue(self):
-        """Confirm the one-click trading action."""
-        self.actions.click(self.__btn_oct_confirm, raise_exception=False)
+    def confirm_oct(self, confirm=True):
+        """Confirm enable OCT or not"""
+        logger.debug(f"- Confirm enable OCT: {confirm!r}")
+        self.actions.click(self.__btn_oct_confirm if confirm else self.__btn_oct_cancel)
 
     # Trade Confirmation Modal Actions
-    def confirm_trade(self):
-        """Confirm the trade in the trade confirmation modal, give trade_object to update the current price for more precise"""
-        self.actions.click(self.__btn_trade_confirm)
-
-    def close_trade_confirm_modal(self):
-        self.click_cancel_btn()
+    def confirm_trade(self, confirm=True):
+        """
+        Confirm the trade in the trade confirmation modal.
+        In case of canceling placing order -> set confirm = False
+        """
+        logger.debug(f"- Confirm place order: {confirm!r}")
+        self.actions.click(self.__btn_trade_confirm if confirm else self.__btn_trade_close)
 
     def confirm_close_order(self):
         """Confirm close order action."""

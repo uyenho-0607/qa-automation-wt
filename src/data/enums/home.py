@@ -15,6 +15,13 @@ class Features(BaseEnum):
     NEWS = "News"
     EDUCATION = "Education"
 
+    @classmethod
+    def home_nav_list(cls):
+        return [cls.SIGNAL, cls.CALENDAR, cls.NEWS, cls.EDUCATION]
+
+    @classmethod
+    def side_bar_list(cls):
+        return [cls.HOME, cls.MARKETS, cls.TRADE, cls.ASSETS]
 
 class AccSummary(BaseEnum):
     BALANCE = "Account Balance"
