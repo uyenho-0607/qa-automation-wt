@@ -10,7 +10,7 @@ from src.utils.logging_utils import logger
 @pytest.mark.critical
 def test(web, symbol, close_confirm_modal):
 
-    trade_object = ObjTrade(order_type=random.choice([OrderType.LIMIT, OrderType.STOP]), symbol=symbol)
+    trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol)
 
     logger.info("Step 1: Get current tab amount of Pending Orders")
     tab_amount = web.trade_page.asset_tab.get_tab_amount(AssetTabs.PENDING_ORDER)
