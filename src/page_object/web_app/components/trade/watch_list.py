@@ -18,7 +18,7 @@ class WatchList(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab = (By.XPATH, "//div[text()='{}']")
+    __tab = (By.XPATH, "//div[text()='{}']") # todo: change parent tabs to use data-testid
     __items = (By.CSS_SELECTOR, data_testid("watchlist-symbol"))
     __item_by_name = (By.XPATH, "//div[@data-testid='watchlist-symbol' and text()='{}']")
     __star_icon_by_symbol = (By.XPATH, data_testid("chart-star-symbol"))
@@ -29,7 +29,7 @@ class WatchList(BaseTrade):
     def select_tab(self, tab: WatchListTab, wait=True, timeout=3):
         locator = cook_element(self.__tab, tab)
         max_retries = 3
-        is_display = self.actions.is_element_displayed(locator)
+        is_display = self.actions.is_element_displayed(locator, timeout=timeout)
 
         while not is_display and max_retries:
             logger.debug("- Tab is subtab, select tab ALL first")
