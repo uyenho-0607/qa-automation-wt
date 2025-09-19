@@ -1,0 +1,46 @@
+import json
+
+import pytest
+
+from src.data.enums import AssetTabs, OrderType, Features, SLTPType
+from src.data.objects.notification_obj import ObjNoti
+from src.data.objects.trade_obj import ObjTrade
+from src.utils.logging_utils import logger
+
+
+@pytest.mark.critical
+@pytest.mark.parametrize("sl_type, tp_type", [(SLTPType.PRICE, SLTPType.PRICE)])
+def test(ios, symbol, get_asset_tab_amount, sl_type, tp_type):
+    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+    tab = AssetTabs.OPEN_POSITION
+
+    logger.info("Step 1: Get tab amount")
+    tab_amount = get_asset_tab_amount(trade_object.order_type)
+
+    logger.info("Step 2: Open pre-trade details form")
+    ios.trade_screen.place_order_panel.open_pre_trade_details()
+
+    logger.info(f"Step 3: Place order {json.dumps(trade_object.to_dict(), indent=2)} (sl_type:{sl_type!r}, tp_type:{tp_type!r}, tab:{tab_amount})")
+    ios.trade_screen.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, confirm=False)
+
+    logger.info("Verify notification banner displays correct input trade information")
+    ios.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
+
+    logger.info(f"Verify Asset Tab amount {tab.title()} is: {tab_amount + 1}")
+    ios.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
+
+    logger.info(f"Verify {tab.title()} item details in Asset Tab")
+    ios.trade_screen.asset_tab.verify_item_data(trade_object, wait=True)
+
+    logger.info("Step 4: Navigate to Home screen")
+    ios.home_screen.navigate_to(Features.HOME)
+
+    logger.info("Verify Open Position noti in Notification Box")
+    ios.home_screen.notifications.verify_notification_result(ObjNoti(trade_object).open_position_details(trade_object.order_id), close=True)
+
+
+@pytest.fixture(autouse=True)
+def teardown(ios):
+    yield
+    logger.info("[Cleanup] Navigate back to Trade screen", teardown=True)
+    ios.home_screen.navigate_to(Features.TRADE)

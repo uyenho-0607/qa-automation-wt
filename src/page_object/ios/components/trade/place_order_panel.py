@@ -5,6 +5,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import SLTPType, TradeType, OrderType, Expiry
+from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element
@@ -24,9 +25,11 @@ class PlaceOrderPanel(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     # One-Click Trading elements
+    __label_oct = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name BEGINSWITH 'toggle-oct'`]")
     __toggle_oct = (AppiumBy.ACCESSIBILITY_ID, 'toggle-oct')
     __toggle_oct_checked = (AppiumBy.ACCESSIBILITY_ID, 'toggle-oct-checked')
     __btn_pre_trade_details = (AppiumBy.ACCESSIBILITY_ID, "trade-button-pre-trade-details")
+    __btn_oct_trade_type = (AppiumBy.ACCESSIBILITY_ID, "trade-button-oct-order-{}")
 
     __btn_trade_type = (AppiumBy.ACCESSIBILITY_ID, "trade-button-order-{}")  # buy / sell
     __drp_order_type = (AppiumBy.ACCESSIBILITY_ID, "trade-dropdown-order-type")
@@ -38,8 +41,7 @@ class PlaceOrderPanel(BaseTrade):
     __expiry_date = (AppiumBy.ACCESSIBILITY_ID, "trade-input-expiry-date")
 
     __txt_volume = (AppiumBy.ACCESSIBILITY_ID, "trade-input-volume")
-    __lbl_units_volume = (AppiumBy.IOS_CLASS_CHAIN,
-                          "**/XCUIElementTypeOther[`name BEGINSWITH 'Units'`]")  # value of units/ volume (NOT the input value)
+    __lbl_units_volume = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name BEGINSWITH 'Units'`]")  # value of units/ volume correspondingly with input value
     __txt_price = (AppiumBy.ACCESSIBILITY_ID, "trade-input-price")  # price
     __txt_stop_limit_price = (AppiumBy.ACCESSIBILITY_ID, "trade-input-stop-limit-price")  # stop limit price
     __txt_stop_loss = (AppiumBy.ACCESSIBILITY_ID, "trade-input-stoploss-{}")  # price | points
@@ -67,6 +69,11 @@ class PlaceOrderPanel(BaseTrade):
         return value
 
     # ------------------------ ACTIONS ------------------------ #
+    def is_oct_enable(self):
+        is_enable = self.actions.is_element_displayed(self.__label_oct)
+        logger.debug(f"- OCT enabled in Admin config: {is_enable!r}")
+        return is_enable
+
     def toggle_oct(self, enable=True, submit=True):
         # Check current OCT state
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=QUICK_WAIT)
@@ -80,9 +87,10 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug("- Open pre-trade details")
         self.actions.click(self.__btn_pre_trade_details)
 
-    def _select_trade_type(self, trade_type: TradeType):
+    def _select_trade_type(self, trade_type: TradeType, normal_mode=True):
+        """Select button trade type in both case: normal_mode and OCT mode (normal mode = False)"""
         logger.debug(f"- Select trade type: {trade_type.value.title()!r}")
-        self.actions.click(cook_element(self.__btn_trade_type, trade_type.lower()))
+        self.actions.click(cook_element(self.__btn_trade_type if normal_mode else self.__btn_oct_trade_type, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType, retries=3):
         if retries <= 0:
@@ -147,12 +155,16 @@ class PlaceOrderPanel(BaseTrade):
         locator = locator_format(expiry) if expiry != Expiry.SPECIFIED_DATE else "_".join(item.lower() for item in expiry.split(" "))
         self.actions.click(cook_element(self.__opt_expiry, locator))
 
-        # todo: update handle select specified date when having locators
-        # if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-        #     self.actions.scroll_down(start_x_percent=0.4)
-        #     self.actions.click(self.__expiry_date)
+        # select date in case expiry specified date
+        expiry not in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME] or self._select_expiry_date()
 
         return self._select_expiry(expiry, retries - 1)
+
+    def _select_expiry_date(self):
+        ...
+        # todo: update handle select specified date when having locators
+        # self.actions.scroll_down(start_x_percent=0.4)
+        # self.actions.click(self.__expiry_date)
 
     def _click_place_order_btn(self):
         logger.debug("- Click place order button")
@@ -270,10 +282,35 @@ class PlaceOrderPanel(BaseTrade):
         if confirm:
             self.confirm_trade()
 
-    def place_oct_order(self):
-        ...
+    def place_oct_order(self, trade_object):
+        """Place MARKET order via OCT"""
+        # Input volume and get units
+        trade_object.volume = trade_object.get("volume") or random.randint(1, 5)
+        self._input_volume(trade_object.volume)
+
+        # calculate units
+        contract_size = ObjSymbol().get_symbol_details(trade_object.symbol).get("contract_size", 1)
+        units = trade_object.volume * contract_size
+
+        # placed order details
+        trade_details = {
+            'volume': format_str_price(trade_object.volume),
+            'units': format_str_price(units),
+            'entry_price': self.get_live_price(trade_object.trade_type, oct=True),
+            'stop_loss': '--',
+            'take_profit': '--'
+        }
+
+        logger.debug(f"- Order Summary: {format_dict_to_string(trade_details)}")
+        trade_object |= {k: v for k, v in trade_details.items()} # update back to trade_object
+
+        # click buy/ sell button
+        self._select_trade_type(trade_object.trade_type, normal_mode=False)
 
     # ------------------------ VERIFY ------------------------ #
-
     def verify_oct_mode(self, enable=True):
-        ...
+        logger.info(f"- Check OCT button is {'enabled' if enable else 'disabled'}")
+        self.actions.verify_element_displayed(self.__toggle_oct_checked if enable else self.__toggle_oct)
+
+        logger.info(f"- Check pre-trade details tab is {'displayed' if enable else 'not displayed'}")
+        self.actions.verify_element_displayed(self.__btn_pre_trade_details, is_display=enable)
