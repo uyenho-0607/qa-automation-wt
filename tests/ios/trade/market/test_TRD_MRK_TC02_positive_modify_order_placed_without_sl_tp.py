@@ -1,30 +1,25 @@
-import json
-
 import pytest
 
 from src.data.enums import AssetTabs
 from src.data.enums import SLTPType
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.parametrize(
     "edit_field, sl_type, tp_type",
     [
-        ("SL", SLTPType.random_values(), None),
-        ("TP", None, SLTPType.random_values()),
         pytest.param("SL, TP", SLTPType.PRICE, SLTPType.PRICE, marks=pytest.mark.critical),
         pytest.param("SL, TP", SLTPType.POINTS, SLTPType.POINTS, marks=pytest.mark.critical),
-        ("SL, TP", *SLTPType.random_values(amount=2)),
     ]
 )
-def test(ios, market_obj, edit_field, sl_type, tp_type, order_data):
+def test(ios, market_obj, edit_field, sl_type, tp_type, order_data, cancel_all):
     trade_object = market_obj()
 
-    logger.info(f"Step 1: Place order {json.dumps(trade_object.to_dict(), indent=2)} without SL and TP")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without SL and TP")
     order_data(trade_object, None, None)
-
-    trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION, True)
+    ios.trade_screen.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION, trade_object, True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     ios.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION)

@@ -3,13 +3,14 @@ from typing import Literal
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
+from src.data.consts import SHORT_WAIT
 from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import RuntimeConfig
 from src.page_object.ios.components.modals.trading_modals import TradingModals
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element, log_page_source
+from src.utils.common_utils import cook_element
 from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number
 from src.utils.logging_utils import logger
 
@@ -42,14 +43,14 @@ class AssetTab(BaseTrade):
     __btn_action = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-button-{}")  # tab: open, pending, history - action: close, edit
     __btn_action_by_id = (
         AppiumBy.IOS_CLASS_CHAIN,
-        '**/XCUIElementTypeOther[`name CONTAINS "{}"`]/**/XCUIElementTypeOther[`name == "%s"`]' % __btn_action[1] # orderID - tab - action
+        '**/XCUIElementTypeOther[`name CONTAINS "{}"`]/**/XCUIElementTypeOther[`name == "%s"`]' % __btn_action[1]  # orderID - tab - action
     )
     __txt_close_volume = (AppiumBy.ACCESSIBILITY_ID, "close-order-input-volume")
 
     # ------------------------ HELPER METHODS ------------------------ #
     def _expand_item(self, tab=None, expand=True):
         if expand:
-            self.actions.click(cook_element(self.__expand_items, tab.col_locator()))
+            self.actions.click(cook_element(self.__expand_items, tab.col_locator()), timeout=SHORT_WAIT)
             logger.debug("- Item expanded")
             return
 
@@ -66,17 +67,20 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, tab: AssetTabs, wait=False):
+    def get_last_order_id(self, tab: AssetTabs, trade_object: ObjTrade = None, wait=False):
         not wait or self.wait_for_spin_loader()
         order_id = self.actions.get_attribute(cook_element(self.__order_id_items, tab.col_locator()), "label")
         order_id = order_id.split(": ")[-1] if order_id else 0
         logger.debug(f"- Lastest orderID: {order_id!r}")
+
+        if trade_object:
+            trade_object.order_id = order_id
+
         return order_id
 
-    def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade, wait=True):
+    def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade):
         """Get latest data for placed order"""
-        not wait or self.wait_for_spin_loader()
-
+        # not wait or self.wait_for_spin_loader()
         if trade_object.get("order_id"):
             logger.debug(f"- Wait for order: {trade_object.order_id} display")
             self.actions.wait_for_element_visible(cook_element(self.__item_by_id, tab.col_locator(), trade_object.order_id))
@@ -112,7 +116,7 @@ class AssetTab(BaseTrade):
         return res
 
     # ------------------------ ACTIONS ------------------------ #
-    def select_tab(self, tab: AssetTabs, wait=True):
+    def select_tab(self, tab: AssetTabs, wait=False):
         tab_locator = tab
         if tab.is_history():
             if not RuntimeConfig.is_mt4():
@@ -148,20 +152,16 @@ class AssetTab(BaseTrade):
             tp_type: SLTPType = SLTPType.PRICE,
             confirm=True
     ):
-        tab = AssetTabs.get_tab(trade_object.order_type)
-
-        # Select tab based on order type
-        self.select_tab(tab)
-
         # Click edit button
-        self._click_action_btn(trade_object.order_id, tab)
+        self._click_action_btn(trade_object.order_id, AssetTabs.get_tab(trade_object.order_type))
 
-        # Fill edit order information
-        self.__trade_modals.fill_updated_order(trade_object, sl_type, tp_type)
+        # Fill edit order modal
+        self.__trade_modals.fill_update_order(trade_object, sl_type, tp_type)
 
-        # Click update order
+        # Click update order button
         self.__trade_modals.click_update_order_btn()
 
+        # confirm update order
         if confirm:
             self.click_confirm_btn()
 
@@ -187,5 +187,5 @@ class AssetTab(BaseTrade):
             expected["price"] = expected.pop("entry_price", None)
 
         # handle actual
-        actual = self.get_expand_item_data(tab, trade_object, wait=False)
+        actual = self.get_expand_item_data(tab, trade_object)
         soft_assert(actual, expected, check_contains=True, tolerance=1, tolerance_fields=trade_object.tolerance_fields())

@@ -9,6 +9,41 @@ from src.data.consts import SEND_ICON, RECEIVE_ICON
 from src.utils.logging_utils import logger
 
 
+def format_display_dict(data, flatten: bool = True) -> str:
+    """Format data for display in reports with enum handling.
+    Args:
+        data: Object with/without to_dict() method or dictionary
+        flatten: If True, return single-line format; if False, return JSON format
+    Returns:
+        Formatted string with enum values converted to title case
+    """
+    # Get dictionary representation
+    if hasattr(data, 'to_dict') and callable(getattr(data, 'to_dict')):
+        dict_data = data.to_dict()
+    else:
+        dict_data = data
+    
+    # Convert enums to their title-cased values
+    def convert_enums(obj):
+        if isinstance(obj, dict):
+            return {k: convert_enums(v) for k, v in obj.items()}
+        elif isinstance(obj, Enum):
+            return obj.value.title() if isinstance(obj.value, str) else obj.value
+        else:
+            return obj
+    
+    converted_data = convert_enums(dict_data)
+    
+    if flatten:
+        # Return flattened single-line format
+        items = [f"{k}: {v}" for k, v in converted_data.items()]
+        return ", ".join(items)
+    else:
+        # Return JSON format
+        return json.dumps(converted_data, indent=2)
+
+
+
 def locator_format(value: str):
     """return the string as locator format: EX: Good Till Cancelled -> good-till-cancel"""
     return value.lower().replace(" ", "-").lower()
