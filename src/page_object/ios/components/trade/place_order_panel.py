@@ -237,13 +237,14 @@ class PlaceOrderPanel(BaseTrade):
         # Select order type
         self._select_order_type(trade_object.order_type)
 
-        # input stop limit price if present
-        if trade_object.order_type == OrderType.STOP_LIMIT:
-            self._input_stop_limit_price(prices.stop_limit_price)
-
         # input price if present
         if trade_object.order_type != OrderType.MARKET:
             self._input_price(prices.entry_price)
+
+        # input stop limit price if present
+        if trade_object.order_type == OrderType.STOP_LIMIT:
+            self._input_stop_limit_price(prices.stop_limit_price)
+            self.actions.scroll_down(start_x_percent=0.4)
 
         # Input stop loss
         if prices.stop_loss:
@@ -251,7 +252,6 @@ class PlaceOrderPanel(BaseTrade):
             trade_object.stop_loss = self._get_input_sl() if sl_type == SLTPType.POINTS else prices.stop_loss
 
         # Scroll to bottom
-        self.actions.scroll_down(0.4)
 
         # Input take profit
         if prices.take_profit:
@@ -260,6 +260,7 @@ class PlaceOrderPanel(BaseTrade):
 
         # Select expiry
         if trade_object.expiry:
+            self.actions.scroll_down(0.4)
             self._select_expiry(trade_object.expiry)
 
         trade_details = {
