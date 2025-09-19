@@ -26,7 +26,7 @@ def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 2: Place order {trade_object.to_dict()!r} - (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
-    ios.trade_screen.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type, confirm=False)
 
     logger.info(f"Verify trade confirmation")
     ios.trade_screen.modals.verify_trade_confirmation(trade_object)
@@ -52,7 +52,7 @@ def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
 
 
 @pytest.fixture(autouse=True)
-def teardown_test(ios):
+def teardown(ios):
     yield
     logger.info("- Navigate back to Trade Screen", teardown=True)
     ios.home_screen.navigate_to(Features.TRADE)

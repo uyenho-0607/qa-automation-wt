@@ -1,3 +1,5 @@
+from typing import Literal
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -7,7 +9,7 @@ from src.data.project_info import RuntimeConfig
 from src.page_object.ios.components.modals.trading_modals import TradingModals
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
-from src.utils.common_utils import cook_element
+from src.utils.common_utils import cook_element, log_page_source
 from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number
 from src.utils.logging_utils import logger
 
@@ -25,7 +27,7 @@ class AssetTab(BaseTrade):
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.ACCESSIBILITY_ID, "tab-asset-order-type-{}")  # tab: open, pending, history
     __tab_amount = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeOther[`name == "tab-asset-order-type-{}" AND label CONTAINS "({})"`]')  # tab - exp_amount
-    __item_by_id = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name == "asset-{}-list-item-order-no" AND label CONTAINS "{}"]')  # tab - orderID
+    __item_by_id = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name == "asset-{}-list-item-order-no" AND label CONTAINS "{}"`]')  # tab - orderID
     __order_id_items = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-list-item-order-no")  # tab
 
     # expand item
@@ -40,7 +42,7 @@ class AssetTab(BaseTrade):
     __btn_action = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-button-{}")  # tab: open, pending, history - action: close, edit
     __btn_action_by_id = (
         AppiumBy.IOS_CLASS_CHAIN,
-        '**/XCUIElementTypeOther[`name CONTAINS "{}"`]/**/XCUIElementTypeOther[`name == "asset-{}-button-{}"`]'  # orderID - tab - action
+        '**/XCUIElementTypeOther[`name CONTAINS "{}"`]/**/XCUIElementTypeOther[`name == "%s"`]' % __btn_action[1] # orderID - tab - action
     )
     __txt_close_volume = (AppiumBy.ACCESSIBILITY_ID, "close-order-input-volume")
 
@@ -64,10 +66,9 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, wait=False):
+    def get_last_order_id(self, tab: AssetTabs, wait=False):
         not wait or self.wait_for_spin_loader()
-
-        order_id = self.actions.get_attribute(self.__order_id_items, "label")
+        order_id = self.actions.get_attribute(cook_element(self.__order_id_items, tab.col_locator()), "label")
         order_id = order_id.split(": ")[-1] if order_id else 0
         logger.debug(f"- Lastest orderID: {order_id!r}")
         return order_id
@@ -132,8 +133,24 @@ class AssetTab(BaseTrade):
     def partial_close_order(self, trade_object: ObjTrade):
         ...
 
-    def modify_order(self):
-        ...
+    def _click_action_btn(
+            self, order_id=0, tab: AssetTabs = AssetTabs.OPEN_POSITION, action: Literal["edit", "close"] = "edit"
+    ):
+        locator = cook_element(self.__btn_action, tab.col_locator(), action)
+        if order_id:
+            locator = cook_element(self.__btn_action_by_id, order_id, tab.col_locator(), action)
+        self.actions.click(locator)
+
+    def modify_order(self, trade_object):
+        tab = AssetTabs.get_tab(trade_object.order_type)
+
+        # Select tab based on order type
+        self.select_tab(tab)
+
+        # Click edit button
+        self._click_action_btn(trade_object.order_id, tab)
+
+        # To be defined
 
     # ------------------------ VERIFY ------------------------ #
     def verify_tab_amount(self, tab: AssetTabs, exp_amount):
