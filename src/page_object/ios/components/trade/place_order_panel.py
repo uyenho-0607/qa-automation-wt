@@ -1,11 +1,10 @@
 import random
-import time
 
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
-from src.data.enums import SLTPType, TradeType, OrderType, FillPolicy, Expiry
+from src.data.enums import SLTPType, TradeType, OrderType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element
@@ -144,7 +143,14 @@ class PlaceOrderPanel(BaseTrade):
 
         logger.info(f"- Selecting expiry: {expiry.value.title()!r}")
         self.actions.click(self.__drp_expiry)
-        self.actions.click(cook_element(self.__opt_expiry, locator_format(expiry)))
+
+        locator = locator_format(expiry) if expiry != Expiry.SPECIFIED_DATE else "_".join(item.lower() for item in expiry.split(" "))
+        self.actions.click(cook_element(self.__opt_expiry, locator))
+
+        # todo: update handle select specified date when having locators
+        # if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
+        #     self.actions.scroll_down(start_x_percent=0.4)
+        #     self.actions.click(self.__expiry_date)
 
         return self._select_expiry(expiry, retries - 1)
 
@@ -202,7 +208,8 @@ class PlaceOrderPanel(BaseTrade):
         self._swap_to_units() if trade_object.get('is_units') else self._swap_to_volume()
 
         # Select fill policy
-        self._select_fill_policy(trade_object.fill_policy)
+        if trade_object.fill_policy:
+            self._select_fill_policy(trade_object.fill_policy)
 
         # Set volume property for object
         trade_object.volume = trade_object.get("volume") or random.randint(1, 5)
@@ -217,6 +224,14 @@ class PlaceOrderPanel(BaseTrade):
 
         # Select order type
         self._select_order_type(trade_object.order_type)
+
+        # input stop limit price if present
+        if trade_object.order_type == OrderType.STOP_LIMIT:
+            self._input_stop_limit_price(prices.stop_limit_price)
+
+        # input price if present
+        if trade_object.order_type != OrderType.MARKET:
+            self._input_price(prices.entry_price)
 
         # Input stop loss
         if prices.stop_loss:
@@ -238,8 +253,7 @@ class PlaceOrderPanel(BaseTrade):
         trade_details = {
             'volume': format_str_price(trade_object.volume),
             'units': format_str_price(trade_object.units),
-            'entry_price': self.get_live_price(
-                trade_object.trade_type) if trade_object.order_type == OrderType.MARKET else prices.entry_price,
+            'entry_price': self.get_live_price(trade_object.trade_type) if trade_object.order_type == OrderType.MARKET else prices.entry_price,
             'stop_limit_price': prices.stop_limit_price,
             'stop_loss': '--' if sl_type is None else trade_object.stop_loss,
             'take_profit': '--' if tp_type is None else trade_object.take_profit,
