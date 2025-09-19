@@ -27,6 +27,7 @@ def ios():
 
 @pytest.fixture(scope="package")
 def login_wt_app(ios):
+    return
 
     if not RuntimeConfig.argo_cd:
         # currently, cannot reset login state of app -> temporarily check if app is logged in -> perform logout
@@ -63,12 +64,28 @@ def login_wt_app(ios):
 
 
 @pytest.fixture(scope="package")
-def disable_OCT():
-    logger.info("[Setup] Send API request to disable OCT")
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(ios):
+    """disable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = ios.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
+        ios.trade_screen.place_order_panel.toggle_oct(enable=False, submit=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 
 @pytest.fixture(scope="package")
-def enable_OCT():
-    logger.info("[Setup] Send API request enable OCT")
-    APIClient().user.patch_oct(enable=True)
+def enable_OCT(ios):
+    """enable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = ios.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Enable OCT", setup=True)
+        ios.trade_screen.place_order_panel.toggle_oct(enable=True, submit=True)
+
+    else:
+        pytest.skip("OCT mode is disabled in Admin Config - SKIP this test ")

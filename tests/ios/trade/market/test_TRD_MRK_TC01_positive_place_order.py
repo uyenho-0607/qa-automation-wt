@@ -25,7 +25,7 @@ def test(ios, market_obj, sl_type, tp_type, get_asset_tab_amount):
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place order {trade_object.to_dict()!r} - (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
+    logger.info(f"Step 2: Place order {json.dumps(trade_object.to_dict(), indent=2)} - (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
     ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type, confirm=False)
 
     logger.info(f"Verify trade confirmation")
