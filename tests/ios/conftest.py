@@ -27,8 +27,6 @@ def ios():
 
 @pytest.fixture(scope="package")
 def login_wt_app(ios):
-    return
-
     if not RuntimeConfig.argo_cd:
         # currently, cannot reset login state of app -> temporarily check if app is logged in -> perform logout
         if ios.home_screen.on_home_screen():

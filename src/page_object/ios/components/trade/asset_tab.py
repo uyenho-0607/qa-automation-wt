@@ -3,7 +3,7 @@ from typing import Literal
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.enums import AssetTabs
+from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.trade_obj import ObjTrade
 from src.data.project_info import RuntimeConfig
 from src.page_object.ios.components.modals.trading_modals import TradingModals
@@ -141,7 +141,13 @@ class AssetTab(BaseTrade):
             locator = cook_element(self.__btn_action_by_id, order_id, tab.col_locator(), action)
         self.actions.click(locator)
 
-    def modify_order(self, trade_object):
+    def modify_order(
+            self,
+            trade_object: ObjTrade,
+            sl_type: SLTPType = SLTPType.PRICE,
+            tp_type: SLTPType = SLTPType.PRICE,
+            confirm=True
+    ):
         tab = AssetTabs.get_tab(trade_object.order_type)
 
         # Select tab based on order type
@@ -150,7 +156,14 @@ class AssetTab(BaseTrade):
         # Click edit button
         self._click_action_btn(trade_object.order_id, tab)
 
-        # To be defined
+        # Fill edit order information
+        self.__trade_modals.fill_updated_order(trade_object, sl_type, tp_type)
+
+        # Click update order
+        self.__trade_modals.click_update_order_btn()
+
+        if confirm:
+            self.click_confirm_btn()
 
     # ------------------------ VERIFY ------------------------ #
     def verify_tab_amount(self, tab: AssetTabs, exp_amount):
