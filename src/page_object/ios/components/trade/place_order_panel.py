@@ -189,7 +189,8 @@ class PlaceOrderPanel(BaseTrade):
     def place_order(
             self, trade_object: ObjTrade,
             sl_type: SLTPType = SLTPType.PRICE,
-            tp_type: SLTPType = SLTPType.PRICE
+            tp_type: SLTPType = SLTPType.PRICE,
+            confirm=True
     ):
         # Select buy or sell
         self._select_trade_type(trade_object.trade_type)
@@ -251,6 +252,9 @@ class PlaceOrderPanel(BaseTrade):
 
         # click place order button
         self.actions.click(self.__btn_place_order)
+
+        if confirm:
+            self.confirm_trade()
 
     def place_oct_order(self):
         ...
