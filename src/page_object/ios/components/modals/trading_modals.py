@@ -1,5 +1,3 @@
-import time
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
@@ -11,6 +9,7 @@ from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.format_utils import locator_format, format_dict_to_string
 from src.utils.logging_utils import logger
+from src.utils.trading_utils import calculate_trading_params
 
 
 class TradingModals(BaseTrade):
@@ -33,7 +32,7 @@ class TradingModals(BaseTrade):
     __txt_edit_sl = (AppiumBy.ACCESSIBILITY_ID, 'edit-input-stoploss-{}')  # price or points
     __txt_edit_tp = (AppiumBy.ACCESSIBILITY_ID, 'edit-input-takeprofit-{}')  # price or points
     __txt_edit_price = (AppiumBy.ACCESSIBILITY_ID, 'edit-input-price')
-    __txt_edit_stp_price = (AppiumBy.ACCESSIBILITY_ID, 'edit-input-stop-limit-price')
+    __txt_edit_stop_price = (AppiumBy.ACCESSIBILITY_ID, 'edit-input-stop-limit-price')
     __txt_edit_stop_limit_price = (AppiumBy.ACCESSIBILITY_ID, 'edit-input-stop-limit-price')
 
     __drp_fill_policy = (AppiumBy.ACCESSIBILITY_ID, 'edit-dropdown-fill-policy')
@@ -59,29 +58,23 @@ class TradingModals(BaseTrade):
     def is_edit_confirm_modal_displayed(self):
         return self.actions.is_element_displayed(self.__edit_confirm_symbol, timeout=SHORT_WAIT)
 
-    def get_edit_price(self, order_type: OrderType = OrderType.MARKET):
+    def get_edit_live_price(self):
         """Return current price of the symbol"""
-        time.sleep(0.5)
-        if not order_type or order_type == OrderType.MARKET:
-            return self.actions.get_text(self.__edit_symbol_price)
-
-        return self.actions.get_text(self.__txt_edit_price)
+        return self.actions.get_text(self.__edit_symbol_price)
 
     def get_edit_sl(self):
         """Get input sl price"""
         locator = cook_element(self.__txt_edit_sl, SLTPType.PRICE.lower())
-        self.actions.click(locator)
-        res = self.actions.get_text(locator, retry=True)
-        logger.debug(f"- Edit SL: {res!r}")
-        return res
+        value = self.actions.get_attribute(locator, "value")
+        logger.debug(f"- Edit SL: {value!r}")
+        return value
 
     def get_edit_tp(self):
         """Get input tp price"""
         locator = cook_element(self.__txt_edit_tp, SLTPType.PRICE.lower())
-        self.actions.click(locator)
-        res = self.actions.get_text(locator, retry=True)
-        logger.debug(f"- Edit TP: {res!r}")
-        return res
+        value = self.actions.get_attribute(locator, "value")
+        logger.debug(f"- Edit TP: {value!r}")
+        return value
 
     def input_edit_sl(self, value, sl_type: SLTPType = SLTPType.PRICE):
         logger.debug(f"- Input SL: {value!r}, type: {sl_type.value.capitalize()!r}")
@@ -97,11 +90,17 @@ class TradingModals(BaseTrade):
         logger.debug(f"- Input price: {value!r}")
         self.actions.send_keys(self.__txt_edit_price, value)
 
-    def input_edit_stop_price(self, value):
+    def input_edit_stop_limit_price(self, value):
         logger.debug(f"- Input stop limit price: {value!r}")
-        self.actions.send_keys(self.__txt_edit_stp_price, value)
+        self.actions.send_keys(self.__txt_edit_stop_price, value)
 
     def select_expiry(self, expiry: Expiry):
+        cur_expiry = self.actions.get_attribute(self.__drp_edit_expiry, "label")
+        cur_expiry = " ".join(cur_expiry.split(" ")[:-1])
+
+        if cur_expiry.lower() == expiry.lower():
+            return
+
         self.actions.click(self.__drp_edit_expiry)
 
         locator = locator_format(expiry)
@@ -153,6 +152,41 @@ class TradingModals(BaseTrade):
 
         logger.debug(f"- Actual: {format_dict_to_string(actual)}")
         return actual
+
+    def fill_updated_order(self, trade_object: ObjTrade, sl_type: SLTPType, tp_type: SLTPType):
+        live_price = self.get_edit_live_price()
+
+        # Calculate edit price
+        prices = calculate_trading_params(
+            live_price, trade_object.trade_type, trade_object.order_type, sl_type, tp_type
+        )
+
+        # Input stop or limit edit price if any
+        if trade_object.order_type != OrderType.MARKET:
+            self.input_edit_price(prices.entry_price)
+            trade_object.entry_price = prices.entry_price
+
+        # Input stop limit edit price if any
+        if trade_object.order_type == OrderType.STOP_LIMIT:
+            self.input_edit_stop_limit_price(prices.stop_limit_price)
+            trade_object.stop_limit_price = prices.stop_limit_price
+
+        # Input edit stop loss
+        if prices.stop_loss:
+            self.input_edit_sl(prices.stop_loss, sl_type)
+            trade_object.stop_loss = self.get_edit_sl() if sl_type == SLTPType.POINTS else prices.stop_loss
+
+        # Scroll to bottom
+        self.actions.scroll_down(0.4)
+
+        # Input edit take profit
+        if prices.take_profit:
+            self.input_edit_tp(prices.take_profit, tp_type)
+            trade_object.take_profit = self.get_edit_tp() if tp_type == SLTPType.POINTS else prices.take_profit
+
+        # Select edit expiry => set a new value to the object’s property for this action.
+        if trade_object.expiry:
+            self.select_expiry(trade_object.expiry)
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
     def verify_trade_confirmation(self, trade_object: ObjTrade):
