@@ -327,8 +327,8 @@ class PlaceOrderPanel(BaseTrade):
     # ------------------------ VERIFY ------------------------ #
 
     def verify_oct_mode(self, enable=True):
-        logger.info(f"- Check OCT button is {'enabled' if enable else 'disabled'}")
+        logger.debug(f"- Check OCT button is {'enabled' if enable else 'disabled'}")
         self.actions.verify_element_displayed(self.__toggle_oct_checked if enable else self.__toggle_oct)
 
-        logger.info(f"- Check pre-trade details tab is {'displayed' if enable else 'not displayed'}")
+        logger.debug(f"- Check pre-trade details tab is {'displayed' if enable else 'not displayed'}")
         self.actions.verify_element_displayed(self.__btn_pre_trade_details, is_display=enable)

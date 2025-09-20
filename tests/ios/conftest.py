@@ -1,8 +1,6 @@
 from contextlib import suppress
 
 import pytest
-
-from src.apis.api_client import APIClient
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.ios_container import iOSContainer
@@ -69,7 +67,7 @@ def disable_OCT(ios):
 
     if is_enable:
         logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
-        ios.trade_screen.place_order_panel.toggle_oct(enable=False, submit=True)
+        ios.trade_screen.place_order_panel.toggle_oct(enable=False, confirm=True)
 
     else:
         logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
@@ -83,7 +81,7 @@ def enable_OCT(ios):
 
     if is_enable:
         logger.info("[Setup] OCT mode is enabled in Admin config - Enable OCT", setup=True)
-        ios.trade_screen.place_order_panel.toggle_oct(enable=True, submit=True)
+        ios.trade_screen.place_order_panel.toggle_oct(enable=True, confirm=True)
 
     else:
         pytest.skip("OCT mode is disabled in Admin Config - SKIP this test ")

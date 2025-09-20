@@ -26,7 +26,7 @@ def test_cancel_enable(ios):
     ios.trade_screen.place_order_panel.toggle_oct(enable=False)
 
     logger.info("Step 2: Enable OCT and select Cancel")
-    ios.trade_screen.place_order_panel.toggle_oct(enable=True, submit=False)
+    ios.trade_screen.place_order_panel.toggle_oct(enable=True, confirm=False)
 
     logger.info("Verify OCT mode is not enabled")
     ios.trade_screen.place_order_panel.verify_oct_mode(enable=False)

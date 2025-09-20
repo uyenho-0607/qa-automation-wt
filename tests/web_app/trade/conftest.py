@@ -9,9 +9,36 @@ from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup(login_member_site, web_app, symbol):
+def setup_trade_test(login_member_site, web_app, symbol):
     logger.info(f"[Setup] Search and select symbol: {symbol}")
     web_app.home_page.search_and_select_symbol(symbol)
+
+
+@pytest.fixture
+def limit_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.LIMIT, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def stop_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
+@pytest.fixture
+def stop_limit_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.STOP_LIMIT, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
 
 
 @pytest.fixture(scope="package")
@@ -38,12 +65,6 @@ def create_order_data(web_app, get_asset_tab_amount, symbol):
 def swap_to_volume(web_app):
     logger.info("[Setup] Send API to use volume")
     APIClient().user.patch_swap_volume_units()
-
-
-@pytest.fixture(scope="package")
-def swap_to_units():
-    logger.info("[Setup] Send API to use units")
-    APIClient().user.patch_swap_volume_units(use_volume=False)
 
 
 @pytest.fixture

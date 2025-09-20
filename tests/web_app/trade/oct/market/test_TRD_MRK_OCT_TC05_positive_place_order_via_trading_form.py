@@ -38,7 +38,7 @@ def test(web_app, symbol, get_asset_tab_amount, sl_type, tp_type):
 
 
 @pytest.fixture(autouse=True)
-def navigate_to_trade_screen(web_app):
+def teardown(web_app):
     yield
     logger.info("[Cleanup] Navigate back to Trade screen")
     web_app.home_page.navigate_to(Features.TRADE)
