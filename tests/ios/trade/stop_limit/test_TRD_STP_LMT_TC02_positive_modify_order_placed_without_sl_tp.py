@@ -1,5 +1,3 @@
-import json
-
 import pytest
 
 from src.data.enums import AssetTabs
@@ -16,8 +14,8 @@ from src.utils.logging_utils import logger
         pytest.param("SL, TP", SLTPType.POINTS, SLTPType.POINTS, marks=pytest.mark.critical),
     ]
 )
-def test(ios, stop_obj, edit_field, sl_type, tp_type, order_data, cancel_all):
-    trade_object = stop_obj()
+def test(ios, stop_limit_obj, edit_field, sl_type, tp_type, order_data, cancel_all):
+    trade_object = stop_limit_obj()
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without SL and TP")
     order_data(trade_object, None, None)

@@ -53,9 +53,9 @@ def stop_limit_obj(symbol):
     return _handler
 
 @pytest.fixture(name="order_data")
-def prepare_place_order(ios, market_obj):
-    def handler(trade_object, sl_type: SLTPType = SLTPType.PRICE, tp_type: SLTPType = SLTPType.PRICE):
-        ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type)
+def prepare_place_order(ios):
+    def handler(trade_object, sl_type: SLTPType = SLTPType.PRICE, tp_type: SLTPType = SLTPType.PRICE, confirm=True):
+        ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type, confirm=confirm)
 
     return handler
 

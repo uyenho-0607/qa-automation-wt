@@ -128,8 +128,14 @@ class AssetTab(BaseTrade):
         self.actions.click(cook_element(self.__tab, locator_format(tab_locator)))
         not wait or self.wait_for_spin_loader()
 
-    def delete_order(self, trade_obj: ObjTrade = None, order_id=None, confirm=True, wait=False):
-        ...
+    def delete_order(self, trade_object: ObjTrade, confirm=True):
+        if not trade_object.get('order_id'):
+            trade_object.order_id = self.get_last_order_id(AssetTabs.PENDING_ORDER, trade_object, wait=True)
+
+        logger.debug(f"- Delete order with ID: {trade_object.order_id!r}")
+        self._click_action_btn(trade_object.order_id, AssetTabs.PENDING_ORDER, "close") # close == delete in pending orders tab
+        if confirm:
+            self.__trade_modals.confirm_delete_order()
 
     def full_close_order(self):
         ...

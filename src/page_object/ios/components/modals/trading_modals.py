@@ -35,7 +35,7 @@ class TradingModals(BaseTrade):
     __drp_edit_expiry = (AppiumBy.ACCESSIBILITY_ID, 'edit-dropdown-expiry')
     __opt_edit_expiry = (AppiumBy.ACCESSIBILITY_ID, 'edit-dropdown-expiry-{}')
 
-    # Edit Trade Confirmation Modal
+    ##### Edit Trade Confirmation Modal #####
     __edit_confirm_order_id = (AppiumBy.ACCESSIBILITY_ID, "edit-confirmation-order-id")
     __edit_confirm_order_type = (AppiumBy.ACCESSIBILITY_ID, "edit-confirmation-order-type")
     __edit_confirm_symbol = (AppiumBy.ACCESSIBILITY_ID, "edit-confirmation-symbol")
@@ -49,6 +49,8 @@ class TradingModals(BaseTrade):
     __btn_cancel_close_order = (AppiumBy.ACCESSIBILITY_ID, "close-order-button-cancel")
     __btn_cancel_delete_order = (AppiumBy.ACCESSIBILITY_ID, 'confirmation-modal-button-cancel')
 
+    __btn_confirm_close_delete = (AppiumBy.ACCESSIBILITY_ID, "close-order-button-submit")
+    __btn_cancel_close_delete = (AppiumBy.ACCESSIBILITY_ID, "close-order-button-cancel")
     # ------------------------ HELPER METHODS ------------------------ #
     def _get_edit_live_price(self):
         """Return current price of the symbol"""
@@ -181,6 +183,11 @@ class TradingModals(BaseTrade):
     def confirm_update_order(self, confirm=True, timeout=EXPLICIT_WAIT):
         logger.debug(f"- Confirm update order: {confirm!r}")
         self.actions.click(self.__btn_confirm_update_order if confirm else self.__btn_cancel_update_order, timeout=timeout, raise_exception=not confirm, show_log=not confirm)
+
+    def confirm_close_order(self, confirm=True):
+        self.actions.click(self.__btn_confirm_close_delete if confirm else self.__btn_cancel_close_delete)
+
+    confirm_delete_order = confirm_close_order
 
     # ------------------------------------------------ VERIFY ------------------------------------------------ #
     def verify_trade_confirmation(self, trade_object: ObjTrade):
