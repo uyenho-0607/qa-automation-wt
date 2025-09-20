@@ -46,10 +46,9 @@ class BaseTrade(BaseScreen):
             trade_type = TradeType.BUY if trade_object.trade_type == TradeType.SELL else TradeType.SELL
 
         current_price = self.actions.get_attribute(
-            cook_element(btn_price, trade_type.lower()), "label", timeout=QUICK_WAIT, raise_exception=False
+            cook_element(btn_price, trade_type.lower()), "label", timeout=timeout, raise_exception=False, show_log=False
         )
 
-        logger.debug(f"- Current price: {current_price!r}")
         trade_object.current_price = current_price
 
     def confirm_oct(self, confirm=True):
