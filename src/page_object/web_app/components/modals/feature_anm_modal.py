@@ -21,7 +21,7 @@ class FeatureAnnouncementModal(BasePage):
         """Click the 'Got it' button to dismiss the feature announcement."""
         while self.actions.is_element_displayed(self.__btn_got_it, timeout=timeout):
             logger.debug("- Clicking on btn Ok Got it")
-            self.actions.click(self.__btn_got_it)
+            self.actions.click(self.__btn_got_it, raise_exception=False)
 
     def try_it_now(self):
         """Click the 'Try it now' button to try the new feature."""

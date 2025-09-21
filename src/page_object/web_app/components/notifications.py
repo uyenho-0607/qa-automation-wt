@@ -97,7 +97,7 @@ class Notifications(BasePage):
                 logger.debug(f"> Check noti title - {expected_title!r}")
                 soft_assert(actual_title, expected_title)
 
-    def verify_notification_result(self, expected_result: str | list, is_system=False, close=False):
+    def verify_notification_result(self, expected_result: str | list, is_system=False, close=True):
         self.open_noti_box()
 
         if is_system:

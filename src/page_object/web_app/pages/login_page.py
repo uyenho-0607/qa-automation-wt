@@ -40,8 +40,7 @@ class LoginPage(BasePage):
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
         tab = cook_element(self.__tab_account_type, account_type)
-        # self.actions.click(tab)
-        self.actions.javascript_click(tab)
+        self.actions.click(tab)
 
     def select_language(self, language: Language):
         self.actions.click(self.__drp_language)
