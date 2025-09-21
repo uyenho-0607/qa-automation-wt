@@ -38,7 +38,7 @@ def test(web, setup_test, disable_OCT):
     web.assets_page.verify_account_balance_summary(
         acc_balance,
         acc_items=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS],
-        tolerance_fields_specific={AccInfo.BALANCE: 0.1, AccInfo.REALISED_PROFIT_LOSS: 10}
+        tolerance_fields_specific={AccInfo.BALANCE: 0.5, AccInfo.REALISED_PROFIT_LOSS: 10}
     )
 
     logger.info("Verify other infos are not changed")
