@@ -34,12 +34,11 @@ class AssetTab(BaseTrade):
     __item_by_id = (By.XPATH, "//div[@data-testid='asset-{}-list-item-order-no' and contains(normalize-space(), '{}')]")
     __order_id_items = (By.CSS_SELECTOR, "*[data-testid$='-list-item-order-no']")
     __expand_items = (By.CSS_SELECTOR, data_testid('asset-{}-list-item-expand'))
-    __expand_item_by_id = (By.XPATH, "//div[text()='{}']/ancestor::div[4]//div[@data-testid='asset-{}-list-item-expand']")
+    __expand_item_by_id = (By.XPATH, "//div[text()='{}']/ancestor::div[2]/following-sibling::div")
     __expand_item_profit_loss = (
         By.XPATH, "//div[@data-testid='asset-open-list-item-expand']/div[contains(normalize-space(), 'Profit/Loss')]"
     )
-    __expanded_labels = (By.CSS_SELECTOR, "[data-testid^='asset-{}-column'][data-testid$='label']")
-    __expanded_values = (By.CSS_SELECTOR, "[data-testid^='asset-{}-column'][data-testid$='value']")
+    __expanded_items = (By.CSS_SELECTOR, "div[data-testid^='asset-{}-column-'][data-testid$='-value']")
     __expanded_symbol = (By.CSS_SELECTOR, data_testid('asset-detailed-header-symbol'))
     __expanded_order_type = (By.CSS_SELECTOR, data_testid('asset-order-type'))  # buy or sell
     __btn_cancel_expand_item = (By.CSS_SELECTOR, data_testid('action-sheet-cancel-button'))
@@ -86,20 +85,16 @@ class AssetTab(BaseTrade):
         if trade_object.get("order_id"):
             expand_item = cook_element(self.__expand_item_by_id, trade_object.order_id, tab.col_locator())
 
+        time.sleep(0.5)
         self.actions.click(expand_item)
         logger.debug("- Item expanded, getting item data...")
 
         # re-assign tab in cased of history - to get correct col locator
         tab = AssetTabs.HISTORY if tab.is_history() else tab
-
-        # get item col name & value
-        expand_labels = self.actions.get_text_elements(
-            cook_element(self.__expanded_labels, tab.col_locator())
-        )
-        expand_values = self.actions.get_text_elements(
-            cook_element(self.__expanded_values, tab.col_locator())
-        )
-        res = {k.lower().replace(" ", "_").replace(".", ""): v for k, v in zip(expand_labels, expand_values)}
+        res = {
+            ele.get_attribute("data-testid").split("-column-")[-1].replace("-value", "").replace("-", "_"): ele.text.strip()
+            for ele in self.actions.find_elements(cook_element(self.__expanded_items, tab.col_locator()))
+        }
 
         # special locators
         res["order_type"] = self.actions.get_text(self.__expanded_order_type)
@@ -115,7 +110,7 @@ class AssetTab(BaseTrade):
             res["volume"] = res["volume"].split(" / ")[0]
 
         # update order_id for trade_object if not present
-        trade_object.get("order_id") or trade_object.update(dict(order_id=res.pop("order_no", None)))
+        trade_object.get("order_id") or trade_object.update(dict(order_id=res.get("order_id", None)))
 
         # close expand item
         self.actions.click(self.__btn_cancel_expand_item)
@@ -229,21 +224,11 @@ class AssetTab(BaseTrade):
             trade_object: ObjTrade,
             sl_type: SLTPType = None,
             tp_type: SLTPType = None,
-            expiry: Expiry = None,
             confirm=False,
             retry_count=0,
             max_retries=3,
             oct_mode=False,
     ):
-        """
-        Modify stop loss/ take profit/ fill policy/ Expiry
-        trade_object: should contain trade_type and order_type
-        sl_type: Price or Points
-        tp_type: Price or Points
-        expiry: None by default, give this value if modifying expiry
-        retry_count: Current retry attempt (used internally for recursion)
-        max_retries: Maximum number of retry attempts
-        """
         if retry_count >= max_retries:
             logger.error(f"Failed to display edit confirm modal after {max_retries} attempts")
             return
@@ -254,41 +239,18 @@ class AssetTab(BaseTrade):
             time.sleep(1)  # Wait before retrying
             self.select_tab(AssetTabs.get_tab(trade_object.order_type))
 
-        trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        self.click_action_btn(AssetTabs.get_tab(order_type), trade_object.get("order_id"), "edit")
+        self.click_action_btn(AssetTabs.get_tab(trade_object.order_type), trade_object.get("order_id"), "edit")
 
         # Get current price to re-calculate prices
-        edit_price = trade_object.get("stop_limit_price") or trade_object.get("entry_price") or self.__trade_modals.get_edit_price()
-        stop_loss, take_profit = get_sl_tp(edit_price, trade_type, sl_type, tp_type).values()
-
-        if sl_type:
-            self.__trade_modals.input_edit_sl(stop_loss, sl_type)
-            if sl_type == SLTPType.POINTS:
-                stop_loss = self.__trade_modals.get_edit_sl()
-                trade_object.sl_type = sl_type
-
-            trade_object.stop_loss = stop_loss
-
-        if tp_type:
-            self.__trade_modals.input_edit_tp(take_profit, tp_type)
-            if tp_type == SLTPType.POINTS:
-                take_profit = self.__trade_modals.get_edit_tp()
-                trade_object.tp_type = tp_type
-
-            trade_object.take_profit = take_profit
-
-        if expiry:
-            self.__trade_modals.select_expiry(expiry)
-            trade_object.expiry = expiry
+        self.__trade_modals.fill_update_order(trade_object, sl_type, tp_type)
 
         time.sleep(1)
         self.__trade_modals.click_update_order_btn()
 
-        # logger.debug(f"- Trade object after modified: {format_dict_to_string(trade_object)}")
         # check if edit confirm modal is displayed
         if not self.__trade_modals.is_edit_confirm_modal_displayed() and not oct_mode:
             # Recursive call with incremented retry count
-            self.modify_order(trade_object, sl_type, tp_type, expiry, confirm, retry_count + 1, max_retries)
+            self.modify_order(trade_object, sl_type, tp_type, confirm, retry_count + 1, max_retries)
 
         # Success case - confirm modal is displayed
         not confirm or self.__trade_modals.confirm_update_order()
@@ -296,8 +258,7 @@ class AssetTab(BaseTrade):
     # ------------------------ VERIFY ------------------------ #
     def verify_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Verify that the tab amount matches the expected amount."""
-        self.wait_for_tab_amount(tab, expected_amount)
-        soft_assert(self.get_tab_amount(tab, wait=False), expected_amount)
+        self.actions.verify_element_displayed(cook_element(self.__tab_amount, locator_format(tab), expected_amount))
 
     def verify_item_data(self, trade_object: ObjTrade, tab: AssetTabs = None, wait=False) -> None:
         """Verify that the item data matches the expected data."""
@@ -306,9 +267,6 @@ class AssetTab(BaseTrade):
         # handle expected
         self.get_current_price(trade_object)  # update current price for trade_object
         expected = trade_object.asset_item_data(tab)
-
-        if not trade_object.order_type.is_market():
-            expected["price"] = expected.pop("entry_price", None)
 
         # handle actual
         actual = self.get_expand_item_data(tab, trade_object)

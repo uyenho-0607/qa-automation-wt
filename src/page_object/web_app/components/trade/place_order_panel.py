@@ -1,6 +1,6 @@
 import random
 import time
-from typing import Optional, Any
+from typing import Any
 
 from selenium.webdriver.common.by import By
 
@@ -42,8 +42,8 @@ class PlaceOrderPanel(BaseTrade):
     __txt_price = (By.CSS_SELECTOR, data_testid('trade-input-price'))
     __txt_stop_loss = (By.CSS_SELECTOR, data_testid('trade-input-stoploss-{}'))
     __txt_take_profit = (By.CSS_SELECTOR, data_testid('trade-input-takeprofit-{}'))
-    __txt_stop_price = (By.CSS_SELECTOR, data_testid('trade-input-stop-limit-price'))
-    __volume_info_value = (By.XPATH, "//input[@data-testid='trade-input-volume']/ancestor::div[1]/following-sibling::div/div[2]")
+    __txt_stop_limit_price = (By.CSS_SELECTOR, data_testid('trade-input-stop-limit-price'))
+    __lbl_units_volume = (By.XPATH, "//input[@data-testid='trade-input-volume']/ancestor::div[1]/following-sibling::div/div[2]")
 
     # Order placement elements
     __btn_trade = (By.XPATH, "(//div[@data-testid='trade-button-order-{}'])[last()]")
@@ -62,7 +62,7 @@ class PlaceOrderPanel(BaseTrade):
     # ------------------------ HELPER METHODS ------------------------ #
     def _get_volume_info_value(self) -> str:
         """Get current volume/units value from UI."""
-        return self.actions.get_text(self.__volume_info_value)
+        return self.actions.get_text(self.__lbl_units_volume)
 
     def _get_input_sl(self) -> str:
         """Get current stop loss value from input field."""
@@ -88,7 +88,6 @@ class PlaceOrderPanel(BaseTrade):
         """Enable/disable One-Click Trading."""
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=5)
         if is_enabled != enable:
-            logger.debug("- Click on oct switch")
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
             if enable:
@@ -102,21 +101,15 @@ class PlaceOrderPanel(BaseTrade):
         if self.actions.is_element_displayed(self.__swap_units, timeout=1):
             self.actions.click(self.__swap_units)
 
-    def _select_trade_type(self, trade_type: TradeType) -> None:
+    def _select_trade_type(self, trade_type: TradeType, normal_mode=True) -> None:
         """Select trade type (BUY/SELL)."""
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
-        self.actions.click(cook_element(self.__btn_trade, trade_type.lower()))
-
-    def _select_oct_trade_type(self, trade_type: TradeType) -> None:
-        """Select trade type (BUY/SELL
-        )."""
-        logger.debug(f"- Select trade type: {trade_type.upper()!r}")
-        self.actions.click(cook_element(self.__btn_oct_trade, trade_type.lower()))
+        self.actions.click(cook_element(self.__btn_trade if normal_mode else self.__btn_oct_trade, trade_type.lower()))
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
-        is_selected = order_type.lower() in self.actions.get_text(self.__drp_order_type, timeout=QUICK_WAIT).lower()
-        if is_selected:
+        is_select = order_type.lower() in self.actions.get_text(self.__drp_order_type, timeout=QUICK_WAIT).lower()
+        if is_select:
             logger.debug(f"- Order type: {order_type} already selected")
             return
 
@@ -128,8 +121,8 @@ class PlaceOrderPanel(BaseTrade):
         """Select the fill policy for the order. Return selected fill_policy"""
         # check current selected fill policy
         self.actions.scroll_to_element(self.__drp_fill_policy)
-        is_selected = fill_policy.lower() in self.actions.get_text(self.__drp_fill_policy, timeout=QUICK_WAIT).lower()
-        if is_selected:
+        is_select = fill_policy.lower() in self.actions.get_text(self.__drp_fill_policy, timeout=QUICK_WAIT).lower()
+        if is_select:
             logger.debug(f"- Fill Policy: {fill_policy!r} selected")
             return
 
@@ -142,8 +135,8 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.scroll_to_element(self.__drp_expiry)
 
         # check if expiry is already selected
-        is_selected = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
-        if is_selected:
+        is_select = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
+        if is_select:
             logger.debug(f"> Expiry: {expiry!r} selected")
             return
 
@@ -157,8 +150,8 @@ class PlaceOrderPanel(BaseTrade):
     def _select_expiry_date(self):
         logger.debug("- Select expiry date")
         self.actions.scroll_to_element(self.__expiry_date)
-        self.actions.click(self.__expiry_date) # open expiry wheel date
-        self.actions.scroll_picker_down(self.__wheel_expiry_date) # scroll picker day
+        self.actions.click(self.__expiry_date)  # open expiry wheel date
+        self.actions.scroll_picker_down(self.__wheel_expiry_date)  # scroll picker day
         time.sleep(0.5)
         self.click_confirm_btn()
 
@@ -195,12 +188,11 @@ class PlaceOrderPanel(BaseTrade):
         logger.debug(f"- Input take profit: {value!r}")
         self.actions.send_keys(cook_element(self.__txt_take_profit, tp_type), value)
 
-    def _input_volume(self, value: Optional[int] = None) -> int:
+    def _input_volume(self, value):
         """Input volume value."""
         volume = value if value is not None else random.randint(2, 10)
         logger.debug(f"- Input volume: {volume!r}")
         self.actions.send_keys(self.__txt_volume, volume)
-        return volume
 
     def _input_price(self, value: Any) -> None:
         """Input trade price for order type: Limit, Stop, Stop Limit."""
@@ -211,15 +203,15 @@ class PlaceOrderPanel(BaseTrade):
     def _input_stop_price(self, value: Any) -> None:
         """Input stop limit price for order type 'Stop limit'."""
         logger.debug(f"- Input stop limit price: {value!r}")
-        self.actions.scroll_to_element(self.__txt_stop_price)
-        self.actions.send_keys(self.__txt_stop_price, value)
+        self.actions.scroll_to_element(self.__txt_stop_limit_price)
+        self.actions.send_keys(self.__txt_stop_limit_price, value)
 
     def place_order(
             self,
             trade_object: ObjTrade,
             sl_type: SLTPType = SLTPType.PRICE,
             tp_type: SLTPType = SLTPType.PRICE,
-            submit: bool = False,
+            confirm: bool = True,
     ) -> None:
         """
         Place a valid order and load input data into trade_object.
@@ -227,7 +219,7 @@ class PlaceOrderPanel(BaseTrade):
             trade_object: Should contain trade_type and order_type
             sl_type: Type of stop loss (PRICE/POINTS)
             tp_type: Type of take profit (PRICE/POINTS)
-            submit: Whether to submit trade confirmation modal
+            confirm: Whether to submit trade confirmation modal
         """
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
 
@@ -239,7 +231,8 @@ class PlaceOrderPanel(BaseTrade):
         not trade_object.get("is_units") or self.swap_to_units()
 
         # Input volume and get units
-        volume = self._input_volume()
+        trade_object.volume = trade_object.get("volume") or random.randint(1, 5)
+        self._input_volume(trade_object.volume)
         units = self._get_volume_info_value()
 
         # Calculate trade parameters
@@ -254,30 +247,27 @@ class PlaceOrderPanel(BaseTrade):
             self._input_stop_price(prices.stop_limit_price)
 
         # Select fill_policy
-        not trade_object.fill_policy or self._select_fill_policy(trade_object.fill_policy)
+        if trade_object.get("fill_policy"):
+            self._select_fill_policy(trade_object.fill_policy)
 
-        # Input SL/TP
-        if sl_type is not None:
+        # Input stop loss
+        if prices.stop_loss:
             stop_loss = prices.stop_loss
             self._input_sl(stop_loss, sl_type)
+            stop_loss = self._get_input_sl() if sl_type == SLTPType.POINTS else stop_loss
 
-            # get SL price
-            if sl_type == SLTPType.POINTS:
-                stop_loss = self._get_input_sl()
-
-        if tp_type is not None:
+        # input take profit
+        if prices.take_profit:
             take_profit = prices.take_profit
             self._input_tp(take_profit, tp_type)
-
-            # get TP price
-            if tp_type == SLTPType.POINTS:
-                take_profit = self._get_input_tp()
+            take_profit = self._get_input_tp() if tp_type == SLTPType.POINTS else take_profit
 
         # select expiry
-        not trade_object.get("expiry") or self._select_expiry(trade_object.expiry)
+        if trade_object.get("expiry"):
+            self._select_expiry(trade_object.expiry)
 
-        # Prepare trade details
-        volume, units = (volume, units) if not trade_object.get("is_units") else (units, volume)
+        # Update placed order details back to trade_object
+        volume, units = (trade_object.volume, units) if not trade_object.get("is_units") else (units, trade_object.volume)
         trade_details = {
             'volume': format_str_price(volume),
             'units': format_str_price(units),
@@ -294,23 +284,21 @@ class PlaceOrderPanel(BaseTrade):
 
         # Place order
         self._click_place_order_btn()
-        if submit:
-            self.get_current_price(trade_object)
-            self.confirm_trade()
+        if confirm:
+            self.get_current_price(trade_object)  # get most recent current_price
+            self.confirm_trade()  # confirm placing order
 
     def place_oct_order(self, trade_object: ObjTrade) -> None:
-
-        trade_type = trade_object.trade_type
-
         # Input volume and get units
-        volume = self._input_volume()
+        volume = trade_object.get("volume") or random.randint(1, 5)
+        self._input_volume(volume)
         units = volume * trade_object.CONTRACT_SIZE
 
         # Prepare trade details
         trade_details = {
             'volume': format_str_price(volume),
             'units': format_str_price(units),
-            'entry_price': self.get_live_price(trade_type, oct=True),
+            'entry_price': self.get_live_price(trade_object.trade_type, oct_mode=True),
             'stop_loss': '--',
             'take_profit': '--'
         }
@@ -319,7 +307,7 @@ class PlaceOrderPanel(BaseTrade):
         trade_object |= {k: v for k, v in trade_details.items()}
 
         # Place Order
-        self._select_oct_trade_type(trade_type)
+        self._select_trade_type(trade_object.trade_type, normal_mode=False)
 
     # ------------------------ VERIFY ------------------------ #
 
