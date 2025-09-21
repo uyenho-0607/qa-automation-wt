@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, Features, OrderType
+from src.data.enums import AssetTabs, Features, OrderType, SLTPType
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -39,6 +39,14 @@ def stop_limit_obj(symbol):
         return trade_object
 
     return _handler
+
+
+@pytest.fixture(name="order_data")
+def prepare_place_order(web_app):
+    def handler(trade_object, sl_type=SLTPType.PRICE, tp_type=SLTPType.PRICE, confirm=True):
+        web_app.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, confirm=confirm)
+
+    return handler
 
 
 @pytest.fixture(scope="package")
