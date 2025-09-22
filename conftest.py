@@ -291,6 +291,6 @@ def pytest_runtest_logreport(report):
         printlog = logger.info if report.outcome == "passed" else logger.warning
         print("\x00") # print a non-printable character to break a new line on console
         printlog("---------------")  # noqa
-        printlog(f"Test case     | { report.nodeid.replace("::test", "")}")  # noqa
+        printlog(f"Test case     | { report.nodeid.replace('::test', '')}")  # noqa
         printlog(f"Test duration | {pretty_time(report.duration)}")  # noqa
         printlog("---------------")
