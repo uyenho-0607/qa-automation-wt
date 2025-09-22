@@ -1,8 +1,6 @@
 from contextlib import suppress
 
 import pytest
-
-from src.apis.api_client import APIClient
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.ios_container import iOSContainer
@@ -27,7 +25,6 @@ def ios():
 
 @pytest.fixture(scope="package")
 def login_wt_app(ios):
-
     if not RuntimeConfig.argo_cd:
         # currently, cannot reset login state of app -> temporarily check if app is logged in -> perform logout
         if ios.home_screen.on_home_screen():
@@ -63,12 +60,28 @@ def login_wt_app(ios):
 
 
 @pytest.fixture(scope="package")
-def disable_OCT():
-    logger.info("[Setup] Send API request to disable OCT")
-    APIClient().user.patch_oct(enable=False)
+def disable_OCT(ios):
+    """disable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = ios.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
+        ios.trade_screen.place_order_panel.toggle_oct(enable=False, confirm=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 
 @pytest.fixture(scope="package")
-def enable_OCT():
-    logger.info("[Setup] Send API request enable OCT")
-    APIClient().user.patch_oct(enable=True)
+def enable_OCT(ios):
+    """enable OCT from place order panel"""
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = ios.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Enable OCT", setup=True)
+        ios.trade_screen.place_order_panel.toggle_oct(enable=True, confirm=True)
+
+    else:
+        pytest.skip("OCT mode is disabled in Admin Config - SKIP this test ")

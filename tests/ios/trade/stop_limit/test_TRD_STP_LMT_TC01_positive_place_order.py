@@ -16,9 +16,9 @@ from src.utils.logging_utils import logger
         (SLTPType.PRICE, SLTPType.PRICE)
     ]
 )
-def test(ios, cancel_all, market_obj, sl_type, tp_type, get_asset_tab_amount):
-    trade_object = market_obj()
-    tab = AssetTabs.OPEN_POSITION
+def test(ios, stop_limit_obj, sl_type, tp_type, get_asset_tab_amount):
+    trade_object = stop_limit_obj()
+    tab = AssetTabs.PENDING_ORDER
 
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
@@ -35,18 +35,14 @@ def test(ios, cancel_all, market_obj, sl_type, tp_type, get_asset_tab_amount):
     logger.info(f"Verify order submitted notification banner")
     ios.home_screen.notifications.verify_notification_banner(*ObjNoti(trade_object).order_submitted_banner())
 
+    logger.info(f"Step 4: Select {tab.value.title()!r} tab")
+    ios.trade_screen.asset_tab.select_tab(tab)
+
     logger.info(f"Verify tab amount increased to {tab_amount + 1}")
     ios.trade_screen.asset_tab.verify_tab_amount(tab, tab_amount + 1)
 
     logger.info(f"Verify order details in tab")
     ios.trade_screen.asset_tab.verify_item_data(trade_object)
-
-    logger.info("Step 4: Navigate to Home Screen")
-    ios.trade_screen.navigate_to(Features.HOME)
-
-    logger.info("Verify Open Position Notification")
-    ios.home_screen.notifications.verify_notification_result(
-        ObjNoti(trade_object).open_position_details(order_id=trade_object.order_id), close=True)
 
 
 @pytest.fixture(autouse=True)
