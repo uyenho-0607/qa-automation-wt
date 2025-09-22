@@ -13,6 +13,7 @@ from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number
 from src.utils.logging_utils import logger
+from src.utils.trading_utils import calculate_partial_close
 
 
 class AssetTab(BaseTrade):
@@ -133,11 +134,17 @@ class AssetTab(BaseTrade):
         if confirm:
             self.__trade_modals.confirm_delete_order()
 
-    def full_close_order(self):
+    def partial_close_order(self):
+        # TBD
         ...
 
-    def partial_close_order(self, trade_object: ObjTrade):
-        ...
+    def full_close_order(self, order_id, confirm=True):
+        logger.debug(f"- Close order with ID: {order_id!r}")
+        self._click_action_btn(order_id, AssetTabs.OPEN_POSITION, "close")
+
+        if confirm:
+            self.__trade_modals.confirm_close_order()
+
 
     def _click_action_btn(
             self, order_id=0, tab: AssetTabs = AssetTabs.OPEN_POSITION, action: Literal["edit", "close"] = "edit"

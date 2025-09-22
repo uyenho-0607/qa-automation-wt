@@ -170,7 +170,7 @@ class AssetTab(BaseTrade):
         self.actions.click(locator)
 
         # random closed volume value
-        values = calculate_partial_close(trade_object)
+        values = calculate_partial_close(trade_object.volume, trade_object.units)
         close_volume = values.close_volume
 
         logger.debug(f"- Close volume: {close_volume!r} / {trade_object.volume}")
