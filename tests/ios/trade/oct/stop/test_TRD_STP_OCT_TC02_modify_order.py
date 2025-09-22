@@ -21,7 +21,7 @@ def test(ios, stop_obj, edit_field, sl_type, tp_type, order_data):
 
     logger.info("Step 3: Get placed orderID")
     ios.trade_screen.asset_tab.select_tab(tab)
-    ios.trade_screen.asset_tab.get_last_order_id(tab, trade_object, True)
+    trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(tab, True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     ios.trade_screen.asset_tab.verify_item_data(trade_object, tab, False)

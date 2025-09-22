@@ -22,7 +22,7 @@ def test(ios, order_data, stop_limit_obj, get_asset_tab_amount):
 
     logger.info("Step 4: Get placed orderID")
     ios.trade_screen.asset_tab.select_tab(tab)
-    ios.trade_screen.asset_tab.get_last_order_id(tab, trade_object, wait=True)
+    trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(tab, wait=True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id}")
     ios.trade_screen.asset_tab.verify_item_data(trade_object, wait=False)

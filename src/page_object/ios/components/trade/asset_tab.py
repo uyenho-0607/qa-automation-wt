@@ -67,15 +67,11 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, tab: AssetTabs, trade_object: ObjTrade = None, wait=False):
+    def get_last_order_id(self, tab: AssetTabs, wait=False):
         not wait or self.wait_for_spin_loader()
         order_id = self.actions.get_attribute(cook_element(self.__order_id_items, tab.col_locator()), "label")
         order_id = order_id.split(": ")[-1] if order_id else 0
         logger.debug(f"- Lastest orderID: {order_id!r}")
-
-        if trade_object:
-            trade_object.order_id = order_id
-
         return order_id
 
     def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade):
@@ -130,7 +126,7 @@ class AssetTab(BaseTrade):
 
     def delete_order(self, trade_object: ObjTrade, confirm=True):
         if not trade_object.get('order_id'):
-            trade_object.order_id = self.get_last_order_id(AssetTabs.PENDING_ORDER, trade_object, wait=True)
+            trade_object.order_id = self.get_last_order_id(AssetTabs.PENDING_ORDER, wait=True)
 
         logger.debug(f"- Delete order with ID: {trade_object.order_id!r}")
         self._click_action_btn(trade_object.order_id, AssetTabs.PENDING_ORDER, "close") # close == delete in pending orders tab
