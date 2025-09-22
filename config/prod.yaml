@@ -11,16 +11,16 @@ lirunex:
 
   credentials:
     mt4:
-      user_demo: 2092009642
+      user_demo: 2092012616
 
     mt5:
-      user_demo: 569202036
+      user_demo: 569205536
 
   mobile:
     app_package: com.aquariux.wt.lirunex
     app_bundle: ...
 
-dcodemarkets:
+dcode:
   base_url: https://webtrader.dcodemarkets.com
 
   credentials:
