@@ -5,7 +5,7 @@ from typing import Optional, Any
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, SHORT_WAIT
+from src.data.consts import QUICK_WAIT
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
 from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
@@ -140,6 +140,8 @@ class PlaceOrderPanel(BaseTrade):
     def _select_expiry(self, expiry: Expiry | str):
         """Select expiry for the order. Return selected expiry"""
         self.actions.scroll_to_element(self.__drp_expiry)
+
+        # check if expiry is already selected
         is_selected = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
         if is_selected:
             logger.debug(f"> Expiry: {expiry!r} selected")
@@ -149,13 +151,16 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.click(self.__drp_expiry)
         self.actions.click(cook_element(self.__opt_expiry, expiry))
 
-        if expiry in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME]:
-            logger.debug(f"- Select expiry date")
-            self.actions.scroll_to_element(self.__expiry_date)
-            self.actions.click(self.__expiry_date)
-            self.actions.scroll_picker_down(self.__wheel_expiry_date)
-            time.sleep(0.5)
-            self.click_confirm_btn()
+        # select date in case expiry specified date
+        expiry not in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME] or self._select_expiry_date()
+
+    def _select_expiry_date(self):
+        logger.debug("- Select expiry date")
+        self.actions.scroll_to_element(self.__expiry_date)
+        self.actions.click(self.__expiry_date) # open expiry wheel date
+        self.actions.scroll_picker_down(self.__wheel_expiry_date) # scroll picker day
+        time.sleep(0.5)
+        self.click_confirm_btn()
 
     def _click_place_order_btn(self) -> None:
         """Click place order button."""
@@ -197,20 +202,14 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.send_keys(self.__txt_volume, volume)
         return volume
 
-    def _input_price(self, value: Any, order_type: Optional[OrderType] = None) -> None:
+    def _input_price(self, value: Any) -> None:
         """Input trade price for order type: Limit, Stop, Stop Limit."""
-        if order_type == OrderType.MARKET:
-            return
-
         logger.debug(f"- Input price: {value!r}")
         self.actions.scroll_to_element(self.__txt_price)
         self.actions.send_keys(self.__txt_price, value)
 
-    def _input_stop_price(self, value: Any, order_type: Optional[OrderType] = None) -> None:
+    def _input_stop_price(self, value: Any) -> None:
         """Input stop limit price for order type 'Stop limit'."""
-        if order_type != OrderType.STOP_LIMIT:
-            return
-
         logger.debug(f"- Input stop limit price: {value!r}")
         self.actions.scroll_to_element(self.__txt_stop_price)
         self.actions.send_keys(self.__txt_stop_price, value)
@@ -220,7 +219,6 @@ class PlaceOrderPanel(BaseTrade):
             trade_object: ObjTrade,
             sl_type: SLTPType = SLTPType.PRICE,
             tp_type: SLTPType = SLTPType.PRICE,
-            swap_to_units: bool = False,
             submit: bool = False,
     ) -> None:
         """
@@ -229,7 +227,6 @@ class PlaceOrderPanel(BaseTrade):
             trade_object: Should contain trade_type and order_type
             sl_type: Type of stop loss (PRICE/POINTS)
             tp_type: Type of take profit (PRICE/POINTS)
-            swap_to_units: Whether to swap to units display
             submit: Whether to submit trade confirmation modal
         """
         trade_type, order_type = trade_object.trade_type, trade_object.order_type
@@ -238,8 +235,8 @@ class PlaceOrderPanel(BaseTrade):
         self._select_trade_type(trade_type)
         self._select_order_type(order_type)
 
-        # Handle volume display
-        not swap_to_units or self.swap_to_units()
+        # Handle swap to units
+        not trade_object.get("is_units") or self.swap_to_units()
 
         # Input volume and get units
         volume = self._input_volume()
@@ -248,12 +245,16 @@ class PlaceOrderPanel(BaseTrade):
         # Calculate trade parameters
         prices = calculate_trading_params(self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
 
-        # Input prices
-        self._input_price(prices.entry_price, order_type)
-        self._input_stop_price(prices.stop_limit_price, order_type)
+        # Input price if present
+        if order_type != OrderType.MARKET:
+            self._input_price(prices.entry_price)
+
+        # input stop limit price if present
+        if order_type == OrderType.STOP_LIMIT:
+            self._input_stop_price(prices.stop_limit_price)
 
         # Select fill_policy
-        not trade_object.get("fill_policy") or self._select_fill_policy(trade_object.fill_policy)
+        not trade_object.fill_policy or self._select_fill_policy(trade_object.fill_policy)
 
         # Input SL/TP
         if sl_type is not None:
@@ -276,7 +277,7 @@ class PlaceOrderPanel(BaseTrade):
         not trade_object.get("expiry") or self._select_expiry(trade_object.expiry)
 
         # Prepare trade details
-        volume, units = (volume, units) if not swap_to_units else (units, volume)
+        volume, units = (volume, units) if not trade_object.get("is_units") else (units, volume)
         trade_details = {
             'volume': format_str_price(volume),
             'units': format_str_price(units),
@@ -326,8 +327,8 @@ class PlaceOrderPanel(BaseTrade):
     # ------------------------ VERIFY ------------------------ #
 
     def verify_oct_mode(self, enable=True):
-        logger.info(f"- Check OCT button is {'enabled' if enable else 'disabled'}")
+        logger.debug(f"- Check OCT button is {'enabled' if enable else 'disabled'}")
         self.actions.verify_element_displayed(self.__toggle_oct_checked if enable else self.__toggle_oct)
 
-        logger.info(f"- Check pre-trade details tab is {'displayed' if enable else 'not displayed'}")
+        logger.debug(f"- Check pre-trade details tab is {'displayed' if enable else 'not displayed'}")
         self.actions.verify_element_displayed(self.__btn_pre_trade_details, is_display=enable)

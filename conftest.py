@@ -8,6 +8,7 @@ import allure
 import pytest
 from allure_commons.types import Severity
 from allure_commons.utils import uuid4, now
+from src.utils.common_utils import pretty_time
 
 from src.core.config_manager import Config
 from src.core.driver.driver_manager import DriverManager
@@ -289,7 +290,7 @@ def pytest_runtest_logreport(report):
     if report.when == "call":
         printlog = logger.info if report.outcome == "passed" else logger.warning
         print("\x00") # print a non-printable character to break a new line on console
-        printlog("-------------")  # noqa
+        printlog("---------------")  # noqa
         printlog(f"Test case     | { report.nodeid.replace("::test", "")}")  # noqa
-        printlog(f"Test duration | {round(report.duration, 3)}s")  # noqa
-        printlog("-------------")
+        printlog(f"Test duration | {pretty_time(report.duration)}")  # noqa
+        printlog("---------------")
