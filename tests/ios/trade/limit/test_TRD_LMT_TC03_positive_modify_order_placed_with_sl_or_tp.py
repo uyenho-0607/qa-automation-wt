@@ -20,7 +20,7 @@ def test(ios, limit_obj, exclude_field, update_field, order_data, cancel_all):
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without {exclude_field}")
     order_data(trade_object, **{f"{exclude_field.lower()}_type": None})
 
-    logger.info("Step 2: Get placed orderID")
+    logger.info("Step 2: Select Pending Orders tab")
     ios.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
     trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(AssetTabs.PENDING_ORDER, wait=True)
 
