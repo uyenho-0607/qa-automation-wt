@@ -8,7 +8,7 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 def test(ios, order_data, market_obj, get_asset_tab_amount):
-    trade_object = market_obj(fill_policy=FillPolicy.FILL_OR_KILL)
+    trade_object = market_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")
@@ -19,7 +19,7 @@ def test(ios, order_data, market_obj, get_asset_tab_amount):
     ios.trade_screen.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
     logger.info("Step 2: Full close order")
-    ios.trade_screen.asset_tab.full_close_order(trade_object.order_id)
+    ios.trade_screen.asset_tab.full_close_position(trade_object.order_id)
     trade_object.current_price = ios.trade_screen.asset_tab.get_current_price(trade_object.trade_type, trade_object.order_type)
 
     logger.info(f"Verify close order notification banner")
@@ -45,7 +45,6 @@ def test(ios, order_data, market_obj, get_asset_tab_amount):
     ios.trade_screen.asset_tab.select_tab(AssetTabs.POSITIONS_HISTORY)
 
     logger.info(f"Verify history order item details")
-    # This step is fail due to locator is changed
     ios.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.POSITIONS_HISTORY)
 
 

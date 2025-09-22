@@ -138,7 +138,7 @@ class AssetTab(BaseTrade):
         # TBD
         ...
 
-    def full_close_order(self, order_id, confirm=True):
+    def full_close_position(self, order_id, confirm=True):
         logger.debug(f"- Close order with ID: {order_id!r}")
         self._click_action_btn(order_id, AssetTabs.OPEN_POSITION, "close")
 
