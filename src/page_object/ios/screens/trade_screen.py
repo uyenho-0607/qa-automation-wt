@@ -1,6 +1,6 @@
 from src.core.actions.mobile_actions import MobileActions
 from appium.webdriver.common.appiumby import AppiumBy
-
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.ios.base_screen import BaseScreen
 from src.page_object.ios.components.modals.trading_modals import TradingModals
 from src.page_object.ios.components.trade.asset_tab import AssetTab
@@ -29,3 +29,25 @@ class TradeScreen(BaseScreen):
         actual_symbol = self.actions.get_text(self.__symbol_overview_id)
         soft_assert(actual_symbol, symbol)
 
+    @staticmethod
+    def verify_placed_order_data(trade_object: ObjTrade, api_data: dict):
+        """Verify placed order against API data"""
+        if not api_data:
+            soft_assert(False, True, error_message="API order data is empty!")
+            return
+
+        actual = trade_object.api_data_format()
+        expected = {k: v for k, v in api_data.items() if k in actual.keys()}
+        
+        # Round floats and handle volume mapping
+        for key, value in expected.items():
+            if isinstance(value, float):
+                expected[key] = round(value, ndigits=ObjTrade.DECIMAL)
+        expected["volume"] = api_data.get("lotSize")
+
+        soft_assert(
+            actual,
+            expected,
+            tolerance=0.5,
+            tolerance_fields=trade_object.tolerance_fields(api_format=True) + ["openPrice"]
+        )

@@ -13,7 +13,6 @@ from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
 from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number, is_float
 from src.utils.logging_utils import logger
-from src.utils.trading_utils import calculate_partial_close
 
 
 class AssetTab(BaseTrade):
@@ -35,8 +34,7 @@ class AssetTab(BaseTrade):
     # expand item
     __expand_items = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-list-item-expand")  # tab
     __btn_cancel_expand_item = (AppiumBy.ACCESSIBILITY_ID, "action-sheet-cancel-button")
-    __expanded_labels = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name BEGINSWITH "asset-{}-column-" AND name ENDSWITH "-label"`]')
-    __expanded_values = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name BEGINSWITH "asset-{}-column-" AND name ENDSWITH "-value"`]')
+    __expanded_values = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name CONTAINS "asset-{}-column" AND name CONTAINS "-value"`]')  # tab.col_locator() - common of order's values
     __expanded_order_type = (AppiumBy.ACCESSIBILITY_ID, "asset-order-type")
     __expanded_symbol = (AppiumBy.ACCESSIBILITY_ID, "asset-detailed-header-symbol")
     __expand_item_profit_loss = (AppiumBy.ACCESSIBILITY_ID, "asset-open-list-item-expand")
@@ -84,22 +82,16 @@ class AssetTab(BaseTrade):
 
     def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade):
         """Get latest data for placed order"""
-        # not wait or self.wait_for_spin_loader()
-        if trade_object.get("order_id"):
-            logger.debug(f"- Wait for order: {trade_object.order_id} display")
-            self.actions.wait_for_element_visible(cook_element(self.__item_by_id, tab.col_locator(), trade_object.order_id))
-
         # expand last item
         self._expand_item(tab)
 
         # re-assign tab in cased of history - to get correct col locator
         tab = AssetTabs.HISTORY if tab.is_history() else tab
+        res = {
+            ele.get_attribute("name").split("-column-")[-1].replace("-value", "").replace("-", "_"): ele.text.strip()
+            for ele in self.actions.find_elements(cook_element(self.__expanded_values, tab.col_locator()))
+        }
 
-        # get item col name & value
-        expand_labels = self.actions.get_text_elements(cook_element(self.__expanded_labels, tab.col_locator()))
-        expand_values = self.actions.get_text_elements(cook_element(self.__expanded_values, tab.col_locator()))
-
-        res = {k.lower().replace(" ", "_").replace(".", ""): v for k, v in zip(expand_labels, expand_values)}
         res["order_type"] = self.actions.get_text(self.__expanded_order_type)
         res["symbol"] = self.actions.get_text(self.__expanded_symbol)
 
@@ -113,7 +105,7 @@ class AssetTab(BaseTrade):
             res["volume"] = res["volume"].split(" / ")[0]
 
         # update order_id for trade_object if not present
-        trade_object.get("order_id") or trade_object.update(dict(order_id=res.get("order_no", None)))
+        trade_object.get("order_id") or trade_object.update(dict(order_id=res.get("order_id", None)))
 
         # close expanded item
         self._expand_item(expand=False)
@@ -137,7 +129,7 @@ class AssetTab(BaseTrade):
             trade_object.order_id = self.get_last_order_id(AssetTabs.PENDING_ORDER, wait=True)
 
         logger.debug(f"- Delete order with ID: {trade_object.order_id!r}")
-        self._click_action_btn(trade_object.order_id, AssetTabs.PENDING_ORDER, "close") # close == delete in pending orders tab
+        self._click_action_btn(trade_object.order_id, AssetTabs.PENDING_ORDER, "close")  # close == delete in pending orders tab
         if confirm:
             self.__trade_modals.confirm_delete_order()
 
@@ -152,7 +144,6 @@ class AssetTab(BaseTrade):
 
         if confirm:
             self.__trade_modals.confirm_close_order()
-
 
     def _click_action_btn(
             self, order_id=0, tab: AssetTabs = AssetTabs.OPEN_POSITION, action: Literal["edit", "close"] = "edit"
@@ -184,8 +175,7 @@ class AssetTab(BaseTrade):
 
     # ------------------------ VERIFY ------------------------ #
     def verify_tab_amount(self, tab: AssetTabs, exp_amount):
-        self.wait_for_tab_amount(tab, exp_amount)
-        soft_assert(self.get_tab_amount(tab), exp_amount)
+        self.actions.verify_element_displayed(cook_element(self.__tab_amount, locator_format(tab), exp_amount))
 
     def verify_items_displayed(self, tab: AssetTabs, order_id, is_display=True):
         order_ids = order_id if isinstance(order_id, list) else [order_id]
@@ -199,9 +189,6 @@ class AssetTab(BaseTrade):
         # handle expected
         trade_object.current_price = self.get_current_price(trade_object.trade_type, trade_object.order_type)  # update current price for trade_object
         expected = trade_object.asset_item_data(tab)
-
-        if not trade_object.order_type.is_market():
-            expected["price"] = expected.pop("entry_price", None)
 
         # handle actual
         actual = self.get_expand_item_data(tab, trade_object)
