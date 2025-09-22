@@ -1,6 +1,6 @@
 import pytest
 
-from src.data.enums import AssetTabs, Features
+from src.data.enums import AssetTabs
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
@@ -20,7 +20,7 @@ def test(ios, order_data, stop_obj, get_asset_tab_amount):
     logger.info(f"Step 3: Place order with: {format_display_dict(trade_object)}, (tab amount: {tab_amount!r})")
     order_data(trade_object, confirm=False)
 
-    logger.info("Step 4: Get placed orderID")
+    logger.info("Step 4: Select Pending Orders tab")
     ios.trade_screen.asset_tab.select_tab(tab)
     trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(tab, wait=True)
 

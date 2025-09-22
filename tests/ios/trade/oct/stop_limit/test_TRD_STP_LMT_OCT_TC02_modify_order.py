@@ -19,7 +19,7 @@ def test(ios, stop_limit_obj, edit_field, sl_type, tp_type, order_data):
     logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)}")
     order_data(trade_object, confirm=False)
 
-    logger.info("Step 3: Get placed orderID")
+    logger.info("Step 3: Select Pending Orders tab")
     ios.trade_screen.asset_tab.select_tab(tab)
     trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(tab, True)
 
