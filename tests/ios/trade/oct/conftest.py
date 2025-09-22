@@ -2,5 +2,5 @@ import pytest
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup_disable_OCT(disable_OCT):
+def setup_enable_OCT(enable_OCT):
     pass
