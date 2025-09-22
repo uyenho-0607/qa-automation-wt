@@ -22,34 +22,28 @@ class BaseTrade(BaseScreen):
     __btn_cancel_trade = (AppiumBy.ACCESSIBILITY_ID, "trade-confirmation-button-close")
 
     # ------------------------ ACTIONS ------------------------ #
-    def get_live_price(self, trade_type: TradeType, oct_mode=False, trade_object: ObjTrade = None) -> str:
+    def get_live_price(self, trade_type: TradeType, oct_mode=False) -> str:
         """Get the current live price for a given trade type.
         The price is displayed in the trading interface and is used for various trading operations.
         """
         btn_price = self.__oct_live_price if oct_mode else self.__live_price
         price = self.actions.get_attribute(cook_element(btn_price, trade_type.lower()), "label")
         price = price.split(" ")[-1] or 0
-
-        if trade_object:
-            trade_object.current_price = price
-
         return price
 
-    def get_current_price(self, trade_object: ObjTrade, timeout=SHORT_WAIT, oct_mode=False):
+    def get_current_price(self, trade_type: TradeType, order_type: OrderType, timeout=SHORT_WAIT, oct_mode=False):
         """Get the current price for a placed order (reverse for order_type = Market).
         """
         btn_price = self.__oct_live_price if oct_mode else self.__live_price
-        trade_type = trade_object.trade_type
-
+        
         # reverse for order MARKET
-        if trade_object.order_type == OrderType.MARKET:
-            trade_type = TradeType.BUY if trade_object.trade_type == TradeType.SELL else TradeType.SELL
+        if order_type == OrderType.MARKET:
+            trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
 
         current_price = self.actions.get_attribute(
             cook_element(btn_price, trade_type.lower()), "label", timeout=timeout, raise_exception=False, show_log=False
         )
-
-        trade_object.current_price = current_price
+        return current_price
 
     def confirm_oct(self, confirm=True):
         logger.debug(f"- Confirm enable OCT: {confirm!r}")
