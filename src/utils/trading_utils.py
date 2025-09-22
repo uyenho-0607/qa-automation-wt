@@ -214,8 +214,8 @@ def calculate_trading_params(
     return DotDict(result)
 
 
-def calculate_partial_close(trade_object):
-    volume, units = int(trade_object.volume), int(remove_comma(trade_object.units))
+def calculate_partial_close(volume, units):
+    volume, units = int(volume), int(remove_comma(units))
     close_volume = random.randint(1, volume - 1)
     left_volume = volume - close_volume
     left_units = int(units * left_volume / volume)
