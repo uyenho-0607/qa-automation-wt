@@ -182,7 +182,7 @@ class AssetTab(BaseTrade):
         not wait or self.wait_for_spin_loader()
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
         # handle expected
-        self.get_current_price(trade_object)  # update current price for trade_object
+        trade_object.current_price = self.get_current_price(trade_object.trade_type, trade_object.order_type)  # update current price for trade_object
         expected = trade_object.asset_item_data(tab)
 
         if not trade_object.order_type.is_market():
