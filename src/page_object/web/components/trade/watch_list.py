@@ -48,6 +48,7 @@ class WatchList(BaseTrade):
 
     def __get_tab_locator(self, tab: WatchListTab):
         """Get correct tab locator based on current page (TRADE or MARKET)"""
+        # todo: separate to 2 functions
         page = None
         if self.is_current_page(URLPaths.MARKETS):
             page = Features.MARKETS
@@ -66,6 +67,7 @@ class WatchList(BaseTrade):
 
         if retry_count >= max_retries:
             logger.warning("- Failed to select tab")
+            return
 
         logger.info(f"- Select tab: {tab.value.title()!r}")
         self.actions.click(self.__get_tab_locator(tab))
