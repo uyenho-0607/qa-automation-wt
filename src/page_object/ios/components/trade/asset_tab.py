@@ -27,8 +27,12 @@ class AssetTab(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.ACCESSIBILITY_ID, "tab-asset-order-type-{}")  # tab: open, pending, history
-    __tab_amount = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeOther[`name == "tab-asset-order-type-{}" AND label CONTAINS "({})"`]')  # tab - exp_amount
-    __item_by_id = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name == "asset-{}-list-item-order-no" AND label CONTAINS "{}"`]')  # tab - orderID
+    __tab_amount = (
+        AppiumBy.IOS_CLASS_CHAIN,
+        '**/XCUIElementTypeOther[`name == "tab-asset-order-type-{}" AND label CONTAINS "({})"`]')  # tab - exp_amount
+    __item_by_id = (
+        AppiumBy.IOS_CLASS_CHAIN,
+        '**/XCUIElementTypeStaticText[`name == "asset-{}-list-item-order-no" AND label CONTAINS "{}"`]')  # tab - orderID
     __order_id_items = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-list-item-order-no")  # tab
 
     # expand item
@@ -133,10 +137,37 @@ class AssetTab(BaseTrade):
         if confirm:
             self.__trade_modals.confirm_delete_order()
 
+    def partial_close_position(self, close_object: ObjTrade, close_volume=0, confirm=True) -> ObjTrade:
+        """
+            This method creates a new trade order object representing the remaining
+            (open) position after partially closing an existing order. It updates both
+            the original `close_object` (with the closed portion) and returns a new
+            `open_trade_order` (with the remaining portion).
+        """
+        # deep copy open_trade_order from close_object
+        open_object = ObjTrade(**dict(close_object) | dict(order_id=None))
 
-    def partial_close_order(self):
-        # TBD
-        ...
+        if close_volume:
+            close_object.volume = close_volume
+        else:
+            # random closed volume value
+            values = calculate_partial_close(close_object.volume, close_object.units)
+            close_volume = values.close_volume
+
+            # update volume for old and new created obj
+            open_object |= dict(volume=values.left_volume, units=values.left_units)
+            close_object |= dict(volume=values.close_volume, units=values.close_units)
+
+        logger.debug(f"- Close order with ID: {close_object.order_id!r}")
+        self._click_action_btn(close_object.order_id, AssetTabs.OPEN_POSITION, "close")
+
+        # Input volume
+        self.actions.send_keys(self.__txt_close_volume, close_volume)
+
+        if confirm:
+            self.__trade_modals.confirm_close_order()
+
+        return open_object
 
     def full_close_position(self, order_id, confirm=True):
         logger.debug(f"- Close order with ID: {order_id!r}")
