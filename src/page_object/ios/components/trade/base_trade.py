@@ -18,8 +18,11 @@ class BaseTrade(BaseScreen):
     __oct_live_price = (AppiumBy.ACCESSIBILITY_ID, "trade-button-oct-order-{}")
     __oct_confirm_btn = (AppiumBy.ACCESSIBILITY_ID, "oct-modal-button-confirm")
     __cot_cancel_btn = (AppiumBy.ACCESSIBILITY_ID, "oct-modal-button-cancel")
+
+    ##### Trade Confirmation Modal #####
     __btn_confirm_trade = (AppiumBy.ACCESSIBILITY_ID, "trade-confirmation-button-confirm")
     __btn_cancel_trade = (AppiumBy.ACCESSIBILITY_ID, "trade-confirmation-button-close")
+    __btn_confirm_close_delete_order = (AppiumBy.ACCESSIBILITY_ID, 'close-order-button-submit')
 
     # ------------------------ ACTIONS ------------------------ #
     def get_live_price(self, trade_type: TradeType, oct_mode=False) -> str:
@@ -52,3 +55,7 @@ class BaseTrade(BaseScreen):
     def confirm_trade(self, confirm=True):
         logger.debug(f"- Confirm place order: {confirm!r}")
         self.actions.click(self.__btn_confirm_trade if confirm else self.__btn_cancel_trade)
+
+    def confirm_close_order(self):
+        """Confirm close order action."""
+        self.actions.click(self.__btn_confirm_close_delete_order)
