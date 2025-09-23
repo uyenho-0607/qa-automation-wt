@@ -11,7 +11,7 @@ from src.page_object.ios.components.modals.trading_modals import TradingModals
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
-from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number
+from src.utils.format_utils import locator_format, format_dict_to_string, extract_asset_tab_number, is_float
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_partial_close
 
@@ -39,6 +39,7 @@ class AssetTab(BaseTrade):
     __expanded_values = (AppiumBy.IOS_CLASS_CHAIN, '**/XCUIElementTypeStaticText[`name BEGINSWITH "asset-{}-column-" AND name ENDSWITH "-value"`]')
     __expanded_order_type = (AppiumBy.ACCESSIBILITY_ID, "asset-order-type")
     __expanded_symbol = (AppiumBy.ACCESSIBILITY_ID, "asset-detailed-header-symbol")
+    __expand_item_profit_loss = (AppiumBy.ACCESSIBILITY_ID, "asset-open-list-item-expand")
 
     # Control buttons locators
     __btn_action = (AppiumBy.ACCESSIBILITY_ID, "asset-{}-button-{}")  # tab: open, pending, history - action: close, edit
@@ -61,6 +62,12 @@ class AssetTab(BaseTrade):
     def wait_for_tab_amount(self, tab: AssetTabs, expected_amount: int) -> None:
         """Wait for the asset tab amount to match the expected amount."""
         self.actions.wait_for_element_visible(cook_element(self.__tab_amount, locator_format(tab), expected_amount))
+
+    def get_profit_loss(self, wait=True):
+        not wait or self.wait_for_spin_loader()
+        res = self.actions.get_text_elements(self.__expand_item_profit_loss)
+        res = [item.split("\n")[-1].replace("--", "0") for item in res]
+        return [(float(item) if is_float(item) else 0) for item in res]
 
     def get_tab_amount(self, tab: AssetTabs, wait=True) -> int:
         """Get the number of items in the specified tab."""
@@ -133,6 +140,7 @@ class AssetTab(BaseTrade):
         self._click_action_btn(trade_object.order_id, AssetTabs.PENDING_ORDER, "close") # close == delete in pending orders tab
         if confirm:
             self.__trade_modals.confirm_delete_order()
+
 
     def partial_close_order(self):
         # TBD

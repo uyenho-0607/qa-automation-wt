@@ -1,10 +1,8 @@
 import random
-import time
 
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import QUICK_WAIT
 from src.data.enums import WatchListTab
 from src.page_object.ios.base_screen import BaseScreen
 from src.page_object.ios.components.trade.watch_list import WatchList
@@ -19,65 +17,71 @@ class MarketsScreen(BaseScreen):
 
     # ------------------------ LOCATORS ------------------------ #
 
-    __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
-    __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
-    __chb_symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.widget.TextView[@text='{}']/preceding-sibling::android.view.ViewGroup[.//android.widget.TextView]")
-    __unchb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Show all']/android.view.ViewGroup")
-    __chb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, 'Show all')]/android.view.ViewGroup[android.widget.TextView]")
-    __btn_save_changes = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Save Changes']")
+    __tab = (AppiumBy.ACCESSIBILITY_ID, "{}")
+    __items = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther[`name MATCHES '.*(SHARES|INDICES|CRYPTO|CMDTY|FOREX).*'`]")
+    __item_by_name = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`label CONTAINS '{}'`][-1]")
 
     # ------------------------ ACTIONS ------------------------ #
 
-    def set_symbol_preference(self, tab: WatchListTab, unchecked=True, show_all=None, store_dict=None):
-        """Show/Hide Symbols with accurate state detection"""
+    def select_tab(self, tab: WatchListTab):
+        """Handle selecting tab for markets screen"""
+        locator = cook_element(self.__tab, tab)
+        logger.info(f"- Select tab: {tab.value.capitalize()!r}")
+        self.actions.click(locator)
 
-        logger.debug("Opening symbol preference setting")
-        self.actions.wait_for_element_visible(self.__btn_symbol_preference)  # wait for the filter button to be visible
-        self.actions.click(self.__btn_symbol_preference)
+    def get_current_symbols(self, random_symbol=False):
+        res = self.actions.get_text_elements(self.__items)
+        extracted_symbols = [
+            next(word for word in item.split() if word[0].isalnum() and word != "REMOVE")
+            for item in res
+        ]
+        return extracted_symbols if not random_symbol else random.choice(extracted_symbols)
 
-        time.sleep(1)  # Wait a bit to allow the tab to display
-        self.watch_list.select_tab(tab)
-        time.sleep(3)  # Wait a bit for symbol list to load
+    def get_random_symbol(self):
+        cur_symbols = self.get_current_symbols()
+        return random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols) / 2)])
 
-        elements = self.actions.find_elements(self.__symbol_preference)
-        tmp = [ele.get_attribute("content-desc") for ele in elements]
-        symbol_list = [item.split(",")[-1].strip() for item in tmp]
+    def select_symbol(self, symbol, max_scroll_attempts=30):
+        """Select symbol from current displayed list with enhanced scrolling
+        Args:
+            symbol: Symbol name to select
+            tab: Tab to search in (optional)
+            max_scroll_attempts: Maximum number of scroll attempts
+        Raises:
+            Exception: If symbol is not found after all attempts
+        """
 
-        # Sort the symbol list for consistency
-        symbol_list.sort()
+        logger.debug(f"Attempting to select symbol: {symbol!r}")
+        locator = cook_element(self.__item_by_name, symbol)
 
-        logger.debug(f"Setting Show All preference to: {show_all}")
-
-        if show_all is not None:
-            locator = self.__unchb_show_all if show_all else self.__chb_show_all
+        # First check if symbol is already visible
+        if self.actions.is_element_displayed(locator):
+            logger.debug(f"Symbol {symbol!r} is already visible, clicking immediately")
             self.actions.click(locator)
+            return
 
-        else:
-            # Randomly select number of symbols to modify
-            random_amount = random.randint(1, len(symbol_list) - 1) if symbol_list else 0
+        # Scroll to find the symbol
+        scroll_attempts = 0
 
-            for symbol in symbol_list[:random_amount]:
-                checked_locator = cook_element(self.__chb_symbol_preference, symbol)
-                is_checked = self.actions.is_element_displayed(checked_locator)
+        while scroll_attempts < max_scroll_attempts:
+            logger.debug(f"Scroll attempt {scroll_attempts + 1}/{max_scroll_attempts} to find symbol: {symbol!r}")
 
-                # Determine if action is needed
-                if (unchecked and is_checked) or (not unchecked and not is_checked):
-                    action = "unchecked" if unchecked else "checked"
-                    logger.debug(f"- {action} symbol: {symbol!r}")
-                    self.actions.click(checked_locator)
-                    time.sleep(0.5)
+            # Scroll down in the container
+            try:
+                self.actions.scroll_down()
+            except Exception as e:
+                logger.warning(f"Error during scroll attempt {scroll_attempts + 1}: {e}")
+                scroll_attempts += 1
+                continue
 
-        # Store results if dictionary provided
-        if store_dict is not None and symbol_list:
-            store_dict |= {
-                "hide": symbol_list[:random_amount],
-                "show": symbol_list[random_amount:]
-            }
+            # Check if symbol is now visible
+            if self.actions.is_element_displayed(locator):
+                logger.debug(f"Symbol {symbol!r} found after {scroll_attempts + 1} scroll attempts")
+                self.actions.click(locator)
+                return
 
-        # Save changes if save button is enabled
-        if self.actions.is_element_enabled(self.__btn_save_changes, timeout=QUICK_WAIT):
-            logger.debug("- Click on btn save changes")
-            self.actions.click(self.__btn_save_changes)
-            time.sleep(1)  # wait a bit
+            scroll_attempts += 1
+
+        raise Exception(f"Symbol '{symbol}' not found after {scroll_attempts} scroll attempts")
 
     # ------------------------ VERIFY ------------------------ #

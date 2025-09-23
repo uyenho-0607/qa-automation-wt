@@ -31,7 +31,6 @@ class HomeScreen(BaseScreen):
     __account_selector = (AppiumBy.ACCESSIBILITY_ID, "account-selector")
     __account_type_tag = (AppiumBy.ACCESSIBILITY_ID, "account-type-tag")
     __available_balance_dropdown = (AppiumBy.ACCESSIBILITY_ID, "available-balance-dropdown")
-    __available_account_amount = (AppiumBy.ACCESSIBILITY_ID, 'available-balance-amount')
     __available_balance_title = (AppiumBy.ACCESSIBILITY_ID, "available-balance-title")
     __symbol_search_selector = (AppiumBy.ACCESSIBILITY_ID, "symbol-search-selector")
     __txt_symbol_search = (AppiumBy.ACCESSIBILITY_ID, "symbol-input-search")
@@ -129,6 +128,6 @@ class HomeScreen(BaseScreen):
 
     # account info
     def verify_available_account(self, exp_dict: dict):
-        amount = self.actions.get_text(self.__available_account_amount)
+        amount = self.actions.get_attribute(self.__available_balance_dropdown, "label").split()[2]
         amount = format_acc_balance(amount)
         soft_assert(amount, exp_dict.get(AccSummary.BALANCE))
