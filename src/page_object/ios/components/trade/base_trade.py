@@ -45,7 +45,7 @@ class BaseTrade(BaseScreen):
 
         current_price = self.actions.get_attribute(
             cook_element(btn_price, trade_type.lower()), "label", timeout=timeout, raise_exception=False, show_log=False
-        )
+        ).split(" ")[-1]
         return current_price
 
     def confirm_oct(self, confirm=True):
