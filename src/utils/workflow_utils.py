@@ -1,3 +1,4 @@
+import builtins
 import logging
 import os
 import socket
@@ -13,6 +14,7 @@ import requests.exceptions
 from google.oauth2.service_account import Credentials
 
 from src.data.consts import ROOTDIR
+from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
 
 google_sa_creds = os.getenv('GOOGLE_SA_CREDENTIALS')
@@ -225,13 +227,28 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
     return assigned
 
 
-# if __name__ == '__main__':
-#     ggapi = GoogleSheetsAPI(ROOTDIR / "ggsheet_key.json")
-#     accounts = ggapi.get_accounts(
-#         "https://docs.google.com/spreadsheets/d/1F8xFZxdRd8f87RixPGv61mZj0GAI-Wf8Phm75QiV8FQ/edit?gid=1576111761#gid=1576111761",
-#         ["decode"], "demo"
-#     )
-#
-#     dirs = collect_critical_folders(platform="web-app")
-#     res = assign_dirs_to_accounts(accounts[::-1], dirs)
-#     print(accounts)
+def get_session_id():
+    platform = RuntimeConfig.platform
+    driver = f"{platform.lower()}_driver"
+    if platform.lower() == "web-app":
+        driver = "web_driver"
+
+    driver = getattr(builtins, driver, None)
+    if driver:
+        session_id = driver.session_id
+        file_path = "/tmp/session_id.txt"
+
+        # Read existing IDs if file exists
+        existing_ids = set()
+        if os.path.exists(file_path):
+            with open(file_path) as f:
+                existing_ids = {line.strip() for line in f}
+
+        # Write only if new
+        if session_id not in existing_ids:
+            with open(file_path, "a") as f:
+                f.write(session_id + "\n")
+                
+        return session_id
+
+    return None
