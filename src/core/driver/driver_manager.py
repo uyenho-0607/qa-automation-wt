@@ -4,6 +4,7 @@ from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.web_driver import WebDriver
 from src.data.project_info import RuntimeConfig
 from src.utils.logging_utils import logger
+from src.utils.workflow_utils import output_session_id
 
 
 class DriverManager:
@@ -37,6 +38,8 @@ class DriverManager:
     @classmethod
     def quit_driver(cls, platform=None):
         platform = platform or RuntimeConfig.platform
+        output_session_id()
+
         match platform.lower():
             case "web" | "web-app":
                 WebDriver.quit()
