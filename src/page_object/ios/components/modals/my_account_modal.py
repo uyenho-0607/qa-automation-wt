@@ -14,11 +14,12 @@ class MyAccountModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __items = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, '{}')])[5]")
-    __drp_balance = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, 'Balance')])[5]")
-    __drp_note = (AppiumBy.XPATH, "(//XCUIElementTypeOther[contains(@label, 'Note')])[5]")
+    __items = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name CONTAINS '{}'`]/XCUIElementTypeStaticText[2]")
+    __drp_balance_collapse = (AppiumBy.ACCESSIBILITY_ID, 'Balance \uf131')
+    __drp_balance_expand = (AppiumBy.ACCESSIBILITY_ID, 'Balance \uf12e')
+    __drp_note_collapse = (AppiumBy.ACCESSIBILITY_ID, 'Note \uf131')
+    __drp_note_expand = (AppiumBy.ACCESSIBILITY_ID, 'Note \uf12e')
     __btn_close = (AppiumBy.ACCESSIBILITY_ID, 'modal-close-button')
-
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -32,12 +33,14 @@ class MyAccountModal(BaseScreen):
     def toggle_balance(self, open=True):
         is_open = self.actions.is_element_displayed(cook_element(self.__items, AccSummary.BALANCE))
         if is_open != open:
-            self.actions.click(self.__drp_balance)
+            locator_to_click = self.__drp_balance_collapse if is_open else self.__drp_balance_expand
+            self.actions.click(locator_to_click)
 
     def toggle_note(self, open=True):
         is_open = self.actions.is_element_displayed(cook_element(self.__items, AccSummary.STOP_OUT_LEVEL))
         if is_open != open:
-            self.actions.click(self.__drp_note)
+            locator_to_click = self.__drp_note_collapse if is_open else self.__drp_note_expand
+            self.actions.click(locator_to_click)
 
     def get_account_info(self):
         # get actual all value
@@ -53,7 +56,6 @@ class MyAccountModal(BaseScreen):
         actual = self.get_account_info()
         soft_assert(actual, exp_dict, tolerance=0.05,
                     tolerance_fields=AccSummary.list_values(except_val=AccSummary.BALANCE))
-
 
     def verify_balance_items_displayed(self, is_display=True):
         locators = [cook_element(self.__items, item) for item in AccSummary.checkbox_list()]

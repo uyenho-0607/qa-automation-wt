@@ -4,7 +4,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT
+from src.data.consts import QUICK_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
@@ -26,7 +26,7 @@ class LoginScreen(BaseScreen):
 
     __tab_account_type = (AppiumBy.ACCESSIBILITY_ID, "tab-login-account-type-{}")
     __drp_language = (AppiumBy.ACCESSIBILITY_ID, "language-dropdown")
-    __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
+    __opt_language = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeAny[`name == 'language-option' AND label == '{}'`]")
     __txt_user_id = (AppiumBy.ACCESSIBILITY_ID, "login-user-id")
     __txt_password = (AppiumBy.ACCESSIBILITY_ID, "login-password")
     __btn_eye_mask = (AppiumBy.ACCESSIBILITY_ID, "input-password-hidden")
@@ -77,8 +77,8 @@ class LoginScreen(BaseScreen):
 
     # ------------------------ VERIFY ------------------------ #
     def verify_language(self, language: Language):
-        actual = self.actions.get_content_desc(self.__btn_sign_in)
-        soft_assert(actual, translate_sign_in(language))
+        actual = self.actions.get_text(self.__btn_sign_in)
+        soft_assert(actual, translate_sign_in(language).upper())
 
     def verify_account_tab_is_displayed(self):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)

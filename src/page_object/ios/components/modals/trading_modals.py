@@ -177,6 +177,9 @@ class TradingModals(BaseTrade):
         if trade_object.expiry:
             self._select_expiry(trade_object.expiry)
 
+        trade_object.sl_type = sl_type
+        trade_object.tp_type = tp_type
+
     def click_update_order_btn(self):
         self.actions.click(self.__btn_edit_order, timeout=SHORT_WAIT, raise_exception=False)
 

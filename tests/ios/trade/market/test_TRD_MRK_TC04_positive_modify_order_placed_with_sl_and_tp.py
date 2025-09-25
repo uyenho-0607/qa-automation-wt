@@ -18,7 +18,7 @@ def test(ios, market_obj, sl_type, tp_type, order_data, cancel_all):
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")
     order_data(trade_object, SLTPType.PRICE, SLTPType.PRICE)
-    ios.trade_screen.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION, trade_object, True)
+    trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION, True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     ios.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION, False)

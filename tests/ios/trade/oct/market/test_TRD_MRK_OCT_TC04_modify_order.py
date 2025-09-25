@@ -18,14 +18,12 @@ def test(ios, market_obj, edit_field, sl_type, tp_type, order_data):
 
     logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)}")
     order_data(trade_object, confirm=False)
-
-    logger.info("Step 3: Get placed orderID")
-    ios.trade_screen.asset_tab.get_last_order_id(tab, trade_object, True)
+    trade_object.order_id = ios.trade_screen.asset_tab.get_last_order_id(tab, True)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     ios.trade_screen.asset_tab.verify_item_data(trade_object, tab, False)
 
-    logger.info(f"Step 4: Update {tab.title()} item with {edit_field!r} ({sl_type}, {tp_type})")
+    logger.info(f"Step 3: Update {tab.title()} item with {edit_field!r} ({sl_type}, {tp_type})")
     ios.trade_screen.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type, confirm=False)
 
     logger.info("Verify Order Updated Notification banner")

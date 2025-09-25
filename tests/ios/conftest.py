@@ -1,6 +1,7 @@
 from contextlib import suppress
 
 import pytest
+
 from src.core.driver.appium_driver import AppiumDriver
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.ios_container import iOSContainer
@@ -41,7 +42,6 @@ def login_wt_app(ios):
     ios.home_screen.feature_anm_modal.got_it()
 
     logger.info("- Wait for home screen loaded", setup=True)
-
 
     for attempt in range(max_retries + 1):
         if not ios.home_screen.on_home_screen():

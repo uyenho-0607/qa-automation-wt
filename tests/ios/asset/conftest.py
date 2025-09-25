@@ -25,6 +25,5 @@ def ios():
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup_test(ios):
-    logger.info(f"- Perform Login")
-    ios.login_screen.login()
+def setup_asset_test(ios, login_wt_app):
+    pass

@@ -29,12 +29,12 @@ def test(ios, teardown):
     logger.info("Step 5: Open Notes section")
     ios.home_screen.my_account_modal.toggle_note(open=True)
 
-    logger.info("Verify Notes section is closed")
+    logger.info("Verify Notes section is open")
     ios.home_screen.my_account_modal.verify_note_items_displayed(is_display=True)
 
 
 @pytest.fixture
 def teardown(ios):
     yield
-    logger.info("- Close My Account modal")
+    logger.info("[Cleanup] Close My Account modal", teardown=True)
     ios.home_screen.my_account_modal.close()

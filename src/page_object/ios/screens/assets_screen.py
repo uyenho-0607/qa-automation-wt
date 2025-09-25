@@ -19,12 +19,12 @@ class AssetsScreen(BaseScreen):
     __acc_type = (AppiumBy.ACCESSIBILITY_ID, 'account-selector')
     __acc_details = (AppiumBy.ACCESSIBILITY_ID, 'account-detail')
 
-    __available_balance = (AppiumBy.XPATH, "//*[contains(@name, 'Account Balance')]/XCUIElementTypeStaticText[2]")
-    __realised_profit_loss = (AppiumBy.XPATH, "//*[contains(@name, 'Profit/Loss')]/XCUIElementTypeStaticText[2]")
-    __credit = (AppiumBy.XPATH, "//*[contains(@name, 'Credit')]/XCUIElementTypeStaticText[2]")
-    __deposit = (AppiumBy.XPATH, "//*[contains(@name, 'Deposit')]/XCUIElementTypeStaticText[2]")
-    __withdrawal = (AppiumBy.XPATH, "//*[contains(@name, 'Withdrawal')]/XCUIElementTypeStaticText[2]")
-    __item_watchlist = (AppiumBy.ACCESSIBILITY_ID, "watchlist-symbol")
+    __available_balance = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name CONTAINS 'Available Balance'`]/XCUIElementTypeStaticText[-1]")
+    __realised_profit_loss = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name CONTAINS 'Realised Profit/Loss'`]/XCUIElementTypeStaticText[-1]")
+    __credit = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name CONTAINS 'Credit'`]/XCUIElementTypeStaticText[-1]")
+    __deposit = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name CONTAINS 'Deposit'`]/XCUIElementTypeStaticText[-1]")
+    __withdrawal = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`name CONTAINS 'Withdrawal'`]/XCUIElementTypeStaticText[-1]")
+    __item_watchlist = (AppiumBy.XPATH, "//*[@name='My Trades \uf130']/following-sibling::XCUIElementTypeOther/XCUIElementTypeOther[1]")
 
     # ------------------------ ACTIONS ------------------------ #
     def _get_acc_balance_info(self):
@@ -41,15 +41,24 @@ class AssetsScreen(BaseScreen):
     def get_mytrade_item(self):
         # scroll down a bit
         self.actions.scroll_down()
-        elements = self.actions.find_elements(self.__item_watchlist)
-        return [ele.text.strip() for ele in elements]
+
+        res = self.actions.get_text_elements(self.__item_watchlist)
+        
+        # Get just the symbol name
+        return [
+            next(word for word in item.split() if word[0].isalnum())
+            for item in res
+        ]
+
+    def select_last_symbol(self):
+        self.actions.click(self.__item_watchlist)
 
     # ------------------------ VERIFY ------------------------ #
     def verify_account_details(self, exp_data):
         actual = {
             "name": self.actions.get_text(self.__acc_name),
             "id": self.actions.get_text(self.__acc_id),
-            "type": self.actions.get_text(self.__acc_type),
+            "type": self.actions.get_text(self.__acc_type).split()[-1],
             "details": self.actions.get_text(self.__acc_details)
         }
 
