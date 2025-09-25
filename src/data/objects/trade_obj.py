@@ -197,7 +197,7 @@ class ObjTrade(BaseObj):
 
         # Add tab-specific details
         if tab == AssetTabs.PENDING_ORDER:
-            details["pending_price" if RuntimeConfig.platform not in ["web-app", "ios"] else "stop_limit_price"] = (
+            details["pending_price" if RuntimeConfig.platform not in ["web-app"] else "stop_limit_price"] = (
                 None if RuntimeConfig.is_mt4() else (stp_limit_price if self.order_type.is_stp_limit() else "--")
             )
 

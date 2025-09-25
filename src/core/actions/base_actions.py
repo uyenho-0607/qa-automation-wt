@@ -261,7 +261,8 @@ class BaseActions:
             if not res:
                 failed_locator.append(_locator)
 
-        logger.debug(f"> Check {'elements_displayed' if is_display else 'elements_not_displayed'}: {CHECK_ICON_COLOR if all(all_res) else FAILED_ICON_COLOR}")
+        logger.debug(
+            f"> Check {'elements_displayed' if is_display else 'elements_not_displayed'}: {CHECK_ICON_COLOR if all(all_res) else FAILED_ICON_COLOR}")
 
         soft_assert(
             all(all_res), True,

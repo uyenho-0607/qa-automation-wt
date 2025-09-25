@@ -2,7 +2,7 @@ from contextlib import suppress
 
 import pytest
 
-from src.data.consts import SHORT_WAIT, QUICK_WAIT
+from src.data.consts import QUICK_WAIT
 from src.data.enums import OrderType, SLTPType, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger

@@ -57,6 +57,7 @@ class RuntimeConfig:
     platform: str = ""
     browser: str = ""
     headless: str = ""
+    enable_cdp: bool = False
     argo_cd: str = ""
 
     user: str = ""

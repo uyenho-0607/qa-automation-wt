@@ -19,7 +19,7 @@ def test(ios, stop_obj, sl_type, tp_type, order_data, cancel_all):
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")
     order_data(trade_object, SLTPType.PRICE, SLTPType.PRICE)
 
-    logger.info("Step 2: Get placed orderID")
+    logger.info("Step 2: Select Pending Orders tab")
     ios.trade_screen.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
     ios.trade_screen.asset_tab.verify_item_data(trade_object, AssetTabs.PENDING_ORDER, False)
 
