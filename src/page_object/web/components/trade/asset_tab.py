@@ -202,7 +202,7 @@ class AssetTab(BaseTrade):
             close_obj["close_volume"] = close_volume
         else:
             # random closed volume value
-            values = calculate_partial_close(close_obj)
+            values = calculate_partial_close(close_obj.volume, close_obj.units)
             close_volume = values.close_volume
 
             # update volume for old and new created obj
