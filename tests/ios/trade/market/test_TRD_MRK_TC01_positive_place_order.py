@@ -19,17 +19,15 @@ from src.utils.logging_utils import logger
 def test(ios, cancel_all, market_obj, sl_type, tp_type, get_asset_tab_amount):
     trade_object = market_obj()
     tab = AssetTabs.OPEN_POSITION
-
-    logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)} (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")
     ios.trade_screen.place_order_panel.place_order(trade_object, sl_type, tp_type, confirm=False)
 
     logger.info(f"Verify trade confirmation")
     ios.trade_screen.modals.verify_trade_confirmation(trade_object)
 
-    logger.info("Step 3: Confirm place order")
+    logger.info("Step 2: Confirm place order")
     ios.trade_screen.modals.confirm_trade()
 
     logger.info(f"Verify order submitted notification banner")
@@ -41,7 +39,7 @@ def test(ios, cancel_all, market_obj, sl_type, tp_type, get_asset_tab_amount):
     logger.info(f"Verify order details in tab")
     ios.trade_screen.asset_tab.verify_item_data(trade_object)
 
-    logger.info("Step 4: Navigate to Home Screen")
+    logger.info("Step 3: Navigate to Home Screen")
     ios.trade_screen.navigate_to(Features.HOME)
 
     logger.info("Verify Open Position Notification")

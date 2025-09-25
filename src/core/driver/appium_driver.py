@@ -19,11 +19,13 @@ DEVICEFARM_APP_PATH = os.getenv("DEVICEFARM_APP_PATH")
 IOS_DEVICEFARM_UDID = os.getenv("DEVICEFARM_DEVICE_UDID_FOR_APPIUM")
 ANDROID_DEVICEFARM_UDID = os.getenv("DEVICEFARM_DEVICE_UDID")
 
+APPIUM_PORT = 4723
+
 class AppiumDriver:
     _appium_service = None
 
     @classmethod
-    def start_appium_service(cls, host="localhost", port=4723):
+    def start_appium_service(cls, host="localhost", port=APPIUM_PORT):
         # Kill any existing process on the port (with error handling)
         kill_command = f"lsof -ti :{port} | xargs kill -9"
         try:
@@ -46,7 +48,7 @@ class AppiumDriver:
 
 
     @classmethod
-    def init_android_driver(cls, host="http://localhost", port=4723) -> webdriver.Remote:
+    def init_android_driver(cls, host="http://localhost", port=APPIUM_PORT) -> webdriver.Remote:
 
         cd = RuntimeConfig.argo_cd
         options = UiAutomator2Options()
@@ -94,7 +96,7 @@ class AppiumDriver:
 
 
     @classmethod
-    def init_ios_driver(cls, host="http://localhost", port=4723) -> webdriver.Remote:
+    def init_ios_driver(cls, host="http://localhost", port=APPIUM_PORT) -> webdriver.Remote:
         options = XCUITestOptions()
 
         if RuntimeConfig.argo_cd:

@@ -1,11 +1,7 @@
 import re
-import threading
 import time
-from time import sleep
 
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common import StaleElementReferenceException
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums import ChartTimeframe

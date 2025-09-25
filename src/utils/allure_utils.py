@@ -147,7 +147,7 @@ def delete_container_files(allure_dir):
             data = json.load(f)
 
         # safely extract names
-        before_name = data.get("befores", [{}])[0].get("name")
+        before_name = (data.get("befores") or [{}])[0].get("name", "")
         after_name = _strip_name(data.get("afters", [{}])[0].get("name")) if data.get("afters") else None
 
         # delete if both are not in own fixtures
@@ -194,7 +194,7 @@ def custom_setup_teardown(allure_dir):
 
         if container_file.name not in builtins.container_uid:
             # Setup
-            if any(data.get('befores', [{}])[0].get('name', "") in d for d in StepLogs.setup_steps):
+            if any((data.get("befores") or [{}])[0].get("name", "") in d for d in StepLogs.setup_steps):
                 _inject_steps(data, "befores", StepLogs.setup_steps)
 
             # Teardown
@@ -316,7 +316,8 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     # Clean up attachments and status details
     if data.get("attachments"):
         attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup", "skipped"]]
+        data["attachments"] = [item for item in attachments if
+                               item["name"] in ["Screen Recording", "Screen Recording Link", "Chart Comparison Summary", "setup", "skipped"]]
 
         if data.get("status") != "passed":
             data["attachments"].extend(
@@ -343,6 +344,7 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     # Customize test's properties
     data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
     data["historyId"] = _generate_history_id(data['fullName'])
+
 
 def _add_check_icon(data):
     for item in data.get("steps", []):

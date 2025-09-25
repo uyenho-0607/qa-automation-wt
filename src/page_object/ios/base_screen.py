@@ -52,7 +52,6 @@ class BaseScreen:
     __alert_box_close = (AppiumBy.ACCESSIBILITY_ID, "notification-box-close")
     __btn_nav_back = (AppiumBy.ACCESSIBILITY_ID, "navigation-back-button")
     __spin_loader = (AppiumBy.ACCESSIBILITY_ID, 'spin-loader')
-
     __opt_home_nav = (AppiumBy.ACCESSIBILITY_ID, "home-nav-option-{}")
     __opt_side_bar = (AppiumBy.ACCESSIBILITY_ID, "side-bar-option-{}")
     __btn_confirm = (AppiumBy.XPATH, "//*[translate(@name, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='confirm']")
