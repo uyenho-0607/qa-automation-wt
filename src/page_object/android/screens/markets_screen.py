@@ -4,7 +4,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums import WatchListTab
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.trade.watch_list import WatchList
@@ -20,13 +20,14 @@ class MarketsScreen(BaseScreen):
     # ------------------------ LOCATORS ------------------------ #
 
     __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
+    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
     __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
     __chb_symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.widget.TextView[@text='{}']/preceding-sibling::android.view.ViewGroup[.//android.widget.TextView]")
-    __unchb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Show all']/android.view.ViewGroup")
-    __chb_show_all = (AppiumBy.XPATH, "//android.view.ViewGroup[contains(@content-desc, 'Show all')]/android.view.ViewGroup[android.widget.TextView]")
-    __btn_save_changes = (AppiumBy.XPATH, "//android.view.ViewGroup[@content-desc='Save Changes']")
+    __chb_show_all = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Show all").childSelector(new UiSelector().className("android.view.ViewGroup")).childSelector(new UiSelector().className("android.widget.TextView"))')
+    __show_all_option = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Show all")')
+    __btn_save_changes = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionMatches("(?i)save changes")')
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -58,7 +59,7 @@ class MarketsScreen(BaseScreen):
         self.actions.click(self.__btn_symbol_preference)
 
         time.sleep(1)  # Wait a bit to allow the tab to display
-        self.watch_list.select_tab(tab)
+        self.select_tab(tab)
         time.sleep(3)  # Wait a bit for symbol list to load
 
         elements = self.actions.find_elements(self.__symbol_preference)
@@ -71,9 +72,12 @@ class MarketsScreen(BaseScreen):
         logger.debug(f"Setting Show All preference to: {show_all}")
 
         if show_all is not None:
-            locator = self.__unchb_show_all if show_all else self.__chb_show_all
-            self.actions.click(locator)
+            is_show_all_checked = self.actions.is_element_displayed(self.__chb_show_all, timeout=SHORT_WAIT)
+            logger.debug(f"Current Show All state: {is_show_all_checked}")
 
+            if show_all != is_show_all_checked:
+                logger.debug(f"Toggling Show All checkbox to: {show_all}")
+                self.actions.click(self.__show_all_option)
         else:
             # Randomly select number of symbols to modify
             random_amount = random.randint(1, len(symbol_list) - 1) if symbol_list else 0
@@ -103,3 +107,10 @@ class MarketsScreen(BaseScreen):
             time.sleep(1)  # wait a bit
 
     # ------------------------ VERIFY ------------------------ #
+
+    def verify_symbols_displayed(self, tab: WatchListTab, symbols: str | list = None, is_display=True, timeout=SHORT_WAIT):
+        """Verify symbol is displayed in tab"""
+        self.select_tab(tab)
+        symbols = symbols if isinstance(symbols, list) else [symbols]
+        for symbol in symbols:
+            self.actions.verify_element_displayed(cook_element(self.__item_by_name, symbol), is_display=is_display, timeout=timeout)

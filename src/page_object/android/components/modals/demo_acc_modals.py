@@ -19,8 +19,7 @@ class DemoAccountModal(BaseScreen):
         name="name",
         email="email",
         dial_code="dial code",
-        phone_number="phone number",
-        agreement="agreement"
+        phone_number="phone number"
     )
 
     def __init__(self, actions: MobileActions):
@@ -36,7 +35,7 @@ class DemoAccountModal(BaseScreen):
     __drp_country_dial_code = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-dial-code']")
     __txt_country_search = (AppiumBy.XPATH, "//*[@resource-id='country-dial-code-search']")
     __item_country_dial_code = (
-        AppiumBy.XPATH, "//*[@resource-id='country-dial-code-item' and contains(@content-desc, '(+{})')]"
+        AppiumBy.XPATH, "//*[@resource-id='country-dial-code-item']/android.widget.TextView[contains(@text, '(+{})')]"
     )
     __txt_phone_number = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-phone']")
     __deposit = (AppiumBy.XPATH, "//*[@resource-id='demo-account-creation-modal-deposit']")
@@ -116,13 +115,6 @@ class DemoAccountModal(BaseScreen):
         # Build expected error messages
         error_list = []
         if validation_type == "required":
-            if self.validation_fields.agreement in fields:
-                error_list.append(UIMessages.ACCEPT_TERM_CONDITION)
-                fields.remove(self.validation_fields.agreement)
-
-            if self.validation_fields.dial_code in fields and self.validation_fields.phone_number in fields:
-                fields.remove(self.validation_fields.dial_code)
-
             error_list.extend(UIMessages.IS_REQUIRED.format(field.capitalize()) for field in fields)
 
         else:
@@ -149,6 +141,7 @@ class DemoAccountModal(BaseScreen):
             len(error_messages) == len(error_list), True,
             error_message=f"Redundant errors: {[item for item in error_messages if item not in error_list]}"
         )
+
 
     # ======================== DEMO ACCOUNT COMPLETION ======================== #
     # Locators

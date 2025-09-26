@@ -84,6 +84,7 @@ class AppiumDriver:
         try:
             logger.debug("- Init android driver...")
             driver = webdriver.Remote(f"{host}:{port}/wd/hub", options=options)
+            driver.update_settings({"disableIdLocatorAutocompletion": True})
             setattr(builtins, "android_driver", driver)
 
             DriverList.all_drivers["android"] = driver

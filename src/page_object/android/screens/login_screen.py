@@ -75,11 +75,22 @@ class LoginScreen(BaseScreen):
     # ------------------------ VERIFY ------------------------ #
     def verify_language(self, language: Language):
         actual = self.actions.get_content_desc(self.__btn_sign_in)
-        soft_assert(actual, translate_sign_in(language))
+        soft_assert(actual, translate_sign_in(language).upper())
 
     def verify_account_tab_is_displayed(self):
         acc_tab_demo = cook_element(self.__tab_account_type, AccountType.DEMO)
         self.actions.verify_element_displayed(acc_tab_demo)
+
+    def verify_account_tab_is_selected(self, account_type: AccountType):
+        # verify 'selected' in attribute of account tab
+        selected_attr = self.actions.get_attribute(
+            cook_element(self.__tab_account_type, account_type), "selected"
+        )
+
+        soft_assert(
+            selected_attr.strip().lower() == "true", True,
+            error_message=f"Demo account is not selected, attribute: {selected_attr!r}"
+        )
 
     def verify_account_autofill_value(self, userid, password):
         actual_userid = self.actions.get_attribute(self.__txt_user_id, "text")
