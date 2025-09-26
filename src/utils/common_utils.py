@@ -63,7 +63,7 @@ def translate_sign_in(language: Language) -> str:
         "English": "Sign in",
         "简体中文": "登录",
         "繁体中文": "登入",
-        "ภาษาไทย": "ลงชื่อเข้าใช้",
+        "ภาษาไทย": "เข้าสู่ระบบ",
         "Tiếng Việt": "Đăng nhập",
         "Melayu": "Log masuk",
         "Bahasa Indonesia": "Masuk",
