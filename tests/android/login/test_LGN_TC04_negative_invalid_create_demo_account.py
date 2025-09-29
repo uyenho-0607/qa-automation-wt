@@ -12,7 +12,7 @@ pytestmark = [pytest.mark.not_live, pytest.mark.not_crm]
 
 
 def test_missing_all_required_fields(android):
-    account_info = ObjDemoAccount(name=None, email=None, dial_code=None, phone_number=None, agreement=False)
+    account_info = ObjDemoAccount(agreement=False)
     validation_fields = list(DemoAccountModal.validation_fields.values())
 
     logger.info("Step 1: Open demo account modal")
@@ -28,7 +28,7 @@ def test_missing_all_required_fields(android):
 
 
 def test_invalid_email_and_phone_number_format(android):
-    account_info = ObjDemoAccount(email=random_invalid_email(), phone_number=random_number_by_length())
+    account_info = ObjDemoAccount().invalid_format()
     validation_fields = [DemoAccountModal.validation_fields.email, DemoAccountModal.validation_fields.phone_number]
 
     logger.info("Step 1: Open demo account modal")
@@ -45,8 +45,8 @@ def test_invalid_email_and_phone_number_format(android):
 
 @pytest.mark.parametrize("missing_field", random.choices(list(DemoAccountModal.validation_fields.keys())))
 def test_single_missing_field(android, missing_field):
-    account_info = ObjDemoAccount()
-    account_info.set_value(missing_field, None)
+    account_info = ObjDemoAccount().full_params()
+    account_info[missing_field] = None
 
     logger.info("Step 1: Open demo account modal")
     android.login_screen.select_open_demo_account()
@@ -54,7 +54,6 @@ def test_single_missing_field(android, missing_field):
     logger.info(f"Step 3: Submit demo account creation form without input field: {missing_field!r}")
     time.sleep(1)
     android.login_screen.demo_account_modal.fill_demo_account_creation_form(account_info)
-    android.login_screen.demo_account_modal.tap_agree_and_continue()
 
     logger.info(f"Verify validation message for missing {missing_field}")
     android.login_screen.demo_account_modal.verify_field_validation(fields=[missing_field])

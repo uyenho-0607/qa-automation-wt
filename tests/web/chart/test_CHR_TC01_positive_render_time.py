@@ -52,7 +52,7 @@ def cleanup_chart(web):
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_test(web):
-    select_symbol = random.choice(ObjSymbol().get_symbols(get_all=True))
+    select_symbol = random.choice(ObjSymbol().all_symbols)
 
     logger.info(f"- Search and select symbol: {select_symbol!r}")
     web.home_page.search_and_select_symbol(select_symbol)

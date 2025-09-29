@@ -32,7 +32,7 @@ def mark_star_symbol(tab, ios):
         logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
         logger.info("- Prepare starred symbols")
 
-        for star_symbol in ObjSymbol().get_symbols(get_all=True)[:3]:
+        for star_symbol in ObjSymbol().all_symbols[:3]:
             logger.info(f"> Mark star symbol: {star_symbol!r}")
             APIClient().market.post_starred_symbol(star_symbol)
 
