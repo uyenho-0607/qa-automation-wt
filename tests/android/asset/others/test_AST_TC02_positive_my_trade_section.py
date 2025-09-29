@@ -38,7 +38,7 @@ def test(android, setup_order_data):
 @pytest.fixture
 def setup_order_data(android):
 
-    symbols = random.choices(ObjSymbol().get_symbols(get_all=True), k=5)
+    symbols = ObjSymbol(amount=5).get_symbol()
     logger.info(f"- Place 5 order for list symbol: {symbols}")
     for _symbol in symbols:
         trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=_symbol)

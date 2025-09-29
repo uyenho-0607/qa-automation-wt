@@ -19,7 +19,7 @@ def test(web, disable_OCT, setup_test):
         step_idx += 1
         placed_amount = 5 - order_amount
 
-        symbol_list = random.choices(ObjSymbol().get_symbols(get_all=True), k=5)
+        symbol_list = ObjSymbol(amount=5).get_symbol()
 
         logger.info(f"Step 1: Send API to place {placed_amount} more Market Orders ({', '.join(symbol_list)}) (current orders:{order_amount})")
 
