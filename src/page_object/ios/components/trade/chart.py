@@ -4,6 +4,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
+from src.data.consts import SHORT_WAIT
 from src.data.enums import ChartTimeframe
 from src.data.project_info import RuntimeConfig
 from src.page_object.ios.components.trade.base_trade import BaseTrade
@@ -24,7 +25,7 @@ class Chart(BaseTrade):
     __chart_high = (AppiumBy.XPATH, "//*[starts-with(@name, 'H: ')]")
     __chart_low = (AppiumBy.XPATH, "//*[starts-with(@name, 'L: ')]")
     __chart_close = (AppiumBy.XPATH, "//*[starts-with(@name, 'C: ')]")
-    __chart_timeframe_option = (AppiumBy.ACCESSIBILITY_ID, "chart-period-option-{}")
+    __opt_timeframe = (AppiumBy.ACCESSIBILITY_ID, "chart-period-option-{}")
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -90,8 +91,8 @@ class Chart(BaseTrade):
     #     logger.debug(f"- timeframe: {timeframe!r} selected")
 
     def select_timeframe(self, timeframe: ChartTimeframe):
-        locator = cook_element(self.__chart_timeframe_option, timeframe)
-        if not self.actions.is_element_displayed(locator):
+        locator = cook_element(self.__opt_timeframe, timeframe)
+        if not self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
             self.actions.scroll_down()
         self.actions.click(locator)
 
