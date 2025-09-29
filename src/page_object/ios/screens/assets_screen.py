@@ -38,7 +38,7 @@ class AssetsScreen(BaseScreen):
 
         return res
 
-    def get_mytrade_item(self):
+    def get_my_trade_list(self):
         # scroll down a bit
         self.actions.scroll_down()
 
@@ -80,6 +80,6 @@ class AssetsScreen(BaseScreen):
 
         soft_assert(actual, exp_data, tolerance=tolerance_percent, tolerance_fields=tolerance_fields)
 
-    def verify_mytrade_items(self, expected: list):
-        actual = self.get_mytrade_item()
+    def verify_my_trade_list(self, expected: list):
+        actual = self.get_my_trade_list()
         soft_assert(actual, expected)
