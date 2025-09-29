@@ -1,3 +1,5 @@
+from appium.webdriver.common.appiumby import AppiumBy
+
 from src.apis.api_client import APIClient
 from src.core.actions.mobile_actions import MobileActions
 from src.data.objects.trade_obj import ObjTrade
@@ -21,15 +23,23 @@ class TradeScreen(BaseScreen):
         self.modals = TradingModals(actions)
 
     # ------------------------ LOCATORS ------------------------ #
+    __symbol_overview_id = (AppiumBy.ID, "symbol-overview-id")
+
     # ------------------------ ACTIONS ------------------------ #
     # ------------------------ VERIFY ------------------------ #
+
+    def verify_symbol_overview_id(self, symbol):
+        actual_symbol = self.actions.get_text(self.__symbol_overview_id)
+        soft_assert(actual_symbol, symbol)
+
     @staticmethod
     def verify_placed_order_data(trade_object: ObjTrade, api_data: dict):
         """Verify placed order against API data"""
 
         def _get_api_data():
             logger.info("- Fetching order details from API")
-            return APIClient().order.get_orders_details(symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type)
+            return APIClient().order.get_orders_details(symbol=trade_object.symbol, order_id=trade_object.order_id,
+                                                        order_type=trade_object.order_type)
 
         def _prepare_expected(_api_data: dict, _keys_to_check: list) -> dict:
             _expected = {k: v for k, v in _api_data.items() if k in _keys_to_check}

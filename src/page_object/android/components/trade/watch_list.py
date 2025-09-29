@@ -1,4 +1,5 @@
 import random
+import time
 
 from appium.webdriver.common.appiumby import AppiumBy
 
@@ -17,20 +18,21 @@ class WatchList(BaseTrade):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
+    __tab = (AppiumBy.ID, "tab-{}")
+    __sub_tab = (AppiumBy.ANDROID_UIAUTOMATOR, "new UiSelector().description('{}')")
     __items = (AppiumBy.XPATH, resource_id('watchlist-symbol'))
     __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
     __star_icon_by_symbol = (AppiumBy.XPATH, resource_id("chart-star-symbol"))
-    __btn_symbol_remove = (AppiumBy.XPATH, "//*[@text='Remove']")
+    __btn_symbol_remove = (AppiumBy.XPATH, "//*[translate(@text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='remove']")
     __selected_item = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='symbol-overview-id' and @text='{}']")
 
     # ------------------------ ACTIONS ------------------------ 
 
     def select_tab(self, tab: WatchListTab):
         """Handle selecting tab for home & markets screen"""
-        locator = cook_element(self.__tab, tab)
-
         logger.info(f"- Select tab: {tab.value.capitalize()!r}")
+        locator = cook_element(self.__tab, tab.get_tab())
+
         # if tab is represent, select tab immediately
         if self.actions.is_element_displayed(locator):
             self.actions.click(locator)
@@ -38,8 +40,8 @@ class WatchList(BaseTrade):
 
         # For home screen, in case tab is sub-tab
         logger.debug(f"- Tab is sub-tab, select tab {WatchListTab.ALL.value!r} first")
-        self.actions.click(cook_element(self.__tab, WatchListTab.ALL))
-        self.actions.click(locator)
+        self.actions.click(cook_element(self.__tab, WatchListTab.ALL.lower()))
+        self.actions.click(cook_element(self.__sub_tab, tab))
 
     def get_current_symbols(self, tab: WatchListTab = None, random_symbol=False):
         if tab:
@@ -52,6 +54,10 @@ class WatchList(BaseTrade):
             return res if not random_symbol else random.choice(res)
 
         return []
+
+    def get_random_symbol(self):
+        cur_symbols = self.get_current_symbols()
+        return random.choice(cur_symbols[:5 if len(cur_symbols) > 5 else int(len(cur_symbols) / 2)])
 
     def get_last_symbol(self, tab: WatchListTab | list[WatchListTab], store_data: DotDict = None):
         """Get latest symbol of each input tab (tab can be str or list)"""

@@ -3,6 +3,7 @@ import pytest
 from src.apis.api_client import APIClient
 from src.data.enums import AccSummary, OrderType
 from src.data.objects.trade_obj import ObjTrade
+from src.utils.common_utils import line_break
 from src.utils.logging_utils import logger
 
 
@@ -41,20 +42,19 @@ def test(web, setup_teardown):
 
 @pytest.fixture
 def setup_teardown(web, symbol):
+    line_break("Setup Test - Start")
 
-    logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
-
-    logger.info("- Place order to make sure account has Margin Level", setup=True)
+    logger.info("[Setup] Place order to make sure account has Margin Level", setup=True)
     APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
 
-    logger.info("- Refresh Page to load data", setup=True)
+    logger.info("[Setup] Refresh Page to load data", setup=True)
     web.home_page.refresh_page()
 
-    logger.info("- Send API to get account statistic and details", setup=True)
+    logger.info("[Setup] Send API to get account statistic and details", setup=True)
     account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     account_details = APIClient().user.get_user_account()
 
-    logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
+    line_break("Setup Test - End")
 
     yield account_summary, account_details
 

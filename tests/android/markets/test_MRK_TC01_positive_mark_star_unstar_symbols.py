@@ -12,12 +12,12 @@ def test(android):
     star_symbol = android.markets_screen.watch_list.toggle_star_symbol(mark_star=True)
     
     logger.info(f"Verify symbols {star_symbol!r} is displayed in Favourites tab - Market Page")
-    android.markets_screen.watch_list.verify_symbols_displayed(WatchListTab.FAVOURITES, star_symbol)
+    android.markets_screen.verify_symbols_displayed(WatchListTab.FAVOURITES, star_symbol)
     
     logger.info(f"Step 3: Click on Favourites tab to remove symbols:")
     android.home_screen.navigate_to(Features.MARKETS)
-    android.markets_screen.watch_list.select_tab(WatchListTab.FAVOURITES)
+    android.markets_screen.select_tab(WatchListTab.FAVOURITES)
     unstar_symbol = android.markets_screen.watch_list.toggle_star_symbol(mark_star=False)
     
     logger.info(f"Verify symbols {unstar_symbol!r} no longer displayed in Favourites tab - Market Page")
-    android.markets_screen.watch_list.verify_symbols_displayed(WatchListTab.FAVOURITES, unstar_symbol, is_display=False)
+    android.markets_screen.verify_symbols_displayed(WatchListTab.FAVOURITES, unstar_symbol, is_display=False)
