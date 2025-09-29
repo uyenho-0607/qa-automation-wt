@@ -300,14 +300,11 @@ class PlaceOrderPanel(BaseTrade):
 
     def place_oct_order(self, trade_object: ObjTrade) -> None:
 
-        symbol_details = ObjSymbol().get_symbol_details(trade_object.symbol)
-        contract_size = symbol_details["contract_size"]
-
         trade_type = trade_object.trade_type
 
         # Input volume and get units
         volume = self._input_volume()
-        units = volume * contract_size
+        units = volume * trade_object.CONTRACT_SIZE
 
         # Prepare trade details
         trade_details = {

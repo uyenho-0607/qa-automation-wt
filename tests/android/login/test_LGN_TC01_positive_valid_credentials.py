@@ -37,7 +37,7 @@ def setup_pre_selected_tab():
     logger.info(f"- Mark star: {mark_star!r}")
     if mark_star:
         logger.info("- Mark star symbol")
-        APIClient().market.post_starred_symbol(random.choice(ObjSymbol().get_symbols(get_all=True)))
+        APIClient().market.post_starred_symbol(random.choice(ObjSymbol().all_symbols))
 
     else:
         logger.info("- Delete all stared symbols")
