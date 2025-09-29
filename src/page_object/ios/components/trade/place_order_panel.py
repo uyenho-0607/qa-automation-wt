@@ -292,8 +292,7 @@ class PlaceOrderPanel(BaseTrade):
         self._input_volume(trade_object.volume)
 
         # calculate units
-        contract_size = ObjSymbol().get_symbol_details(trade_object.symbol).get("contract_size", 1)
-        units = trade_object.volume * contract_size
+        units = trade_object.volume * trade_object.CONTRACT_SIZE
 
         # placed order details
         trade_details = {

@@ -57,7 +57,7 @@ def setup_test(web):
         else:
 
             logger.info(f"- Prepare starred symbols for checking tab {WatchListTab.FAVOURITES.value!r}")
-            symbols = ObjSymbol().get_symbols(get_all=True)
+            symbols = ObjSymbol().all_symbols
             _list_symbol = random.sample(symbols, 10) if len(symbols) >= 10 else symbols
 
             for symbol in _list_symbol:

@@ -1,4 +1,3 @@
-import random
 from typing import Dict, Any, Optional, Tuple
 
 from src.data.enums import SLTPType
@@ -36,7 +35,7 @@ class ObjTrade(BaseObj):
 
         self.trade_type = trade_type
         self.order_type = order_type
-        self.symbol = symbol or random.choice(ObjSymbol().get_symbols())
+        self.symbol = symbol or ObjSymbol().get_symbol()
         self.expiry = expiry or Expiry.sample_values(self.order_type)
         self.fill_policy = fill_policy or FillPolicy.sample_values(self.order_type)
         self._update_symbol_details(self.symbol)
@@ -44,11 +43,13 @@ class ObjTrade(BaseObj):
 
     @staticmethod
     def _update_symbol_details(symbol):
-        # symbol_details = get_symbol_details(symbol)
-        symbol_details = ObjSymbol().get_symbol_details(symbol)
-        ObjTrade.POINT_STEP = symbol_details["point_step"]
+        symbol_details = ObjSymbol.DETAILS.get(symbol)
+        if not symbol_details:
+            symbol_details = ObjSymbol.get_details(symbol)
+
+        ObjTrade.POINT_STEP = symbol_details["pointStep"]
         ObjTrade.DECIMAL = symbol_details["decimal"]
-        ObjTrade.CONTRACT_SIZE = symbol_details["contract_size"]
+        ObjTrade.CONTRACT_SIZE = symbol_details["contractSize"]
 
     @classmethod
     def get_expiry_map(cls, expiry: Expiry | str) -> str:
