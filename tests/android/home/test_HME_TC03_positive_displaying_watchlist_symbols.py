@@ -35,7 +35,7 @@ def setup_test():
         symbols = APIClient().market.get_watchlist_items(tab, get_symbols=True)
 
         if not symbols and tab == WatchListTab.FAVOURITES:
-            _list_symbol = ObjSymbol().get_symbols(get_all=True)[:3]
+            _list_symbol = ObjSymbol().all_symbols[:3]
 
             for symbol in _list_symbol:
                 logger.info(f"- Mark star symbol: {symbol!r}")
