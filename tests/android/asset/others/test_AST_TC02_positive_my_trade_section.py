@@ -20,7 +20,7 @@ def test(android, setup_order_data):
     time.sleep(2)
 
     logger.info(f"Verify symbols list displayed in My Trade are: {symbols[::-1]}")
-    android.assets_screen.verify_mytrade_items(symbols[::-1])
+    android.assets_screen.verify_my_trade_list(symbols[::-1])
 
     logger.info(f"Step 2: Place Pending Order for symbol: {symbols[-1]}")
     android.assets_screen.watch_list.select_last_symbol(tab=None)
@@ -32,7 +32,7 @@ def test(android, setup_order_data):
     android.home_screen.navigate_to(Features.ASSETS, wait=True)
 
     logger.info("Verify displaying symbols are not changed")
-    android.assets_screen.verify_mytrade_items(symbols[::-1])
+    android.assets_screen.verify_my_trade_list(symbols[::-1])
 
 
 @pytest.fixture

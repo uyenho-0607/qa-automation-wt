@@ -18,9 +18,8 @@ class MarketsScreen(BaseScreen):
         self.watch_list = WatchList(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-
-    __tab = (AppiumBy.XPATH, "//android.widget.TextView[contains(@text, '{}')]")
-    __item_by_name = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='watchlist-symbol' and @text='{}']")
+    __tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.TextView").textContains("{}")')
+    __item_by_name = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").text("{}")')
     __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
@@ -37,7 +36,7 @@ class MarketsScreen(BaseScreen):
 
         logger.info(f"- Select tab: {tab.value.capitalize()!r}")
         # if tab is represent, select tab immediately
-        if self.actions.is_element_displayed(locator):
+        if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
             self.actions.click(locator)
             return
 
@@ -47,7 +46,7 @@ class MarketsScreen(BaseScreen):
             for direction in ["left", "right"]:
                 logger.debug(f"- Swipe {direction} to show tab")
                 self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
-                if self.actions.is_element_displayed(locator):
+                if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
                     self.actions.click(locator)
                     return
 

@@ -10,17 +10,15 @@ class PasswordModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __txt_old_password = (AppiumBy.XPATH, "//*[@resource-id='change-password-modal-old-password']")
-    __txt_new_password = (AppiumBy.XPATH, "//*[@resource-id='change-password-modal-new-password']")
-    __txt_confirm_new_password = (
-        AppiumBy.XPATH, "//*[@resource-id='change-password-modal-confirm-new-password']"
-    )
-    __btn_confirm = (AppiumBy.XPATH, "//*[@resource-id='change-password-modal-confirm']")
+    __txt_old_password = (AppiumBy.ID, 'change-password-modal-old-password')
+    __txt_new_password = (AppiumBy.ID, 'change-password-modal-new-password')
+    __txt_confirm_new_password = (AppiumBy.ID, 'change-password-modal-confirm-new-password')
+    __btn_confirm = (AppiumBy.ID, 'change-password-modal-confirm')
 
     # ======================== RESET PASSWORD ======================== #
-    __txt_email = (AppiumBy.XPATH, "//*[@resource-id='reset-password-email']")
-    __txt_account_id = (AppiumBy.XPATH, "//*[@resource-id='reset-password-account-id']")
-    __btn_submit = (AppiumBy.XPATH, "//*[@resource-id='reset-password-submit']")
+    __txt_email = (AppiumBy.ID, 'reset-password-email')
+    __txt_account_id = (AppiumBy.ID, 'reset-password-account-id')
+    __btn_submit = (AppiumBy.ID, 'reset-password-submit')
 
     # ------------------------ ACTIONS ------------------------ #
     def change_password(self, old_password, new_password):

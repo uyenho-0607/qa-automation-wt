@@ -1,8 +1,10 @@
+from contextlib import suppress
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.core.config_manager import Config
-from src.data.consts import LONG_WAIT
+from src.data.consts import LONG_WAIT, EXPLICIT_WAIT
 from src.data.enums import AccountType, Language
 from src.data.project_info import RuntimeConfig
 from src.data.ui_messages import UIMessages
@@ -21,17 +23,17 @@ class LoginScreen(BaseScreen):
         self.password_modal = PasswordModal(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __tab_account_type = (AppiumBy.XPATH, "//*[@resource-id='tab-login-account-type-{}']")
-    __drp_language = (AppiumBy.XPATH, "//*[@resource-id='language-dropdown']")
-    __opt_language = (AppiumBy.XPATH, "//*[@resource-id='language-option' and contains(@content-desc, '{}')]")
-    __txt_user_id = (AppiumBy.XPATH, "//*[@resource-id='login-user-id']")
-    __txt_password = (AppiumBy.XPATH, "//*[@resource-id='login-password']")
-    __btn_eye_masked = (AppiumBy.XPATH, "//android.widget.TextView[@resource-id='input-password-hidden']")
-    __btn_sign_in = (AppiumBy.XPATH, "//*[@resource-id='login-submit']")
-    __lnk_reset_password = (AppiumBy.XPATH, "//*[@resource-id='reset-password-link']")
-    __btn_sign_up = (AppiumBy.XPATH, "//*[@resource-id='login-account-signup']")
-    __alert_error = (AppiumBy.XPATH, "//*[@resource-id='alert-error']")
-    __btn_skip = (AppiumBy.XPATH, "//*[resource-id='ads-skip-button']")
+    __tab_account_type = (AppiumBy.ID, 'tab-login-account-type-{}')
+    __drp_language = (AppiumBy.ID, 'language-dropdown')
+    __opt_language = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("language-option").descriptionContains("{}")')
+    __txt_user_id = (AppiumBy.ID, 'login-user-id')
+    __txt_password = (AppiumBy.ID, 'login-password')
+    __btn_eye_masked = (AppiumBy.ID, 'input-password-hidden')
+    __btn_sign_in = (AppiumBy.ID, 'login-submit')
+    __lnk_reset_password = (AppiumBy.ID, 'reset-password-link')
+    __btn_sign_up = (AppiumBy.ID, 'login-account-signup')
+    __alert_error = (AppiumBy.ID, 'alert-error')
+    __btn_skip = (AppiumBy.ID, 'ads-skip-button')
 
     # ------------------------ ACTIONS ------------------------ #
     def select_account_tab(self, account_type: AccountType):
@@ -48,14 +50,14 @@ class LoginScreen(BaseScreen):
         self.actions.click(self.__lnk_reset_password)
 
     def login(self, userid="", password="", account_type: AccountType = None, language: Language = None, wait=False):
-
         credentials = Config.credentials()
         userid = userid or credentials.username
         password = password or credentials.password
 
         logger.debug(f"- Login with user: {userid!r}")
-        while self.actions.is_element_displayed(self.__btn_skip, timeout=LONG_WAIT):
-            self.actions.click(self.__btn_skip)
+        while self.actions.is_element_displayed(self.__btn_skip, timeout=5):
+            with suppress(Exception):
+                self.actions.click(self.__btn_skip, raise_exception=False, show_log=False)
 
         if language:
             self.select_language(language)
