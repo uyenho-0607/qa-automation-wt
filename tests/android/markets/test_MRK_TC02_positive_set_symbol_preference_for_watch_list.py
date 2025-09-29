@@ -20,10 +20,10 @@ def test(android, setup_test):
     android.home_screen.notifications.verify_alert_message(UIMessages.ALL_CHANGES_SAVED)
 
     logger.info("Verify hidden symbols")
-    android.markets_screen.watch_list.verify_symbols_displayed(tab, store_dict.hide, is_display=False)
+    android.markets_screen.verify_symbols_displayed(tab, store_dict.hide, is_display=False)
 
     logger.info("Verify displayed symbol")
-    android.markets_screen.watch_list.verify_symbols_displayed(tab, store_dict.show)
+    android.markets_screen.verify_symbols_displayed(tab, store_dict.show)
 
 
 @pytest.fixture(autouse=True)
@@ -36,3 +36,6 @@ def setup_test(android):
 
     logger.info(f"- Set Show All for tab: {tab.capitalize()!r}")
     android.markets_screen.set_symbol_preference(tab, unchecked=False, show_all=True)
+
+    logger.info("Verify message saved success")
+    android.home_screen.notifications.verify_alert_message(UIMessages.ALL_CHANGES_SAVED)
