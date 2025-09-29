@@ -49,7 +49,7 @@ def setup_test(web_app):
         amount = 5 - len(order_details)
 
         logger.info(f"- No market order available, Place {amount} new orders", setup=True)
-        symbols = random.choices(ObjSymbol().get_symbols(get_all=True), k=amount)
+        symbols = ObjSymbol(amount=amount).get_symbol()
         for _symbol in symbols:
             APIClient().trade.post_order(ObjTrade(symbol=_symbol, order_type=OrderType.MARKET), update_price=False)
 

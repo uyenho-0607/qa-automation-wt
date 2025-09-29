@@ -6,7 +6,6 @@ from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
-from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element, resource_id
@@ -198,14 +197,11 @@ class PlaceOrderPanel(BaseTrade):
             trade_object: contain ObjTrade
         """
 
-        symbol_details = ObjSymbol().get_symbol_details(trade_object.symbol)
-        contract_size = symbol_details["contract_size"]
-
         trade_type = trade_object.trade_type
 
         # Input volume and get units
         volume = self._input_volume()
-        units = volume * contract_size
+        units = volume * ObjTrade.CONTRACT_SIZE
 
         # Prepare trade details
         trade_details = {

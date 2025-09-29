@@ -7,8 +7,8 @@ from src.data.enums import WatchListTab, Features
 from src.utils.logging_utils import logger
 
 
-def test(web, get_current_symbol):
-    current_symbols = get_current_symbol()
+def test(web):
+    current_symbols = web.home_page.watch_list.get_current_symbols(WatchListTab.ALL)
     star_symbols = random.sample(current_symbols, k=(5 if len(current_symbols) > 5 else len(current_symbols) - 1))
 
     logger.info(f"Step 1: Mark star for {star_symbols!r}")

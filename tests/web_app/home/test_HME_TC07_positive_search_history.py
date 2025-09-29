@@ -7,7 +7,7 @@ from src.utils.logging_utils import logger
 
 
 def test(web_app):
-    symbol_list = random.sample(ObjSymbol().get_symbols(get_all=True), k=2)
+    symbol_list = random.sample(ObjSymbol().all_symbols, k=2)
 
     for index, symbol_name in enumerate(symbol_list):
         logger.info(f"Step {index + 1}: Search and select symbol: {symbol_name!r}")

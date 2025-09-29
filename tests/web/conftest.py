@@ -27,16 +27,16 @@ def login_member_site(web):
     max_attempts = 5
 
     logger.info(f"{'=' * 10} Setup Login - Start {'=' * 10}")
-    logger.info("- Navigate to WT Member Site", setup=True)
+    logger.info("[Setup] Navigate to WT Member Site", setup=True)
     web.login_page.goto()
 
-    logger.info("- Login to Member Site", setup=True)
+    logger.info("[Setup] Login to Member Site", setup=True)
     web.login_page.login(wait=True)
 
-    logger.info("- Skipping feature ann modal (if any)", setup=True)
+    logger.info("[Setup] Skip feature ann modal (if any)", setup=True)
     web.home_page.feature_announcement_modal.got_it()
 
-    logger.info("- Check if logged in success", setup=True)
+    logger.info("[Setup] Check if logged in success", setup=True)
     for attempt in range(max_attempts):
         if not web.home_page.on_home_page():
 
