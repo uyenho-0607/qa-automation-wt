@@ -343,6 +343,11 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
 
     # Customize test's properties
     data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
+
+    # for running one test case with different user
+    if RuntimeConfig.user:
+        data["fullName"] = f"{data['fullName']}[{RuntimeConfig.user}]"
+
     data["historyId"] = _generate_history_id(data['fullName'])
 
 

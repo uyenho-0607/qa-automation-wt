@@ -112,10 +112,16 @@ class GoogleSheetsAPI:
                     continue
 
                 server_acc = label.split()
-                if len(server_acc) == 2:
-                    server, acc_type = server_acc
-                    if acc_type == account_type:
+
+                if len(server_acc) >= 2:
+                    if len(server_acc) == 2:
+                        server, acc_type = server_acc
+                    else:
+                        server, acc_type = " ".join(server_acc[:2]), server_acc[-1]
+
+                    if account_type.lower() in acc_type.lower():
                         col_defs.append((i, acc_type, server))
+                        # print(col_defs)
                 i += 2
 
             for row in rows:
@@ -158,7 +164,7 @@ Handle test directories
 """
 
 
-def collect_critical_folders(platform="web", module="", test_marker="critical"):
+def collect_runtest_folders(platform="web", module="", test_marker="critical", custom_option=""):
     platform = platform.replace("-", "_")
     test_root = ROOTDIR / "tests" / platform / module
     test_folders = set()
@@ -173,8 +179,16 @@ def collect_critical_folders(platform="web", module="", test_marker="critical"):
     for folder in sorted(test_folders.copy()):
         logging.info(f"Running pytest in: {folder}")
         try:
+            # handle filter with custom option if any
+            cmd = []
+            if custom_option.startswith("-k "):
+                cmd.append("-k")
+                cmd.append(custom_option[3:].strip('"'))
+            else:
+                cmd.extend(custom_option.split())
+
             result = subprocess.run(
-                [pytest_path, str(folder), "-m", test_marker, "--co"],
+                [pytest_path, str(folder), "-m", test_marker, *cmd, "--co"],
                 capture_output=True,
                 text=True,
                 check=False,
@@ -195,16 +209,21 @@ def collect_critical_folders(platform="web", module="", test_marker="critical"):
     return res
 
 
-def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict]:
+def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict], num_of_pod=None) -> List[Dict]:
     """
     Assign directories to accounts in round-robin fashion.
     Limits the number of accounts per client per server based on the number of directories available.
+    num_of_pod: used in case of running one dir but multiple pods
     """
+
     if not dirs:
         return accounts
 
     # Calculate how many accounts we need per client per server
     amount_per_client_server = len(dirs)
+
+    if num_of_pod and len(dirs) == 1:
+        amount_per_client_server = int(num_of_pod)
 
     # Track counts per client per server
     counts = defaultdict(lambda: defaultdict(int))
@@ -224,6 +243,12 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict
         account_copy = account.copy()
         account_copy['directory'] = dirs[i % len(dirs)]['directory']
         assigned.append(account_copy)
+
+    # last filter for server mt4 2
+    for item in assigned:
+        if len(item.get("server").split(" ")) > 1:
+            item['server'] = item["server"].split(" ")[0]
+
     return assigned
 
 
@@ -252,3 +277,14 @@ def output_session_id():
         return session_id
 
     return None
+
+# if __name__ == '__main__':
+#     tmp = GoogleSheetsAPI()
+#     account = tmp.get_accounts(
+#         sheet_url="https://docs.google.com/spreadsheets/d/1AlxtJKUWiE6Amya2o0FMvaYlx_htq0XsBAZZ2luOgtM",
+#         clients="lirunex", account_type="live"
+#     )
+#
+#     dirs = collect_runtest_folders(module="login", custom_option="-k positive")
+#     res = assign_dirs_to_accounts(account, dirs, num_of_pod=3)
+#     breakpoint()
