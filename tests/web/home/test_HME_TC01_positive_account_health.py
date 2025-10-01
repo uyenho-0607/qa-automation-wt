@@ -3,7 +3,7 @@ import pytest
 from src.apis.api_client import APIClient
 from src.data.enums import AccSummary, OrderType
 from src.data.objects.trade_obj import ObjTrade
-from src.utils.common_utils import line_break
+from src.utils.common_utils import break_line
 from src.utils.logging_utils import logger
 
 
@@ -42,7 +42,7 @@ def test(web, setup_teardown):
 
 @pytest.fixture
 def setup_teardown(web, symbol):
-    line_break("Setup Test - Start")
+    break_line("Setup Test - Start")
 
     logger.info("[Setup] Place order to make sure account has Margin Level", setup=True)
     APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol), update_price=False)
@@ -54,7 +54,7 @@ def setup_teardown(web, symbol):
     account_summary = APIClient().statistics.get_account_statistics(get_acc_balance=True)
     account_details = APIClient().user.get_user_account()
 
-    line_break("Setup Test - End")
+    break_line("Setup Test - End")
 
     yield account_summary, account_details
 
