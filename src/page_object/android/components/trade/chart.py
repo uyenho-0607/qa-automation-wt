@@ -17,7 +17,7 @@ class Chart(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __candle_stick = (AppiumBy.XPATH, "//*[contains(@content-desc, 'Candlestick')]")
-    __timeframe = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']")
+    __chart_timeframe_option = (AppiumBy.XPATH, "//android.widget.TextView[@text='{}']")
     __chart_loading = (AppiumBy.XPATH, "//android.view.View[@resource-id='chart-root']/android.widget.TextView[1]")
 
     # ------------------------ ACTIONS ------------------------ #
@@ -28,12 +28,9 @@ class Chart(BaseTrade):
     def select_timeframe(self, timeframe: ChartTimeframe):
         self.open_timeframe_opt()
 
-        locator = cook_element(self.__timeframe, timeframe.locator_map())
-        if self.actions.is_element_displayed(locator):
-            self.actions.click(locator)
-            return
-
-        self.actions.scroll_down()
+        locator = cook_element(self.__chart_timeframe_option, timeframe.locator_map())
+        if not self.actions.is_element_displayed(locator):
+            self.actions.scroll_down()
         self.actions.click(locator)
 
     def get_default_render_time(self):
