@@ -225,21 +225,26 @@ def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict], num_of_pod=N
     if num_of_pod and len(dirs) == 1:
         amount_per_client_server = int(num_of_pod)
 
-    # Track counts per client per server
-    counts = defaultdict(lambda: defaultdict(int))
-    limited_accounts = []
-
+    # Group accounts by client-server combination
+    client_server_groups = defaultdict(list)
     for account in accounts:
-        client = account["client"]
-        server = account["server"]
+        key = (account["client"], account["server"])
+        client_server_groups[key].append(account)
 
-        # Check limit per client per server
-        if counts[client][server] < amount_per_client_server:
-            limited_accounts.append(account)
-            counts[client][server] += 1
+    # Expand each group if needed
+    expanded_accounts = []
+    for (client, server), group_accounts in client_server_groups.items():
+        if amount_per_client_server > len(group_accounts) and group_accounts:
+            cycles_needed = (amount_per_client_server + len(group_accounts) - 1) // len(group_accounts)
+            expanded_group = group_accounts * cycles_needed
+        else:
+            expanded_group = group_accounts
+        
+        # Take only the required amount per client-server
+        expanded_accounts.extend(expanded_group[:amount_per_client_server])
 
     assigned = []
-    for i, account in enumerate(limited_accounts):
+    for i, account in enumerate(expanded_accounts):
         account_copy = account.copy()
         account_copy['directory'] = dirs[i % len(dirs)]['directory']
         assigned.append(account_copy)
@@ -277,3 +282,10 @@ def output_session_id():
         return session_id
 
     return None
+
+# if __name__ == '__main__':
+#     tmp = GoogleSheetsAPI()
+#     acc = tmp.get_accounts(sheet_url="https://docs.google.com/spreadsheets/d/1AlxtJKUWiE6Amya2o0FMvaYlx_htq0XsBAZZ2luOgtM", clients="lirunex", account_type="live")
+#     dirs = collect_critical_folders("api", "login", "")
+#     res = assign_dirs_to_accounts(acc, dirs, num_of_pod=5)
+#     breakpoint()
