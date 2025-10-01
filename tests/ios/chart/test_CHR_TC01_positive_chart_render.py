@@ -31,8 +31,7 @@ timeframe_list = {
 
 
 def test_default_time(ios):
-
-    logger.info(f"- Step 1: and select symbol: {SYMBOLS!r}")
+    logger.info(f"Step 1: Search and select symbol: {SYMBOLS!r}")
     ios.home_screen.search_and_select_symbol(SYMBOLS)
 
     logger.info(f"Step 2: Get default render time")
@@ -43,8 +42,7 @@ def test_default_time(ios):
 
 
 @pytest.mark.parametrize("timeframe", timeframe_list[RuntimeConfig.server])
-def test_timeframe(ios, timeframe, setup_test, ):
-
+def test_timeframe(ios, timeframe, setup_test):
     logger.info(f"Step 1: Select and get chart render time for timeframe: {timeframe.value!r}")
     elapsed = ios.trade_screen.chart.get_timeframe_render_time(timeframe)
 
@@ -53,19 +51,17 @@ def test_timeframe(ios, timeframe, setup_test, ):
 
 
 @pytest.mark.parametrize("timeframe", timeframe_list[RuntimeConfig.server])
-def test_select_timeframe_repeatedly(ios, timeframe, setup_test, ):
-
+def test_select_timeframe_repeatedly(ios, timeframe, setup_test):
     logger.info(f"Step: Continue select and get chart render time for timeframe: {timeframe.value!r}")
     elapsed = ios.trade_screen.chart.get_timeframe_render_time(timeframe)
 
     logger.info(f"Verify render time: {elapsed!r} sec <= {EXP_TIME!r} sec")
     ios.trade_screen.chart.verify_render_time(elapsed, EXP_TIME)
 
+
 @pytest.fixture(scope="module", autouse=True)
 def setup_test(ios):
-
-    if not ios.trade_screen.chart.is_symbol_selected():
-
+    if not ios.trade_screen.chart.is_symbol_selected(SYMBOLS):
         logger.info(f"- Search and select symbol: {SYMBOLS!r}")
         ios.home_screen.search_and_select_symbol(SYMBOLS)
 
