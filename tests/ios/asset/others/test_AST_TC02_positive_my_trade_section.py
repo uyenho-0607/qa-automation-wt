@@ -18,7 +18,7 @@ def test(ios, setup_test):
     ios.home_screen.navigate_to(Features.ASSETS, wait=True)
 
     logger.info(f"Verify My Trade list: {', '.join(symbols)} (result from test setup)")
-    ios.assets_screen.verify_mytrade_items(symbols)
+    ios.assets_screen.verify_my_trade_list(symbols)
 
     logger.info(f"Step 2: Select latest symbol from My Trade ({symbols[0]!r})")
     ios.assets_screen.select_last_symbol()
@@ -34,7 +34,7 @@ def test(ios, setup_test):
     ios.home_screen.navigate_to(Features.ASSETS, wait=True)
 
     logger.info(f"Verify My Trade list is not changed ({', '.join(symbols)})")
-    ios.assets_screen.verify_mytrade_items(symbols)
+    ios.assets_screen.verify_my_trade_list(symbols)
 
 
 @pytest.fixture
