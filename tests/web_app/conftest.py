@@ -4,7 +4,7 @@ import pytest
 
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_app_container import WebAppContainer
-from src.data.consts import FAILED_ICON_COLOR
+from src.data.consts import FAILED_ICON_COLOR, QUICK_WAIT
 from src.utils.logging_utils import logger
 
 
