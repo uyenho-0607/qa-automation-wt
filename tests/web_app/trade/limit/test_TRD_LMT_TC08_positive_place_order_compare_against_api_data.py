@@ -9,21 +9,19 @@ from src.utils.logging_utils import logger
 @pytest.mark.critical
 def test(web_app, limit_obj, get_asset_tab_amount, order_data, cancel_all):
     trade_object = limit_obj()
-
-    logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)} (tab amount: {tab_amount!r})")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} (tab:{tab_amount})")
     order_data(trade_object)
 
-    logger.info("Step 3: Select Pending Orders tab")
+    logger.info("Step 2: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
     web_app.trade_page.asset_tab.get_last_order_id(trade_object) # get placed order_id
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web_app.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
-    logger.info(f"Step 4: Get placed order API data, order_id: {trade_object.order_id!r}")
+    logger.info(f"Step 3: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
         symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
     )
