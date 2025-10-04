@@ -23,6 +23,7 @@ def test(web_app, market_obj, order_data, get_asset_tab_amount):
 
     logger.info("Step 3: Full close position")
     web_app.trade_page.asset_tab.full_close_position(trade_object, confirm=False)
+    web_app.trade_page.asset_tab.get_current_price(trade_object, oct_mode=True)
 
     logger.info("Verify Close Order notification banner")
     web_app.home_page.notifications.verify_notification_banner(*ObjNoti(trade_object).close_order_success_banner())
