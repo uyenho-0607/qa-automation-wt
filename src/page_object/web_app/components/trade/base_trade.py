@@ -52,6 +52,7 @@ class BaseTrade(BasePage):
     # One Click Trading Modal Actions
     def confirm_oct(self, confirm=True):
         """Confirm enable OCT or not"""
+        time.sleep(0.5)
         logger.debug(f"- Confirm enable OCT: {confirm!r}")
         self.actions.click(self.__btn_oct_confirm if confirm else self.__btn_oct_cancel)
 

@@ -7,7 +7,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(ios, stop_limit_obj, get_asset_tab_amount):
+def test(ios, stop_limit_obj, get_asset_tab_amount, cancel_all):
     trade_object = stop_limit_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 

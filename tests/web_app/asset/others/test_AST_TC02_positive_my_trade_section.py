@@ -26,7 +26,7 @@ def test(web_app, setup_test):
     trade_obj = ObjTrade(symbol=symbols[0], order_type=random.choice(OrderType.pending()))
 
     logger.info(f"Step 3: Place {trade_obj.order_type.upper()!r} Order")
-    web_app.trade_page.place_order_panel.place_order(trade_obj, submit=True, sl_type=None, tp_type=None)
+    web_app.trade_page.place_order_panel.place_order(trade_obj, confirm=True, sl_type=None, tp_type=None)
 
     logger.info("Verify Order Submitted Notification banner")
     web_app.home_page.notifications.verify_notification_banner(expected_title=ObjNoti(trade_obj).order_submitted_banner()[0])

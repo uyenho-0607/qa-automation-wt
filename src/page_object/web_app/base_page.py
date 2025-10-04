@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -85,11 +87,10 @@ class BasePage:
         max_retries = 3
         while self.actions.is_element_displayed(self.__btn_cancel, timeout=timeout) and max_retries:
             logger.debug("- Click cancel btn")
-            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT, show_log=False)
-            max_retries -= 1
-
+            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=timeout, show_log=False)
             if not cancel_all:
                 return
+            max_retries -= 1
 
     def close_alert_box(self):
         self.actions.click(self.__alert_box_close)

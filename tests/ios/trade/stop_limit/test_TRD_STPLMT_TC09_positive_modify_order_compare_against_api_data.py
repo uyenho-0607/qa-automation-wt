@@ -1,13 +1,13 @@
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, SLTPType, OrderType, Expiry
+from src.data.enums import AssetTabs, SLTPType
 from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(ios, stop_limit_obj, order_data):
+def test(ios, stop_limit_obj, order_data, cancel_all):
     trade_object = stop_limit_obj()
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")

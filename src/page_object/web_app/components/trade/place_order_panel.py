@@ -5,7 +5,7 @@ from typing import Any
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
 from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
@@ -80,18 +80,18 @@ class PlaceOrderPanel(BaseTrade):
 
     # ------------------------ ACTIONS ------------------------ #
     def is_oct_enable(self):
-        is_enable = self.actions.is_element_displayed(self.__label_oct)
+        is_enable = self.actions.is_element_displayed(self.__label_oct, timeout=SHORT_WAIT)
         logger.debug(f"- OCT enabled in Admin config: {is_enable!r}")
         return is_enable
 
-    def toggle_oct(self, enable: bool = True, submit=True) -> None:
+    def toggle_oct(self, enable: bool = True, confirm=True) -> None:
         """Enable/disable One-Click Trading."""
         is_enabled = self.actions.is_element_displayed(self.__toggle_oct_checked, timeout=5)
         if is_enabled != enable:
             self.actions.click(self.__toggle_oct if enable else self.__toggle_oct_checked)
 
             if enable:
-                self.confirm_oct(confirm=submit)
+                self.confirm_oct(confirm=confirm)
 
     def open_pre_trade_details(self):
         self.actions.click(self.__btn_pre_trade_details)
@@ -190,9 +190,8 @@ class PlaceOrderPanel(BaseTrade):
 
     def _input_volume(self, value):
         """Input volume value."""
-        volume = value if value is not None else random.randint(2, 10)
-        logger.debug(f"- Input volume: {volume!r}")
-        self.actions.send_keys(self.__txt_volume, volume)
+        logger.debug(f"- Input volume: {value!r}")
+        self.actions.send_keys(self.__txt_volume, value)
 
     def _input_price(self, value: Any) -> None:
         """Input trade price for order type: Limit, Stop, Stop Limit."""
@@ -200,7 +199,7 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.scroll_to_element(self.__txt_price)
         self.actions.send_keys(self.__txt_price, value)
 
-    def _input_stop_price(self, value: Any) -> None:
+    def _input_stop_limit_price(self, value: Any) -> None:
         """Input stop limit price for order type 'Stop limit'."""
         logger.debug(f"- Input stop limit price: {value!r}")
         self.actions.scroll_to_element(self.__txt_stop_limit_price)
@@ -244,23 +243,21 @@ class PlaceOrderPanel(BaseTrade):
 
         # input stop limit price if present
         if order_type == OrderType.STOP_LIMIT:
-            self._input_stop_price(prices.stop_limit_price)
+            self._input_stop_limit_price(prices.stop_limit_price)
 
         # Select fill_policy
         if trade_object.get("fill_policy"):
             self._select_fill_policy(trade_object.fill_policy)
 
-        # Input stop loss
-        if prices.stop_loss:
-            stop_loss = prices.stop_loss
-            self._input_sl(stop_loss, sl_type)
-            stop_loss = self._get_input_sl() if sl_type == SLTPType.POINTS else stop_loss
+        # Input stop loss - handle clear field when sl_type = None
+        stop_loss = prices.stop_loss
+        self._input_sl(stop_loss, sl_type)
+        stop_loss = self._get_input_sl() if sl_type == SLTPType.POINTS else stop_loss
 
-        # input take profit
-        if prices.take_profit:
-            take_profit = prices.take_profit
-            self._input_tp(take_profit, tp_type)
-            take_profit = self._get_input_tp() if tp_type == SLTPType.POINTS else take_profit
+        # input take profit - handle clear field when sl_type = None
+        take_profit = prices.take_profit
+        self._input_tp(take_profit, tp_type)
+        take_profit = self._get_input_tp() if tp_type == SLTPType.POINTS else take_profit
 
         # select expiry
         if trade_object.get("expiry"):

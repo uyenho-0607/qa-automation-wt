@@ -38,7 +38,7 @@ class AssetTab(BaseTrade):
     __expand_item_profit_loss = (
         By.XPATH, "//div[@data-testid='asset-open-list-item-expand']/div[contains(normalize-space(), 'Profit/Loss')]"
     )
-    __expanded_items = (By.CSS_SELECTOR, "div[data-testid^='asset-{}-column-'][data-testid$='-value']")
+    __expanded_values = (By.CSS_SELECTOR, "div[data-testid^='asset-{}-column-'][data-testid$='-value']")
     __expanded_symbol = (By.CSS_SELECTOR, data_testid('asset-detailed-header-symbol'))
     __expanded_order_type = (By.CSS_SELECTOR, data_testid('asset-order-type'))  # buy or sell
     __btn_cancel_expand_item = (By.CSS_SELECTOR, data_testid('action-sheet-cancel-button'))
@@ -62,19 +62,27 @@ class AssetTab(BaseTrade):
         res = [item.split("\n")[-1].replace("--", "0") for item in res]
         return [(float(item) if is_float(item) else 0) for item in res]
 
-    def get_tab_amount(self, tab: AssetTabs, wait=True) -> int:
+    def get_tab_amount(self, tab: AssetTabs, wait=True):
         """Get the number of items in the specified tab."""
         not wait or self.wait_for_spin_loader()
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, trade_object: ObjTrade = None) -> int:
+    def get_last_order_id(self, trade_object: ObjTrade = None, wait=True):
         """Get the latest order ID from the specified tab and update value into trade_object"""
-        order_id = self.actions.get_text(self.__order_id_items)
-        order_id = order_id.split(": ")[-1] if order_id else 0
+        current_id = self.actions.get_text(self.__order_id_items).split(": ")[-1]
+        not wait or self.wait_for_spin_loader()
+        order_id = self.actions.get_text(self.__order_id_items).split(": ")[-1]
+
+        # double check to make sure orderID is the latest
+        if current_id == order_id:
+            logger.debug("- order_id is not changed, try waiting for loading icon...")
+            self.wait_for_spin_loader(timeout=1)
+            order_id = self.actions.get_text(self.__order_id_items).split(": ")[-1]
 
         if trade_object:
             trade_object.order_id = order_id
+
         logger.debug(f"> Latest order_id: {order_id!r}")
         return order_id
 
@@ -93,7 +101,7 @@ class AssetTab(BaseTrade):
         tab = AssetTabs.HISTORY if tab.is_history() else tab
         res = {
             ele.get_attribute("data-testid").split("-column-")[-1].replace("-value", "").replace("-", "_"): ele.text.strip()
-            for ele in self.actions.find_elements(cook_element(self.__expanded_items, tab.col_locator()))
+            for ele in self.actions.find_elements(cook_element(self.__expanded_values, tab.col_locator()))
         }
 
         # special locators
@@ -141,17 +149,15 @@ class AssetTab(BaseTrade):
             locator = cook_element(self.__btn_action_by_id, order_id, tab.col_locator(), action)
         self.actions.click(locator)
 
-    def delete_order(self, trade_object: ObjTrade = None, confirm=True, wait=False) -> None:
+    def delete_order(self, trade_object: ObjTrade, confirm=True) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
-        if trade_object and not trade_object.get("order_id"):
-            # update latest orderID for trade object
+        if not trade_object.get("order_id"):
             self.get_last_order_id(trade_object)
 
         logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
         self.click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
 
         not confirm or self.confirm_delete_order()
-        not wait or self.wait_for_spin_loader()
 
     def bulk_delete_orders(self) -> None:
         """Delete multiple pending orders at once."""
@@ -262,7 +268,9 @@ class AssetTab(BaseTrade):
 
     def verify_item_data(self, trade_object: ObjTrade, tab: AssetTabs = None, wait=False) -> None:
         """Verify that the item data matches the expected data."""
-        not wait or self.wait_for_spin_loader()
+        if wait:
+            self.wait_for_spin_loader()
+
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
         # handle expected
         self.get_current_price(trade_object)  # update current price for trade_object
