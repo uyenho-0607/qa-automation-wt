@@ -123,14 +123,13 @@ class TradingModals(BaseTrade):
 
     def _select_expiry(self, expiry: Expiry):
         self.actions.click(self.__drp_edit_expiry)
-
         locator = locator_format(expiry)
+
         # handle special locator
         if expiry == Expiry.SPECIFIED_DATE:
             locator = "_".join(item.lower() for item in expiry.split(" "))
 
         self.actions.click(cook_element(self.__opt_edit_expiry, locator))
-
         expiry not in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME] or self._select_expiry_date()
 
     def _select_expiry_date(self):

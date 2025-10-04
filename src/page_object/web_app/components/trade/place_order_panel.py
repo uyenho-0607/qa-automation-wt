@@ -5,7 +5,7 @@ from typing import Any
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT, SHORT_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT, WARNING_ICON
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
@@ -129,13 +129,19 @@ class PlaceOrderPanel(BaseTrade):
         self.actions.click(self.__drp_fill_policy)
         self.actions.click(cook_element(self.__opt_fill_policy, locator_format(fill_policy)))
 
-    def _select_expiry(self, expiry: Expiry | str):
+    def _select_expiry(self, expiry: Expiry | str, retries=3):
         """Select expiry for the order. Return selected expiry"""
+
+        if not retries:
+            logger.warning(f"- Max retries exceeded! Fail to select expiry {WARNING_ICON}")
+            return
+
         self.actions.scroll_to_element(self.__drp_expiry)
 
         # check if expiry is already selected
-        is_select = expiry.lower() in self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).lower()
-        if is_select:
+        cur_expiry = self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).split("\n")[0].lower()
+        logger.debug(f"- Current expiry: {cur_expiry!r}")
+        if expiry.lower() == cur_expiry:
             logger.debug(f"> Expiry: {expiry!r} selected")
             return
 
@@ -147,6 +153,7 @@ class PlaceOrderPanel(BaseTrade):
 
         # select date in case expiry specified date
         expiry not in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME] or self._select_expiry_date()
+        self._select_expiry(expiry, retries - 1)
 
     def _select_expiry_date(self):
         logger.debug("- Select expiry date")
