@@ -2,6 +2,7 @@ import pytest
 
 from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
@@ -22,7 +23,7 @@ def test(web_app, cancel_all, sl_type, tp_type, stop_obj, get_asset_tab_amount):
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place {trade_object.trade_type} order for {trade_object.symbol!r} (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
+    logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)} - (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")
     web_app.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
 
     logger.info(f"Verify trade confirmation")
