@@ -10,21 +10,19 @@ from src.utils.logging_utils import logger
 def test(web_app, limit_obj, order_data, cancel_all):
     trade_object = limit_obj()
     tab = AssetTabs.PENDING_ORDER
-
-    logger.info("Step 1: Get asset tab amount")
     tab_amount = web_app.trade_page.asset_tab.get_tab_amount(AssetTabs.PENDING_ORDER)
 
-    logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)} (tab amount: {tab_amount!r})")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} (tab:{tab_amount})")
     order_data(trade_object)
     web_app.home_page.notifications.close_noti_banner()
 
-    logger.info("Step 3: Select Pending Orders tab")
+    logger.info("Step 2: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(tab)
 
-    logger.info(f"Verify order placed successfully, tab = {tab_amount + 1}")
+    logger.info(f"Verify order placed successfully, tab amount: {tab_amount + 1}")
     web_app.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)
 
-    logger.info("Step 4: Delete pending order")
+    logger.info("Step 3: Delete pending order")
     web_app.trade_page.asset_tab.delete_order(trade_object)
 
     logger.info(f"Verify delete order notification banner")
