@@ -19,7 +19,7 @@ def setup(login_member_site, web_app):
 
     if is_enable:
         logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
-        web_app.trade_page.place_order_panel.toggle_oct(enable=False, submit=True)
+        web_app.trade_page.place_order_panel.toggle_oct(enable=False, confirm=True)
 
     else:
         logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)

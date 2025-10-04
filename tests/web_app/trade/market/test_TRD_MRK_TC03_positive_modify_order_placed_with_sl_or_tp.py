@@ -19,7 +19,7 @@ from src.utils.logging_utils import logger
 )
 def test(web_app, market_obj, exclude_field, update_field, order_data, cancel_all):
     trade_object = market_obj()
-    update_info = {f"{exclude_field.lower()}_type": None, f"{update_field.lower()}_type": SLTPType.random_values()}
+    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without {exclude_field}")
     order_data(trade_object, **{f"{exclude_field.lower()}_type": None})

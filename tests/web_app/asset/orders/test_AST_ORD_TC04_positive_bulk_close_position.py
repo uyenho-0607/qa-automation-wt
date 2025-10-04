@@ -6,7 +6,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.parametrize("bulk_close_option", list(BulkCloseOpts))
-def test(web_app, symbol, setup_bulk_asset_test, cancel_bulk_close, bulk_close_option):
+def test(web_app, symbol, setup_bulk_asset_test, cancel_all, bulk_close_option):
     tab_amount, order_ids = setup_bulk_asset_test(order_type=OrderType.MARKET)
     # -------------------
 
