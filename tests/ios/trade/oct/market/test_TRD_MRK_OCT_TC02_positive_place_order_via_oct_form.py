@@ -8,8 +8,8 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(ios, symbol, get_asset_tab_amount):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(ios, market_obj, get_asset_tab_amount):
+    trade_object = market_obj()
     tab = AssetTabs.OPEN_POSITION
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
