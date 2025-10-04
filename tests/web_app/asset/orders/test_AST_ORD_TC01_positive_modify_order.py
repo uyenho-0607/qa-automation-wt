@@ -32,7 +32,6 @@ def test(web_app, symbol, order_type):
     web_app.trade_page.asset_tab.select_tab(AssetTabs.get_tab(order_type))
 
     logger.info(f"Step 5: Update placed order")
-    # web_app.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values(), confirm=True)
     web_app.trade_page.asset_tab.modify_order(trade_object, sl_type=SLTPType.random_values(), tp_type=SLTPType.random_values())
 
     logger.info(f"Verify trade edit confirmation")

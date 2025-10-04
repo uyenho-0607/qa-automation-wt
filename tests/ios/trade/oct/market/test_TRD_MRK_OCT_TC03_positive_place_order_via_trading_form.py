@@ -9,8 +9,8 @@ from src.utils.logging_utils import logger
 
 @pytest.mark.critical
 @pytest.mark.parametrize("sl_type, tp_type", [(SLTPType.PRICE, SLTPType.PRICE)])
-def test(ios, symbol, get_asset_tab_amount, sl_type, tp_type):
-    trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
+def test(ios, market_obj, get_asset_tab_amount, sl_type, tp_type):
+    trade_object = market_obj()
     tab = AssetTabs.OPEN_POSITION
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 

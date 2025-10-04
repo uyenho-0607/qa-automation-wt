@@ -2,6 +2,7 @@ import pytest
 
 from src.data.enums import AssetTabs, SLTPType
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
@@ -16,24 +17,22 @@ from src.utils.logging_utils import logger
         ("TP", "SL,TP"),
     ]
 )
-def test(web_app, stop_limit_obj, get_asset_tab_amount, exclude_field, update_field, create_order_data, cancel_all):
-
+def test(web_app, stop_limit_obj, exclude_field, update_field, order_data, cancel_all):
     trade_object = stop_limit_obj()
-    trade_object[exclude_field] = 0
-    update_info = {f"{item.lower()}_type": SLTPType.POINTS for item in update_field.split(",")}
-    # -------------------
+    update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
-    create_order_data(trade_object)
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without {exclude_field}")
+    order_data(trade_object, **{f"{exclude_field.lower()}_type": None})
 
     logger.info("Step 2: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
+    web_app.trade_page.asset_tab.get_last_order_id(trade_object) # get placed order_id
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
-    web_app.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
+    web_app.trade_page.asset_tab.verify_item_data(trade_object, AssetTabs.PENDING_ORDER, wait=False)
 
-    logger.info(f"Step 3: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
-    web_app.trade_page.asset_tab.modify_order(trade_object, **update_info)
+    logger.info(f"Step 3: Update placed order with {update_field!r}")
+    web_app.trade_page.asset_tab.modify_order(trade_object, **update_info, confirm=False)
 
     logger.info(f"Verify trade edit confirmation")
     web_app.trade_page.modals.verify_edit_trade_confirmation(trade_object)

@@ -13,6 +13,15 @@ def setup_trade_test(login_member_site, web_app, symbol):
     logger.info(f"[Setup] Search and select symbol: {symbol}")
     web_app.home_page.search_and_select_symbol(symbol)
 
+@pytest.fixture
+def market_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
+
 
 @pytest.fixture
 def limit_obj(symbol):
