@@ -20,7 +20,7 @@ def test(web_app, market_obj, get_asset_tab_amount, cancel_all):
     web_app.trade_page.asset_tab.verify_tab_amount(AssetTabs.OPEN_POSITION, tab_amount + 1)
 
     logger.info("Step 3: Get order_id of placed order")
-    web_app.trade_page.asset_tab.get_last_order_id(trade_object)
+    trade_object.order_id = web_app.trade_page.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Step 4: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
