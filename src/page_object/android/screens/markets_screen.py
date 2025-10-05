@@ -30,7 +30,7 @@ class MarketsScreen(BaseScreen):
 
     # ------------------------ ACTIONS ------------------------ #
 
-    def select_tab(self, tab: WatchListTab):
+    def select_tab(self, tab: WatchListTab, wait=False):
         """Handle selecting tab for home & markets screen"""
         locator = cook_element(self.__tab, tab)
 
@@ -38,17 +38,16 @@ class MarketsScreen(BaseScreen):
         # if tab is represent, select tab immediately
         if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
             self.actions.click(locator)
-            return
 
-        # Handle swipe scroll tab for markets screen
-        if self.actions.is_element_enabled(self.__horizontal_scroll_tab):
-            # If not visible, attempt to scroll horizontally to reveal it
+        else:
             for direction in ["left", "right"]:
                 logger.debug(f"- Swipe {direction} to show tab")
                 self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
                 if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
                     self.actions.click(locator)
-                    return
+                    break
+
+        not wait or self.wait_for_spin_loader()
 
     def set_symbol_preference(self, tab: WatchListTab, unchecked=True, show_all=None, store_dict=None):
         """Show/Hide Symbols with accurate state detection"""

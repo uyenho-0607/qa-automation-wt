@@ -19,7 +19,7 @@ class WatchList(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.ID, "tab-{}")
-    __sub_tab = (AppiumBy.ANDROID_UIAUTOMATOR, "new UiSelector().description('{}')")
+    __sub_tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("{}")')
     __items = (AppiumBy.ID, 'watchlist-symbol')
     __item_by_name = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").text("{}")')
     __star_icon_by_symbol = (AppiumBy.ID, 'chart-star-symbol')
@@ -48,13 +48,8 @@ class WatchList(BaseTrade):
         if tab:
             self.select_tab(tab)
 
-        elements = self.actions.find_elements(self.__items, timeout=timeout)
-        if elements:
-            res = [ele.text.strip() for ele in elements]
-            res = [item for item in res if item]  # remove empty text if any
-            return res if not random_symbol else random.choice(res)
-
-        return []
+        symbols = self.actions.get_text_elements(self.__items, timeout=timeout)
+        return symbols if not random_symbol else random.choice(symbols) if symbols else []
 
     def get_random_symbol(self):
         cur_symbols = self.get_current_symbols()
@@ -79,7 +74,7 @@ class WatchList(BaseTrade):
         all_symbols = set()
         scroll_attempts = 0
         last_count = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 2)
+        max_scroll_attempts: int = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 30
         no_new_symbol = 0
 
         while scroll_attempts < max_scroll_attempts:
