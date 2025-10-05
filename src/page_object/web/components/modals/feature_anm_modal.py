@@ -1,10 +1,9 @@
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT
+from src.data.consts import SHORT_WAIT
 from src.page_object.web.base_page import BasePage
 from src.utils.common_utils import data_testid
-from src.utils.logging_utils import logger
 
 
 class FeatureAnnouncementModal(BasePage):
@@ -21,8 +20,7 @@ class FeatureAnnouncementModal(BasePage):
         Clicks the 'Got it' button on the feature announcement modal.
         Will continue clicking if multiple announcements are present.
         """
-        while self.actions.is_element_displayed(self.__btn_got_it, timeout=EXPLICIT_WAIT):
-            # logger.debug("- Click btn got it")
+        while self.actions.is_element_displayed(self.__btn_got_it, timeout=SHORT_WAIT):
             self.actions.click(self.__btn_got_it)
 
     def try_it_now(self):

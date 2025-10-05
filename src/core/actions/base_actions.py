@@ -1,5 +1,6 @@
-from selenium.common import StaleElementReferenceException
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from contextlib import suppress
+
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Keys
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
@@ -21,7 +22,9 @@ class BaseActions:
         self._wait = WebDriverWait(driver=self._driver, timeout=EXPLICIT_WAIT)
         self._driver.implicitly_wait(IMPLICIT_WAIT)
 
-    # @handle_stale_element
+    # ----------------------------
+    # Main find_element wrapper with failure handler
+    # ----------------------------
     def find_element(
             self,
             locator: tuple[str, str],
@@ -31,27 +34,20 @@ class BaseActions:
             show_log=True
     ) -> WebElement | None:
         """
-        ------ Find single element using WebDriverWait ------
-        :param locator: locator needs to find
-        :param timeout: timeout for WebDriverWait, default is "EXPLICIT_WAIT"
-        :param cond: condition for finding element, default is "visibility_of_element_located"
-        :param raise_exception:
-            + True: raise Exception in case not found element, mark test step as broken and take screenshot
-            + False: skip and return None
-        :param show_log: if True, log warning message to console in case not found element, if False, skip logging
-        :return: WebElement | None
+        Find a single element with WebDriverWait.
+        :param locator: Target element locator.
+        :param timeout: Wait time (default: EXPLICIT_WAIT).
+        :param cond: Wait condition (default: visibility_of_element_located).
+        :param raise_exception: If True, raise on failure and capture screenshot; else return None.
+        :param show_log: Log warning if not found (default: False).
+        :return: WebElement or None.
         """
 
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout)
-
         try:
             return wait.until(cond(locator))
 
-        except StaleElementReferenceException:
-            logger.warning("- Stale element finding element, retry...")
-            return wait.until(cond(locator))
-
-        except (TimeoutException, NoSuchElementException) as e:
+        except TimeoutException as e:
             if show_log:
                 logger.warning(f"{WARNING_ICON} Element not found for {locator}: {type(e).__name__} after {timeout}(s)")
 
@@ -67,23 +63,60 @@ class BaseActions:
 
         return None
 
-    def find_elements(
-            self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, show_log=True
-    ) -> list[WebElement]:
-        """
-        ------ Find list of elements using WebDriverWait using condition "presence_of_all_elements_located" ------
-        :param locator: locator needs to find
-        :param timeout: timeout for WebDriverWait, default is "EXPLICIT_WAIT"
-        :return: list[WebElement] or empty list (case not found)
-        """
+    def find_elements(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, show_log=True) -> list[WebElement]:
+        wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout)
         try:
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
+            return wait.until(EC.presence_of_all_elements_located(locator))
 
-        except StaleElementReferenceException:
-            logger.warning("StaleElementReferenceException finding elements, retry...")
-            res = self.find_element(locator, timeout, EC.presence_of_all_elements_located, raise_exception=False, show_log=show_log)
+        except TimeoutException as e:
+            if show_log:
+                logger.warning(f"{WARNING_ICON} Elements not found for {locator}: {type(e).__name__} after {timeout}(s)")
+            res = []
 
-        return res or []
+        return res
+
+    # ----------------------------
+    # Element state checks
+    # ----------------------------
+    def is_element_displayed(self, locator: tuple[str, str], timeout: int | float = EXPLICIT_WAIT, is_display=True, show_log=False) -> bool:
+        """Check if element is displayed, NO exception will be raised if element is not found"""
+        if not is_display:
+            return self.wait_for_element_invisible(locator, timeout=timeout)
+
+        return self.wait_for_element_visible(locator, timeout, show_log=show_log)
+
+    def is_element_enabled(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT) -> bool:
+        """Check if element is enabled."""
+        element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
+        return element and element.is_enabled()
+
+    # ----------------------------
+    # Waits
+    # ----------------------------
+
+    def wait_for_element_visible(self, locator: tuple[str, str], timeout: int | float = EXPLICIT_WAIT, show_log=True) -> bool:
+        res = self.find_element(locator, timeout, raise_exception=False, show_log=show_log)
+        return bool(res)
+
+    def wait_for_element_invisible(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, show_log=True) -> bool:
+
+        def _check_invisible() -> bool:
+            """Safe check invisible of element to make sure the element really invisible"""
+            with suppress(Exception):
+                ele = self._driver.find_element(*locator)
+                return not ele.is_displayed()
+            return True # case not found
+
+        wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout)
+        res = wait.until(lambda d: _check_invisible())
+        if show_log:
+            logger.debug(f"Check invisibility of locator: {locator}: {CHECK_ICON_COLOR if res else FAILED_ICON_COLOR}")
+
+        return res
+
+    # ----------------------------
+    # Safe interactions
+    # ----------------------------
 
     @log_requests
     @handle_stale_element
@@ -95,11 +128,7 @@ class BaseActions:
             show_log=True,
     ) -> None:
         """Click on an element."""
-        element = self.find_element(
-            locator, timeout, EC.element_to_be_clickable,
-            raise_exception=raise_exception,
-            show_log=show_log
-        )
+        element = self.find_element(locator, timeout, EC.element_to_be_clickable, raise_exception=raise_exception, show_log=show_log)
         if element:
             element.click()
 
@@ -186,50 +215,6 @@ class BaseActions:
             element = self.find_element(locator, QUICK_WAIT, raise_exception=raise_exception, show_log=show_log)
 
         return element.text.strip() if element else ""
-
-    def wait_for_element_invisible(
-            self,
-            locator: tuple[str, str],
-            timeout: float | int = EXPLICIT_WAIT,
-    ) -> WebElement | None:
-        """Wait for element to be invisible, NO exception will be raised if element is not found"""
-        wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout=timeout)
-        try:
-            res = wait.until(EC.invisibility_of_element_located(locator))
-            logger.debug(f"> Check invisibility of element {locator}: {CHECK_ICON_COLOR if bool(res) else FAILED_ICON_COLOR}")
-            return res
-
-        except TimeoutException:
-            logger.warning(f"{WARNING_ICON} Element {locator} still display after {timeout} sec")
-            return None
-
-    @log_requests
-    def wait_for_element_visible(
-            self,
-            locator: tuple[str, str],
-            timeout=EXPLICIT_WAIT,
-    ) -> bool:
-        """Wait for element to be visible, NO exception will be raised if element is not found"""
-        res = self.find_element(
-            locator, timeout, cond=EC.visibility_of_element_located, raise_exception=False, show_log=True
-        )
-        return bool(res)
-
-    def is_element_displayed(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT, is_display=True, show_log=False) -> bool:
-        """Check if element is displayed, NO exception will be raised if element is not found"""
-        if not is_display:
-            self.wait_for_element_invisible(locator, timeout=timeout)
-            timeout = QUICK_WAIT
-
-        element = self.find_element(locator, timeout, raise_exception=False, show_log=show_log)
-        res = bool(element)
-
-        return res if is_display else not res
-
-    def is_element_enabled(self, locator: tuple[str, str], timeout=EXPLICIT_WAIT) -> bool:
-        """Check if element is enabled."""
-        element = self.find_element(locator, timeout, raise_exception=False, show_log=False)
-        return element.is_enabled() if element else False
 
     # ------- VERIFY ------ #
     def verify_element_displayed(

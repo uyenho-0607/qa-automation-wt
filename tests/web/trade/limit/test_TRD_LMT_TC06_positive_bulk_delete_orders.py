@@ -10,7 +10,7 @@ def test(web, setup_bulk_test, cancel_bulk_delete, ):
     order_ids = setup_bulk_test(order_type=OrderType.LIMIT)
     expected_amount = 0 if len(order_ids) <= 30 else len(order_ids) - 30
 
-    logger.info("Step: Bulk delete pending orders")
+    logger.info("Step 1: Bulk delete pending orders")
     web.trade_page.asset_tab.bulk_delete_orders()
 
     logger.info("Verify bulk delete notification banner")
