@@ -1,16 +1,28 @@
-import pytest
 import random
 
+import pytest
+
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, Features, OrderType, WatchListTab
+from src.data.enums import AssetTabs, Features, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup(login_wt_app):
-    pass
+def setup(login_wt_app, android):
 
+    logger.info("[Setup] Select any symbol from watch list", setup=True)
+    android.home_screen.watch_list.select_last_symbol()
+
+    logger.info("[Setup] Check if OCT mode is enabled/disabled in Admin Config", setup=True)
+    is_enable = android.trade_screen.place_order_panel.is_oct_enable()
+
+    if is_enable:
+        logger.info("[Setup] OCT mode is enabled in Admin config - Disable OCT", setup=True)
+        android.trade_screen.place_order_panel.toggle_oct(enable=False, confirm=True)
+
+    else:
+        logger.info("[Setup] OCT mode already disabled in Admin Config", setup=True)
 
 @pytest.fixture
 def setup_bulk_asset_test(android, symbol):
