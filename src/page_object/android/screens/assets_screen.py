@@ -1,6 +1,9 @@
+import operator
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
+from src.data.consts import SHORT_WAIT
 from src.data.enums import AccInfo
 from src.page_object.android.base_screen import BaseScreen
 from src.page_object.android.components.trade.watch_list import WatchList
@@ -21,9 +24,9 @@ class AssetsScreen(BaseScreen):
 
     __available_balance = (AppiumBy.XPATH, "//android.widget.TextView[@text='Available Balance']/following-sibling::android.widget.TextView[2]")
     __realised_profit_loss = (AppiumBy.XPATH, "//android.widget.TextView[@text='Realised Profit/Loss']/following-sibling::android.widget.TextView[2]")
-    __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[3]")
-    __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[3]")
-    __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[3]")
+    __credit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Credit']/following-sibling::android.widget.TextView[2]")
+    __deposit = (AppiumBy.XPATH, "//android.widget.TextView[@text='Deposit']/following-sibling::android.widget.TextView[2]")
+    __withdrawal = (AppiumBy.XPATH, "//android.widget.TextView[@text='Withdrawal']/following-sibling::android.widget.TextView[1]")
     __item_watchlist = (AppiumBy.ID, 'watchlist-symbol')
     __view_transaction = (AppiumBy.ID, 'asset-header-view-all')
 
@@ -64,6 +67,17 @@ class AssetsScreen(BaseScreen):
         }
 
         soft_assert(actual, expected)
+
+    def verify_account_values_changed(self, acc_item: AccInfo, amount_change, old_value):
+        # todo: enhance later
+        locator_map = {
+            AccInfo.BALANCE: self.__available_balance,
+            AccInfo.REALISED_PROFIT_LOSS: self.__realised_profit_loss
+        }
+
+        actual = format_acc_balance(self.actions.get_text(locator_map[acc_item], timeout=SHORT_WAIT), to_float=True)
+        exp_op = operator.ge if amount_change > 0 else operator.le
+        soft_assert(exp_op(actual, old_value + amount_change), True, error_message=f"Actual: {actual}, Expected: {old_value + amount_change}, Operator: {exp_op.__name__!r}")
 
     def verify_account_balance_summary(self, exp_data, tolerance_percent=None, tolerance_fields=None):
         """Verify the asset account dashboard details"""

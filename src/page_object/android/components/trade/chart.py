@@ -3,7 +3,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT
 from src.data.enums import ChartTimeframe
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
@@ -45,7 +45,6 @@ class Chart(BaseTrade):
     def get_timeframe_render_time(self, timeframe):
         self.select_timeframe(timeframe)
         start = time.time()
-        self.actions.find_element(self.__chart_loading, timeout=QUICK_WAIT, raise_exception=False, show_log=False)
         self.actions.wait_for_element_invisible(self.__chart_loading, timeout=EXPLICIT_WAIT)
         elapsed = round(time.time() - start, 2)
         logger.debug(f"- Render time: {elapsed} sec")

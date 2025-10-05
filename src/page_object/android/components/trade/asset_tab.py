@@ -14,7 +14,7 @@ from src.page_object.android.components.modals.trading_modals import TradingModa
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
-from src.utils.format_utils import locator_format, extract_asset_tab_number, format_dict_to_string
+from src.utils.format_utils import locator_format, extract_asset_tab_number, format_dict_to_string, remove_comma
 from src.utils.logging_utils import logger
 from src.utils.trading_utils import calculate_partial_close
 
@@ -64,17 +64,17 @@ class AssetTab(BaseTrade):
     __txt_close_order = (AppiumBy.ID, 'close-order-input-volume')
 
     # ------------------------ HELPER METHODS ------------------------ #
-    def _get_item_info(self, get_info: Literal["profit_loss", "current_price", "volume"] = "current_price"):
+    def _get_item_info(self, get_info: Literal["profit/loss", "current_price", "volume"] = "current_price"):
         """Get the outside displaying values (volume, profit/loss, current price)"""
         text = self.actions.get_content_desc(cook_element(self.__expand_items, AssetTabs.OPEN_POSITION.col_locator())).lower()
         pattern = r'(volume|profit/loss|current price),\s*([-+]?\d*\.?\d+)'
         matches = re.findall(pattern, text)
-        res_dict = {k: float(v) for k, v in matches}
+        res_dict = {k: float(remove_comma(v)) for k, v in matches}
 
         return res_dict.get(get_info, 0)
 
     def get_profit_loss(self):
-        return self._get_item_info("profit_loss")
+        return self._get_item_info("profit/loss")
 
     def get_tab_amount(self, tab: AssetTabs, wait=True) -> int:
         """Get the number of items in the specified tab."""
