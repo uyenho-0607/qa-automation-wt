@@ -1,6 +1,7 @@
 import pytest
 
 from src.data.ui_messages import UIMessages
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 """
@@ -24,7 +25,7 @@ def test(web, invalid_field, market_obj):
 
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
-    logger.info(f"Step 1: Place order with invalid: {invalid_field}")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} with invalid: {invalid_field}")
     web.trade_page.place_order_panel.place_invalid_order(trade_object, **invalid_dict, submit=True)
 
     logger.info("Verify invalid notification banner")

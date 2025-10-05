@@ -3,6 +3,7 @@ import pytest
 from src.data.enums import OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 """
@@ -26,7 +27,7 @@ def test(web, invalid_field, expected_message, symbol):
 
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
-    logger.info(f"Step 1: Place order with invalid: {invalid_field}")
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} with invalid: {invalid_field}")
     web.trade_page.place_order_panel.place_invalid_order(trade_object, **invalid_dict, submit=True)
 
     logger.info("Verify invalid notification banner")
@@ -35,4 +36,5 @@ def test(web, invalid_field, expected_message, symbol):
 @pytest.fixture(autouse=True)
 def cleanup(web):
     yield
+    logger.info("[Cleanup] Close notification banner", teardown=True)
     web.home_page.notifications.close_noti_banner()

@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import QUICK_WAIT
+from src.data.consts import QUICK_WAIT, SHORT_WAIT
 from src.data.enums import TradeType, BulkCloseOpts, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.base_page import BasePage
@@ -50,17 +50,17 @@ class BaseTrade(BasePage):
         live_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()), timeout=timeout)
         return live_price if live_price else 0
 
-    def get_current_price(self, trade_object: ObjTrade, timeout=QUICK_WAIT):
+    def get_current_price(self, trade_type: TradeType, order_type: OrderType, timeout=SHORT_WAIT, oct_mode=False):
         """Get the current price for a placed order (reverse for order_type = Market).
         """
-        trade_type, order_type = trade_object.trade_type, trade_object.order_type
+        btn_price = self.__oct_live_price if oct_mode else self.__live_price
+
+        # reverse for order MARKET
         if order_type == OrderType.MARKET:
             trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
 
-        current_price = self.actions.get_text(
-            cook_element(self.__live_price, trade_type.lower()), timeout=timeout, show_log=False
-        )
-        trade_object.current_price = current_price
+        current_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()), timeout=timeout, show_log=False)
+        return current_price
 
     # One Click Trading Modal Actions
     def agree_and_continue(self):

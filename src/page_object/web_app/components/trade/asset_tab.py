@@ -68,18 +68,10 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, tab: AssetTabs, wait=False):
+    def get_last_order_id(self, tab: AssetTabs, wait=True):
         """Get the latest order ID from the specified tab."""
         not wait or self.wait_for_spin_loader()
-        current_id = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator())).split(": ")[-1]
         order_id = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator())).split(": ")[-1]
-
-        # double check to make sure orderID is the latest
-        if current_id == order_id:
-            logger.debug("- order_id is not changed, try waiting for loading icon...")
-            self.wait_for_spin_loader()
-            order_id = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator())).split(": ")[-1]
-
         logger.debug(f"- Latest orderID: {order_id!r}")
         return order_id
 

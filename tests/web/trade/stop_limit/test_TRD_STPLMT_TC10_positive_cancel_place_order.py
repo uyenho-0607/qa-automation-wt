@@ -6,9 +6,9 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web, limit_obj, close_confirm_modal, get_asset_tab_amount):
+def test(web, stop_limit_obj, close_confirm_modal, get_asset_tab_amount):
 
-    trade_object = limit_obj()
+    trade_object = stop_limit_obj()
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)}")

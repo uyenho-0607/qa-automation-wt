@@ -5,12 +5,11 @@ from src.data.enums import AssetTabs, OrderType
 from src.data.objects.notification_obj import ObjNoti
 from src.utils.logging_utils import logger
 
-@pytest.mark.critical
 def test(web, setup_bulk_test, cancel_bulk_delete, ):
     order_ids = setup_bulk_test(order_type=OrderType.LIMIT)
     expected_amount = 0 if len(order_ids) <= 30 else len(order_ids) - 30
 
-    logger.info("Step: Bulk delete pending orders")
+    logger.info("Step 1: Bulk delete pending orders")
     web.trade_page.asset_tab.bulk_delete_orders()
 
     logger.info("Verify bulk delete notification banner")

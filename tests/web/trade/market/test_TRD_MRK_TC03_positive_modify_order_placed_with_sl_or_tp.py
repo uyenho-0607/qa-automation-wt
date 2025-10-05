@@ -2,6 +2,7 @@ import pytest
 
 from src.data.enums import SLTPType, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
@@ -16,19 +17,20 @@ from src.utils.logging_utils import logger
         ("TP", "SL,TP"),
     ]
 )
-def test(web, market_obj, create_order_data, exclude_field, update_field, close_edit_confirm_modal):
+def test(web, market_obj, order_data, exclude_field, update_field, close_edit_confirm_modal):
 
     trade_object = market_obj()
     trade_object[exclude_field] = 0
     update_info = {f"{item.lower()}_type": SLTPType.random_values() for item in update_field.split(",")}
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order with SL/ TP ({exclude_field} = 0)")
-    create_order_data(trade_object)
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} with SL/ TP ({exclude_field} = 0)")
+    order_data(trade_object, SLTPType.PRICE, SLTPType.PRICE)
+    trade_object.order_id = web.trade_page.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
-    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.OPEN_POSITION, trade_object.order_id)
+    web.trade_page.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION, False)
 
-    logger.info(f"Step 2: Modify order with {update_field!r} {' - '.join(list(update_info.values()))}")
+    logger.info(f"Step 2: Update placed order with {update_field!r} {' - '.join(list(update_info.values()))}")
     web.trade_page.asset_tab.modify_order(trade_object, **update_info)
 
     logger.info("Verify trade edit confirmation")
