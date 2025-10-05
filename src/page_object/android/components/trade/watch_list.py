@@ -19,7 +19,7 @@ class WatchList(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.ID, "tab-{}")
-    __sub_tab = (AppiumBy.ANDROID_UIAUTOMATOR, "new UiSelector().description('{}')")
+    __sub_tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().description("{}")')
     __items = (AppiumBy.ID, 'watchlist-symbol')
     __item_by_name = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").text("{}")')
     __star_icon_by_symbol = (AppiumBy.ID, 'chart-star-symbol')
@@ -79,7 +79,7 @@ class WatchList(BaseTrade):
         all_symbols = set()
         scroll_attempts = 0
         last_count = 0
-        max_scroll_attempts: int = int(len(expected_symbols) / 2)
+        max_scroll_attempts: int = int(len(expected_symbols) / 2) if len(expected_symbols) > 10 else 30
         no_new_symbol = 0
 
         while scroll_attempts < max_scroll_attempts:
