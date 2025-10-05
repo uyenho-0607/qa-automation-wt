@@ -1,13 +1,11 @@
-import time
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT, EXPLICIT_WAIT
-from src.data.enums import TradeType
+from src.data.enums import TradeType, OrderType
+from src.data.objects.trade_obj import ObjTrade
 from src.page_object.android.base_screen import BaseScreen
-from src.utils import DotDict
-from src.utils.common_utils import resource_id, cook_element
+from src.utils.common_utils import cook_element
 from src.utils.logging_utils import logger
 
 
@@ -16,37 +14,41 @@ class BaseTrade(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __live_price = (AppiumBy.XPATH, resource_id('trade-live-{}-price'))  # buy or sell market price
+    __live_price = (AppiumBy.ID, 'trade-live-{}-price')  # buy or sell market price
     __oct_live_price = (AppiumBy.XPATH, "//*[@resource-id='trade-button-oct-order-{}']/android.widget.TextView[2]")
     
     ##### One Click Trading Modal #####
-    __btn_oct_confirm = (AppiumBy.XPATH, resource_id('oct-modal-button-confirm'))
-    __btn_oct_cancel = (AppiumBy.XPATH, resource_id('oct-modal-button-cancel'))
+    __btn_oct_confirm = (AppiumBy.ID, 'oct-modal-button-confirm')
+    __btn_oct_cancel = (AppiumBy.ID, 'oct-modal-button-cancel')
 
     ##### Trade Confirmation Modal #####
-    __btn_trade_confirm = (AppiumBy.XPATH, resource_id('trade-confirmation-button-confirm'))
-    __btn_trade_close = (AppiumBy.XPATH, resource_id('trade-confirmation-button-close'))
-    __btn_confirm_close_delete_order = (AppiumBy.XPATH, resource_id('close-order-button-submit'))
-    __btn_cancel_trade = (AppiumBy.XPATH, "//*[translate(@text, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')='cancel']")
+    __btn_trade_confirm = (AppiumBy.ID, 'trade-confirmation-button-confirm')
+    __btn_trade_close = (AppiumBy.ID, 'trade-confirmation-button-close')
+    __btn_confirm_close_delete = (AppiumBy.ID, 'close-order-button-submit')
+    __btn_cancel_close_delete = (AppiumBy.ID, 'close-order-button-cancel')
 
     # ------------------------ ACTIONS ------------------------ #
-    def get_live_price(
-            self, trade_type: TradeType, reverse=False, oct=False, trade_object: DotDict = None, timeout=QUICK_WAIT
-    ) -> str:
+    def get_live_price(self, trade_type: TradeType, oct_mode=False) -> str:
         """Get the current live price for a given trade type.
         The price is displayed in the trading interface and is used for various trading operations.
         """
+        btn_price = self.__oct_live_price if oct_mode else self.__live_price
+        live_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()))
+        logger.debug(f"- Live price: {live_price!r}")
+        return live_price if live_price else 0
 
-        if reverse:
+    def get_current_price(self, trade_type: TradeType, order_type: OrderType, oct_mode=False, timeout=QUICK_WAIT):
+        """Get the current price for a placed order (reverse for order_type = Market).
+        """
+        # reverse for market order
+        if order_type == OrderType.MARKET:
             trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
 
-        btn_price = self.__oct_live_price if oct else self.__live_price
-        live_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()), timeout=timeout)
-
-        if trade_object:
-            trade_object.current_price = live_price
-
-        return live_price if live_price else 0
+        current_price = self.actions.get_text(
+            cook_element(self.__live_price if not oct_mode else self.__oct_live_price, trade_type.lower()),
+            timeout=timeout, raise_exception=False, show_log=False
+        )
+        return current_price
 
     # One Click Trading Modal Actions
     def confirm_oct(self, confirm=True):
@@ -63,8 +65,8 @@ class BaseTrade(BaseScreen):
         logger.debug(f"- Confirm place order: {confirm!r}")
         self.actions.click(self.__btn_trade_confirm if confirm else self.__btn_trade_close, timeout=timeout, raise_exception=not confirm, show_log=not confirm)
 
-    def confirm_close_order(self):
+    def confirm_close_order(self, confirm=True):
         """Confirm close order action."""
-        self.actions.click(self.__btn_confirm_close_delete_order)
+        self.actions.click(self.__btn_confirm_close_delete if confirm else self.__btn_cancel_close_delete)
 
     confirm_delete_order = confirm_close_order

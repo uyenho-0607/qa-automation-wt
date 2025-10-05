@@ -1,3 +1,5 @@
+import pytest
+
 from src.data.consts import LONG_WAIT
 from src.data.enums import AssetTabs, OrderType
 from src.data.objects.notification_obj import ObjNoti
