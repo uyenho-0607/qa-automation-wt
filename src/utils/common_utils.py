@@ -28,7 +28,7 @@ def get_connected_device(platform=None):
         for line in lines:
             if line.strip() and 'device' in line:
                 return line.split()[0]  # Return the device ID
-    else: # IOS
+    else:  # IOS
         logger.info("Trying to get iOS device")
         result = subprocess.run(['idevice_id', '-l'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         lines = result.stdout.strip().split('\n')
@@ -36,7 +36,7 @@ def get_connected_device(platform=None):
             if line.strip():
                 return line.strip()
 
-    return None # No device found
+    return None  # No device found
 
 
 def cook_element(element: tuple, *custom):
@@ -56,6 +56,15 @@ def data_testid(testid, tag='*'):
 def resource_id(testid, tag='*'):
     pattern = f"//{tag}[@resource-id='{testid}']"
     return pattern
+
+
+def break_line(desc="", break_icon="-"):
+    line = f"{break_icon * 10}"
+    if desc:
+        line += f" {desc} "
+    line += f"{break_icon * 10}"
+
+    logger.info(line)
 
 
 def translate_sign_in(language: Language) -> str:
@@ -120,6 +129,7 @@ def convert_strtime(str_time: str | float):
     """Interpret input as UTC and return POSIX timestamp."""
     dt_obj = datetime.strptime(str_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
     return dt_obj.timestamp()
+
 
 def convert_timestamp(timestamp: float | int):
     """Convert POSIX timestamp to UTC string (no +00:00 in output)."""
