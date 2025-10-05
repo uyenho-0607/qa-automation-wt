@@ -5,7 +5,6 @@ from appium.webdriver.common.appiumby import AppiumBy
 from src.core.actions.mobile_actions import MobileActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums import SLTPType, TradeType, OrderType, Expiry
-from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.ios.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element

@@ -101,16 +101,26 @@ class PlaceOrderPanel(BaseTrade):
         if self.actions.is_element_displayed(self.__swap_units, timeout=1):
             self.actions.click(self.__swap_units)
 
-    def _select_trade_type(self, trade_type: TradeType, normal_mode=True) -> None:
+    def _select_trade_type(self, trade_type: TradeType, normal_mode=True, retries=3) -> None:
         """Select trade type (BUY/SELL)."""
+        if retries <= 0:
+            logger.warning(f"- {WARNING_ICON} Failed to select trade_type")
+            return
+
+        # no selected attribute to check, check place_order_panel opened instead
+        if self.actions.is_element_displayed(self.__drp_order_type, timeout=QUICK_WAIT):
+            logger.debug("- Trade Type selected")
+            return
+
         logger.debug(f"- Select trade type: {trade_type.upper()!r}")
         self.actions.click(cook_element(self.__btn_trade if normal_mode else self.__btn_oct_trade, trade_type.lower()))
+        self._select_trade_type(trade_type, normal_mode, retries - 1)
 
     def _select_order_type(self, order_type: OrderType) -> None:
         """Select order type (MARKET/LIMIT/STOP/STOP_LIMIT)."""
         is_select = order_type.lower() in self.actions.get_text(self.__drp_order_type, timeout=QUICK_WAIT).lower()
         if is_select:
-            logger.debug(f"- Order type: {order_type} already selected")
+            logger.debug(f"- Order type: {order_type} selected")
             return
 
         logger.debug(f"- Select order type: {order_type.capitalize()!r}")
@@ -134,24 +144,23 @@ class PlaceOrderPanel(BaseTrade):
         """Select expiry for the order. Return selected expiry"""
 
         if not retries:
-            logger.warning(f"- Max retries exceeded! Fail to select expiry {WARNING_ICON}")
+            logger.warning(f"- {WARNING_ICON} Failed to select expiry")
             return
 
         self.actions.scroll_to_element(self.__drp_expiry)
 
         # check if expiry is already selected
         cur_expiry = self.actions.get_text(self.__drp_expiry, timeout=QUICK_WAIT).split("\n")[0].lower()
-        logger.debug(f"- Current expiry: {cur_expiry!r}")
         if expiry.lower() == cur_expiry:
             logger.debug(f"> Expiry: {expiry!r} selected")
             return
 
+        logger.debug(f"- Select expiry: {expiry.title()!r}")
         locator = locator_format(expiry)
         # handle special locator
         if expiry == Expiry.SPECIFIED_DATE:
             locator = "_".join(item.lower() for item in expiry.split(" "))
 
-        logger.debug(f"- Select expiry: {expiry.title()!r}")
         self.actions.click(self.__drp_expiry)
         time.sleep(0.5)
         self.actions.click(cook_element(self.__opt_expiry, locator))

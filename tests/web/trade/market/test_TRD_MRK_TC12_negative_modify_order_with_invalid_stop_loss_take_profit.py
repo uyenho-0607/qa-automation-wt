@@ -1,8 +1,9 @@
 import pytest
 
-from src.data.enums import OrderType
+from src.data.enums import OrderType, SLTPType, AssetTabs
 from src.data.objects.trade_obj import ObjTrade
 from src.data.ui_messages import UIMessages
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 """
@@ -26,7 +27,7 @@ def test(web, invalid_field, close_edit_confirm_modal, setup_test):
     trade_obj = setup_test
     invalid_dict = {key: True for key in invalid_field.split(",")}
 
-    logger.info(f"Step 1: Modify order with {invalid_field!r}")
+    logger.info(f"Step 1: Update placed order with {invalid_field!r}")
     web.trade_page.asset_tab.modify_invalid_order(trade_obj, **invalid_dict, submit=True)
 
     logger.info("Verify invalid notification banner")
@@ -35,9 +36,10 @@ def test(web, invalid_field, close_edit_confirm_modal, setup_test):
 
 
 @pytest.fixture(scope="package", autouse=True)
-def setup_test(create_order_data, symbol):
-    trade_obj = ObjTrade(stop_loss=0, take_profit=0, symbol=symbol, order_type=OrderType.MARKET)
+def setup_test(order_data, market_obj, web):
+    trade_obj = market_obj()
 
-    logger.info(f"- Place {trade_obj.trade_type} Order")
-    create_order_data(trade_obj)
+    logger.info(f"- Place order with: {format_display_dict(trade_obj)}")
+    order_data(trade_obj, SLTPType.PRICE, SLTPType.PRICE)
+    trade_obj.order_id = web.trade_page.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION)
     yield trade_obj
