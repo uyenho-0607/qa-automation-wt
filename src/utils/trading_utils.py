@@ -28,7 +28,7 @@ def _point_step(current_price):
 def _decimal(current_price):
     """Get decimal places"""
     decimal = ObjTrade.DECIMAL
-    if not decimal:
+    if decimal is None:
         # extract decimal from current price
         decimal = get_decimal(current_price)
 
@@ -210,6 +210,11 @@ def calculate_trading_params(
         "entry_price": current_price if order_type.is_market() else pending_price,
         "stop_limit_price": stop_price,
     }
+
+    if ObjTrade.DECIMAL == 0:
+        for key in result:
+            if result[key]:
+                result[key] = int(result[key])
 
     return DotDict(result)
 

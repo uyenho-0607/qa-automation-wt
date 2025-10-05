@@ -3,7 +3,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
-from src.data.consts import EXPLICIT_WAIT, QUICK_WAIT, SHORT_WAIT
+from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, QUICK_WAIT
 from src.data.enums import ChartTimeframe
 from src.page_object.android.components.trade.base_trade import BaseTrade
 from src.utils.assert_utils import soft_assert
