@@ -3,10 +3,10 @@ import pytest
 from src.data.consts import LONG_WAIT
 from src.data.enums import AssetTabs, OrderType
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
-@pytest.mark.critical
 def test(web, setup_bulk_test, cancel_bulk_close, ):
     order_ids = setup_bulk_test(order_type=OrderType.MARKET)
     expected_amount = 0 if len(order_ids) <= 30 else len(order_ids) - 30

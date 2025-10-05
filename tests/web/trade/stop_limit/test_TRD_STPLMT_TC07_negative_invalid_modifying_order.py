@@ -26,6 +26,7 @@ def test(web, invalid_field, expected_message, close_edit_confirm_modal, setup_t
 
     trade_object = setup_test
     invalid_dict = {key: True for key in invalid_field.split(",")}
+
     logger.info(f"Step 1: Update placed order with {invalid_field!r}")
     web.trade_page.asset_tab.modify_invalid_order(trade_object, **invalid_dict, submit=True)
 
