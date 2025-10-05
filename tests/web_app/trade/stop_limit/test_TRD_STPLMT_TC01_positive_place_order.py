@@ -19,7 +19,6 @@ from src.utils.logging_utils import logger
 def test(web_app, cancel_all, sl_type, tp_type, stop_limit_obj, get_asset_tab_amount):
     trade_object = stop_limit_obj()
     tab = AssetTabs.PENDING_ORDER
-
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")

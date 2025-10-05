@@ -17,7 +17,7 @@ def test(web_app, stop_obj, get_asset_tab_amount, order_data, cancel_all):
 
     logger.info("Step 2: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
-    web_app.trade_page.asset_tab.get_last_order_id(trade_object) # get placed order_id
+    trade_object.order_id = web_app.trade_page.asset_tab.get_last_order_id(AssetTabs.PENDING_ORDER) # get placed order_id
 
     logger.info(f"Verify Asset Tab amount is: {tab_amount + 1}")
     web_app.trade_page.asset_tab.verify_tab_amount(AssetTabs.PENDING_ORDER, tab_amount + 1)

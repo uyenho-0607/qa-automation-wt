@@ -4,7 +4,7 @@ import pytest
 
 from src.core.driver.driver_manager import DriverManager
 from src.core.page_container.web_app_container import WebAppContainer
-from src.data.consts import FAILED_ICON_COLOR
+from src.data.consts import FAILED_ICON_COLOR, QUICK_WAIT
 from src.utils.logging_utils import logger
 
 
@@ -89,4 +89,5 @@ def enable_OCT(web_app):
 def cancel_all(web_app):
     yield
     logger.info("[Cleanup] Click cancel button (if any)", teardown=True)
-    web_app.trade_page.click_cancel_btn()
+    web_app.trade_page.click_cancel_btn(timeout=QUICK_WAIT)
+

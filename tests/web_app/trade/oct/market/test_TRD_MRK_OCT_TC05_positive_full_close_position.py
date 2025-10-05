@@ -16,7 +16,7 @@ def test(web_app, market_obj, order_data, get_asset_tab_amount):
 
     logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)}")
     order_data(trade_object, confirm=False)
-    web_app.trade_page.asset_tab.get_last_order_id(trade_object, wait=True)
+    trade_object.order_id = web_app.trade_page.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION, wait=True)
 
     logger.info(f"Verify order placed successfully, order_id = {trade_object.order_id!r}")
     web_app.trade_page.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION)
