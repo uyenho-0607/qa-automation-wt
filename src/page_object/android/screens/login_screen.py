@@ -60,6 +60,7 @@ class LoginScreen(BaseScreen):
                 self.actions.click(self.__btn_skip, raise_exception=False, show_log=False)
 
         if language:
+            logger.debug(f"- Select language: {language.title()!r}")
             self.select_language(language)
 
         self.select_account_tab(account_type or RuntimeConfig.account)
