@@ -53,7 +53,7 @@ class PlaceOrderPanel(BaseTrade):
     __opt_order_type = (AppiumBy.ID, 'trade-dropdown-order-type-{}')
     __btn_place_order = (AppiumBy.ID, 'trade-button-order')
     __drp_expiry = (AppiumBy.ID, 'trade-dropdown-expiry')
-    __opt_expiry = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("{}")')
+    __opt_expiry = (AppiumBy.ID, 'trade-dropdown-expiry-{}')
     __expiry_date = (AppiumBy.ID, 'trade-input-expiry-date')
     __wheel_expiry_date = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.SeekBar").descriptionContains("Select Date")')
 
@@ -152,7 +152,7 @@ class PlaceOrderPanel(BaseTrade):
             logger.warning(f"- Failed to select expiry: {expiry.value.title()!r} after retries")
             return
 
-        cur_expiry = self.actions.get_content_desc(self.__drp_expiry).split(", ")[0]
+        cur_expiry = self.actions.get_content_desc(self.__drp_expiry).split(",")[0]
         is_select = cur_expiry.lower() == expiry.lower()
 
         if is_select:
@@ -160,13 +160,21 @@ class PlaceOrderPanel(BaseTrade):
             return
 
         logger.debug(f"- Selecting expiry: {expiry.value.title()!r}")
+        time.sleep(0.5)
         self.actions.click(self.__drp_expiry)
-        if not self.actions.is_element_displayed(cook_element(self.__opt_expiry, expiry.lower()), timeout=SHORT_WAIT):
+
+        # handle running on device farm, sometimes cannot open dropdown expiry
+        locator = locator_format(expiry) if expiry != Expiry.SPECIFIED_DATE else "_".join(item.lower() for item in expiry.split(" "))
+
+        if not self.actions.is_element_displayed(cook_element(self.__opt_expiry, locator), timeout=QUICK_WAIT):
             logger.debug("- Retry clicking on expiry dropdown")
             time.sleep(0.5)
             self.actions.click(self.__drp_expiry)
 
-        self.actions.click(cook_element(self.__opt_expiry, expiry.lower()))
+        # handle special locator
+        locator = locator_format(expiry) if expiry != Expiry.SPECIFIED_DATE else "_".join(item.lower() for item in expiry.split(" "))
+        self.actions.click(cook_element(self.__opt_expiry, locator))
+        time.sleep(0.5)
 
         # select date in case expiry specified date
         expiry not in [Expiry.SPECIFIED_DATE, Expiry.SPECIFIED_DATE_TIME] or self._select_expiry_date()

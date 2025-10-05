@@ -50,6 +50,7 @@ def setup_test(web_app):
 
         logger.info(f"- No market order available, Place {amount} new orders", setup=True)
         symbols = ObjSymbol(amount=amount).get_symbol()
+        symbols = symbols if isinstance(symbols, list) else symbols
         for _symbol in symbols:
             APIClient().trade.post_order(ObjTrade(symbol=_symbol, order_type=OrderType.MARKET), update_price=False)
 

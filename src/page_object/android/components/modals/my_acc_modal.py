@@ -6,7 +6,8 @@ from src.data.enums import AccSummary
 from src.page_object.android.base_screen import BaseScreen
 from src.utils.assert_utils import soft_assert
 from src.utils.common_utils import cook_element
-from src.utils.format_utils import format_acc_balance
+from src.utils.format_utils import format_acc_balance, format_dict_to_string
+from src.utils.logging_utils import logger
 
 
 class MyAccountModal(BaseScreen):
@@ -14,7 +15,7 @@ class MyAccountModal(BaseScreen):
         super().__init__(actions)
 
     # ------------------------ LOCATORS ------------------------ #
-    __items = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().text("{}").fromParent(new UiSelector().className("android.widget.TextView").index(1))')
+    __items = (AppiumBy.XPATH, '//android.widget.TextView[@text="{}"]/following-sibling::android.widget.TextView')
     __drp_balance = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Balance, ")')
     __drp_note = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().descriptionContains("Note, ")')
     __btn_close = (AppiumBy.ID, 'modal-close-button')
@@ -39,11 +40,13 @@ class MyAccountModal(BaseScreen):
             self.actions.click(self.__drp_note)
 
     def get_account_info(self):
-        # get actual all value
+        logger.debug("- Getting account balance values...")
         res = {}
         for item in AccSummary.list_values():
-            value = self.actions.get_text(cook_element(self.__items, item))
+            value = self.actions.get_text(cook_element(self.__items, item), timeout=SHORT_WAIT)
             res[item] = format_acc_balance(value)
+
+        logger.debug(f"- Account Summary: {format_dict_to_string(res)}")
         return res
 
     # ------------------------ VERIFY ------------------------ #
