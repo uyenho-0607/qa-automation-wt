@@ -16,7 +16,7 @@ class FeatureAnnouncementModal(BaseScreen):
     # ------------------------ ACTIONS ------------------------ #
     def got_it(self):
         """Click the 'Got it' button to dismiss the feature announcement."""
-        while self.actions.is_element_displayed(self.__btn_got_it, timeout=5):
+        while self.actions.is_element_displayed(self.__btn_got_it, timeout=3):
             logger.debug("- Clicking on btn Ok Got it")
             self.actions.click(self.__btn_got_it)
 

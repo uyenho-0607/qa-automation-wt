@@ -68,7 +68,7 @@ class ObjSymbol:
     def _get_disabled_symbols(cls) -> None:
         """Get issue symbols with all current placed orders with isEnable, editable, closable = False"""
         orders = cls._get_all_orders()
-        cls.ISSUED = {item["symbol"] for item in orders if not item["isEnable"] or not item["editable"] or not item["closable"]}
+        cls.ISSUED = {item["symbol"] for item in orders if not item.get("isEnable", item.get("enable")) or not item.get("editable", True) or not item.get("closable")}
         cls._issue_loaded = True
 
         if cls.ISSUED:

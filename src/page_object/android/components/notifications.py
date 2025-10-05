@@ -35,29 +35,6 @@ class Notifications(BaseScreen):
     __noti_result = (
     AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("notification-list-result-item").descriptionContains("{}")')
 
-    # Noti order details
-    __noti_details_order_type = (AppiumBy.ID, 'notification-order-details-modal-order-type')
-    __noti_details_symbol = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Symbol']/following-sibling::*[1]"
-    )
-    __noti_details_volume = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='notification-order-details-label' and (@text='Size' or @text='Volume')]/following-sibling::*[1]"
-    )
-    __noti_details_units = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Units']/following-sibling::*[1]"
-    )
-    __noti_details_stop_loss = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Stop Loss']/following-sibling::*[1]"
-    )
-    __noti_details_take_profit = (
-        AppiumBy.XPATH,
-        "//*[@resource-id='notification-order-details-label' and @text='Take Profit']/following-sibling::*[1]"
-    )
-
     #### SYSTEM ####
     __system_tab = (AppiumBy.ID, 'tab-notification-type-system')
 
@@ -126,7 +103,6 @@ class Notifications(BaseScreen):
 
     def verify_notification_banner(self, expected_title="", expected_des="", timeout=EXPLICIT_WAIT):
         """Verify title and description of notification banner"""
-        """Verify title and description of notification banner"""
         if expected_des:
             logger.debug("- Fetching notification description")
             actual_des = self.actions.get_text(self.__noti_des, timeout=timeout)
@@ -172,22 +148,3 @@ class Notifications(BaseScreen):
 
         finally:
             not close or self.go_back()
-
-    def verify_notification_details(self, trade_object: ObjTrade):
-        self.actions.click(self.__noti_list_items)
-
-        actual = {
-            "order_type": self.actions.get_text(self.__noti_details_order_type),
-            "symbol": self.actions.get_text(self.__noti_details_symbol),
-            "volume": self.actions.get_text(self.__noti_details_volume),
-            "units": self.actions.get_text(self.__noti_details_units),
-            "stop_loss": self.actions.get_text(self.__noti_details_stop_loss),
-            "take_profit": self.actions.get_text(self.__noti_details_take_profit),
-        }
-
-        expected = {k: v for k, v in trade_object.items() if k in actual}
-        expected["order_type"] = f"{trade_object.trade_type.upper()} ORDER"
-
-        logger.debug("- Verify notification item details")
-        soft_assert(actual, expected)
-        self.navigate_back_to_home()
