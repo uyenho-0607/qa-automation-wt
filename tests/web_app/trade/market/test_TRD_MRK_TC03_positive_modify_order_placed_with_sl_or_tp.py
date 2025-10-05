@@ -23,7 +23,7 @@ def test(web_app, market_obj, exclude_field, update_field, order_data, cancel_al
 
     logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without {exclude_field}")
     order_data(trade_object, **{f"{exclude_field.lower()}_type": None})
-    web_app.trade_page.asset_tab.get_last_order_id(trade_object)
+    trade_object.order_id = web_app.trade_page.asset_tab.get_last_order_id(AssetTabs.OPEN_POSITION)
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web_app.trade_page.asset_tab.verify_item_data(trade_object, AssetTabs.OPEN_POSITION, wait=False)

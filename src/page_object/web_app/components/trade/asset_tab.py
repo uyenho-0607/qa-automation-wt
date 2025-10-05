@@ -32,7 +32,7 @@ class AssetTab(BaseTrade):
     __tab_amount = (By.XPATH, "//div[@data-testid='tab-asset-order-type-{}' and contains(normalize-space(), '({})')]")
 
     __item_by_id = (By.XPATH, "//div[@data-testid='asset-{}-list-item-order-no' and contains(normalize-space(), '{}')]")
-    __order_id_items = (By.CSS_SELECTOR, "*[data-testid$='-list-item-order-no']")
+    __order_id_items = (By.CSS_SELECTOR, "*[data-testid='asset-{}-list-item-order-no']")
     __expand_items = (By.CSS_SELECTOR, data_testid('asset-{}-list-item-expand'))
     __expand_item_by_id = (By.XPATH, "//div[text()='{}']/ancestor::div[2]/following-sibling::div")
     __expand_item_profit_loss = (
@@ -68,22 +68,19 @@ class AssetTab(BaseTrade):
         amount = self.actions.get_text(cook_element(self.__tab, locator_format(tab)))
         return extract_asset_tab_number(amount)
 
-    def get_last_order_id(self, trade_object: ObjTrade = None, wait=True):
-        """Get the latest order ID from the specified tab and update value into trade_object"""
-        current_id = self.actions.get_text(self.__order_id_items).split(": ")[-1]
+    def get_last_order_id(self, tab: AssetTabs, wait=False):
+        """Get the latest order ID from the specified tab."""
         not wait or self.wait_for_spin_loader()
-        order_id = self.actions.get_text(self.__order_id_items).split(": ")[-1]
+        current_id = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator())).split(": ")[-1]
+        order_id = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator())).split(": ")[-1]
 
         # double check to make sure orderID is the latest
         if current_id == order_id:
             logger.debug("- order_id is not changed, try waiting for loading icon...")
-            self.wait_for_spin_loader(timeout=1)
-            order_id = self.actions.get_text(self.__order_id_items).split(": ")[-1]
+            self.wait_for_spin_loader()
+            order_id = self.actions.get_text(cook_element(self.__order_id_items, tab.col_locator())).split(": ")[-1]
 
-        if trade_object:
-            trade_object.order_id = order_id
-
-        logger.debug(f"> Latest order_id: {order_id!r}")
+        logger.debug(f"- Latest orderID: {order_id!r}")
         return order_id
 
     def get_expand_item_data(self, tab: AssetTabs, trade_object: ObjTrade) -> Dict[str, Any]:
@@ -152,7 +149,7 @@ class AssetTab(BaseTrade):
     def delete_order(self, trade_object: ObjTrade, confirm=True) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         if not trade_object.get("order_id"):
-            self.get_last_order_id(trade_object)
+            trade_object.order_id = self.get_last_order_id(AssetTabs.PENDING_ORDER)
 
         logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
         self.click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
@@ -168,7 +165,9 @@ class AssetTab(BaseTrade):
     def full_close_position(self, trade_object: ObjTrade = None, order_id=0, confirm=True, wait=True) -> None:
         order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
         if not order_id:
-            order_id = self.get_last_order_id(trade_object)
+            order_id = self.get_last_order_id(AssetTabs.OPEN_POSITION)
+            if trade_object:
+                trade_object.order_id = order_id
 
         logger.debug(f"- Close order with ID: {order_id!r}")
         self.click_action_btn(AssetTabs.OPEN_POSITION, order_id, "close")
@@ -181,7 +180,8 @@ class AssetTab(BaseTrade):
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
         new_created_obj = ObjTrade(**{k: v for k, v in close_obj.items() if k != "order_id"})
-        close_obj.get("order_id") or self.get_last_order_id(close_obj)  # update order_id for trade_object
+        if not close_obj.get("order_id"):
+            close_obj.order_id = self.get_last_order_id(AssetTabs.OPEN_POSITION)
 
         self.click_action_btn(AssetTabs.OPEN_POSITION, close_obj.get("order_id", 0), "close")
 
@@ -223,7 +223,7 @@ class AssetTab(BaseTrade):
         if submit:
             self.click_confirm_btn()
         else:
-            self.click_cancel_btn()
+            self.click_cancel_btn(cancel_all=False)
 
     def modify_order(
             self,

@@ -24,7 +24,7 @@ def test(web_app, stop_limit_obj, edit_field, sl_type, tp_type, order_data, canc
 
     logger.info("Step 2: Select Pending Orders tab")
     web_app.trade_page.asset_tab.select_tab(AssetTabs.PENDING_ORDER)
-    web_app.trade_page.asset_tab.get_last_order_id(trade_object) # get placed order_id
+    trade_object.order_id = web_app.trade_page.asset_tab.get_last_order_id(AssetTabs.PENDING_ORDER) # get placed order_id
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
     web_app.trade_page.asset_tab.verify_item_data(trade_object, AssetTabs.PENDING_ORDER, wait=False)
