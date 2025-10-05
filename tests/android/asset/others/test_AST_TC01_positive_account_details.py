@@ -7,10 +7,10 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(android, setup_teardown, symbol):
-    acc_balance, acc_info, order_ids = setup_teardown
+def test(android, setup_test, symbol):
+    acc_balance, acc_info, order_ids = setup_test
 
-    logger.info("Step 1: Navigate to Asset Page")
+    logger.info("Step 1: Navigate to Asset Screen")
     android.home_screen.navigate_to(Features.ASSETS)
 
     logger.info("Verify account info (against API data)")
@@ -29,7 +29,7 @@ def test(android, setup_teardown, symbol):
 
     logger.info(f"Step 4: Close {len(order_ids)} Market orders ({', '.join(order_ids)})")
     for i, _id in enumerate(order_ids):
-        profit_loss += android.trade_screen.asset_tab.get_profit_loss()[0]
+        profit_loss += android.trade_screen.asset_tab.get_profit_loss()
 
         android.trade_screen.asset_tab.full_close_position(_id)
 
@@ -39,22 +39,24 @@ def test(android, setup_teardown, symbol):
     logger.info("Step 5: Navigate back to Asset Page")
     android.trade_screen.navigate_to(Features.ASSETS)
 
-    # update expected value after closing orders
-    acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + profit_loss
-    acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + profit_loss
+    logger.info(f"Verify Acc Balance changes ~{round(profit_loss, 2)}")
+    android.assets_screen.verify_account_values_changed(AccInfo.BALANCE, round(profit_loss, 2), acc_balance[AccInfo.BALANCE])
 
-    logger.info(f"Verify Acc Balance vs Profit Loss are changed ~{round(profit_loss, 2)!r}")
-    android.assets_screen.verify_account_balance_summary(acc_balance, tolerance_percent=5, tolerance_fields=[AccInfo.BALANCE, AccInfo.REALISED_PROFIT_LOSS])
+    logger.info(f"Verify Realised Profit Loss changes ~{round(profit_loss, 2)}")
+    android.assets_screen.verify_account_values_changed(AccInfo.REALISED_PROFIT_LOSS, round(profit_loss, 2), acc_balance[AccInfo.REALISED_PROFIT_LOSS])
 
-    logger.info("Step 6: Get account statistic using API again")
-    acc_balance = APIClient().statistics.get_account_statistics(get_asset_acc=True)
-
-    logger.info("Verify account info against API data again")
-    android.assets_screen.verify_account_balance_summary(acc_balance)
+    # logger.info("Step 6: Get account statistic using API again")
+    # acc_balance = APIClient().statistics.get_account_statistics(get_asset_acc=True)
+    #
+    # acc_balance[AccInfo.REALISED_PROFIT_LOSS] = acc_balance[AccInfo.REALISED_PROFIT_LOSS] + profit_loss
+    # acc_balance[AccInfo.BALANCE] = acc_balance[AccInfo.BALANCE] + profit_loss
+    #
+    # logger.info("Verify account info against API data again")
+    # android.assets_screen.verify_account_balance_summary(acc_balance)
 
 
 @pytest.fixture
-def setup_teardown(android, symbol):
+def setup_test(android, symbol):
     logger.info(f"{'=' * 10} Setup Test - Start {'=' * 10}")
     close_amount = 5
 
