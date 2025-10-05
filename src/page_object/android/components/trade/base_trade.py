@@ -34,6 +34,7 @@ class BaseTrade(BaseScreen):
         """
         btn_price = self.__oct_live_price if oct_mode else self.__live_price
         live_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()))
+        logger.debug(f"- Live price: {live_price!r}")
         return live_price if live_price else 0
 
     def get_current_price(self, trade_type: TradeType, order_type: OrderType, oct_mode=False, timeout=QUICK_WAIT):

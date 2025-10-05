@@ -20,7 +20,7 @@ class MarketsScreen(BaseScreen):
     # ------------------------ LOCATORS ------------------------ #
     __tab = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().className("android.widget.TextView").textContains("{}")')
     __item_by_name = (AppiumBy.ANDROID_UIAUTOMATOR, 'new UiSelector().resourceId("watchlist-symbol").text("{}")')
-    __horizontal_scroll_tab = (AppiumBy.XPATH, "//android.widget.HorizontalScrollView")
+    __horizontal_scroll_tab = (AppiumBy.CLASS_NAME, "android.widget.HorizontalScrollView")
     __btn_symbol_preference = (AppiumBy.XPATH, "//android.view.ViewGroup[5]/android.view.ViewGroup")
     __symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.view.ViewGroup[@content-desc]")
     __chb_symbol_preference = (AppiumBy.XPATH, "//android.widget.ScrollView//android.widget.TextView[@text='{}']/preceding-sibling::android.view.ViewGroup[.//android.widget.TextView]")
@@ -30,7 +30,7 @@ class MarketsScreen(BaseScreen):
 
     # ------------------------ ACTIONS ------------------------ #
 
-    def select_tab(self, tab: WatchListTab):
+    def select_tab(self, tab: WatchListTab, wait=False):
         """Handle selecting tab for home & markets screen"""
         locator = cook_element(self.__tab, tab)
 
@@ -38,17 +38,16 @@ class MarketsScreen(BaseScreen):
         # if tab is represent, select tab immediately
         if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
             self.actions.click(locator)
-            return
 
-        # Handle swipe scroll tab for markets screen
-        if self.actions.is_element_enabled(self.__horizontal_scroll_tab):
-            # If not visible, attempt to scroll horizontally to reveal it
+        else:
             for direction in ["left", "right"]:
                 logger.debug(f"- Swipe {direction} to show tab")
                 self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
                 if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
                     self.actions.click(locator)
-                    return
+                    break
+
+        not wait or self.wait_for_spin_loader()
 
     def set_symbol_preference(self, tab: WatchListTab, unchecked=True, show_all=None, store_dict=None):
         """Show/Hide Symbols with accurate state detection"""

@@ -1,4 +1,5 @@
 import random
+import time
 
 import pytest
 
@@ -21,6 +22,7 @@ def test(android, tab, setup_test):
 
     logger.info(f"Step 2: Select tab: {tab.value.title()}")
     android.home_screen.watch_list.select_tab(tab)
+    time.sleep(0.5)
 
     logger.info(f"Verify current tab displays {len(exp_symbols)} symbols: {', '.join(exp_symbols)}")
     android.home_screen.watch_list.verify_symbols_list(exp_symbols)
@@ -56,13 +58,16 @@ def setup_test(android):
         else:
 
             logger.info(f"- Prepare starred symbols for checking tab {WatchListTab.FAVOURITES.value!r}")
-            _list_symbol = ObjSymbol(amount=10).all_symbols
+            _list_symbol = ObjSymbol(amount=10).get_symbol()
 
             for symbol in _list_symbol:
                 logger.info(f"- Mark star symbol: {symbol!r}")
                 APIClient().market.post_starred_symbol(symbol)
 
             symbols = _list_symbol
+
+            # select to other tab for reloading data
+            android.home_screen.watch_list.select_tab(WatchListTab.ALL)
 
         logger.info(f">> Setup Summary: List symbols should be displayed in tab: {tab.value!r} - {', '.join(symbols)!r}")
         logger.info(f"{'=' * 10} Setup Test - Done {'=' * 10}")
@@ -76,5 +81,5 @@ def setup_test(android):
 def cleanup(tab):
     yield
     if tab == WatchListTab.FAVOURITES:
-        logger.info(f"[Cleanup] Delete all star symbols")
+        logger.info(f"[Cleanup] Delete all star symbols", teardown=True)
         APIClient().market.delete_starred_symbols()
