@@ -103,20 +103,20 @@ class FillPolicy(BaseEnum):
 
 
 class ChartTimeframe(BaseEnum):
-    one_min = "1min"
-    five_min = "5min"
-    ten_min = "10min"
-    fifteen_min = "15min"
-    twenty_min = "20min"
-    thirty_min = "30min"
-    one_hour = "1h"
-    two_hour = "2h"
-    three_hour = "3h"
-    four_hour = "4h"
-    six_hour = "6h"
-    one_day = "1d"
-    one_week = "1w"
-    one_month = "1M"
+    one_min = "1-minute"
+    five_min = "5-minute"
+    ten_min = "10-minute"
+    fifteen_min = "15-minute"
+    twenty_min = "20-minute"
+    thirty_min = "30-minute"
+    one_hour = "1-hour"
+    two_hour = "2-hour"
+    three_hour = "3-hour"
+    four_hour = "4-hour"
+    six_hour = "6-hour"
+    one_day = "1-day"
+    one_week = "1-week"
+    one_month = "1-month"
 
     @classmethod
     def list_values(cls, except_val=None):

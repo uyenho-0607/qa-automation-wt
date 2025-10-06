@@ -4,6 +4,7 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
+from src.data.consts import SHORT_WAIT
 from src.data.enums import ChartTimeframe
 from src.data.project_info import RuntimeConfig
 from src.page_object.ios.components.trade.base_trade import BaseTrade
@@ -19,12 +20,12 @@ class Chart(BaseTrade):
 
     # ------------------------ LOCATORS ------------------------ #
     __candlestick = (AppiumBy.XPATH, "(//XCUIElementTypeOther[@name='Candlestick '])[1]")
-    __timeframe = (AppiumBy.XPATH, "(//XCUIElementTypeOther[@name='4H '])[1]")
     __symbol_over_view = (AppiumBy.IOS_PREDICATE, "name == 'symbol-overview-id' AND label == '{}'")
     __chart_open = (AppiumBy.XPATH, "//*[starts-with(@name, 'O: ')]")
     __chart_high = (AppiumBy.XPATH, "//*[starts-with(@name, 'H: ')]")
     __chart_low = (AppiumBy.XPATH, "//*[starts-with(@name, 'L: ')]")
     __chart_close = (AppiumBy.XPATH, "//*[starts-with(@name, 'C: ')]")
+    __opt_timeframe = (AppiumBy.ACCESSIBILITY_ID, "chart-period-option-{}")
 
     # ------------------------ ACTIONS ------------------------ #
 
@@ -51,43 +52,50 @@ class Chart(BaseTrade):
             logger.error(f"Error getting initial OHLC values: {e}")
             return {"o": None, "h": None, "l": None, "c": None}
 
-    def select_timeframe(self, timeframe: ChartTimeframe):
-        match timeframe:
-            case ChartTimeframe.one_min:
-                y_percent = 0.5 if RuntimeConfig.is_mt4() else 0.15
-            case ChartTimeframe.five_min:
-                y_percent = 0.55 if RuntimeConfig.is_mt4() else 0.35
-            case ChartTimeframe.ten_min:
-                y_percent = 0.43
-            case ChartTimeframe.fifteen_min:
-                y_percent = 0.6 if RuntimeConfig.is_mt4() else 0.47
-            case ChartTimeframe.twenty_min:
-                y_percent = 0.5
-            case ChartTimeframe.thirty_min:
-                y_percent = 0.55 if not RuntimeConfig.is_mt4() else 0.65
-            case ChartTimeframe.one_hour:
-                y_percent = 0.7 if RuntimeConfig.is_mt4() else 0.6
-            case ChartTimeframe.two_hour:
-                y_percent = 0.65
-            case ChartTimeframe.three_hour:
-                y_percent = 0.7
-            case ChartTimeframe.four_hour:
-                y_percent = 0.75
-            case ChartTimeframe.six_hour:
-                y_percent = 0.8
-            case ChartTimeframe.one_day:
-                y_percent = 0.8 if RuntimeConfig.is_mt4() else 0.85
-            case ChartTimeframe.one_week:
-                y_percent = 0.85 if RuntimeConfig.is_mt4() else 0.9
-            case ChartTimeframe.one_month:
-                y_percent = 0.9
-                if not RuntimeConfig.is_mt4():
-                    self.actions.scroll_down()
-            case _:
-                raise ValueError("Invalid Timeframe")
+    # def select_timeframe(self, timeframe: ChartTimeframe):
+    #     match timeframe:
+    #         case ChartTimeframe.one_min:
+    #             y_percent = 0.5 if RuntimeConfig.is_mt4() else 0.15
+    #         case ChartTimeframe.five_min:
+    #             y_percent = 0.55 if RuntimeConfig.is_mt4() else 0.35
+    #         case ChartTimeframe.ten_min:
+    #             y_percent = 0.43
+    #         case ChartTimeframe.fifteen_min:
+    #             y_percent = 0.6 if RuntimeConfig.is_mt4() else 0.47
+    #         case ChartTimeframe.twenty_min:
+    #             y_percent = 0.5
+    #         case ChartTimeframe.thirty_min:
+    #             y_percent = 0.55 if not RuntimeConfig.is_mt4() else 0.65
+    #         case ChartTimeframe.one_hour:
+    #             y_percent = 0.7 if RuntimeConfig.is_mt4() else 0.6
+    #         case ChartTimeframe.two_hour:
+    #             y_percent = 0.65
+    #         case ChartTimeframe.three_hour:
+    #             y_percent = 0.7
+    #         case ChartTimeframe.four_hour:
+    #             y_percent = 0.75
+    #         case ChartTimeframe.six_hour:
+    #             y_percent = 0.8
+    #         case ChartTimeframe.one_day:
+    #             y_percent = 0.8 if RuntimeConfig.is_mt4() else 0.85
+    #         case ChartTimeframe.one_week:
+    #             y_percent = 0.85 if RuntimeConfig.is_mt4() else 0.9
+    #         case ChartTimeframe.one_month:
+    #             y_percent = 0.9
+    #             if not RuntimeConfig.is_mt4():
+    #                 self.actions.scroll_down()
+    #         case _:
+    #             raise ValueError("Invalid Timeframe")
+    #
+    #     self.actions.click_screen_position(y_percent=y_percent)
+    #     logger.debug(f"- timeframe: {timeframe!r} selected")
 
-        self.actions.click_screen_position(y_percent=y_percent)
-        logger.debug(f"- timeframe: {timeframe!r} selected")
+    def select_timeframe(self, timeframe: ChartTimeframe):
+        locator = cook_element(self.__opt_timeframe, timeframe)
+        if not self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
+            self.actions.scroll_down()
+        self.actions.click(locator)
+
 
     def get_default_render_time(self, max_wait: int = 10):
         """Measure initial chart render time by waiting for first OHLC values."""
