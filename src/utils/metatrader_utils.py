@@ -30,7 +30,7 @@ def _ms_to_date(milliseconds):
 def _ms_to_chart_date(milliseconds):
     utc_plus_3 = timezone(timedelta(hours=3))
     dt = datetime.fromtimestamp(milliseconds / 1000, tz=utc_plus_3)
-    return dt.strftime("%Y-%m-%d %H:%M:%S UTC+3")
+    return dt.strftime("%Y-%m-%d %H:%M:%S (UTC+3)")
 
 
 def _csv_to_json(df, symbol: str, timeframe: ChartTimeframe):
@@ -166,7 +166,7 @@ def check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe):
         # If actual wrong and expected is correct → failure
         if a_delta != expected_interval and e_delta == expected_interval:
             actual_ms_items = f"{actual[i]} <-> {actual[i + 1]}"
-            actual_date_items = f"{_ms_to_date(actual[i])} <-> {_ms_to_date(actual[i + 1])}"
+            actual_date_items = f"{_ms_to_chart_date(actual[i])} <-> {_ms_to_chart_date(actual[i + 1])}"
             failed.append(dict(ms=actual_ms_items, date=actual_date_items, interval=actual[i + 1] - actual[i]))
 
     return {"result": len(failed) == 0, "failed": failed}
@@ -206,7 +206,7 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
             logger.error(f"❌ Mismatched: {len(res['mismatches'])} items")
             for item in res['mismatches']:
                 error_msg += (
-                    f"\n - Mismatched item {item['chartTime']} ({_ms_to_date(item['chartTime'])} - chart_data: {_ms_to_chart_date(item['chartTime'])}): {item['actual']} <-> {item['expected']}"
+                    f"\n - Mismatched item {item['chartTime']} (chart_data: {_ms_to_chart_date(item['chartTime'])}): {item['actual']} <-> {item['expected']}"
                 )
 
         if res['missing']:
@@ -214,13 +214,13 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
 
             logger.error(f"❌ Missing: {len(res['missing'])} items")
             for item in res['missing']:
-                error_msg += f"\n - Missing item: {item} ({_ms_to_date(item)})"
+                error_msg += f"\n - Missing item: {item} ({_ms_to_chart_date(item)})"
 
         if res['redundant']:
             compare_res['redundant'] = res['redundant']
             logger.error(f"❌ Redundant: {len(res['redundant'])} items")
             for item in res['redundant']:
-                error_msg += f"\n - Redundant item: {item} ({_ms_to_date(item)})"
+                error_msg += f"\n - Redundant item: {item} ({_ms_to_chart_date(item)})"
 
         soft_assert(True, False, error_message=error_msg)
 
@@ -382,7 +382,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
             date_str = _ms_to_date(item)
             missing_details += f"""
                 <div class="error-item">
-                    <strong>Missing #{i + 1}:</strong> {item} - {date_str}, chart_time: {_ms_to_chart_date(item)}<br>
+                    <strong>Missing #{i + 1}:</strong> {item}, chart_time: {_ms_to_chart_date(item)}<br>
                 </div>
             """
         missing_details += "</div>"
@@ -408,7 +408,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
             date_str = _ms_to_date(item)
             redundant_details += f"""
                 <div class="warning-item">
-                    <strong>Redundant #{i + 1}:</strong> {item} - {date_str} - {_ms_to_chart_date(item)}<br>
+                    <strong>Redundant #{i + 1}:</strong> {item} - {_ms_to_chart_date(item)}<br>
                 </div>
             """
         redundant_details += "</div>"
@@ -437,7 +437,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
 
             different_details += f"""
                 <div class="error-item">
-                    <strong>Different #{i + 1}:</strong> API data: {chart_time} - {date_str} (chart_data: {original_chart_str})<br>
+                    <strong>Different #{i + 1}:</strong> API data: {chart_time}, chart_time: {original_chart_str}<br>
             """
             different_details += f"expected={item.get('expected')}, actual={item.get('actual')}<br>"
             different_details += """
@@ -467,7 +467,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
                     <div class="error-item">
                         <strong>Invalid #{i + 1}:</strong>
                 """
-            int_details += f"ms={item.get('ms')}, date={item.get('date')}, interval={_exp_interval(item.get('interval', 0), comparison_result.get('timeframe'))}<br>"
+            int_details += f"ms={item.get('ms')}, chart_time={item.get('date')}, interval={_exp_interval(item.get('interval', 0), comparison_result.get('timeframe'))}<br>"
             int_details += """
                     </div>
                 """

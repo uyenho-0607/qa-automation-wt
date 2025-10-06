@@ -22,4 +22,4 @@ CSV_DIR = {
 #     Server.MT4: r"C:\Program Files (x86)\MetaTrader 4\MQL4\Files" + "\\"
 # }
 
-TOLERANCE_PERCENT = 0.1
+TOLERANCE_PERCENT = 0
