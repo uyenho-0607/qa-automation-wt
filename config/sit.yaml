@@ -6,7 +6,7 @@ password_demo: Autotest@12345
 
 # Lirunex Client Configuration
 lirunex:
-  api_url: https://lirunex-mb.webtrader-sit.s20ip12.com/api
+  api_url: https://lirunex-global-mb.webtrader-sit.s20ip12.com/api
   
   credentials:
     mt4:
