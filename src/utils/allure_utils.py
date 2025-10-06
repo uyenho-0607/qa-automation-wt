@@ -1,5 +1,7 @@
 import json
 import os
+import re
+from pathlib import Path
 from typing import Dict, Any
 
 import allure
@@ -40,6 +42,7 @@ def custom_allure_report(allure_dir: str) -> None:
                 _process_broken_status(data)  # Process broken status if any
 
             _cleanup_and_customize_report(data)  # Clean up and customize report
+            _clean_log_files(allure_dir)
 
             # Write back the modified data
             with open(file_path, 'w', encoding='utf-8') as file:
@@ -115,10 +118,9 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
         attachments = data["attachments"]
         data["attachments"] = [item for item in attachments if "Chart Comparison Summary" in item["name"]]
 
-        if data.get("status") != "passed":
-            data["attachments"].extend(
-                [item for item in attachments if item["type"] == "text/plain" and item["name"] == "log"]
-            )
+        data["attachments"].extend(
+            [item for item in attachments if item["type"] == "text/plain" and item["name"] == "log"]
+        )
 
     # Remove trace
     data.get("statusDetails", {}).pop("trace", None)
@@ -130,6 +132,20 @@ def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     # # Customize test's properties
     # data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
     # data["historyId"] = uuid.uuid4().hex
+
+
+def _clean_log_files(allure_dir):
+    ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+    logger_prefix = re.compile(r'pythonLog:[^:\s]+\.py:\d+\s*-?\s*')
+    allure_results_dir = ROOTDIR / allure_dir
+
+    for txt_file in Path(allure_results_dir).glob("*.txt"):
+        content = txt_file.read_text(encoding="utf-8")
+        # Remove ANSI colors
+        content = ansi_escape.sub('', content)
+        # Remove pythonLog:filename.py:line
+        content = logger_prefix.sub('', content)
+        txt_file.write_text(content, encoding="utf-8")
 
 
 def _remove_zero_duration(data: Dict[str, Any]):

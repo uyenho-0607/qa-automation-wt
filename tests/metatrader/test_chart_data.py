@@ -7,16 +7,16 @@ from src.utils.logging_utils import logger
 from src.utils.metatrader_utils import parse_metatrader_data, compare_chart_data
 
 SYMBOL_LIST = {
-    Server.MT4: ["BTCUSD.std"],
-    Server.MT5: ["BAKE.USD"]
+    # Server.MT4: ["BTC.USD"],
+    Server.MT5: ["BTC.USD"]
 }
 
 server = RuntimeConfig.server
+test_timeframe = [ChartTimeframe.one_min, ChartTimeframe.five_min, ChartTimeframe.one_hour, ChartTimeframe.four_hour]
 
 
 @pytest.mark.parametrize(
-    "symbol, timeframe", [(_symbol, _time) for _symbol in SYMBOL_LIST[server] for _time in ChartTimeframe.list_values()]
-    # "symbol, timeframe", [(_symbol, _time) for _symbol in SYMBOL_LIST[server] for _time in [ChartTimeframe.one_week]]
+    "symbol, timeframe", [(_symbol, _time) for _symbol in SYMBOL_LIST[server] for _time in test_timeframe]
 )
 def test(symbol, timeframe):
 

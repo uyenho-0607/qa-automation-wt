@@ -34,8 +34,8 @@ def format_request_log(resp: Response, log_resp=False) -> str:
         response_text = resp.text.strip()
 
     if log_resp:
-        return f"\n{curl_command}\n\n{response_text}"
-    return f"\n{curl_command}"
+        return f"\n\n{curl_command}\n\n{response_text}"
+    return f"→ Request Sent: \n\n{curl_command}\n\n"
 
 
 def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
