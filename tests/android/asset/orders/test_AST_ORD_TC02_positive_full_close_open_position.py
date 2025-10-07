@@ -5,7 +5,7 @@ from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
 
-def test(android, symbol, get_asset_tab_amount, cancel_close_order):
+def test(android, symbol, get_asset_tab_amount, cancel_all):
     trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol)
 
     logger.info("Step 1: Navigate to Assets Page")
@@ -21,7 +21,7 @@ def test(android, symbol, get_asset_tab_amount, cancel_close_order):
     android.trade_screen.asset_tab.verify_item_displayed(tab=AssetTabs.OPEN_POSITION, order_id=trade_object.order_id)
 
     logger.info("Step 4: Full close position")
-    android.trade_screen.asset_tab.full_close_position(order_id=trade_object.order_id, confirm=True)
+    android.trade_screen.asset_tab.full_close_position(trade_object.order_id)
 
     logger.info("Verify Close order notification banner")
     exp_noti = ObjNoti(trade_object)

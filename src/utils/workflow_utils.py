@@ -112,10 +112,16 @@ class GoogleSheetsAPI:
                     continue
 
                 server_acc = label.split()
-                if len(server_acc) == 2:
-                    server, acc_type = server_acc
-                    if acc_type == account_type:
+
+                if len(server_acc) >= 2:
+                    if len(server_acc) == 2:
+                        server, acc_type = server_acc
+                    else:
+                        server, acc_type = " ".join(server_acc[:2]), server_acc[-1]
+
+                    if account_type.lower() in acc_type.lower():
                         col_defs.append((i, acc_type, server))
+                        # print(col_defs)
                 i += 2
 
             for row in rows:
@@ -158,7 +164,7 @@ Handle test directories
 """
 
 
-def collect_critical_folders(platform="web", module="", test_marker="critical"):
+def collect_critical_folders(platform="web", module="", test_marker="critical", custom_option=""):
     platform = platform.replace("-", "_")
     test_root = ROOTDIR / "tests" / platform / module
     test_folders = set()
@@ -173,8 +179,16 @@ def collect_critical_folders(platform="web", module="", test_marker="critical"):
     for folder in sorted(test_folders.copy()):
         logging.info(f"Running pytest in: {folder}")
         try:
+            # handle filter with custom option if any
+            cmd = []
+            if custom_option.startswith("-k "):
+                cmd.append("-k")
+                cmd.append(custom_option[3:].strip('"'))
+            else:
+                cmd.extend(custom_option.split())
+
             result = subprocess.run(
-                [pytest_path, str(folder), "-m", test_marker, "--co"],
+                [pytest_path, str(folder), "-m", test_marker, *cmd, "--co"],
                 capture_output=True,
                 text=True,
                 check=False,
@@ -195,35 +209,51 @@ def collect_critical_folders(platform="web", module="", test_marker="critical"):
     return res
 
 
-def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict]) -> List[Dict]:
+def assign_dirs_to_accounts(accounts: List[Dict], dirs: List[Dict], num_of_pod=None) -> List[Dict]:
     """
     Assign directories to accounts in round-robin fashion.
     Limits the number of accounts per client per server based on the number of directories available.
+    num_of_pod: used in case of running one dir but multiple pods
     """
+
     if not dirs:
         return accounts
 
     # Calculate how many accounts we need per client per server
     amount_per_client_server = len(dirs)
 
-    # Track counts per client per server
-    counts = defaultdict(lambda: defaultdict(int))
-    limited_accounts = []
+    if num_of_pod and len(dirs) == 1:
+        amount_per_client_server = int(num_of_pod)
 
+    # Group accounts by client-server combination
+    client_server_groups = defaultdict(list)
     for account in accounts:
-        client = account["client"]
-        server = account["server"]
+        key = (account["client"], account["server"])
+        client_server_groups[key].append(account)
 
-        # Check limit per client per server
-        if counts[client][server] < amount_per_client_server:
-            limited_accounts.append(account)
-            counts[client][server] += 1
+    # Expand each group if needed
+    expanded_accounts = []
+    for (client, server), group_accounts in client_server_groups.items():
+        if amount_per_client_server > len(group_accounts) and group_accounts:
+            cycles_needed = (amount_per_client_server + len(group_accounts) - 1) // len(group_accounts)
+            expanded_group = group_accounts * cycles_needed
+        else:
+            expanded_group = group_accounts
+        
+        # Take only the required amount per client-server
+        expanded_accounts.extend(expanded_group[:amount_per_client_server])
 
     assigned = []
-    for i, account in enumerate(limited_accounts):
+    for i, account in enumerate(expanded_accounts):
         account_copy = account.copy()
         account_copy['directory'] = dirs[i % len(dirs)]['directory']
         assigned.append(account_copy)
+
+    # last filter for server mt4 2
+    for item in assigned:
+        if len(item.get("server").split(" ")) > 1:
+            item['server'] = item["server"].split(" ")[0]
+
     return assigned
 
 
@@ -252,3 +282,10 @@ def output_session_id():
         return session_id
 
     return None
+
+# if __name__ == '__main__':
+#     tmp = GoogleSheetsAPI()
+#     acc = tmp.get_accounts(sheet_url="https://docs.google.com/spreadsheets/d/1AlxtJKUWiE6Amya2o0FMvaYlx_htq0XsBAZZ2luOgtM", clients="lirunex", account_type="live")
+#     dirs = collect_critical_folders("api", "login", "")
+#     res = assign_dirs_to_accounts(acc, dirs, num_of_pod=5)
+#     breakpoint()

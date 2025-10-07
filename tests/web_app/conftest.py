@@ -89,7 +89,7 @@ def enable_OCT(web_app):
 def cancel_all(web_app):
     yield
     logger.info("[Cleanup] Click cancel button (if any)", teardown=True)
-    web_app.trade_page.click_cancel_btn()
+    web_app.trade_page.click_cancel_btn(timeout=QUICK_WAIT)
 
 
 @pytest.fixture
@@ -103,7 +103,6 @@ def cancel_edit_order(web_app):
 def cancel_close_order(web_app):
     yield
     logger.info("[Cleanup] Cancel close order if any", teardown=True)
-    web_app.trade_page.modals.cancel_close_order()
 
 
 @pytest.fixture
