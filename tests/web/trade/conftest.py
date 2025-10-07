@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, OrderType
+from src.data.enums import AssetTabs, OrderType, SLTPType
 from src.data.enums import Features
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
@@ -58,26 +58,16 @@ def stop_limit_obj(symbol):
     return _handler
 
 
-@pytest.fixture(scope="package")
-def create_order_data(web, get_asset_tab_amount, symbol):
-    def _handler(trade_object, update_price=True):
-        tab = AssetTabs.get_tab(trade_object.order_type)
+@pytest.fixture(name="order_data")
+def prepare_place_order(web):
+    def handler(trade_object, sl_type=SLTPType.PRICE, tp_type=SLTPType.PRICE, confirm=True, close_banner=True):
+        web.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, submit=confirm)
 
-        logger.info(f"- Select tab: {tab.value.title()}")
-        web.trade_page.asset_tab.select_tab(tab)
+        # clear noti banner
+        if close_banner:
+            web.home_page.notifications.close_noti_banner()
 
-        logger.info("- Get tab amount")
-        tab_amount = web.trade_page.asset_tab.get_tab_amount(tab)
-
-        logger.info(f"- Send API to place {trade_object.trade_type.upper()} {trade_object.order_type.upper()} order (tab_amount:{tab_amount})")
-        res = APIClient().trade.post_order(trade_object, update_price=update_price)
-
-        # wait for loading new created data
-        web.trade_page.asset_tab.wait_for_tab_amount(tab, expected_amount=tab_amount + 1)
-
-        return res, tab_amount
-
-    return _handler
+    return handler
 
 
 @pytest.fixture
