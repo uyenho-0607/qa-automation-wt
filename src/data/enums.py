@@ -54,4 +54,15 @@ class ChartTimeframe(BaseEnum):
             ChartTimeframe.one_week: "PERIOD_W1",
             ChartTimeframe.one_month: "PERIOD_MN1"
         }
-        return timeframe_map[self] 
+        return timeframe_map[self]
+
+    def get_scheduler_time(self):
+        """Get scheduler time set for each tf"""
+        timeframe_map = {
+            ChartTimeframe.one_min: 7200000,
+            ChartTimeframe.five_min: 7200000,
+            ChartTimeframe.one_hour: 7200000,
+            ChartTimeframe.four_hour: 14400000
+        }
+
+        return timeframe_map.get(self)

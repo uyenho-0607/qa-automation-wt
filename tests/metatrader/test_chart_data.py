@@ -7,8 +7,8 @@ from src.utils.logging_utils import logger
 from src.utils.metatrader_utils import parse_metatrader_data, compare_chart_data
 
 SYMBOL_LIST = {
-    # Server.MT4: ["BTC.USD"],
-    Server.MT5: ["BTC.USD"]
+    Server.MT4: ["BTCUSD"],
+    Server.MT5: ["HK50", "BTC.USD", "AUDCAD", "XAGUSD", "HKCHKD.std"]
 }
 
 server = RuntimeConfig.server
@@ -24,10 +24,10 @@ def test(symbol, timeframe):
     chart_data = parse_metatrader_data(symbol, timeframe)
     chart_data.sort(key=lambda x: x["chartTime"])
 
-    logger.info("Step 2: Get data from chart using API")
+    logger.info(f"Step 2: GET {APIClient().chart._candlestick_endpoint}")
     api_resp = APIClient().chart.get_candlestick(
         symbol=symbol, timeframe=timeframe,
-        from_time=chart_data[0]["chartTime"],
+        # from_time=chart_data[0]["chartTime"],
         to=chart_data[-1]["chartTime"]
     )
 

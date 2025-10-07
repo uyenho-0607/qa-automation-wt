@@ -59,6 +59,7 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
                 try:
                     # Execute the API request
                     response = func(self, *args, **kwargs)
+                    logger.info(f"- Response time: {response.elapsed.total_seconds()} sec")
 
                     # Handle successful response
                     if response.ok:
