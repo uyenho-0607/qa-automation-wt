@@ -35,28 +35,28 @@ def login_wt_app(ios):
     # handle login with max attempts = 3
     max_retries = 3
 
-    logger.info("- Login to WT app", setup=True)
-    ios.login_screen.login(wait=True)
+    with suppress(Exception):
+        logger.info("- Login to WT app", setup=True)
+        ios.login_screen.login(wait=True)
 
-    logger.info("- Skip feature ann modal if any", setup=True)
-    ios.home_screen.feature_anm_modal.got_it()
+        logger.info("- Skip feature ann modal if any", setup=True)
+        ios.home_screen.feature_anm_modal.got_it()
 
     logger.info("- Wait for home screen loaded", setup=True)
 
-    for attempt in range(max_retries + 1):
+    for attempt in range(max_retries):
         if not ios.home_screen.on_home_screen():
             with suppress(Exception):
-                logger.info("- Perform login again", setup=True)
+                logger.info(f"- Perform login again (attempt {attempt + 1})", setup=True)
                 ios.login_screen.login(wait=True)
                 ios.home_screen.feature_anm_modal.got_it()
-
         else:
             break
 
         if attempt == max_retries - 1 and not ios.home_screen.on_home_screen():
-            # login one more time to catch the screenshot
+            # Optional final login for screenshot capture
             ios.login_screen.login()
-            raise RuntimeError(f"Setup test failed ! Unable to Login to WT {FAILED_ICON_COLOR}")
+            raise RuntimeError(f"Setup test failed! Unable to Login to WT {FAILED_ICON_COLOR}")
 
 
 @pytest.fixture(scope="package")
