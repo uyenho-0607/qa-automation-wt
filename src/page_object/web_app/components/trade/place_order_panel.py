@@ -7,7 +7,6 @@ from selenium.webdriver.common.by import By
 from src.core.actions.web_actions import WebActions
 from src.data.consts import QUICK_WAIT
 from src.data.enums.trading import OrderType, SLTPType, TradeType, FillPolicy, Expiry
-from src.data.objects.symbol_obj import ObjSymbol
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web_app.components.trade.base_trade import BaseTrade
 from src.utils.common_utils import cook_element, data_testid
@@ -51,7 +50,8 @@ class PlaceOrderPanel(BaseTrade):
     __opt_order_type = (By.CSS_SELECTOR, data_testid('trade-dropdown-order-type-{}'))
     __btn_place_order = (By.CSS_SELECTOR, data_testid('trade-button-order'))
     __drp_expiry = (By.CSS_SELECTOR, data_testid('trade-dropdown-expiry'))
-    __opt_expiry = (By.XPATH, "//div[contains(@data-testid, 'trade-dropdown-expiry') and contains(normalize-space(), '{}')]")
+    __opt_expiry = (By.XPATH, "//div[@data-testid='trade-dropdown-expiry']//div[normalize-space(text())='{}']")
+    # __opt_expiry = (By.XPATH, "//div[contains(@data-testid, 'trade-dropdown-expiry') and contains(normalize-space(), '{}')]")
     __expiry_date = (By.CSS_SELECTOR, data_testid('trade-input-expiry-date'))
     __wheel_expiry_date = (By.CSS_SELECTOR, "div.datepicker-wheel")
 
@@ -157,8 +157,8 @@ class PlaceOrderPanel(BaseTrade):
     def _select_expiry_date(self):
         logger.debug("- Select expiry date")
         self.actions.scroll_to_element(self.__expiry_date)
-        self.actions.click(self.__expiry_date) # open expiry wheel date
-        self.actions.scroll_picker_down(self.__wheel_expiry_date) # scroll picker day
+        self.actions.click(self.__expiry_date)  # open expiry wheel date
+        self.actions.scroll_picker_down(self.__wheel_expiry_date)  # scroll picker day
         time.sleep(0.5)
         self.click_confirm_btn()
 
@@ -243,7 +243,8 @@ class PlaceOrderPanel(BaseTrade):
         units = self._get_volume_info_value()
 
         # Calculate trade parameters
-        prices = calculate_trading_params(self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type, tp_type=tp_type)
+        prices = calculate_trading_params(self.get_live_price(trade_type), trade_type, order_type, sl_type=sl_type,
+                                          tp_type=tp_type)
 
         # Input price if present
         if order_type != OrderType.MARKET:
