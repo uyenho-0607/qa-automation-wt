@@ -1,5 +1,3 @@
-import random
-
 import pytest
 
 from src.apis.api_client import APIClient
@@ -82,5 +80,5 @@ def setup_test(web, ):
 
     yield tab_amount
 
-    logger.info("[Cleanup] Navigate back to markets page")
+    logger.info("[Cleanup] Navigate back to markets page", teardown=True)
     web.home_page.navigate_to(Features.MARKETS)
