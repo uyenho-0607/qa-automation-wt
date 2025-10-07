@@ -2,6 +2,7 @@ import pytest
 
 from src.data.enums import AssetTabs, SLTPType, Features
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
@@ -22,8 +23,8 @@ def test(web_app, cancel_all, sl_type, tp_type, market_obj, get_asset_tab_amount
     logger.info("Step 1: Get asset tab amount")
     tab_amount = get_asset_tab_amount(trade_object.order_type)
 
-    logger.info(f"Step 2: Place {trade_object.trade_type} order for {trade_object.symbol!r} (SL:{sl_type}, TP:{tp_type}, tab:{tab_amount})")
-    web_app.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type)
+    logger.info(f"Step 2: Place order with: {format_display_dict(trade_object)} (SL:{sl_type.value.title() if sl_type else None}, TP:{tp_type.value.title() if tp_type else None}, tab:{tab_amount})")
+    web_app.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, confirm=False)
 
     logger.info(f"Verify trade confirmation")
     web_app.trade_page.modals.verify_trade_confirmation(trade_object)
@@ -40,7 +41,7 @@ def test(web_app, cancel_all, sl_type, tp_type, market_obj, get_asset_tab_amount
     logger.info(f"Verify order details in tab")
     web_app.trade_page.asset_tab.verify_item_data(trade_object)
 
-    logger.info("Step 3: Navigate to Home Screen")
+    logger.info("Step 4: Navigate to Home Screen")
     web_app.trade_page.navigate_to(Features.HOME)
 
     logger.info("Verify Open Position Notification")
@@ -48,7 +49,7 @@ def test(web_app, cancel_all, sl_type, tp_type, market_obj, get_asset_tab_amount
 
 
 @pytest.fixture(autouse=True)
-def teardown_test(web_app):
+def teardown(web_app):
     yield
-    logger.info("- Navigate back to Trade Screen")
+    logger.info("[Cleanup] Navigate back to Trade Screen", teardown=True)
     web_app.home_page.navigate_to(Features.TRADE)

@@ -27,14 +27,14 @@ def test_cancel_enable(web_app):
     web_app.trade_page.place_order_panel.toggle_oct(enable=False)
 
     logger.info("Step 2: Enable OCT and select Cancel")
-    web_app.trade_page.place_order_panel.toggle_oct(enable=True, submit=False)
+    web_app.trade_page.place_order_panel.toggle_oct(enable=True, confirm=False)
 
     logger.info("Verify OCT mode is not enabled")
     web_app.trade_page.place_order_panel.verify_oct_mode(enable=False)
 
 
 @pytest.fixture(autouse=True, scope="module")
-def cleanup_test(web_app):
+def teardown(web_app):
     yield
     logger.info("[Cleanup] Enable OCT mode for other tests", teardown=True)
     web_app.trade_page.place_order_panel.toggle_oct(enable=True)

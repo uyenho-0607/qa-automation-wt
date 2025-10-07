@@ -8,7 +8,7 @@ from src.utils.logging_utils import logger
 
 
 @pytest.mark.critical
-def test(web_app, symbol, get_asset_tab_amount, cancel_delete_order, create_order_data):
+def test(web_app, symbol, get_asset_tab_amount, cancel_all, create_order_data):
     trade_object = ObjTrade(order_type=OrderType.STOP, symbol=symbol)
     tab = AssetTabs.PENDING_ORDER
     # ------------------- #
