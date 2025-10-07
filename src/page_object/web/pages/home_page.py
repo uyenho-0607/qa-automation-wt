@@ -68,7 +68,7 @@ class HomePage(BasePage):
             self.actions.click(self.__account_selector)
 
     def toggle_balance_summary(self, open=True):
-        is_open = self.actions.is_element_displayed(cook_element(self.__acc_note_items, AccSummary.MARGIN_CALL))
+        is_open = self.actions.is_element_displayed(cook_element(self.__acc_note_items, AccSummary.MARGIN_CALL), timeout=SHORT_WAIT)
         if open != is_open:
             self.actions.click_by_offset(self.__account_name, -100, 5)
 
