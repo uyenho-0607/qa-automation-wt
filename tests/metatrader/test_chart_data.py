@@ -7,7 +7,7 @@ from src.utils.logging_utils import logger
 from src.utils.metatrader_utils import parse_metatrader_data, compare_chart_data
 
 SYMBOL_LIST = {
-    Server.MT4: ["BTCUSD"],
+    Server.MT4: ["BTCUSD.std"],
     Server.MT5: ["HK50", "BTC.USD", "AUDCAD", "XAGUSD", "HKCHKD.std"]
 }
 

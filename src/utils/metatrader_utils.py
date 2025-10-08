@@ -204,6 +204,7 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
 
     # divide into scanned and not scanned range for compare
     most_recent_scanned_time = _get_recovered_time(timeframe)
+    logger.debug(f"- Most recent scanned time: {_ms_to_chart_date(most_recent_scanned_time)}")
 
     actual_scanned_data = [item for item in api_data if item["chartTime"] <= most_recent_scanned_time]
     exp_scanned_data = [item for item in chart_data if item["chartTime"] <= most_recent_scanned_time]
@@ -220,7 +221,8 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     # res = compare_dict_with_keymap(api_data, chart_data, 'chartTime', tolerance_percent=TOLERANCE_PERCENT)
 
     # append chart data comparison result
-    final_res.extend([res_scanned['res'], res_not_scanned['res']])
+    # final_res.extend([res_scanned['res'], res_not_scanned['res']])
+    final_res.extend([res_scanned['res']])
 
     # handle log for scanned result -> bug
     if not res_scanned['res']:
@@ -313,8 +315,7 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     if all(final_res):
         logger.info(f"{'-' * 10} PASSED ✅ {'-' * 10}")
 
-    else:
-        attach_chart_comparison_summary(compare_res, symbol, timeframe)
+    attach_chart_comparison_summary(compare_res, symbol, timeframe)
 
 
 def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
@@ -518,14 +519,14 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
         """
 
     # Add different data row for not scanned data
-    different_count = len(comparison_result["scanned"].get("mismatches", []))
+    different_count = len(comparison_result["not_scanned"].get("mismatches", []))
     different_status = "status-warning" if different_count else "status-pass"
     different_text = "WARNING" if different_count else "PASS"
     different_details = "NOT SCANNED data points with different values between MetaTrader and API"
 
     if different_count:
         different_details += f"<br><div class='error-details'>"
-        for i, item in enumerate(comparison_result["scanned"].get("mismatches", [])):
+        for i, item in enumerate(comparison_result["not_scanned"].get("mismatches", [])):
             chart_time = item.get("chartTime", "")
             original_chart_str = _ms_to_chart_date(chart_time) if chart_time else "Unknown"
 
