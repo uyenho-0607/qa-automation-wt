@@ -2,6 +2,7 @@ import pytest
 
 from src.data.enums import SLTPType, OrderType, Expiry, AssetTabs
 from src.data.objects.notification_obj import ObjNoti
+from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
@@ -15,16 +16,17 @@ from src.utils.logging_utils import logger
         ("SL, TP", *SLTPType.random_values(amount=2)),
     ]
 )
-def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, create_order_data, limit_obj):
+def test(web, edit_field, sl_type, tp_type, close_edit_confirm_modal, order_data, limit_obj):
     trade_object = limit_obj(stop_loss=0, take_profit=0)
 
-    logger.info(f"Step 1: Place {trade_object.trade_type} Order without SL and TP")
-    create_order_data(trade_object)
+    logger.info(f"Step 1: Place order with: {format_display_dict(trade_object)} without SL and TP")
+    order_data(trade_object, None, None)
+    trade_object.order_id = web.trade_page.asset_tab.get_last_order_id(AssetTabs.PENDING_ORDER)  # Get latest orderID
 
     logger.info(f"Verify order placed successfully, order_id: {trade_object.order_id!r}")
-    web.trade_page.asset_tab.verify_item_displayed(AssetTabs.PENDING_ORDER, trade_object.order_id)
+    web.trade_page.asset_tab.verify_item_data(trade_object, AssetTabs.PENDING_ORDER, False)
 
-    logger.info(f"Step 2: Modify order with {edit_field!r}")
+    logger.info(f"Step 2: Update placed order with {edit_field!r}")
     web.trade_page.asset_tab.modify_order(trade_object, sl_type=sl_type, tp_type=tp_type, expiry=Expiry.sample_values(OrderType.LIMIT))
 
     logger.info("Verify trade edit confirmation")
