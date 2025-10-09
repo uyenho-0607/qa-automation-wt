@@ -172,6 +172,6 @@ class ObjSymbol:
     def _get_all_orders(cls):
         """Get all current market and pending orders for filter disabled symbols"""
         from src.apis.api_client import APIClient
-        market_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET)
-        pending_orders = APIClient().order.get_orders_details(order_type=OrderType.LIMIT)
+        market_orders = APIClient().order.get_orders_details(order_type=OrderType.MARKET, exclude_issue_symbols=False)
+        pending_orders = APIClient().order.get_orders_details(order_type=OrderType.LIMIT, exclude_issue_symbols=False)
         return market_orders + pending_orders
