@@ -69,7 +69,7 @@ def disable_OCT(web):
     is_enable = web.trade_page.place_order_panel.is_oct_enable()
 
     if is_enable:
-        logger.info("[Setup] Enable OCT", setup=True)
+        logger.info("[Setup] Disable OCT", setup=True)
         web.trade_page.place_order_panel.toggle_oct(enable=False, submit=True)
 
     else:
