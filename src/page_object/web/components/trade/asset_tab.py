@@ -5,7 +5,7 @@ from typing import Optional, List, Literal
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
-from src.data.consts import EXPLICIT_WAIT, SHORT_WAIT, WARNING_ICON
+from src.data.consts import EXPLICIT_WAIT, WARNING_ICON
 from src.data.enums import AssetTabs, ColPreference, SortOptions, BulkCloseOpts, SLTPType, Expiry, OrderType
 from src.data.objects.trade_obj import ObjTrade
 from src.page_object.web.components.modals.trading_modals import TradingModals
@@ -82,15 +82,13 @@ class AssetTab(BaseTrade):
         logger.debug(f"> Tab amount: {res} ({tab.value})")
         return res
 
-    def get_last_order_id(self, trade_object: ObjTrade = None) -> str:
-        """Get the latest order ID from the specified tab and update value into trade_object."""
-        self.wait_for_spin_loader()
-        order_id = self.actions.get_text(self.__col_order_ids)
-
-        if trade_object:
-            trade_object.order_id = order_id
-
-        logger.debug(f"> Latest order_id: {order_id}")
+    def get_last_order_id(self, tab: AssetTabs, wait=True) -> str:
+        """Get the latest order ID from the specified tab."""
+        locator = cook_element(self.__col_order_ids_by_tab, tab.col_locator())
+        not wait or self.wait_for_spin_loader()
+        time.sleep(1) # wait a bit for the loading icon totally disappeared
+        order_id = self.actions.get_text(locator)
+        logger.debug(f"- Latest orderID: {order_id!r}")
         return order_id
 
     def get_symbols(self, tab: AssetTabs = AssetTabs.OPEN_POSITION):
@@ -156,7 +154,7 @@ class AssetTab(BaseTrade):
     def delete_order(self, trade_object: ObjTrade, confirm=True, wait=False) -> None:
         """Delete a pending order by ID or the last order if no ID provided."""
         if trade_object and not trade_object.get("order_id"):
-            self.get_last_order_id(trade_object)
+            trade_object.order_id = self.get_last_order_id(AssetTabs.PENDING_ORDER)
 
         logger.debug(f"- Deleting order: {trade_object.get('order_id')!r}")
         self._click_action_btn(AssetTabs.PENDING_ORDER, trade_object.get("order_id"), "close")
@@ -174,7 +172,9 @@ class AssetTab(BaseTrade):
         # define order_id value
         order_id = order_id if order_id else trade_object.get("order_id") if trade_object else 0
         if not order_id:
-            order_id = self.get_last_order_id(trade_object)
+            order_id = self.get_last_order_id(AssetTabs.OPEN_POSITION)
+            if trade_object:
+                trade_object.order_id = order_id
 
         # update closed info for trade_object if provided
         if trade_object:
@@ -193,7 +193,8 @@ class AssetTab(BaseTrade):
 
     def partial_close_position(self, close_obj: ObjTrade, volume=0, confirm=True, wait=False):
         new_created_obj = ObjTrade(**{k: v for k, v in close_obj.items() if k != "order_id"})
-        close_obj.get("order_id") or self.get_last_order_id(close_obj)  # update order_id for trade_object
+        if not close_obj.get("order_id"):
+            close_obj.order_id = self.get_last_order_id(AssetTabs.OPEN_POSITION)
 
         self._click_action_btn(AssetTabs.OPEN_POSITION, close_obj.get("order_id", 0), "close")
 
@@ -456,7 +457,7 @@ class AssetTab(BaseTrade):
         tab = tab or AssetTabs.get_tab(trade_object.order_type)
 
         # update current price for trade_object
-        self.get_current_price(trade_object)
+        trade_object.current_price = self.get_current_price(trade_object.trade_type, trade_object.order_type)
         expected = trade_object.asset_item_data(tab)
 
         # actual
