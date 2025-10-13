@@ -204,7 +204,7 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
 
     # divide into scanned and not scanned range for compare
     most_recent_scanned_time = _get_recovered_time(timeframe)
-    logger.debug(f"- Most recent scanned time: {_ms_to_chart_date(most_recent_scanned_time)}")
+    logger.debug(f"- Most recent recovered time: {_ms_to_chart_date(most_recent_scanned_time)}")
 
     actual_scanned_data = [item for item in api_data if item["chartTime"] <= most_recent_scanned_time]
     exp_scanned_data = [item for item in chart_data if item["chartTime"] <= most_recent_scanned_time]
@@ -441,7 +441,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     missing_count = len(comparison_result["scanned"].get("missing", []))
     missing_status = "status-fail" if missing_count else "status-pass"
     missing_text = "FAIL" if missing_count else "PASS"
-    missing_details = "Scanned data points present in MetaTrader but missing in API"
+    missing_details = "RECOVERED data points present in MetaTrader but missing in API"
 
     if missing_count:
         missing_details += f"<br><div class='error-details'>"
@@ -455,7 +455,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
 
     html += f"""
         <tr>
-            <td>❌ Missing SCANNED Data Points</td>
+            <td>❌ Missing RECOVERED Data Points</td>
             <td>{missing_count}</td>
             <td class="{missing_status}">{missing_text}</td>
             <td>{missing_details}</td>
@@ -466,7 +466,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     different_count = len(comparison_result["scanned"].get("mismatches", []))
     different_status = "status-fail" if different_count else "status-pass"
     different_text = "FAIL" if different_count else "PASS"
-    different_details = "Scanned data points with different values between MetaTrader and API"
+    different_details = "RECOVERED data points with different values between MetaTrader and API"
 
     if different_count:
         different_details += f"<br><div class='error-details'>"
@@ -486,7 +486,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
 
     html += f"""
         <tr>
-            <td>🔄 Different SCANNED Data Points</td>
+            <td>🔄 Different RECOVERED Data Points</td>
             <td>{different_count}</td>
             <td class="{different_status}">{different_text}</td>
             <td>{different_details}</td>
@@ -497,7 +497,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     missing_count = len(comparison_result["not_scanned"].get("missing", []))
     missing_status = "status-warning" if missing_count else "status-pass"
     missing_text = "WARNING" if missing_count else "PASS"
-    missing_details = "NOT SCANNED data points present in MetaTrader but missing in API"
+    missing_details = "NOT RECOVERED data points present in MetaTrader but missing in API"
 
     if missing_count:
         missing_details += f"<br><div class='error-details'>"
@@ -511,7 +511,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
 
     html += f"""
             <tr>
-                <td>⚠️ Missing NOT SCANNED Data Points</td>
+                <td>⚠️ Missing NOT RECOVERED Data Points</td>
                 <td>{missing_count}</td>
                 <td class="{missing_status}">{missing_text}</td>
                 <td>{missing_details}</td>
@@ -522,7 +522,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     different_count = len(comparison_result["not_scanned"].get("mismatches", []))
     different_status = "status-warning" if different_count else "status-pass"
     different_text = "WARNING" if different_count else "PASS"
-    different_details = "NOT SCANNED data points with different values between MetaTrader and API"
+    different_details = "NOT RECOVERED data points with different values between MetaTrader and API"
 
     if different_count:
         different_details += f"<br><div class='error-details'>"
@@ -542,7 +542,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
 
     html += f"""
             <tr>
-                <td>⚠️ Different NOT SCANNED Data Points</td>
+                <td>⚠️ Different NOT RECOVERED Data Points</td>
                 <td>{different_count}</td>
                 <td class="{different_status}">{different_text}</td>
                 <td>{different_details}</td>
