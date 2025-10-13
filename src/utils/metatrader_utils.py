@@ -558,6 +558,9 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     # convert to html format for human-readable
     df = pd.read_csv(file_path, sep=None, engine="python")
 
+    # Reset index to start from 1
+    df.index = df.index + 1
+
     html_table = df.to_html(
         index=True,
         border=2,
@@ -567,101 +570,182 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     )
     # Clean modern CSS (one color)
     css = """
-        <style>
-            .highlight-missing {
-                background-color: #ffcccc !important;  /* light red */
-            }
-            .highlight-diff {
-                background-color: #ffe0b3 !important;  /* soft orange */
-            }
-            .highlight-warning {
-                background-color: #fff3cd !important;  /* light yellow */
-            }
-            .highlight-white {
-                background-color: #ffffff !important;  /* default */
-            }
-            body {
-                font-family: "Segoe UI", Arial, sans-serif;
-                font-size: 14px;
-                color: #333;
-                margin: 10px;
-            }
-            table {
-                border-collapse: collapse;
-                width: 100%;
-                background-color: #fafafa;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 6px 10px;
-                text-align: center;
-                white-space: nowrap;
-            }
-            thead th {
-                background-color: #4287f5;
-                color: white;
-            }
-            tr:hover {
-                background-color: #f2f2f2;
-            }
-            .highlight {
-                background-color: #ffeeba !important;
-            }
-        </style>
-        """
+    <style>
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+        margin: 10px;
+    }
+    
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        background-color: #fafafa;
+    }
+    
+    th, td {
+        border: 1px solid #ddd;
+        padding: 6px 10px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    
+    /* Table header */
+    thead th {
+        background-color: #4287f5;
+        color: white;
+    }
+    
+    /* Row hover background */
+    tr:hover {
+        background-color: #f2f2f2;
+    }
+    
+    /* Row highlight colors */
+    .highlight-diff { background-color: #ff8c00 !important; } 
+    .highlight-missing { background-color: #ffcccc !important; }
+    .highlight-warning { background-color: #fff3cd !important; }
+    .highlight-white { background-color: #ffffff !important; }
+    
+    /* Subtle grey for Timestamp column */
+    td:nth-child(3) {
+        color: #888;
+        font-style: italic;
+    }  
+    
+    /* Row-level tooltip */
+    td.row-tooltip-container {
+        position: relative;
+        cursor: pointer;
+    }
+    
+    td.row-tooltip-container span.row-tooltip {
+        visibility: hidden;
+        background-color: #333;
+        color: #fff;
+        padding: 8px 12px;   
+        font-size: 14px; 
+        font-weight: bold; 
+        border-radius: 4px;
+        position: absolute;
+        top: 0;
+        left: 300px;
+        width: max-content;
+        max-width: 300px;
+        min-width: 120px;
+        white-space: pre-wrap;
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.1s ease-in-out;
+        z-index: 9999;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+    
+    /* Show tooltip when hovering the row */
+    tr:hover td.row-tooltip-container span.row-tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+    </style>
 
-    # highlight issue data, RED - failed recovered data, YELLOW - failed unrecovered data
+    """
 
-    diff_recovered_times = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_recovered]
+    # Highlight issue data: RED - failed recovered, YELLOW - failed unrecovered
+    _diff_recovered = diff_recovered[:]
+    _diff_unrecovered = diff_unrecovered[:]
+
+    # Convert chartTime to MT time (ms) for highlighting
+    for item in _diff_recovered + _diff_unrecovered:
+        item["chartTime"] = _ms_to_metatrader_time(item["chartTime"], string_time=False)
+
     missing_recovered_times = [_ms_to_metatrader_time(item, string_time=False) for item in missing_recovered]
-    unrecovered = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_unrecovered] + [_ms_to_metatrader_time(item, string_time=False) for item in missing_unrecovered]
-    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered
+    missing_unrecovered_times = [_ms_to_metatrader_time(item, string_time=False) for item in missing_unrecovered]
 
-    # Highlight issue rows
+    diff_recovered_times = [item['chartTime'] for item in _diff_recovered]
+    unrecovered_times = [item['chartTime'] for item in _diff_unrecovered] + missing_unrecovered_times
+
+    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered_times
+
     if highlight_times:
         lines = html_table.splitlines()
         new_lines = []
         current_row = []
         highlight_next = False
+        tool_tip = ""
 
         for line in lines:
-            # Start of a new table row
+            # Start of a new row
             if "<tr>" in line:
                 current_row = [line]
                 highlight_next = False
                 color = "white"
+                tool_tip = ""
                 continue
 
-            # Collect row contents
+            # Collect row content
             if current_row:
-                current_row.append(line)
+                line_to_add = line
 
-                # Detect highlight trigger for this specific row
+                # Detect if this row should be highlighted
                 for t in highlight_times:
                     if f">{t}<" in line:
                         highlight_next = True
+
+                        # Determine color and tooltip
                         if t in diff_recovered_times:
                             color = "diff"
+                            matched = [item for item in _diff_recovered if item['chartTime'] == t]
+                            if matched:
+                                failed_item = matched[0]
+                                tool_tip = f'{str(failed_item['actual']).replace(",", "\n").replace("{", "").replace("}", "").replace("'", "")}'
+                            else:
+                                tool_tip = "Issue data"
+
                         elif t in missing_recovered_times:
                             color = "missing"
-                        else:
-                            color = "warning"
+                            tool_tip = "Missing datapoint"
 
-                        break  # one match is enough
+                        else:  # warning / unrecovered
+                            color = "warning"
+                            matched = [item for item in _diff_unrecovered if item['chartTime'] == t]
+                            if matched:
+                                failed_item = matched[0]
+                                tool_tip = f'{str(failed_item['actual']).replace(",", "\n").replace("{", "").replace("}", "").replace("'", "")}'
+                            else:
+                                tool_tip = "Missing datapoint"
+
+                        break  # only first match per row
+
+                current_row.append(line_to_add)
 
             # End of row
             if "</tr>" in line and current_row:
                 current_row.append(line)
                 row_html = "\n".join(current_row)
+
                 if highlight_next:
+                    # Add highlight class
                     row_html = row_html.replace("<tr>", f"<tr class='highlight-{color}'>", 1)
+
+                    # Inject tooltip in first <td> only
+                    if tool_tip:
+                        row_html = row_html.replace(
+                            "<td>",
+                            f"<td class='row-tooltip-container'><span class='row-tooltip'>{tool_tip}</span>",
+                            1
+                        )
+
                 new_lines.append(row_html)
+
+                # Reset for next row
                 current_row = []
                 highlight_next = False
                 color = "white"
+                tool_tip = ""
 
             elif not current_row:
-                # Lines outside of table rows
+                # Lines outside table rows
                 new_lines.append(line)
 
         html_table = "\n".join(new_lines)
