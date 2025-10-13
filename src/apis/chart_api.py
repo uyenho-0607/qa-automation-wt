@@ -7,10 +7,10 @@ class ChartAPI(BaseAPI):
     _latest = "/chart/v2/candlestick/latest"
 
     def get_candlestick(
-            self, symbol: str, timeframe: ChartTimeframe, from_time=None, to=None
+            self, symbol: str, timeframe: ChartTimeframe, from_time=None, to=None,
     ):
         params = {"symbol": symbol, "period": timeframe.get_timeframe(), "from": from_time, "to": to}
-        resp = self.get(self._candlestick_endpoint, params)
+        resp = self.get(self._candlestick_endpoint, params, get_resp_time=True)
         return resp
 
 

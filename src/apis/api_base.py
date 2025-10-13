@@ -25,12 +25,12 @@ class BaseAPI:
         return session
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def get(self, endpoint: str, params: dict = None):
+    def get(self, endpoint: str, params: dict = None, **kwargs):
         resp = self.session.get(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, params=params or {})
         return resp
 
     @after_request(max_retries=3, base_delay=1.0, max_delay=10.0)
-    def post(self, endpoint: str, payload: dict = None):
+    def post(self, endpoint: str, payload: dict = None, **kwargs):
         resp = self.session.post(url=f"{Config.config.api_url}{endpoint}", headers=self.headers, json=payload)
         return resp
 

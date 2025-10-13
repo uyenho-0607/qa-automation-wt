@@ -13,10 +13,12 @@ from src.utils.assert_utils import soft_assert, compare_dict_with_keymap
 from src.utils.logging_utils import logger
 
 OUTPUT_DIR = ROOTDIR / ".chart_data"
+METATRADER_TIMEZONE = timedelta(hours=3)
+RECOVERED_TIME = None
 
 
 def _get_recovered_time(timeframe: ChartTimeframe):
-    """Get most recent scheduler time triggered, return time in timestamp"""
+    """Get most recent scheduler time triggered, return time in timestamp millisecond"""
     most_recent_time = round(time.time() * 1000) - timeframe.get_scheduler_time()
     # convert to utc time
     dt = datetime.fromtimestamp(most_recent_time / 1000, tz=timezone.utc)
@@ -28,24 +30,23 @@ def _get_recovered_time(timeframe: ChartTimeframe):
 def _map_timestamp(time_str: str):
     """Convert time as human date to timestamp and subtract 3 hours (map UTC)"""
     dt = datetime.strptime(time_str, "%Y.%m.%d %H:%M").replace(tzinfo=timezone.utc)
-    dt_adjusted = dt - timedelta(hours=3)  # Subtract 3 hours to map UTC time
+    dt_adjusted = dt - METATRADER_TIMEZONE  # Subtract 3 hours to map UTC time
     return int(dt_adjusted.timestamp() * 1000)
 
 
-def _ms_to_utc_date(milliseconds):
-    """Convert milliseconds timestamp to human-readable date"""
-    dt = datetime.fromtimestamp(milliseconds / 1000, tz=timezone.utc)
-    return dt.strftime("%Y-%m-%d %H:%M:%S UTC")
-
-
-def _ms_to_chart_date(milliseconds):
-    utc_plus_3 = timezone(timedelta(hours=3))
+def _ms_to_metatrader_time(milliseconds, string_time=True):
+    """Convert millisecond timestamp to UTC + 3 (meta trader timezone) with human-readable format option"""
+    utc_plus_3 = timezone(METATRADER_TIMEZONE)
     dt = datetime.fromtimestamp(milliseconds / 1000, tz=utc_plus_3)
-    return dt.strftime("%Y-%m-%d %H:%M:%S (UTC+3)")
+    if string_time:
+        return dt.strftime("%Y-%m-%d %H:%M:%S (UTC+3)")
+
+    # return timestamp value in UTC + 3
+    return int((datetime.fromtimestamp(milliseconds / 1000, tz=timezone.utc) + METATRADER_TIMEZONE).timestamp())
 
 
 def _csv_to_json(df, symbol: str, timeframe: ChartTimeframe):
-    """Save DataFrame to JSON format"""
+    """Parse CSV exported data from metatrader to JSON file for precessing comparison"""
     os.makedirs(str(OUTPUT_DIR), exist_ok=True)
     df_reversed = df.iloc[::-1].reset_index(drop=True)
 
@@ -69,7 +70,7 @@ def _csv_to_json(df, symbol: str, timeframe: ChartTimeframe):
     return filepath
 
 
-def _process_metatrader_data(symbol: str, timeframe: ChartTimeframe):
+def load_metatrader_data(symbol: str, timeframe: ChartTimeframe):
     """Process MetaTrader CSV data and convert to JSON format"""
     timeframe = timeframe.get_timeframe().split("_")[-1]
     file = os.path.join(os.path.expanduser(CSV_DIR[RuntimeConfig.server]), f"{symbol}_{timeframe}.csv")
@@ -83,23 +84,19 @@ def _process_metatrader_data(symbol: str, timeframe: ChartTimeframe):
     else:
         df = pd.read_csv(file, sep='\t')  # mt5
 
+    # map timestamp back to UTC
     df['Time_ms'] = df['Time'].apply(_map_timestamp)
     json_filepath = _csv_to_json(df, symbol, timeframe)
 
-    return json_filepath
-
-
-def parse_metatrader_data(symbol: str, timeframe: ChartTimeframe):
-    """Parse metatrader data from json file"""
-    parsed_filepath = _process_metatrader_data(symbol, timeframe)
-    with open(parsed_filepath, 'r') as f:
+    # load out json file
+    with open(json_filepath, 'r') as f:
         parsed_data = json.load(f)
 
     return parsed_data
 
 
 def timeframe_to_ms(timeframe: ChartTimeframe):
-    # Convert timeframe to expected interval in milliseconds
+    """Match timeframe with its expected interval time in milliseconds"""
     timeframe_intervals = {
         ChartTimeframe.one_min: 1,  # 1 minute = 60000 milliseconds
         ChartTimeframe.five_min: 5,  # 5 minutes = 300000 milliseconds
@@ -115,7 +112,7 @@ def timeframe_to_ms(timeframe: ChartTimeframe):
     return timeframe_intervals.get(timeframe) * 60 * 1000
 
 
-def _exp_interval(interval_min, timeframe):
+def _format_exp_interval(interval_min, timeframe):
     """Format interval in milliseconds to human-readable format based on timeframe"""
     interval_min = interval_min / (60 * 1000)
 
@@ -149,7 +146,7 @@ def _exp_interval(interval_min, timeframe):
     return f"{round(res)} {unit}"
 
 
-def check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) -> dict:
+def _check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) -> dict:
     """
     Check if each dataset distance from previous is equal to the expected interval
     NOTE: if wrong dataset is present on both chart_data and api_data, it's acceptable
@@ -177,7 +174,7 @@ def check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) ->
                 pass
 
             actual_ms_items = f"{actual[i]} <-> {actual[i + 1]}"
-            actual_date_items = f"{_ms_to_chart_date(actual[i])} <-> {_ms_to_chart_date(actual[i + 1])}"
+            actual_date_items = f"{_ms_to_metatrader_time(actual[i])} <-> {_ms_to_metatrader_time(actual[i + 1])}"
             failed.append(dict(ms=actual_ms_items, date=actual_date_items, interval=actual[i + 1] - actual[i]))
 
     return {"result": len(failed) == 0, "failed": failed}
@@ -186,115 +183,74 @@ def check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) ->
 def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     """Compare chart data (MetaTrader) with API data based on chartTime"""
 
-    final_res = []
     compare_res = {"scanned": {}, "not_scanned": {}}
+    final_res = []
 
     # filter not compare keys
     api_data = [{k: v for k, v in item.items() if k not in ["ask", "source"]} for item in api_data]
 
-    # Compare overall dataset amount
+    ############### DATASET AMOUNT ###############
     logger.info(f"{'-' * 10} COMPARE DATASET AMOUNT {'-' * 10}")
-    res_amount = soft_assert(len(api_data), len(chart_data), error_message=f"Dataset amount mismatch: actual={len(api_data)} <> expected={len(chart_data)}")
-
-    # append compare dataset amount result
-    final_res.append(res_amount)
+    final_res.append(soft_assert(len(api_data), len(chart_data), error_message=f"Dataset amount mismatch: actual={len(api_data)} <> expected={len(chart_data)}"))
     compare_res['dataset_amount'] = {'actual': len(api_data), 'expected': len(chart_data)}
 
+    ############### MISMATCH/ MISSING ###############
     logger.info(f"{'-' * 10} COMPARE CHART DATA {'-' * 10}")
 
     # divide into scanned and not scanned range for compare
-    most_recent_scanned_time = _get_recovered_time(timeframe)
-    logger.debug(f"- Most recent recovered time: {_ms_to_chart_date(most_recent_scanned_time)}")
+    most_recover_time = _get_recovered_time(timeframe)
+    global RECOVERED_TIME
+    RECOVERED_TIME = _ms_to_metatrader_time(most_recover_time)
 
-    actual_scanned_data = [item for item in api_data if item["chartTime"] <= most_recent_scanned_time]
-    exp_scanned_data = [item for item in chart_data if item["chartTime"] <= most_recent_scanned_time]
+    _split_data = lambda data, t: ([d for d in data if d['chartTime'] <= t], [d for d in data if d['chartTime'] > t])
 
-    actual_not_scanned_data = [item for item in api_data if item["chartTime"] > most_recent_scanned_time]
-    exp_not_scanned_data = [item for item in chart_data if item["chartTime"] > most_recent_scanned_time]
+    act_recovered, act_unrecovered = _split_data(api_data, most_recover_time)
+    exp_recovered, exp_unrecovered = _split_data(chart_data, most_recover_time)
 
-    # data failed in this range should be bug
-    res_scanned = compare_dict_with_keymap(actual_scanned_data, exp_scanned_data, "chartTime", tolerance_percent=TOLERANCE_PERCENT)
+    # data failed in this range should be bugged
+    res_recovered = compare_dict_with_keymap(act_recovered, exp_recovered, "chartTime", tolerance_percent=TOLERANCE_PERCENT)
 
     # data failed in this range can be fixed by recover job
-    res_not_scanned = compare_dict_with_keymap(actual_not_scanned_data, exp_not_scanned_data, "chartTime", tolerance_percent=TOLERANCE_PERCENT)
+    res_unrecovered = compare_dict_with_keymap(act_unrecovered, exp_unrecovered, "chartTime", tolerance_percent=TOLERANCE_PERCENT)
 
-    # res = compare_dict_with_keymap(api_data, chart_data, 'chartTime', tolerance_percent=TOLERANCE_PERCENT)
+    # append only recovered chart data comparison result
+    final_res.extend([res_recovered['res']])
 
-    # append chart data comparison result
-    # final_res.extend([res_scanned['res'], res_not_scanned['res']])
-    final_res.extend([res_scanned['res']])
-
-    # handle log for scanned result -> bug
-    if not res_scanned['res']:
-        logger.error(f"❌ Chart data comparison failed - Scanned data")
+    # handle log for recovered result -> bug
+    if not res_recovered['res']:
+        logger.error(f"❌ Chart data comparison failed - Recovered data")
         error_msg = f"Chart data comparison failed"
 
-        if res_scanned['mismatches']:
-            compare_res["scanned"]['mismatches'] = res_scanned['mismatches']
+        if res_recovered['mismatches']:
+            compare_res["scanned"]['mismatches'] = res_recovered['mismatches']
 
-            logger.error(f"❌ Mismatched - Scanned data: {len(res_scanned['mismatches'])} items")
-            error_msg += "\n➡️ Mismatched Scanned data"
+            logger.error(f"❌ Mismatched - Recovered data: {len(res_recovered['mismatches'])} items")
+            error_msg += "\n➡️ Mismatched Recovered data"
 
-            # for item in res_scanned['mismatches']:
-            #     error_msg += (
-            #         f"\n - Mismatched item {item['chartTime']} (chart_data: {_ms_to_chart_date(item['chartTime'])}): {item['actual']} <-> {item['expected']}"
-            #     )
+        if res_recovered['missing']:
+            compare_res["scanned"]['missing'] = res_recovered['missing']
 
-        if res_scanned['missing']:
-            compare_res["scanned"]['missing'] = res_scanned['missing']
+            logger.error(f"❌ Missing - Recovered data: {len(res_recovered['missing'])} items")
+            error_msg += "\n➡️ Missing Recovered data"
 
-            logger.error(f"❌ Missing - Scanned data: {len(res_scanned['missing'])} items")
-            error_msg += "\n➡️ Missing Scanned data"
-            # for item in res_scanned['missing']:
-            #     error_msg += f"\n - Missing item: {item} ({_ms_to_chart_date(item)})"
-
+        # failed the checkpoint
         soft_assert(True, False, error_message=error_msg)
 
-        # handle log for scanned result -> not sure bug
-        if not res_not_scanned['res']:
-            logger.warning(f"⚠️ Chart data comparison failed - NOT scanned data")
+        # handle log for scanned result -> only warning
+        if not res_unrecovered['res']:
+            logger.warning(f"⚠️ Chart data comparison failed - NOT recovered data")
 
-            if res_not_scanned['mismatches']:
-                compare_res["not_scanned"]['mismatches'] = res_not_scanned['mismatches']
-                logger.warning(f"⚠️ Mismatched - Scanned data: {len(res_not_scanned['mismatches'])} items")
+            if res_unrecovered['mismatches']:
+                compare_res["not_scanned"]['mismatches'] = res_unrecovered['mismatches']
+                logger.warning(f"⚠️ Mismatched - NOT recovered data: {len(res_unrecovered['mismatches'])} items")
 
-            if res_not_scanned['missing']:
-                compare_res["not_scanned"]['missing'] = res_not_scanned['missing']
-                logger.warning(f"⚠️ Missing - Scanned data: {len(res_not_scanned['missing'])} items")
+            if res_unrecovered['missing']:
+                compare_res["not_scanned"]['missing'] = res_unrecovered['missing']
+                logger.warning(f"⚠️ Missing - NOT recovered data: {len(res_unrecovered['missing'])} items")
 
-    ####### OLD COMPARE ########
-    # # append chart data comparison result
-    # final_res.append(res['res'])
-    #
-    # if not res['res']:
-    #     logger.error(f"❌ Chart data comparison failed")
-    #     error_msg = f"Chart data comparison failed"
-    #
-    #     if res['mismatches']:
-    #         compare_res['mismatches'] = res['mismatches']
-    #
-    #         logger.error(f"❌ Mismatched: {len(res['mismatches'])} items")
-    #         for item in res['mismatches']:
-    #             error_msg += (
-    #                 f"\n - Mismatched item {item['chartTime']} (chart_data: {_ms_to_chart_date(item['chartTime'])}): {item['actual']} <-> {item['expected']}"
-    #             )
-    #
-    #     if res['missing']:
-    #         compare_res['missing'] = res['missing']
-    #
-    #         logger.error(f"❌ Missing: {len(res['missing'])} items")
-    #         for item in res['missing']:
-    #             error_msg += f"\n - Missing item: {item} ({_ms_to_chart_date(item)})"
-
-    # if res['redundant']:
-    #     compare_res['redundant'] = res['redundant']
-    #     logger.error(f"❌ Redundant: {len(res['redundant'])} items")
-    #     for item in res['redundant']:
-    #         error_msg += f"\n - Redundant item: {item} ({_ms_to_chart_date(item)})"
-
-    # Compare timeframe interval
+    ############### TIMEFRAME INTERVAL ###############
     logger.info(f"{'-' * 10} COMPARE TIMEFRAME INTERVAL {'-' * 10}")
-    res_int = check_timestamp_interval(api_data, chart_data, timeframe)
+    res_int = _check_timestamp_interval(api_data, chart_data, timeframe)
 
     # append timeframe interval result
     final_res.append(res_int["result"])
@@ -306,25 +262,20 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
         logger.error(f"❌ Invalid interval time: {len(res_int['failed'])}")
         error_msg = f"Timeframe interval validation failed"
 
-        # for item in res_int['failed']:
-        # act_interval = _exp_interval(item['interval'], timeframe)
-        # error_msg += f"\n - {act_interval} - {item['ms']} ({item['date']})"
-
+        # failed the checkpoint
         soft_assert(True, False, error_message=error_msg)
 
     if all(final_res):
         logger.info(f"{'-' * 10} PASSED ✅ {'-' * 10}")
 
-    attach_chart_comparison_summary(compare_res, symbol, timeframe)
+    attach_compare_files(compare_res, symbol, timeframe)
 
 
-def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
+def attach_compare_files(comparison_result, symbol, timeframe):
     """Attach a summary table of chart data comparison results to Allure report."""
-
-    # Create title with symbol and timeframe info
-    symbol_display = symbol or 'Unknown'
-    timeframe_display = (timeframe.name if timeframe else 'Unknown').replace("_", " ").upper()
-    title = f"📊 Chart Data Comparison Summary - {symbol_display} - {timeframe_display}"
+    ############### COMPARISON TABLE ####################
+    timeframe_display = timeframe.replace("_", " ").upper()
+    title = f"📊 Chart Data Comparison Summary - {symbol} - {timeframe_display}"
 
     html = f"""
         <style>
@@ -421,34 +372,37 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
         <tbody>
     """
 
-    # Add dataset amount row
+    # --------- dataset amount  --------- #
     data_amount = comparison_result.get("dataset_amount")
     data_diff = data_amount['actual'] == data_amount['expected']
-    dataset_status = "status-fail" if not data_diff else "status-pass"
-    dataset_text = "FAIL" if not data_diff else "PASS"
-    dataset_details = f"API: {data_amount['actual']} | MetaTrader: {data_amount['expected']}"
 
     html += f"""
         <tr>
             <td>📊 Dataset Amount</td>
             <td>{data_amount['actual'] - data_amount['expected']}</td>
-            <td class="{dataset_status}">{dataset_text}</td>
-            <td>{dataset_details}</td>
+            <td class="{"status-fail" if not data_diff else "status-pass"}">{"FAIL" if not data_diff else "PASS"}</td>
+            <td>{f"API: {data_amount['actual']} | MetaTrader: {data_amount['expected']}"}</td>
         </tr>
     """
 
-    # Add missing scanned data row
-    missing_count = len(comparison_result["scanned"].get("missing", []))
-    missing_status = "status-fail" if missing_count else "status-pass"
-    missing_text = "FAIL" if missing_count else "PASS"
+    # Compare result metrics
+    missing_recovered = comparison_result["scanned"].get("missing", [])
+    diff_recovered = comparison_result["scanned"].get("mismatches", [])
+    missing_unrecovered = comparison_result["not_scanned"].get("missing", [])
+    diff_unrecovered = comparison_result["not_scanned"].get("mismatches", [])
+    interval = comparison_result.get("interval", [])
+
+    # --------- RECOVERED DATA --------- #
+    #### missing data
+    missing_count = len(missing_recovered)
     missing_details = "RECOVERED data points present in MetaTrader but missing in API"
 
     if missing_count:
         missing_details += f"<br><div class='error-details'>"
-        for i, item in enumerate(comparison_result["scanned"].get("missing", [])):
+        for i, item in enumerate(missing_recovered):
             missing_details += f"""
                 <div class="error-item">
-                    <strong>Missing #{i + 1}:</strong> {item}, chart_time: {_ms_to_chart_date(item)}<br>
+                    <strong>Missing #{i + 1}:</strong> {item}, chart_time: {_ms_to_metatrader_time(item)}<br>
                 </div>
             """
         missing_details += "</div>"
@@ -457,22 +411,20 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
         <tr>
             <td>❌ Missing RECOVERED Data Points</td>
             <td>{missing_count}</td>
-            <td class="{missing_status}">{missing_text}</td>
+            <td class="{"status-fail" if missing_count else "status-pass"}">{"FAIL" if missing_count else "PASS"}</td>
             <td>{missing_details}</td>
         </tr>
     """
 
-    # Add different data row for scanned data
-    different_count = len(comparison_result["scanned"].get("mismatches", []))
-    different_status = "status-fail" if different_count else "status-pass"
-    different_text = "FAIL" if different_count else "PASS"
+    ##### different data
+    diff_count = len(diff_recovered)
     different_details = "RECOVERED data points with different values between MetaTrader and API"
 
-    if different_count:
+    if diff_count:
         different_details += f"<br><div class='error-details'>"
-        for i, item in enumerate(comparison_result["scanned"].get("mismatches", [])):
+        for i, item in enumerate(diff_recovered):
             chart_time = item.get("chartTime", "")
-            original_chart_str = _ms_to_chart_date(chart_time) if chart_time else "Unknown"
+            original_chart_str = _ms_to_metatrader_time(chart_time) if chart_time else "Unknown"
 
             different_details += f"""
                 <div class="error-item">
@@ -487,24 +439,23 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     html += f"""
         <tr>
             <td>🔄 Different RECOVERED Data Points</td>
-            <td>{different_count}</td>
-            <td class="{different_status}">{different_text}</td>
+            <td>{diff_count}</td>
+            <td class="{"status-fail" if diff_count else "status-pass"}">{"FAIL" if diff_count else "PASS"}</td>
             <td>{different_details}</td>
         </tr>
     """
 
-    # Add missing not scanned data row
-    missing_count = len(comparison_result["not_scanned"].get("missing", []))
-    missing_status = "status-warning" if missing_count else "status-pass"
-    missing_text = "WARNING" if missing_count else "PASS"
+    # --------- NOT RECOVERED DATA --------- #
+    ##### missing
+    missing_count = len(missing_unrecovered)
     missing_details = "NOT RECOVERED data points present in MetaTrader but missing in API"
 
     if missing_count:
         missing_details += f"<br><div class='error-details'>"
-        for i, item in enumerate(comparison_result["not_scanned"].get("missing", [])):
+        for i, item in enumerate(missing_unrecovered):
             missing_details += f"""
                     <div class="error-item">
-                        <strong>Missing #{i + 1}:</strong> {item}, chart_time: {_ms_to_chart_date(item)}<br>
+                        <strong>Missing #{i + 1}:</strong> {item}, chart_time: {_ms_to_metatrader_time(item)}<br>
                     </div>
                 """
         missing_details += "</div>"
@@ -513,22 +464,20 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
             <tr>
                 <td>⚠️ Missing NOT RECOVERED Data Points</td>
                 <td>{missing_count}</td>
-                <td class="{missing_status}">{missing_text}</td>
+                <td class="{"status-warning" if missing_count else "status-pass"}">{"WARNING" if missing_count else "PASS"}</td>
                 <td>{missing_details}</td>
             </tr>
         """
 
-    # Add different data row for not scanned data
-    different_count = len(comparison_result["not_scanned"].get("mismatches", []))
-    different_status = "status-warning" if different_count else "status-pass"
-    different_text = "WARNING" if different_count else "PASS"
+    ##### different
+    diff_count = len(diff_unrecovered)
     different_details = "NOT RECOVERED data points with different values between MetaTrader and API"
 
-    if different_count:
+    if diff_count:
         different_details += f"<br><div class='error-details'>"
-        for i, item in enumerate(comparison_result["not_scanned"].get("mismatches", [])):
+        for i, item in enumerate(diff_unrecovered):
             chart_time = item.get("chartTime", "")
-            original_chart_str = _ms_to_chart_date(chart_time) if chart_time else "Unknown"
+            original_chart_str = _ms_to_metatrader_time(chart_time) if chart_time else "Unknown"
 
             different_details += f"""
                     <div class="error-item">
@@ -543,26 +492,24 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
     html += f"""
             <tr>
                 <td>⚠️ Different NOT RECOVERED Data Points</td>
-                <td>{different_count}</td>
-                <td class="{different_status}">{different_text}</td>
+                <td>{diff_count}</td>
+                <td class="{"status-warning" if diff_count else "status-pass"}">{"WARNING" if diff_count else "PASS"}</td>
                 <td>{different_details}</td>
             </tr>
         """
 
     # Add invalid interval data row
-    int_count = len(comparison_result.get("interval", []))
-    int_status = "status-fail" if int_count else "status-pass"
-    int_text = "FAIL" if int_count else "PASS"
+    int_count = len(interval)
     int_details = "Data points with invalid interval (API response ONLY)"
 
     if int_count:
         int_details += f"<br><div class='error-details'>"
-        for i, item in enumerate(comparison_result.get("interval", [])):
+        for i, item in enumerate(interval):
             int_details += f"""
                     <div class="error-item">
                         <strong>Invalid #{i + 1}:</strong>
                 """
-            int_details += f"ms={item.get('ms')}, chart_time={item.get('date')}, interval={_exp_interval(item.get('interval', 0), comparison_result.get('timeframe'))}<br>"
+            int_details += f"ms={item.get('ms')}, chart_time={item.get('date')}, interval={_format_exp_interval(item.get('interval', 0), comparison_result.get('timeframe'))}<br>"
             int_details += """
                     </div>
                 """
@@ -572,7 +519,7 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
             <tr>
                 <td>🔄 Invalid Interval Data Points</td>
                 <td>{int_count}</td>
-                <td class="{int_status}">{int_text}</td>
+                <td class="{"status-fail" if int_count else "status-pass"}">{"FAIL" if int_count else "PASS"}</td>
                 <td>{int_details}</td>
             </tr>
         """
@@ -582,10 +529,131 @@ def attach_chart_comparison_summary(comparison_result, symbol, timeframe):
         </table>
     """
 
-    # Attach to Allure report
-    attachment_name = f"Chart Comparison Summary - {symbol_display} - {timeframe_display}"
+    # Attach compare table to Allure report
+    attachment_name = f"Chart Comparison Summary - {symbol} - {timeframe_display}"
     allure.attach(
         html,
         name=attachment_name,
         attachment_type=allure.attachment_type.HTML
     )
+
+    ############### META TRADER CSV FILE ####################
+    file_path = os.path.join(os.path.expanduser(CSV_DIR[RuntimeConfig.server]), f"{symbol}_{timeframe.get_timeframe().split("_")[-1]}.csv")
+
+    # convert to html format for human-readable
+    df = pd.read_csv(file_path, sep=None, engine="python")
+
+    html_table = df.to_html(
+        index=True,
+        border=2,
+        justify="center",
+        classes="styled-table",
+        escape=False
+    )
+    # Clean modern CSS (one color)
+    css = """
+        <style>
+            .highlight-error {
+                background-color: #ffcccc !important;  /* light red */
+            }
+            .highlight-warning {
+                background-color: #fff3cd !important;  /* light yellow */
+            }
+            .highlight-white {
+                background-color: #ffffff !important;  /* default */
+            }
+            body {
+                font-family: "Segoe UI", Arial, sans-serif;
+                font-size: 14px;
+                color: #333;
+                margin: 10px;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+                background-color: #fafafa;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 6px 10px;
+                text-align: center;
+                white-space: nowrap;
+            }
+            thead th {
+                background-color: #4287f5;
+                color: white;
+            }
+            tr:hover {
+                background-color: #f2f2f2;
+            }
+            .highlight {
+                background-color: #ffeeba !important;
+            }
+        </style>
+        """
+
+    # highlight issue data, RED - failed recovered data, YELLOW - failed unrecovered data
+
+    recovered = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_recovered] + [_ms_to_metatrader_time(item, string_time=False) for item in missing_recovered]
+    unrecovered = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_unrecovered] + [_ms_to_metatrader_time(item, string_time=False) for item in missing_unrecovered]
+    highlight_times = recovered + unrecovered
+
+    # Highlight issue rows
+    if highlight_times:
+        lines = html_table.splitlines()
+        new_lines = []
+        current_row = []
+        highlight_next = False
+
+        for line in lines:
+            # Start of a new table row
+            if "<tr>" in line:
+                current_row = [line]
+                highlight_next = False
+                color = "white"
+                continue
+
+            # Collect row contents
+            if current_row:
+                current_row.append(line)
+
+                # Detect highlight trigger for this specific row
+                for t in highlight_times:
+                    if f">{t}<" in line:
+                        highlight_next = True
+                        color = "error" if t in recovered else "warning"
+                        break  # one match is enough
+
+            # End of row
+            if "</tr>" in line and current_row:
+                current_row.append(line)
+                row_html = "\n".join(current_row)
+                if highlight_next:
+                    row_html = row_html.replace("<tr>", f"<tr class='highlight-{color}'>", 1)
+                new_lines.append(row_html)
+                current_row = []
+                highlight_next = False
+                color = "white"
+
+            elif not current_row:
+                # Lines outside of table rows
+                new_lines.append(line)
+
+        html_table = "\n".join(new_lines)
+
+    # Final wrapped HTML
+    final_html = f"""
+        <html>
+        <head>{css}</head>
+        <body>
+            <h4>{symbol} — {timeframe_display}</h4>
+            {html_table}
+        </body>
+        </html>
+        """
+
+    allure.attach(
+        final_html, name="Meta Trader CSV Data", attachment_type=allure.attachment_type.HTML
+    )
+
+    allure.dynamic.description_html(f'<p>Most recent recovery time: <strong style="color:#2E8B57;">{RECOVERED_TIME}</strong></p>')

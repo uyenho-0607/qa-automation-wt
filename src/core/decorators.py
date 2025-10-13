@@ -1,4 +1,5 @@
 import functools
+import inspect
 import json
 import time
 
@@ -41,11 +42,6 @@ def format_request_log(resp: Response, log_resp=False) -> str:
 def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
     """
     Enhanced decorator for handling API requests with retry logic and proper error handling.
-    
-    Args:
-        max_retries (int): Maximum number of retry attempts
-        base_delay (float): Base delay in seconds for exponential backoff
-        max_delay (float): Maximum delay in seconds
     """
 
     def decorator(func):
@@ -53,13 +49,20 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
         def wrapper(self, *args, **kwargs):
             __tracebackhide__ = True
 
+            # Extract optional arguments
+            sig = inspect.signature(func)
+            bound_args = sig.bind(self, *args, **kwargs)
+            bound_args.apply_defaults()
+
+            # Get options with defaults
+            get_resp_time = kwargs.get("get_resp_time", False)
             last_exception = None
 
             for attempt in range(max_retries + 1):  # +1 for initial attempt
                 try:
                     # Execute the API request
                     response = func(self, *args, **kwargs)
-                    logger.info(f"- Response time: {response.elapsed.total_seconds()} sec")
+                    response_time = response.elapsed.total_seconds()
 
                     # Handle successful response
                     if response.ok:
@@ -68,7 +71,8 @@ def after_request(max_retries=3, base_delay=1.0, max_delay=10.0):
                         # Parse JSON response safely
                         try:
                             result = response.json()
-                            return result.get("result", result) if response.text.strip() else []
+                            parsed_result = result.get("result", result) if response.text.strip() else []
+                            return parsed_result if not get_resp_time else (parsed_result, round(response_time, 3))
 
                         except json.JSONDecodeError as e:
                             logger.warning(f"Failed to parse JSON response: {e}")

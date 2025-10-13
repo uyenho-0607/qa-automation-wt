@@ -113,25 +113,9 @@ def _process_broken_status(data: Dict[str, Any]) -> None:
 
 def _cleanup_and_customize_report(data: Dict[str, Any]) -> None:
     """Clean up attachments and customize report details."""
-    # Clean up attachments and status details
-    if data.get("attachments"):
-        attachments = data["attachments"]
-        data["attachments"] = [item for item in attachments if "Chart Comparison Summary" in item["name"]]
-
-        data["attachments"].extend(
-            [item for item in attachments if item["type"] == "text/plain" and item["name"] == "log"]
-        )
-
-    # Remove trace
     data.get("statusDetails", {}).pop("trace", None)
-
-    # Customize test case name
     data["name"] = data["fullName"].split(".")[-1].replace("#test", "")
     data["name"] = " ".join(data["name"].split("_"))
-
-    # # Customize test's properties
-    # data["fullName"] = f"{data['fullName']}[{RuntimeConfig.client}][{RuntimeConfig.server}]"
-    # data["historyId"] = uuid.uuid4().hex
 
 
 def _clean_log_files(allure_dir):
