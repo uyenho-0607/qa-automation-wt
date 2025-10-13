@@ -1,5 +1,6 @@
 import os.path
 import shutil
+from uuid import uuid4
 
 import allure
 import pytest
@@ -70,6 +71,12 @@ def pytest_runtest_setup(item: pytest.Item):
 
     server = RuntimeConfig.server
     account = RuntimeConfig.account
+
+    custom_testid = f"testid-{uuid4()}"
+    allure.dynamic.id(custom_testid)
+    StepLogs.TEST_ID = custom_testid
+    StepLogs.init_test_logs()
+
 
     # Set allure labels
     allure.dynamic.parent_suite("MetaTrader API Validation")

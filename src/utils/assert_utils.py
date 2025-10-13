@@ -166,6 +166,8 @@ def soft_assert(
     Returns:
         bool: True if assertion passes, False otherwise
     """
+    __tracebackhide__ = True
+
     validation_err_msg = f"\nValidation Failed ! " + (error_message or f"\n>>> Actual:   {actual!r} \n>>> Expected: {expected!r}")
     res = check.equal(actual, expected, validation_err_msg)
 
@@ -173,7 +175,9 @@ def soft_assert(
         logger.error(validation_err_msg)
         # save failed verify step
         if StepLogs.test_steps:
-            failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
-            failed_step in StepLogs.all_failed_logs or StepLogs.all_failed_logs.append(failed_step)
+            # save failed verify step
+            if StepLogs.test_steps:
+                failed_step = [item.lower() for item in StepLogs.test_steps if "verify" in item.lower()][-1]
+                failed_step in StepLogs.all_failed_logs or StepLogs.add_failed_log(failed_step, "")
 
     return res

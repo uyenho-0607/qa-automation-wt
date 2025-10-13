@@ -553,8 +553,11 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     # Clean modern CSS (one color)
     css = """
         <style>
-            .highlight-error {
+            .highlight-missing {
                 background-color: #ffcccc !important;  /* light red */
+            }
+            .highlight-diff {
+                background-color: #ffe0b3 !important;  /* soft orange */
             }
             .highlight-warning {
                 background-color: #fff3cd !important;  /* light yellow */
@@ -594,9 +597,10 @@ def attach_compare_files(comparison_result, symbol, timeframe):
 
     # highlight issue data, RED - failed recovered data, YELLOW - failed unrecovered data
 
-    recovered = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_recovered] + [_ms_to_metatrader_time(item, string_time=False) for item in missing_recovered]
+    diff_recovered_times = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_recovered]
+    missing_recovered_times = [_ms_to_metatrader_time(item, string_time=False) for item in missing_recovered]
     unrecovered = [_ms_to_metatrader_time(item['chartTime'], string_time=False) for item in diff_unrecovered] + [_ms_to_metatrader_time(item, string_time=False) for item in missing_unrecovered]
-    highlight_times = recovered + unrecovered
+    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered
 
     # Highlight issue rows
     if highlight_times:
@@ -621,7 +625,13 @@ def attach_compare_files(comparison_result, symbol, timeframe):
                 for t in highlight_times:
                     if f">{t}<" in line:
                         highlight_next = True
-                        color = "error" if t in recovered else "warning"
+                        if t in diff_recovered_times:
+                            color = "diff"
+                        elif t in missing_recovered_times:
+                            color = "missing"
+                        else:
+                            color = "warning"
+
                         break  # one match is enough
 
             # End of row
@@ -656,4 +666,24 @@ def attach_compare_files(comparison_result, symbol, timeframe):
         final_html, name="Meta Trader CSV Data", attachment_type=allure.attachment_type.HTML
     )
 
-    allure.dynamic.description_html(f'<p>Most recent recovery time: <strong style="color:#2E8B57;">{RECOVERED_TIME}</strong></p>')
+    # Build color-coded description summary
+    summary_lines = []
+
+    if diff_recovered:
+        summary_lines.append(f"<p style='color:#ff4d4d;'>❌ Total Mismatch records: <strong>{len(diff_recovered)}</strong></p>")
+
+    if missing_recovered:
+        summary_lines.append(f"<p style='color:#ff4d4d;'>❌ Total Missing records: <strong>{len(missing_recovered)}</strong></p>")
+
+    if diff_unrecovered or missing_unrecovered:
+        summary_lines.append(f"<p style='color:#ff9900;'>⚠️ Total NOT RECOVERED records (acceptable): <strong>{len(diff_unrecovered) + len(missing_unrecovered)}</strong></p>")
+
+    # If everything passed
+    if not summary_lines:
+        summary_lines.append("<p style='color:#2E8B57;'>✅ All data passed validation — no mismatches or missing records.</p>")
+
+    # Add most recent recovery time (always shown)
+    summary_lines.append(f"<p>Most recent recovery time: <strong style='color:#2E8B57;'>{RECOVERED_TIME}</strong></p>")
+
+    # Attach to Allure
+    allure.dynamic.description_html("\n".join(summary_lines))

@@ -63,41 +63,24 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
     if not data.get("steps"):
         return
 
-    failed_logs = StepLogs.all_failed_logs[:]
-    failed_attachments = list(filter(lambda x: x["name"] == "screenshot", data.get("attachments", [])))
-    v_steps = [item for item in data["steps"]]
+    test_id = [item["value"] for item in data["labels"] if item["name"] == "as_id"][0]
+    filtered_logs = [StepLogs.failed_logs_dict[key] for key in StepLogs.failed_logs_dict if key == test_id]
 
-    should_break = False
-    while failed_logs and not should_break:
-        for failed_step in failed_logs:
-            if failed_step == "end_test":
-                StepLogs.all_failed_logs.pop(0)
-                should_break = True
-                break
+    if not filtered_logs:
+        return
 
-            for index, v_step in enumerate(v_steps):
-                step_name = v_step.get("name", "").lower()
+    steps_map = {s["name"].lower(): s for s in data["steps"]}
+    failed_logs = filtered_logs[0]
 
-                if step_name == failed_step.lower():
-                    StepLogs.all_failed_logs.pop(0)
+    for failed_step, _ in failed_logs:
+        v_step = steps_map.get(failed_step.lower())
 
-                    if "verify" in step_name:
-                        v_step["status"] = "failed"
-                        del v_steps[:index + 1]
+        if v_step:
+            if "verify" in v_step["name"].lower():
+                v_step["status"] = "failed"
 
-                        # Attach screenshot if available
-                        if failed_attachments:
-                            v_step["attachments"].extend(failed_attachments[:1])
-                            del failed_attachments[:1]
-
-                        break  # Move to next failed_log after first match
-
-                    else:  # this is a broken step
-                        v_step["status"] = "broken"
-                        data["status"] = "broken"
-                        data["steps"][-1]["attachments"].extend(list(
-                            filter(lambda x: x["name"] == "broken", data.get("attachments", []))
-                        ))
+            else:  # this is a broken step
+                v_step["status"] = "broken"
 
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
