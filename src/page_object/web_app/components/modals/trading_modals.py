@@ -74,8 +74,7 @@ class TradingModals(BaseTrade):
         time.sleep(0.5)
         if not order_type or order_type == OrderType.MARKET:
             return self.actions.get_text(self.__edit_symbol_price)
-
-        return self.actions.get_text(self.__txt_edit_price)
+        return self.actions.get_text(self.__edit_symbol_price) or 0
 
     def get_edit_sl(self):
         """Get input sl price"""

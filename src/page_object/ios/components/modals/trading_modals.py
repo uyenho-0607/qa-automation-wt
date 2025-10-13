@@ -54,7 +54,7 @@ class TradingModals(BaseTrade):
     # ------------------------ HELPER METHODS ------------------------ #
     def _get_edit_live_price(self):
         """Return current price of the symbol"""
-        return self.actions.get_text(self.__edit_symbol_price)
+        return self.actions.get_text(self.__edit_symbol_price) or 0
 
     def _get_edit_sl(self):
         """Get input sl price"""
