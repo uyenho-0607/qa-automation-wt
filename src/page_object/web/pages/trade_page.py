@@ -1,4 +1,3 @@
-from src.apis.api_client import APIClient
 from src.core.actions.web_actions import WebActions
 from src.data.enums import URLPaths
 from src.data.objects.trade_obj import ObjTrade
@@ -9,7 +8,6 @@ from src.page_object.web.components.trade.chart import Chart
 from src.page_object.web.components.trade.place_order_panel import PlaceOrderPanel
 from src.page_object.web.components.trade.watch_list import WatchList
 from src.utils.assert_utils import soft_assert
-from src.utils.logging_utils import logger
 
 
 class TradePage(BasePage):
@@ -28,41 +26,22 @@ class TradePage(BasePage):
         super().verify_page_url(URLPaths.TRADE)
 
     # ------------------------ VERIFY ------------------------ #
-
     @staticmethod
     def verify_placed_order_data(trade_object: ObjTrade, api_data: dict):
         """Verify placed order against API data"""
-
-        def _get_api_data():
-            logger.info("- Fetching order details from API")
-            return APIClient().order.get_orders_details(
-                symbol=trade_object.symbol,
-                order_id=trade_object.order_id,
-                order_type=trade_object.order_type
-            )
-
-        def _prepare_expected(_api_data: dict, _keys_to_check: list) -> dict:
-            _expected = {k: v for k, v in _api_data.items() if k in _keys_to_check}
-            # Round floats for comparison
-            for key in _expected:
-                if isinstance(_expected[key], float):
-                    _expected[key] = round(_expected[key], ndigits=ObjTrade.DECIMAL)
-            _expected["volume"] = _api_data.get("lotSize")
-            return _expected
-
-        if not api_data:
-            logger.warning("- Initial API data is empty, retrying...")
-            api_data = _get_api_data()
 
         if not api_data:
             soft_assert(False, True, error_message="API order data is empty!")
             return
 
-        # Prepare actual and expected data
         actual = trade_object.api_data_format()
+        expected = {k: v for k, v in api_data.items() if k in actual.keys()}
 
-        keys_to_check = list(actual.keys())
-        expected = _prepare_expected(api_data, keys_to_check)
+        # Round floats and handle volume mapping
+        for key, value in expected.items():
+            if isinstance(value, float):
+                expected[key] = round(value, ndigits=ObjTrade.DECIMAL)
+        expected["volume"] = api_data.get("lotSize")
 
         soft_assert(
             actual,

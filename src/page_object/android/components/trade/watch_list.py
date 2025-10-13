@@ -198,9 +198,7 @@ class WatchList(BaseTrade):
 
     def verify_symbols_list(self, symbols, tab=None):
         symbols = symbols if isinstance(symbols, list) else [symbols]
-        current_symbols = self.get_all_symbols(tab, expected_symbols=symbols)
+        current_symbols = sorted(item for item in self.get_all_symbols(tab, expected_symbols=symbols) if item in symbols)
 
-        soft_assert(
-            sorted(item for item in current_symbols if item in symbols), sorted(symbols),
-            error_message=f"Actual: {current_symbols}, Expected: {symbols}"
+        soft_assert(current_symbols, sorted(symbols), error_message=f"\nActual: {current_symbols} \nExpected: {symbols} \nMissing: {', '.join([item for item in symbols if item not in current_symbols])}"
         )
