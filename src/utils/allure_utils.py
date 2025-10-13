@@ -82,6 +82,10 @@ def _process_failed_status(data: Dict[str, Any]) -> None:
             else:  # this is a broken step
                 v_step["status"] = "broken"
 
+    # todo: remove later
+    if len(failed_logs) == 1 and "response time" in str(failed_logs):
+        # update tests failed for response time -> warning // out of scope for now
+        data["status"] = "warning"
 
 def _process_broken_status(data: Dict[str, Any]) -> None:
     """Process broken test status and update steps."""

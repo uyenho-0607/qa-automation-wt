@@ -1,6 +1,5 @@
 import json
 import os
-import time
 from datetime import datetime, timezone, timedelta
 
 import allure
@@ -19,12 +18,32 @@ RECOVERED_TIME = None
 
 def _get_recovered_time(timeframe: ChartTimeframe):
     """Get most recent scheduler time triggered, return time in timestamp millisecond"""
-    most_recent_time = round(time.time() * 1000) - timeframe.get_scheduler_time()
-    # convert to utc time
-    dt = datetime.fromtimestamp(most_recent_time / 1000, tz=timezone.utc)
-    # get most recent hour
-    dt_hour = dt.replace(minute=0, second=0, microsecond=0)
-    return int(dt_hour.timestamp() * 1000)
+    # Singapore timezone (UTC+8)
+    sg_tz = timezone(timedelta(hours=8))
+    now = datetime.now(sg_tz)
+    midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Scheduler intervals
+    sched_time = 1 if timeframe in [ChartTimeframe.one_min, ChartTimeframe.five_min] else 2
+
+    # Hours since midnight
+    elapsed_hours = (now - midnight).total_seconds() / 3600
+
+    # Compute most recent hours
+    most_recent_sched = int(elapsed_hours // sched_time) * sched_time
+
+    # Convert to datetime in Singapore TZ
+    last_triggered_sg = midnight + timedelta(hours=most_recent_sched)
+
+    # Convert to UTC
+    last_triggered_utc = last_triggered_sg.astimezone(timezone.utc)
+
+    global RECOVERED_TIME
+    RECOVERED_TIME = last_triggered_sg
+
+    # Convert to milliseconds
+    ts_triggered_ms = int(last_triggered_utc.timestamp() * 1000)
+    return ts_triggered_ms
 
 
 def _map_timestamp(time_str: str):
@@ -199,9 +218,6 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
 
     # divide into scanned and not scanned range for compare
     most_recover_time = _get_recovered_time(timeframe)
-    global RECOVERED_TIME
-    RECOVERED_TIME = _ms_to_metatrader_time(most_recover_time)
-
     _split_data = lambda data, t: ([d for d in data if d['chartTime'] <= t], [d for d in data if d['chartTime'] > t])
 
     act_recovered, act_unrecovered = _split_data(api_data, most_recover_time)
@@ -530,10 +546,9 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     """
 
     # Attach compare table to Allure report
-    attachment_name = f"Chart Comparison Summary - {symbol} - {timeframe_display}"
     allure.attach(
         html,
-        name=attachment_name,
+        name=f"Chart Comparison Summary - {symbol} - {timeframe_display}",
         attachment_type=allure.attachment_type.HTML
     )
 
@@ -663,7 +678,9 @@ def attach_compare_files(comparison_result, symbol, timeframe):
         """
 
     allure.attach(
-        final_html, name="Meta Trader CSV Data", attachment_type=allure.attachment_type.HTML
+        final_html,
+        name=f"Metatrader CSV Data - {symbol} - {timeframe_display}",
+        attachment_type=allure.attachment_type.HTML
     )
 
     # Build color-coded description summary
@@ -680,10 +697,12 @@ def attach_compare_files(comparison_result, symbol, timeframe):
 
     # If everything passed
     if not summary_lines:
-        summary_lines.append("<p style='color:#2E8B57;'>✅ All data passed validation — no mismatches or missing records.</p>")
+        summary_lines.append("<p style='color:#2E8B57;'>✅ All data passed validation — no mismatches or missing records 🥳 </p>")
 
-    # Add most recent recovery time (always shown)
-    summary_lines.append(f"<p>Most recent recovery time: <strong style='color:#2E8B57;'>{RECOVERED_TIME}</strong></p>")
+    # Add most recent recovery time
+    summary_lines.append(
+        f"<p>⏳ Most recent recovery time: <strong style='color:#2E8B57;'>{RECOVERED_TIME.astimezone(timezone(timedelta(hours=3))).strftime("%H:%M")} (UTC+3) - {RECOVERED_TIME.strftime("%H:%M")} (SG Time) </strong></p>"
+    )
 
     # Attach to Allure
     allure.dynamic.description_html("\n".join(summary_lines))
