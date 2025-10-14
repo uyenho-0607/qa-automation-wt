@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -202,11 +203,8 @@ def _check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) -
 
 def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     """Compare chart data (MetaTrader) with API data based on chartTime"""
-    # check drawing last chart stick
-    is_chart_drawing = round(time.time(), 3) * 1000 - chart_data[-1]['chartTime'] < timeframe_to_ms(timeframe)
-
-    # pass this datapoint if last chart still drawing
-    if is_chart_drawing and api_data[-1]['chartTime'] == chart_data[-1]['chartTime']:
+    # skip checking for the last chart stick
+    if api_data[-1]['chartTime'] == chart_data[-1]['chartTime']:
         # map value of chart data to API data for skipping check
         for key, value in chart_data[-1].items():
             if key != 'chartTime':
@@ -235,6 +233,13 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
 
     # data failed in this range should be bugged
     res_recovered = compare_dict_with_keymap(act_recovered, exp_recovered, "chartTime", tolerance_percent=TOLERANCE_PERCENT)
+
+    # recheck if missing the latest item due to APIs BE logic
+    if res_recovered["missing"]:
+        # filter the missing item
+        res_recovered["missing"] = [item for item in res_recovered["missing"] if item >= min(item['chartTime'] for item in chart_data)]
+        if not res_recovered and not res_recovered["mismatches"]:
+            res_recovered["res"] = True
 
     # data failed in this range can be fixed by recover job
     res_unrecovered = compare_dict_with_keymap(act_unrecovered, exp_unrecovered, "chartTime", tolerance_percent=TOLERANCE_PERCENT)
@@ -692,8 +697,8 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     diff_recovered_times = [item['chartTime'] for item in _diff_recovered]
     unrecovered_times = [item['chartTime'] for item in _diff_unrecovered] + missing_unrecovered_times
 
-    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered_times
     recovered_time = _ms_to_metatrader_time(_get_recovered_time(timeframe), string_time=False)
+    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered_times + [recovered_time]
 
     if highlight_times:
         lines = html_table.splitlines()
