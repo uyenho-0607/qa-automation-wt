@@ -2,7 +2,6 @@ import pytest
 
 from src.apis.api_client import APIClient
 from src.data.enums import AssetTabs
-from src.utils.format_utils import format_display_dict
 from src.utils.logging_utils import logger
 
 
@@ -24,7 +23,7 @@ def test(web_app, market_obj, get_asset_tab_amount, cancel_all):
 
     logger.info(f"Step 4: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
-        symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
+        symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type, exclude_issue_symbols=False
     )
 
     logger.info("Verify placed order against API data")

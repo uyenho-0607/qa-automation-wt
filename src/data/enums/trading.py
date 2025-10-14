@@ -57,7 +57,7 @@ class Expiry(BaseEnum):
     """Enum representing order expiry types."""
     GOOD_TILL_CANCELLED = "Good Till Cancelled"
     GOOD_TILL_DAY = "Good Till Day"
-    SPECIFIED_DATE = "Specified Date"  # MT5 only
+    # SPECIFIED_DATE = "Specified Date"  # MT5 only todo: remove after FE deploy locator fixed
     SPECIFIED_DATE_TIME = "Specified Date and Time"  # MT5 only
 
     @classmethod
