@@ -810,7 +810,15 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     )
 
     # Build color-coded description summary
-    summary_lines = []
+    summary_lines = [
+        "<div style='background-color:#e8f0ff; color:#000000; padding:10px; border-radius:6px;'>"
+        "📝 <strong>Note:</strong>"
+        "<ul style='margin:6px 0 0 20px;'>"
+        "<li>This test checks the latest 500 chart data points.</li>"
+        "<li>The most recent candle is skipped because it is still forming and may not be stable.</li>"
+        "</ul>"
+        "</div>"
+    ]
 
     if diff_recovered:
         summary_lines.append(f"<p style='color:#ff4d4d;'>❌ Total Mismatch records: <strong>{len(diff_recovered)}</strong></p>")
