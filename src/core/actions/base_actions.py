@@ -1,5 +1,7 @@
+import time
 from contextlib import suppress
 
+from selenium.common import StaleElementReferenceException
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver import Keys
 from selenium.webdriver.remote.webelement import WebElement
@@ -45,6 +47,11 @@ class BaseActions:
 
         wait = self._wait if timeout == EXPLICIT_WAIT else WebDriverWait(self._driver, timeout)
         try:
+            return wait.until(cond(locator))
+
+        except StaleElementReferenceException as e:
+            logger.warning(f"{WARNING_ICON} {type(e).__name__} finding element for locator {locator}), retrying...")
+            time.sleep(0.5)
             return wait.until(cond(locator))
 
         except TimeoutException as e:
