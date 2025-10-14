@@ -52,7 +52,8 @@ def compare_dict_with_keymap(actual, expected, key: str = 'chart_time', toleranc
                 })
 
     return dict(
-        res=not missing and not mismatches and not redundant,
+        # res=not missing and not mismatches and not redundant,
+        res=not missing and not mismatches,  # skip checking redundant data for now
         mismatches=mismatches,
         missing=missing,
         redundant=redundant

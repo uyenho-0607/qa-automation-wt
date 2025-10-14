@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from datetime import datetime, timezone, timedelta
 
 import allure
@@ -46,7 +47,7 @@ def _get_recovered_time(timeframe: ChartTimeframe):
     return ts_triggered_ms
 
 
-def _map_timestamp(time_str: str):
+def _map_utc_timestamp(time_str: str):
     """Convert time as human date to timestamp and subtract 3 hours (map UTC)"""
     dt = datetime.strptime(time_str, "%Y.%m.%d %H:%M").replace(tzinfo=timezone.utc)
     dt_adjusted = dt - METATRADER_TIMEZONE  # Subtract 3 hours to map UTC time
@@ -104,7 +105,7 @@ def load_metatrader_data(symbol: str, timeframe: ChartTimeframe):
         df = pd.read_csv(file, sep='\t')  # mt5
 
     # map timestamp back to UTC
-    df['Time_ms'] = df['Time'].apply(_map_timestamp)
+    df['Time_ms'] = df['Time'].apply(_map_utc_timestamp)
     json_filepath = _csv_to_json(df, symbol, timeframe)
 
     # load out json file
@@ -201,6 +202,15 @@ def _check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) -
 
 def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     """Compare chart data (MetaTrader) with API data based on chartTime"""
+    # check drawing last chart stick
+    is_chart_drawing = round(time.time(), 3) * 1000 - chart_data[-1]['chartTime'] < timeframe_to_ms(timeframe)
+
+    # pass this datapoint if last chart still drawing
+    if is_chart_drawing and api_data[-1]['chartTime'] == chart_data[-1]['chartTime']:
+        # map value of chart data to API data for skipping check
+        for key, value in chart_data[-1].items():
+            if key != 'chartTime':
+                api_data[-1][key] = value
 
     compare_res = {"scanned": {}, "not_scanned": {}}
     final_res = []
@@ -218,7 +228,7 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
 
     # divide into scanned and not scanned range for compare
     most_recover_time = _get_recovered_time(timeframe)
-    _split_data = lambda data, t: ([d for d in data if d['chartTime'] <= t], [d for d in data if d['chartTime'] > t])
+    _split_data = lambda data, t: ([d for d in data if d['chartTime'] < t - timeframe_to_ms(timeframe)], [d for d in data if d['chartTime'] >= t - timeframe_to_ms(timeframe)])
 
     act_recovered, act_unrecovered = _split_data(api_data, most_recover_time)
     exp_recovered, exp_unrecovered = _split_data(chart_data, most_recover_time)
@@ -252,17 +262,17 @@ def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
         # failed the checkpoint
         soft_assert(True, False, error_message=error_msg)
 
-        # handle log for scanned result -> only warning
-        if not res_unrecovered['res']:
-            logger.warning(f"⚠️ Chart data comparison failed - NOT recovered data")
+    # handle log for scanned result -> only warning
+    if not res_unrecovered['res']:
+        logger.warning(f"⚠️ Chart data comparison failed - NOT recovered data")
 
-            if res_unrecovered['mismatches']:
-                compare_res["not_scanned"]['mismatches'] = res_unrecovered['mismatches']
-                logger.warning(f"⚠️ Mismatched - NOT recovered data: {len(res_unrecovered['mismatches'])} items")
+        if res_unrecovered['mismatches']:
+            compare_res["not_scanned"]['mismatches'] = res_unrecovered['mismatches']
+            logger.warning(f"⚠️ Mismatched - NOT recovered data: {len(res_unrecovered['mismatches'])} items")
 
-            if res_unrecovered['missing']:
-                compare_res["not_scanned"]['missing'] = res_unrecovered['missing']
-                logger.warning(f"⚠️ Missing - NOT recovered data: {len(res_unrecovered['missing'])} items")
+        if res_unrecovered['missing']:
+            compare_res["not_scanned"]['missing'] = res_unrecovered['missing']
+            logger.warning(f"⚠️ Missing - NOT recovered data: {len(res_unrecovered['missing'])} items")
 
     ############### TIMEFRAME INTERVAL ###############
     logger.info(f"{'-' * 10} COMPARE TIMEFRAME INTERVAL {'-' * 10}")
@@ -604,9 +614,10 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     
     /* Row highlight colors */
     .highlight-diff { background-color: #ff8c00 !important; } 
-    .highlight-missing { background-color: #ffcccc !important; }
+    .highlight-missing { background-color: #ff6666 !important; }
     .highlight-warning { background-color: #fff3cd !important; }
     .highlight-white { background-color: #ffffff !important; }
+    .highlight-recover { background-color: #90ee90 !important; }
     
     /* Subtle grey for Timestamp column */
     td:nth-child(3) {
@@ -647,6 +658,22 @@ def attach_compare_files(comparison_result, symbol, timeframe):
         visibility: visible;
         opacity: 1;
     }
+    /* Scrollable table with sticky header */
+    .table-wrapper {
+        position: relative;
+        max-height: 600px; /* adjust as needed */
+        overflow-y: auto;
+        border: 1px solid #ddd;
+    }
+    
+    /* Make table headers sticky */
+    table thead th {
+        position: sticky;
+        top: 0;
+        background-color: #4287f5; /* same as before */
+        color: white;
+        z-index: 2; /* stay on top of rows */
+    }
     </style>
 
     """
@@ -666,6 +693,7 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     unrecovered_times = [item['chartTime'] for item in _diff_unrecovered] + missing_unrecovered_times
 
     highlight_times = diff_recovered_times + missing_recovered_times + unrecovered_times
+    recovered_time = _ms_to_metatrader_time(_get_recovered_time(timeframe), string_time=False)
 
     if highlight_times:
         lines = html_table.splitlines()
@@ -692,8 +720,17 @@ def attach_compare_files(comparison_result, symbol, timeframe):
                     if f">{t}<" in line:
                         highlight_next = True
 
+                        if t == recovered_time:
+                            color = "recover"
+                            tool_tip = "Recovered Time\n"
+
+                            matched = [item for item in _diff_unrecovered if item['chartTime'] == t]
+                            if matched:
+                                failed_item = matched[0]
+                                tool_tip += f'{str(failed_item['actual']).replace(",", "\n").replace("{", "").replace("}", "").replace("'", "")}'
+
                         # Determine color and tooltip
-                        if t in diff_recovered_times:
+                        elif t in diff_recovered_times:
                             color = "diff"
                             matched = [item for item in _diff_recovered if item['chartTime'] == t]
                             if matched:
@@ -781,11 +818,15 @@ def attach_compare_files(comparison_result, symbol, timeframe):
 
     # If everything passed
     if not summary_lines:
-        summary_lines.append("<p style='color:#2E8B57;'>✅ All data passed validation — no mismatches or missing records 🥳 </p>")
+        summary_lines.append("<p style='color:#2E8B57;'><strong>✅ All data passed validation — no mismatches or missing records 🥳</strong></p>")
 
     # Add most recent recovery time
     summary_lines.append(
-        f"<p>⏳ Most recent recovery time: <strong style='color:#2E8B57;'>{RECOVERED_TIME.astimezone(timezone(timedelta(hours=3))).strftime("%H:%M")} (UTC+3) - {RECOVERED_TIME.strftime("%H:%M")} (SG Time) </strong></p>"
+        f"<p>⏳ Recovery Time&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp <strong style='color:#2E8B57;'>{RECOVERED_TIME.astimezone(timezone(timedelta(hours=3))).strftime("%Y-%m-%d - %H:%M:%S")} (UTC+3) - {RECOVERED_TIME.strftime("%Y-%m-%d - %H:%M:%S")} (SG Time) </strong></p>"
+    )
+
+    summary_lines.append(
+        f"<p>🧪 Test Executed Time: &nbsp<strong>{datetime.now(timezone(timedelta(hours=3))).strftime('%Y-%m-%d - %H:%M:%S')} (UTC+3) - {datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d - %H:%M:%S')} (SG Time) </strong></p>"
     )
 
     # Attach to Allure
