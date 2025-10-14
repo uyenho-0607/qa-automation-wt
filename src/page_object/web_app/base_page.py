@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -69,7 +71,7 @@ class BasePage:
 
     def wait_for_spin_loader(self, timeout: int | float = 20):
         """Wait for the loader to be invisible."""
-        if self.actions.is_element_displayed(self.__spin_loader, timeout=5):
+        if self.actions.is_element_displayed(self.__spin_loader, timeout=3):
             logger.debug("- Wait for spin loader to disappear")
             self.actions.wait_for_element_invisible(self.__spin_loader, timeout=timeout)
 
@@ -81,11 +83,13 @@ class BasePage:
     def click_confirm_btn(self):
         self.actions.click(self.__btn_confirm)
 
-    def click_cancel_btn(self):
-        max_retries = 5
-        while self.actions.is_element_displayed(self.__btn_cancel) and max_retries:
+    def click_cancel_btn(self, timeout=QUICK_WAIT, cancel_all=True):
+        max_retries = 3
+        while self.actions.is_element_displayed(self.__btn_cancel, timeout=timeout) and max_retries:
             logger.debug("- Click cancel btn")
-            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=QUICK_WAIT, show_log=False)
+            self.actions.javascript_click(self.__btn_cancel, raise_exception=False, timeout=timeout, show_log=False)
+            if not cancel_all:
+                return
             max_retries -= 1
 
     def close_alert_box(self):
