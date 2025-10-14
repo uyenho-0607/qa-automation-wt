@@ -201,10 +201,16 @@ def _check_timestamp_interval(api_data, chart_data, timeframe: ChartTimeframe) -
     return {"result": len(failed) == 0, "failed": failed}
 
 
+LAST_CHART_TIME = []
+
+
 def compare_chart_data(chart_data, api_data, timeframe, symbol=None):
     """Compare chart data (MetaTrader) with API data based on chartTime"""
     # skip checking for the last chart stick
     if api_data[-1]['chartTime'] == chart_data[-1]['chartTime']:
+        global LAST_CHART_TIME
+        LAST_CHART_TIME.append(_ms_to_metatrader_time(api_data[-1]['chartTime'], string_time=False))
+
         # map value of chart data to API data for skipping check
         for key, value in chart_data[-1].items():
             if key != 'chartTime':
@@ -623,6 +629,7 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     .highlight-warning { background-color: #fff3cd !important; }
     .highlight-white { background-color: #ffffff !important; }
     .highlight-recover { background-color: #90ee90 !important; }
+    .highlight-skipped { background-color: #d3d3d3 !important; }
     
     /* Subtle grey for Timestamp column */
     td:nth-child(3) {
@@ -698,7 +705,7 @@ def attach_compare_files(comparison_result, symbol, timeframe):
     unrecovered_times = [item['chartTime'] for item in _diff_unrecovered] + missing_unrecovered_times
 
     recovered_time = _ms_to_metatrader_time(_get_recovered_time(timeframe), string_time=False)
-    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered_times + [recovered_time]
+    highlight_times = diff_recovered_times + missing_recovered_times + unrecovered_times + [recovered_time] + LAST_CHART_TIME
 
     if highlight_times:
         lines = html_table.splitlines()
@@ -724,8 +731,12 @@ def attach_compare_files(comparison_result, symbol, timeframe):
                 for t in highlight_times:
                     if f">{t}<" in line:
                         highlight_next = True
+                        if t in LAST_CHART_TIME:
+                            color = "skipped"
+                            tool_tip = "Skipped Checking"
+                            LAST_CHART_TIME.remove(t)
 
-                        if t == recovered_time:
+                        elif t == recovered_time:
                             color = "recover"
                             tool_tip = "Recovered Time\n"
 
