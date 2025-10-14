@@ -15,7 +15,7 @@ from src.utils.logging_utils import logger
         OrderType.STOP_LIMIT
     ]
 ))
-def test(web_app, symbol, order_type, cancel_close_order):
+def test(web_app, symbol, order_type, cancel_all):
     trade_object = ObjTrade(order_type=order_type, symbol=symbol)
 
     logger.info("Step 1: Navigate to Asset Page")
