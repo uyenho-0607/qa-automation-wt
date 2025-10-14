@@ -3,7 +3,7 @@ import random
 import pytest
 
 from src.apis.api_client import APIClient
-from src.data.enums import AssetTabs, Features, OrderType
+from src.data.enums import AssetTabs, Features, OrderType, SLTPType
 from src.data.objects.trade_obj import ObjTrade
 from src.utils.logging_utils import logger
 
@@ -12,6 +12,15 @@ from src.utils.logging_utils import logger
 def setup_trade_test(login_member_site, web_app, symbol):
     logger.info(f"[Setup] Search and select symbol: {symbol}")
     web_app.home_page.search_and_select_symbol(symbol)
+
+@pytest.fixture
+def market_obj(symbol):
+    def _handler(**kwargs):
+        trade_object = ObjTrade(order_type=OrderType.MARKET, symbol=symbol, **kwargs)
+        return trade_object
+
+    return _handler
+
 
 
 @pytest.fixture
@@ -39,6 +48,18 @@ def stop_limit_obj(symbol):
         return trade_object
 
     return _handler
+
+
+@pytest.fixture(name="order_data")
+def prepare_place_order(web_app):
+    def handler(trade_object, sl_type=SLTPType.PRICE, tp_type=SLTPType.PRICE, confirm=True, close_banner=True):
+        web_app.trade_page.place_order_panel.place_order(trade_object, sl_type=sl_type, tp_type=tp_type, confirm=confirm)
+
+        if close_banner:
+            web_app.home_page.notifications.close_noti_banner()
+
+
+    return handler
 
 
 @pytest.fixture(scope="package")

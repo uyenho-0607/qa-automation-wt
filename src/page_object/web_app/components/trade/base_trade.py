@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 
 from src.core.actions.web_actions import WebActions
@@ -22,30 +24,35 @@ class BaseTrade(BasePage):
     ##### Trade Confirmation Modal #####
     __btn_trade_confirm = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-confirm'))
     __btn_trade_close = (By.CSS_SELECTOR, data_testid('trade-confirmation-button-close'))  # cancel trade btn
-    __btn_confirm_close_delete_order = (By.CSS_SELECTOR, data_testid('close-order-button-submit'))
+    __btn_confirm_close_delete = (By.CSS_SELECTOR, data_testid('close-order-button-submit'))
+    __btn_cancel_close_delete = (By.CSS_SELECTOR, data_testid('close-order-button-cancel'))
 
     # ------------------------ ACTIONS ------------------------ #
-    def get_live_price(self, trade_type: TradeType, oct=False) -> str:
+    def get_live_price(self, trade_type: TradeType, oct_mode=False) -> str:
         """Get the current live price for a given trade type.
         The price is displayed in the trading interface and is used for various trading operations.
         """
-        btn_price = self.__oct_live_price if oct else self.__live_price
+        btn_price = self.__oct_live_price if oct_mode else self.__live_price
         live_price = self.actions.get_text(cook_element(btn_price, trade_type.lower()), timeout=QUICK_WAIT)
         return live_price if live_price else 0
 
-    def get_current_price(self, trade_object: ObjTrade, timeout=QUICK_WAIT):
+    def get_current_price(self, trade_object: ObjTrade, oct_mode=False, timeout=QUICK_WAIT):
         """Get the current price for a placed order (reverse for order_type = Market).
         """
-        trade_type, order_type = trade_object.trade_type, trade_object.order_type
-        if order_type == OrderType.MARKET:
+        trade_type = trade_object.trade_type
+        if trade_object.order_type == OrderType.MARKET:
             trade_type = TradeType.BUY if trade_type == TradeType.SELL else TradeType.SELL
 
-        current_price = self.actions.get_text(cook_element(self.__live_price, trade_type.lower()), timeout=timeout, raise_exception=False, show_log=False)
+        current_price = self.actions.get_text(
+            cook_element(self.__live_price if not oct_mode else self.__oct_live_price, trade_type.lower()),
+            timeout=timeout, raise_exception=False, show_log=False
+        )
         trade_object.current_price = current_price
 
     # One Click Trading Modal Actions
     def confirm_oct(self, confirm=True):
         """Confirm enable OCT or not"""
+        time.sleep(0.5)
         logger.debug(f"- Confirm enable OCT: {confirm!r}")
         self.actions.click(self.__btn_oct_confirm if confirm else self.__btn_oct_cancel)
 
@@ -58,8 +65,9 @@ class BaseTrade(BasePage):
         logger.debug(f"- Confirm place order: {confirm!r}")
         self.actions.click(self.__btn_trade_confirm if confirm else self.__btn_trade_close)
 
-    def confirm_close_order(self):
+    def confirm_close_order(self, confirm=True):
         """Confirm close order action."""
-        self.actions.click(self.__btn_confirm_close_delete_order)
+        logger.debug(f"- Confirm close/ delete order: {confirm}")
+        self.actions.click(self.__btn_confirm_close_delete if confirm else self.__btn_cancel_close_delete)
 
     confirm_delete_order = confirm_close_order

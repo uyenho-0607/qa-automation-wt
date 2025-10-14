@@ -3,6 +3,7 @@ import random
 from appium.webdriver.common.appiumby import AppiumBy
 
 from src.core.actions.mobile_actions import MobileActions
+from src.data.consts import SHORT_WAIT
 from src.data.enums import WatchListTab
 from src.page_object.ios.base_screen import BaseScreen
 from src.page_object.ios.components.trade.watch_list import WatchList
@@ -20,14 +21,30 @@ class MarketsScreen(BaseScreen):
     __tab = (AppiumBy.ACCESSIBILITY_ID, "{}")
     __items = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeScrollView/XCUIElementTypeOther/XCUIElementTypeOther[`name MATCHES '.*(SHARES|INDICES|CRYPTO|CMDTY|FOREX).*'`]")
     __item_by_name = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeOther[`label CONTAINS '{}'`][-1]")
+    __horizontal_scroll_tab = (AppiumBy.IOS_CLASS_CHAIN, "**/XCUIElementTypeScrollView[-1]")
 
     # ------------------------ ACTIONS ------------------------ #
 
     def select_tab(self, tab: WatchListTab):
         """Handle selecting tab for markets screen"""
         locator = cook_element(self.__tab, tab)
+
         logger.info(f"- Select tab: {tab.value.capitalize()!r}")
-        self.actions.click(locator)
+        # if tab is represent, select tab immediately
+        if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
+            self.actions.click(locator)
+            return
+
+        # Handle swipe scroll tab for markets screen
+        if self.actions.is_element_enabled(self.__horizontal_scroll_tab):
+            # If not visible, attempt to scroll horizontally to reveal it
+            for direction in ["left", "right"]:
+                logger.debug(f"- Swipe {direction} to show tab")
+                self.actions.swipe_element_horizontal(self.__horizontal_scroll_tab, direction)
+                if self.actions.is_element_displayed(locator, timeout=SHORT_WAIT):
+                    self.actions.click(locator)
+                    return
+                
 
     def get_current_symbols(self, random_symbol=False):
         res = self.actions.get_text_elements(self.__items)
