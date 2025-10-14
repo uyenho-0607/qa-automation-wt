@@ -40,8 +40,8 @@ def pytest_sessionstart(session: pytest.Session):
     server = session.config.getoption("server")
     account = session.config.getoption("account")
 
-    if account == AccountType.LIVE and client == Client.LIRUNEX:
-        account = "crm"
+    # if account == AccountType.LIVE and client == Client.LIRUNEX:
+    #     account = "crm"
 
     if client in NON_OMS:
         server = Server.MT5

@@ -10,7 +10,8 @@ class AuthAPI(BaseAPI):
     endpoints = {
         Client.LIRUNEX: {
             AccountType.CRM: "/auth/v1/company/login",
-            AccountType.DEMO: "/auth/v2/company/demo/login"
+            AccountType.DEMO: "/auth/v2/company/demo/login",
+            AccountType.LIVE: "/auth/v2/company/live/login",
         },
         Client.TRANSACT_CLOUD: {
             AccountType.LIVE: "/auth/v2/metatrader5/live/login",
