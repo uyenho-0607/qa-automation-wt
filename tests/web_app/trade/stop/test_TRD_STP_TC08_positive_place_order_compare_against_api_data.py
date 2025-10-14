@@ -24,7 +24,7 @@ def test(web_app, stop_obj, get_asset_tab_amount, order_data, cancel_all):
 
     logger.info(f"Step 3: Get placed order API data, order_id: {trade_object.order_id!r}")
     api_data = APIClient().order.get_orders_details(
-        symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type
+        symbol=trade_object.symbol, order_id=trade_object.order_id, order_type=trade_object.order_type, exclude_issue_symbols=False
     )
 
     logger.info("Verify placed order against API data")

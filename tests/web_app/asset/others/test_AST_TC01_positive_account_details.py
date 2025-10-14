@@ -70,7 +70,7 @@ def setup_teardown(web_app, symbol):
             APIClient().trade.post_order(ObjTrade(order_type=OrderType.MARKET, symbol=symbol))
 
         logger.info("- Get placed market orders again")
-        cur_orders = APIClient().order.get_orders_details(symbol, order_type=OrderType.MARKET)
+        cur_orders = APIClient().order.get_orders_details(symbol, order_type=OrderType.MARKET, exclude_issue_symbols=False)
 
     order_ids = [item["orderId"] for item in cur_orders[:close_amount]]
 
